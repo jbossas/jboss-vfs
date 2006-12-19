@@ -110,13 +110,14 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    public boolean hasBeenModified() throws IOException
    {
+      boolean hasBeenModified = false;
       long last = getLastModified();
       if (cachedLastModified != last)
       {
+         hasBeenModified = cachedLastModified != 0;
          cachedLastModified = last;
-         return true;
       }
-      return false;
+      return hasBeenModified;
    }
 
 
@@ -337,11 +338,13 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return true;
    }
 
+   /*
    @Override
    protected void finalize() throws Throwable
    {
       close();
    }
+   */
    
    /**
     * Safely get a url version of the string
