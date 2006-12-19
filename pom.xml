@@ -4,10 +4,117 @@
   <groupId>jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>jboss-vfs</name>
-  <url>http://maven.apache.org</url>
+  <version>2.0.4.snapshot</version>
+  <name>JBoss VFS</name>
+  <url>http://www.jboss.org</url>
+  <description>A set of commonly used classed classes</description>
+  <licenses>
+    <license>
+      <name>lgpl</name>
+      <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+    </license>
+  </licenses>
+  <organization>
+    <name>JBoss, A division of Red Hat</name>
+    <url>http://www.jboss.org</url>
+  </organization>
+
+  <repositories>
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Inc. Repository</name>
+      <layout>default</layout>
+      <url>http://repository.jboss.com/maven2/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jbosspluginrepo</id>
+      <name>jboss plugin repository</name>
+      <url>http://repository.jboss.com/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <finalName>${artifactId}</finalName>
+    <plugins>
+      
+      <!-- define how we want compilation to take place
+        here, we accept most of the defaults but say that we want the
+        optimization flag set, and define the source and target to be 1.5,
+        these setting will be inherited by child projects -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0</version>
+        <configuration>
+          <debug>true</debug>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <!-- define that we wish to create src jars -->
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <printSummary>true</printSummary>
+          <disableXmlReport>false</disableXmlReport>
+          <testFailureIgnore>true</testFailureIgnore>
+          <forkMode>once</forkMode> <!-- required to correctly run the PojoServer tests -->
+          <systemProperties>
+            <property>
+              <name>java.protocol.handler.pkgs</name>
+              <value>org.jboss.virtual.protocol</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      
+    </plugins>
+  </build>
+
   <dependencies>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-common-core</artifactId>
+      <version>2.0.3.GA</version>
+    </dependency>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-logging-log4j</artifactId>
+      <version>2.0.3.GA</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-test</artifactId>
+      <version>1.0.0.GA</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -15,4 +122,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>cvs-file-repository</id>
+      <!-- Set maven.cvs.root in your settings.xml -->
+      <url>file://${maven.cvs.root}</url>
+    </repository>
+  </distributionManagement>
 </project>

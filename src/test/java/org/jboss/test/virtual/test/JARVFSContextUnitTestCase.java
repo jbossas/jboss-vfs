@@ -26,6 +26,7 @@ import java.net.URL;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.plugins.context.jar.JarContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VFSContext;
@@ -45,6 +46,8 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
 
    public static Test suite()
    {
+      VFS.init();
+      System.out.println("java.protocol.handler.pkgs: "+System.getProperty("java.protocol.handler.pkgs"));
       return new TestSuite(JARVFSContextUnitTestCase.class);
    }
 

@@ -21,6 +21,8 @@
 */
 package org.jboss.test.virtual.test;
 
+import org.jboss.virtual.VFS;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
@@ -40,6 +42,7 @@ public class VFSAllTestSuite extends TestSuite
 
    public static Test suite()
    {
+      VFS.init();
       TestSuite suite = new TestSuite("VFS Tests");
 
       suite.addTest(new TestSuite(URLResolutionUnitTestCase.class));
