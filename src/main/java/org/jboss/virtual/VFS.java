@@ -48,6 +48,11 @@ public class VFS
 
    static
    {
+      init();
+   }
+
+   public static void init()
+   {
       String pkgs = System.getProperty("java.protocol.handler.pkgs");
       if (pkgs == null || pkgs.trim().length() == 0)
       {
@@ -60,7 +65,7 @@ public class VFS
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
       // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
-      ArchiveBrowser.factoryFinder.put("vfsfile", new VfsArchiveBrowserFactory());
+      ArchiveBrowser.factoryFinder.put("vfsfile", new VfsArchiveBrowserFactory());      
    }
 
    /**
