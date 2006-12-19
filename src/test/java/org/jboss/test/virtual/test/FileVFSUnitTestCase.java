@@ -45,7 +45,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.jboss.test.BaseTestCase;
+import org.jboss.test.virtual.support.ClassPathIterator;
 import org.jboss.test.virtual.support.MetaDataMatchFilter;
+import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -289,6 +291,21 @@ public class FileVFSUnitTestCase extends BaseTestCase
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
+
+      VirtualFile war2 = vfs.findChild("WarDeployApp_web.war");
+      assertTrue("WarDeployApp_web.war != null", war2 != null);
+
+      VirtualFile classes2 = war2.findChild("WEB-INF/classes");
+      assertTrue("WEB-INF/classes != null", classes2 != null);
+      assertTrue("WEB-INF/classes is not a leaf", classes2.isLeaf()==false);
+      classes2 = war2.findChild("WEB-INF/classes");
+      assertTrue("WEB-INF/classes != null", classes2 != null);
+      assertTrue("WEB-INF/classes is not a leaf", classes2.isLeaf()==false);
+
+      VirtualFile HelloJavaBean = classes2.findChild("com/sun/ts/tests/webservices/deploy/warDeploy/HelloJavaBean.class");
+      assertTrue("HelloJavaBean.class != null", HelloJavaBean != null);
+      assertTrue("HelloJavaBean.class is a leaf", HelloJavaBean.isLeaf());
+
       VirtualFile war = vfs.findChild("filesonly.war");
       assertTrue("filesonly.war != null", war != null);
 
@@ -314,6 +331,36 @@ public class FileVFSUnitTestCase extends BaseTestCase
       String title = mf.getMainAttributes().getValue(Attributes.Name.SPECIFICATION_TITLE);
       assertEquals("filesonly-war", title);
       mfIS.close();
+
+      war.findChild("WEB-INF/classes");
+      assertTrue("WEB-INF/classes != null", classes != null);
+      assertTrue("WEB-INF/classes is not a leaf", classes.isLeaf()==false);
+   }
+
+   /**
+    * Validate iterating over a vfs url
+    * 
+    * @throws Exception
+    */
+   public void testFindClassesInFilesOnlyWar()
+      throws Exception
+   {
+      URL rootURL = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(rootURL);
+
+      VirtualFile war = vfs.findChild("filesonly.war");
+      assertTrue("filesonly.war != null", war != null);
+
+      VirtualFile classes = war.findChild("WEB-INF/classes");
+      assertTrue("WEB-INF/classes != null", classes != null);
+      HashSet<String> names = new HashSet<String>();
+      ClassPathIterator iter = new ClassPathIterator(classes.toURL());
+      ClassPathEntry entry = null;
+      while( (entry = iter.getNextEntry()) != null )
+      {
+         names.add(entry.name);
+      }
+      log.debug(names);
    }
 
    public void testFindResourceUnpackedJar()
