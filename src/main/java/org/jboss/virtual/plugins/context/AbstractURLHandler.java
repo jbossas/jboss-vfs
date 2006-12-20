@@ -62,6 +62,7 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
       if (url == null)
          throw new IllegalArgumentException("Null url");
       this.url = url;
+      initCacheLastModified();
    }
 
    protected void initCacheLastModified()
