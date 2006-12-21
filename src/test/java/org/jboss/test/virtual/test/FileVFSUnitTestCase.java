@@ -1,4 +1,3 @@
-
 /*
  * JBoss, Home of Professional Open Source
  * Copyright 2006, Red Hat Middleware LLC, and individual contributors
@@ -338,7 +337,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
    }
 
    /**
-    * Validate iterating over a vfs url
+    * Validate iterating over a vfs url from a files only war.
     * 
     * @throws Exception
     */
@@ -361,6 +360,9 @@ public class FileVFSUnitTestCase extends BaseTestCase
          names.add(entry.name);
       }
       log.debug(names);
+      assertTrue("org/jboss/test/vfs/support/jar1", names.contains("org/jboss/test/vfs/support/jar1"));
+      assertTrue("ClassInJar1.class", names.contains("org/jboss/test/vfs/support/jar1/ClassInJar1.class"));
+      assertTrue("ClassInJar1$InnerClass.class", names.contains("org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class"));
    }
 
    public void testFindResourceUnpackedJar()
