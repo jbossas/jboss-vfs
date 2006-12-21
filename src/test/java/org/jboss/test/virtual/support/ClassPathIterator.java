@@ -36,6 +36,7 @@ import java.util.zip.ZipInputStream;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
+import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
  * ClassPathIterator logic used by UCL package mapping
@@ -75,8 +76,8 @@ public class ClassPathIterator
       }
       else if( protocol.startsWith("vfs") )
       {
-         VFS vfs = VFS.getVFS(url);
-         vf = vfs.getRoot();
+         VirtualFileURLConnection conn = (VirtualFileURLConnection)url.openConnection();
+         vf = conn.getVirtualFile();
          rootLength = vf.getPathName().length() + 1;
          vfIter = new VirtualFileIterator(vf);
       }
@@ -221,6 +222,7 @@ public class ClassPathIterator
          if( index < currentListing.size() )
          {
             next = currentListing.get(index);
+            index ++;
             if( next.isLeaf() == false )
                subDirectories.addLast(next);
          }
