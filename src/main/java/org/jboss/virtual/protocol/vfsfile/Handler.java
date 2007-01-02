@@ -21,23 +21,13 @@
 */
 package org.jboss.virtual.protocol.vfsfile;
 
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.net.URLClassLoader;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.HashSet;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * URLStreamHandler for VFS
@@ -76,52 +66,9 @@ public class Handler extends URLStreamHandler
          }
       }
 
-      if (vfsurl == null) throw new IOException("vfsfile does not exist: " + u.toString());
+      if (vfsurl == null)
+         throw new IOException("vfsfile does not exist: " + u.toString());
       return new VirtualFileURLConnection(u, vfsurl, relative);
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      System.setProperty("java.protocol.handler.pkgs", "org.jboss.virtual.protocol");
-
-      //URL url = new URL("vfsfile:/c:/tmp/urlstream.java");
-      //URL url = new URL("vfsfile:/C:\\jboss\\jboss-head\\build\\output\\jboss-5.0.0.Beta\\server\\default\\lib\\jboss.jar\\schema\\xml.xsd");
-      URL furl = new URL("file:/c:/tmp/parent.jar");
-      System.out.println("urlpath: " + furl.getPath());
-      URL url = new URL("vfsfile:/c:/tmp/parent.jar/foo.jar/urlstream.java");
-      InputStream is = url.openStream();
-      char curr = 0;
-      while (is.available() != 0)
-      {
-         curr = (char) is.read();
-         System.out.print(curr);
-      }
-      is.close();
-
-      // use a .jar file that would NEVER EVER be in my IDE's classpath
-      File fp = new File("c:/jboss/geronimo-1.1.1/lib/geronimo-kernel-1.1.1.jar");
-      JarFile jf = new JarFile(fp);
-      Enumeration<JarEntry> entries = jf.entries();
-      HashSet<String> set = new HashSet<String>();
-      while (entries.hasMoreElements())
-      {
-         String name = entries.nextElement().getName();
-         if (name.endsWith(".class")) set.add(name.replace('/', '.').substring(0, name.length() - 6));
-      }
-      jf.close();
-      /*
-URL[] urls = {new URL("vfsfile:/c:/tmp/webinf-classes.jar/classes/"),
-      new URL("file:/c:/jboss/geronimo-1.1.1/lib/xstream-1.1.3.jar")};
-      */
-      // use a .jar file that would NEVER EVER be in my IDE's classpath
-      URL[] urls = {new URL("vfsfile:/c:/tmp/wrap.jar/geronimo-kernel-1.1.1.jar"),
-              new URL("file:/c:/jboss/geronimo-1.1.1/lib/xstream-1.1.3.jar")};
-      URLClassLoader loader = new URLClassLoader(urls);
-      for (String name : set)
-      {
-         System.out.println("loading: " + name);
-         loader.loadClass(name);
-      }
    }
 
 }
