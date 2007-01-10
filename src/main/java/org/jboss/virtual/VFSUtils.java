@@ -21,26 +21,20 @@
 */
 package org.jboss.virtual;
 
+import org.jboss.logging.Logger;
+import org.jboss.util.StringPropertyReplacer;
+import org.jboss.virtual.spi.LinkInfo;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import org.jboss.logging.Logger;
-import org.jboss.util.StringPropertyReplacer;
-import org.jboss.virtual.spi.LinkInfo;
 
 /**
  * VFS Utilities
@@ -184,7 +178,18 @@ public class VFSUtils
          log.debug("Can't find manifest for " + archive.getPathName());
          return null;
       }
+      return readManifest(manifest);
+   }
 
+   /**
+    * Read the manifest from given manifest VirtualFile.
+    *
+    * @param manifest the VF to read from
+    * @return JAR's manifest
+    * @throws IOException if problems while opening VF stream occur
+    */
+   public static Manifest readManifest(VirtualFile manifest) throws IOException
+   {
       InputStream stream = manifest.openStream();
       try
       {
@@ -201,21 +206,21 @@ public class VFSUtils
          }
       }
    }
-   
+
    /**
-    * Get a manifest from a virtual file system,
-    * assuming the root of the VFS is the root of an archive
-    * 
-    * @param archive the vfs
-    * @return the manifest or null if not found
-    * @throws IOException if there is an error reading the manifest
-    * @throws IllegalArgumentException for a null archive
-    */
-   public static Manifest getManifest(VFS archive) throws IOException
-   {
-      VirtualFile root = archive.getRoot();
-      return getManifest(root);
-   }
+     * Get a manifest from a virtual file system,
+     * assuming the root of the VFS is the root of an archive
+     *
+     * @param archive the vfs
+     * @return the manifest or null if not found
+     * @throws IOException if there is an error reading the manifest
+     * @throws IllegalArgumentException for a null archive
+     */
+    public static Manifest getManifest(VFS archive) throws IOException
+    {
+       VirtualFile root = archive.getRoot();
+       return getManifest(root);
+    }
    
    /**
     * Fix a name (removes any trailing slash)
