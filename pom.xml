@@ -4,7 +4,7 @@
   <groupId>jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>2.0.0.snapshot</version>
+  <version>1.0.0.Beta</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A set of commonly used classed classes</description>
@@ -100,14 +100,8 @@
   <dependencies>
     <dependency>
       <groupId>jboss</groupId>
-      <artifactId>jboss-common-core</artifactId>
-      <version>2.0.3.GA</version>
-    </dependency>
-    <dependency>
-      <groupId>jboss</groupId>
-      <artifactId>jboss-logging-log4j</artifactId>
-      <version>2.0.3.GA</version>
-      <scope>test</scope>
+      <artifactId>jboss-common</artifactId>
+      <version>1.0.4.GA</version>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
