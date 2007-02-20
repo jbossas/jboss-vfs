@@ -29,6 +29,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -1227,5 +1228,24 @@ public class FileVFSUnitTestCase extends BaseTestCase
       List<VirtualFile> metaDataList = metadataLocation.getChildren(new MetaDataMatchFilter(null, "-data.xml"));
       assertNotNull(metaDataList);
       assertEquals("Wrong size", 1, metaDataList.size());
+   }
+
+   /**
+    * Validate that a URLClassLoader.findReource/getResourceAsStream calls for non-existing absolute
+    * resources that should fail as expected with null results. Related to JBMICROCONT-139.
+    * 
+    * @throws Exception
+    */
+   public void testURLClassLoaderFindResourceFailure() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(rootURL);
+      URL[] cp = {vfs.getRoot().toURL()};
+      URLClassLoader ucl = new URLClassLoader(cp);
+      // Search for a non-existent absolute resource
+      URL qp = ucl.findResource("/nosuch-quartz.props");
+      assertNull("findResource(/nosuch-quartz.props)", qp);
+      InputStream is = ucl.getResourceAsStream("/nosuch-quartz.props");
+      assertNull("getResourceAsStream(/nosuch-quartz.props)", is);
    }
 }
