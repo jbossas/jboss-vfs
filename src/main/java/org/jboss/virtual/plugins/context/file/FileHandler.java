@@ -144,6 +144,15 @@ public class FileHandler extends AbstractURLHandler
       File[] files = parent.listFiles();
       if (files == null)
          throw new IOException("Error listing files: " + parent.getCanonicalPath());
+      // We need to validate the files list due to jdk bug 6192331
+      ArrayList<File> tmpFiles = new ArrayList<File>();
+      for (File file : files)
+      {
+         if( file.canRead() == true )
+            tmpFiles.add(file);
+      }
+      files = new File[tmpFiles.size()];
+      tmpFiles.toArray(files);
       if (files.length == 0)
          return Collections.emptyList();
 
