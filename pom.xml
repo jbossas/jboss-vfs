@@ -4,7 +4,7 @@
   <groupId>jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>2.0.0.snapshot</version>
+  <version>2.0.0.Beta3</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A set of commonly used classed classes</description>
@@ -18,31 +18,11 @@
     <name>JBoss, A division of Red Hat</name>
     <url>http://www.jboss.org</url>
   </organization>
-
-  <repositories>
-    <repository>
-      <id>jboss</id>
-      <name>JBoss Inc. Repository</name>
-      <layout>default</layout>
-      <url>http://repository.jboss.com/maven2/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  
-  <pluginRepositories>
-    <pluginRepository>
-      <id>jbosspluginrepo</id>
-      <name>jboss plugin repository</name>
-      <url>http://repository.jboss.com/maven2</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+  <parent>
+    <groupId>jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>1</version>
+  </parent>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
