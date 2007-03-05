@@ -60,6 +60,9 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
    /** Size */
    private long size;
    
+   /** Does the file exist */
+   private boolean exists = true;
+
    /** Is a leaf */
    private boolean leaf = true;
    
@@ -186,6 +189,16 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
    public void setSize(long size)
    {
       this.size = size;
+   }
+
+   public boolean exists()
+   {
+      return exists;
+   }
+
+   public void setExists(boolean exists)
+   {
+      this.exists = exists;
    }
 
    public boolean isLeaf() throws IOException

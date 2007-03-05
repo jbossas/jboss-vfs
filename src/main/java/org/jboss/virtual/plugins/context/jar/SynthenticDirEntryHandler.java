@@ -115,6 +115,15 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
       return 0;
    }
 
+   /**
+    * TODO: removing the entry/jar that resulted in this needs
+    * to be detected.
+    */
+   public boolean exists() throws IOException
+   {
+      return true;
+   }
+
    public boolean isLeaf()
    {
       return false;

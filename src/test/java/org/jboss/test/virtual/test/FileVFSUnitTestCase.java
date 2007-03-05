@@ -1248,4 +1248,111 @@ public class FileVFSUnitTestCase extends BaseTestCase
       InputStream is = ucl.getResourceAsStream("/nosuch-quartz.props");
       assertNull("getResourceAsStream(/nosuch-quartz.props)", is);
    }
+
+   /**
+    * Test VirtualFile.exists for vfsfile based urls.
+    * 
+    * @throws Exception
+    */
+   public void testFileExists()
+      throws Exception
+   {
+      File tmpRoot = File.createTempFile("vfs", ".root");
+      tmpRoot.delete();
+      tmpRoot.mkdir();
+      File tmp = File.createTempFile("testFileExists", null, tmpRoot);
+      log.info("+++ testFileExists, tmp="+tmp.getCanonicalPath());
+
+      URL rootURL = tmpRoot.toURL();
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile tmpVF = vfs.findChild(tmp.getName());
+      assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue("tmp.delete()", tmp.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
+
+   /**
+    * Test VirtualFile.exists for vfsfile based urls for a directory.
+    * 
+    * @throws Exception
+    */
+   public void testDirFileExists()
+      throws Exception
+   {
+      File tmpRoot = File.createTempFile("vfs", ".root");
+      tmpRoot.delete();
+      tmpRoot.mkdir();
+      File tmp = File.createTempFile("testFileExists", null, tmpRoot);
+      assertTrue(tmp+".delete()", tmp.delete());
+      assertTrue(tmp+".mkdir()", tmp.mkdir());
+      log.info("+++ testDirFileExists, tmp="+tmp.getCanonicalPath());
+
+      URL rootURL = tmpRoot.toURL();
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile tmpVF = vfs.findChild(tmp.getName());
+      assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertFalse(tmpVF.getPathName()+".isLeaf()", tmpVF.isLeaf());
+      assertTrue(tmp+".delete()", tmp.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
+
+   /**
+    * Test VirtualFile.exists for vfsjar based urls.
+    * 
+    * @throws Exception
+    */
+   public void testJarExists()
+      throws Exception
+   {
+      File tmpRoot = File.createTempFile("vfs", ".root");
+      tmpRoot.delete();
+      tmpRoot.mkdir();
+      File tmpJar = File.createTempFile("testJarExists", ".jar", tmpRoot);
+      log.info("+++ testJarExists, tmpJar="+tmpJar.getCanonicalPath());
+      Manifest mf = new Manifest();
+      mf.getMainAttributes().putValue("Created-By", "FileVFSUnitTestCase.testJarExists");
+      FileOutputStream fos = new FileOutputStream(tmpJar);
+      JarOutputStream jos = new JarOutputStream(fos, mf);
+      jos.setComment("testJarExists");
+      jos.setLevel(0);
+      jos.close();
+
+      URL rootURL = tmpRoot.toURL();
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile tmpVF = vfs.findChild(tmpJar.getName());
+      assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpVF.getPathName()+".size() > 0", tmpVF.getSize() > 0);
+      assertTrue("tmp.delete()", tmpJar.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
+
+   /**
+    * Test VirtualFile.exists for vfsjar based urls for a directory.
+    * 
+    * @throws Exception
+    */
+   public void testDirJarExists()
+      throws Exception
+   {
+      File tmpRoot = File.createTempFile("vfs", ".root");
+      tmpRoot.delete();
+      tmpRoot.mkdir();
+      File tmp = File.createTempFile("testDirJarExists", ".jar", tmpRoot);
+      assertTrue(tmp+".delete()", tmp.delete());
+      assertTrue(tmp+".mkdir()", tmp.mkdir());
+      log.info("+++ testDirJarExists, tmp="+tmp.getCanonicalPath());
+
+      URL rootURL = tmpRoot.toURL();
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile tmpVF = vfs.findChild(tmp.getName());
+      log.info(tmpVF.getHandler());
+      assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertFalse(tmpVF.getPathName()+".isLeaf()", tmpVF.isLeaf());
+      assertTrue(tmp+".delete()", tmp.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
 }
