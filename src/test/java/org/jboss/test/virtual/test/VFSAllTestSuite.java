@@ -46,6 +46,7 @@ public class VFSAllTestSuite extends TestSuite
       TestSuite suite = new TestSuite("VFS Tests");
 
       suite.addTest(new TestSuite(URLResolutionUnitTestCase.class));
+      suite.addTest(new TestSuite(URLExistsUnitTestCase.class));
       suite.addTest(VFSUnitTestCase.suite());
       suite.addTest(VirtualFileUnitTestCase.suite());
       suite.addTest(FileVFSUnitTestCase.suite());
