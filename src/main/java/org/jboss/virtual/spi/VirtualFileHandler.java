@@ -110,6 +110,13 @@ public interface VirtualFileHandler extends Serializable
    long getSize() throws IOException;
 
    /**
+    * Tests whether the underlying implementation file still exists.
+    * @return true if the file exists, false otherwise.
+    * @throws IOException - thrown on failure to detect existence.
+    */
+   boolean exists() throws IOException;
+
+   /**
     * Whether it is a simple leaf of the VFS,
     * i.e. whether it can contain other files
     * 

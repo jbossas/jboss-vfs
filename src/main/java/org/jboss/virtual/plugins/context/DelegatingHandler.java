@@ -89,6 +89,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate.isLeaf();
    }
 
+   public boolean exists() throws IOException
+   {
+      return delegate.exists();
+   }
+
    public boolean isHidden() throws IOException
    {
       return delegate.isHidden();

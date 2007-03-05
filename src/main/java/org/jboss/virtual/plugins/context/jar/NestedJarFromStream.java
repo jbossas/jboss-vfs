@@ -96,6 +96,15 @@ public class NestedJarFromStream
       return children;
    }
 
+   /**
+    * TODO: removing the entry/jar that resulted in this needs
+    * to be detected.
+    */
+   public boolean exists() throws IOException
+   {
+      return true;
+   }
+
    public boolean isLeaf() throws IOException
    {
       return false;
@@ -281,6 +290,15 @@ public class NestedJarFromStream
                baos.write(tmp, 0, length);
          }
          contents = baos.toByteArray();
+      }
+
+      /**
+       * TODO: removing the entry/jar that resulted in this needs
+       * to be detected.
+       */
+      public boolean exists() throws IOException
+      {
+         return true;
       }
 
       public boolean isHidden() throws IOException

@@ -170,6 +170,16 @@ public class VirtualFile implements Serializable
    }
 
    /**
+    * Tests whether the underlying implementation file still exists.
+    * @return true if the file exists, false otherwise.
+    * @throws IOException - thrown on failure to detect existence.
+    */
+   public boolean exists() throws IOException
+   {
+      return getHandler().exists();      
+   }
+
+   /**
     * Whether it is a simple leaf of the VFS,
     * i.e. whether it can contain other files
     *

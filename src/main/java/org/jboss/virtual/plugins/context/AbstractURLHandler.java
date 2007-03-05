@@ -106,6 +106,19 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
       return c.getContentLength();
    }
 
+   /**
+    * Basis existence on URLConnection.getLastModified() != 0. This may
+    * not be true for all url connections.
+    * 
+    * @see URLConnection#getLastModified()
+    * @see org.jboss.test.virtual.test.URLExistsUnitTestCase
+    */
+   public boolean exists() throws IOException
+   {
+      URLConnection c = url.openConnection();
+      return c.getLastModified() != 0;
+   }
+
    public boolean isHidden() throws IOException
    {
       checkClosed();
