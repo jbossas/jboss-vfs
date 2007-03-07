@@ -91,6 +91,22 @@ public class FileVFSUnitTestCase extends BaseTestCase
    }
 
    /**
+    * Test that one can go from a file uri to VirtualFile and obtain the
+    * same VirtualFile using VirtualFile vfsfile uri
+    * @throws Exception
+    */
+   public void testVFSFileURIFactory()
+      throws Exception
+   {
+      URL rootURL = getClass().getProtectionDomain().getCodeSource().getLocation();
+      VFS rootVFS0 = VFS.getVFS(rootURL.toURI());
+      VirtualFile root0 = rootVFS0.getRoot();
+      VFS rootVFS1 = VFS.getVFS(root0.toURI());
+      VirtualFile root1 = rootVFS1.getRoot();
+      assertEquals(root0, root1);
+   }
+
+   /**
     * Test that NestedJarFromStream can provide access to nested jar content
     * @throws Exception
     */
