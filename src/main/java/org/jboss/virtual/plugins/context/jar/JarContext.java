@@ -27,6 +27,7 @@ import java.net.URL;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
+import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -83,7 +84,10 @@ public class JarContext extends AbstractVFSContext
       entryPath = entryPath(entryPath);
       JarHandler jar =  new JarHandler(this, parent, url, jarName);
       if (entryPath == null) return jar;
-      return jar.findChild(entryPath);
+      // todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
+      AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.findChild(entryPath);
+      result.setPathName("");
+      return result;
    }
 
    public static String entryPath(String entryName)

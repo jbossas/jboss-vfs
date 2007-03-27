@@ -137,6 +137,18 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return vfsPath;
    }
 
+   /**
+    * todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
+    *
+    * @param path
+    */
+   public void setPathName(String path)
+   {
+      this.vfsPath = path;
+   }
+
+
+
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
       return toURI().toURL();
