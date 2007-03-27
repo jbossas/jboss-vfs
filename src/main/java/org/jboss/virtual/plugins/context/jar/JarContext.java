@@ -72,22 +72,49 @@ public class JarContext extends AbstractVFSContext
     * @throws IOException for any error accessing the file system
     * @throws IllegalArgumentException for a null entry or url
     */
-   public VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, URL url) throws IOException
+   protected VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, URL url) throws IOException
    {
       if (url == null)
          throw new IllegalArgumentException("Null url");
 
-      String name = url.toString();
-      int index = name.indexOf('!');
-      if (index != -1)
-         name = name.substring(0, index);
-      index = name.lastIndexOf('/');
-      if (index != -1 && index < name.length()-1)
-         name = name.substring(index+1);
-      
-      return new JarHandler(this, parent, url, name);
+      String urlStr = url.toString();
+      String jarName = extractJarName(urlStr);
+      String entryPath = urlStr;
+      entryPath = entryPath(entryPath);
+      JarHandler jar =  new JarHandler(this, parent, url, jarName);
+      if (entryPath == null) return jar;
+      return jar.findChild(entryPath);
    }
-   
+
+   public static String entryPath(String entryName)
+   {
+      int index;
+      index = entryName.indexOf("!/");
+      if (index != -1)
+      {
+         entryName = entryName.substring(index + 2);
+      }
+      else
+      {
+         entryName = null;
+      }
+      if (entryName.trim().equals("")) return null;
+      
+      return entryName;
+   }
+
+   public static String extractJarName(String urlStr)
+   {
+      String jarName = urlStr;
+      int index = jarName.indexOf('!');
+      if (index != -1)
+         jarName = jarName.substring(0, index);
+      index = jarName.lastIndexOf('/');
+      if (index != -1 && index < jarName.length()-1)
+         jarName = jarName.substring(index+1);
+      return jarName;
+   }
+
    @Override
    protected void finalize() throws Throwable
    {
@@ -95,4 +122,5 @@ public class JarContext extends AbstractVFSContext
          rootFile.close();
       super.finalize();
    }
+
 }

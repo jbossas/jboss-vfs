@@ -21,19 +21,18 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.net.URL;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.plugins.context.jar.JarContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VFSContext;
 
+import java.net.URL;
+
 /**
  * JARVFSContextUnitTestCase.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
@@ -47,7 +46,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
    public static Test suite()
    {
       VFS.init();
-      System.out.println("java.protocol.handler.pkgs: "+System.getProperty("java.protocol.handler.pkgs"));
+      System.out.println("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
       return new TestSuite(JARVFSContextUnitTestCase.class);
    }
 
@@ -57,4 +56,49 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       url = JarUtils.createJarURL(url);
       return new JarContext(url);
    }
+
+
+   /**
+    * Was having problems with a jar entry as root of VFS.
+    *
+    * @throws Exception
+    */
+   public void testJarEntryAsRoot() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/simple.jar");
+      URL entry = new URL("jar:" + url.toString() + "!/child");
+      //entry.openStream().close();
+      JarContext context = new JarContext(entry);
+      assertEquals("child", context.getRoot().getName());
+
+      url = getResource("/vfs/test/outer.jar");
+      entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
+      //entry.openStream().close();
+      context = new JarContext(entry);
+      assertEquals("jar2.jar", context.getRoot().getName());
+   }
+
+   /**
+    * Was having problems with a jar entry as root of VFS.
+    * A JarEntry that is the root of the VFS should have a VFS Path of ""
+    *
+    * @throws Exception
+    */
+   public void testPathIsEmptryForJarEntryAsRoot() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/simple.jar");
+      URL entry = new URL("jar:" + url.toString() + "!/child");
+      //entry.openStream().close();
+      JarContext context = new JarContext(entry);
+      assertEquals("child", context.getRoot().getName());
+      assertEquals("", context.getRoot().getPathName());
+
+      url = getResource("/vfs/test/outer.jar");
+      entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
+      //entry.openStream().close();
+      context = new JarContext(entry);
+      assertEquals("jar2.jar", context.getRoot().getName());
+      assertEquals("", context.getRoot().getPathName());
+   }
+
 }
