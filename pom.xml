@@ -61,12 +61,7 @@
           <disableXmlReport>false</disableXmlReport>
           <testFailureIgnore>true</testFailureIgnore>
           <forkMode>once</forkMode> <!-- required to correctly run the PojoServer tests -->
-          <systemProperties>
-            <property>
-              <name>java.protocol.handler.pkgs</name>
-              <value>org.jboss.virtual.protocol</value>
-            </property>
-          </systemProperties>
+          <useSystemClassLoader>true</useSystemClassLoader>
         </configuration>
       </plugin>
       <plugin>
@@ -110,4 +105,5 @@
       <url>file://${maven.cvs.root}</url>
     </repository>
   </distributionManagement>
+
 </project>
