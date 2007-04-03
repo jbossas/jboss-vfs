@@ -38,11 +38,11 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * comment
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
  */
+@Assembled
 public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
    private long lastModified = System.currentTimeMillis();
@@ -58,9 +58,9 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       vfsUrl = new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context));
    }
 
-   public void addChld(VirtualFileHandler handler)
+   public VirtualFileHandler addChld(VirtualFileHandler handler)
    {
-      if (!(handler instanceof AssembledDirectoryHandler || handler instanceof AssembledFileHandler))
+      if (!handler.getClass().isAnnotationPresent(Assembled.class))
       {
          try
          {
@@ -74,6 +74,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       children.add(handler);
       childrenMap.put(handler.getName(), handler);
       lastModified = System.currentTimeMillis();
+      return handler;
    }
 
    public VirtualFileHandler getChild(String name)

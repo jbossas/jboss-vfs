@@ -142,7 +142,7 @@ public class AssembledContextTest extends TestCase
 
    public void testAddClass() throws Exception
    {
-      AssembledDirectory directory = AssembledContextFactory.getSingleton().create("foo.jar");
+      AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
       directory.addClass(VirtualFile.class);
 
 
@@ -180,7 +180,7 @@ public class AssembledContextTest extends TestCase
 
    public void testAddResources() throws Exception
    {
-      AssembledDirectory directory = AssembledContextFactory.getSingleton().create("foo.jar");
+      AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
       String[] includes = {"org/jboss/virtual/*.class", "org/jboss/virtual/**/context/jar/*.class"};
       String[] excludes = {"**/Nested*"};
       directory.addResources("org/jboss/virtual/VirtualFile.class", includes, excludes, Thread.currentThread().getContextClassLoader());
@@ -249,12 +249,12 @@ public class AssembledContextTest extends TestCase
       {
          if (child.getName().startsWith("Nested")) throw new RuntimeException("did not exclude propertly");
       }
-      AssembledContextFactory.getSingleton().remove(directory);
+      AssembledContextFactory.getInstance().remove(directory);
    }
 
    public void testMkDir() throws Exception
    {
-      AssembledDirectory directory = AssembledContextFactory.getSingleton().create("foo.jar");
+      AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
       directory.mkdir("META-INF");
       assertNotNull(directory.findChild("META-INF"));
 

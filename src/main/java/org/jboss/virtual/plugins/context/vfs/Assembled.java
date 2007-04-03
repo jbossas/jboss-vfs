@@ -19,34 +19,20 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.protocol.vfs;
+package org.jboss.virtual.plugins.context.vfs;
 
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
-import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
-import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
-import org.jboss.virtual.VirtualFile;
-
-import java.net.URLStreamHandler;
-import java.net.URLConnection;
-import java.net.URL;
-import java.io.IOException;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * URLStreamHandler for VFS
+ * Marker annotation
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
  */
-public class Handler extends URLStreamHandler
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface Assembled
 {
-   protected URLConnection openConnection(URL u) throws IOException
-   {
-      String host = u.getHost();
-      AssembledDirectory directory = AssembledContextFactory.getInstance().find(host);
-      if (directory == null) throw new IOException("vfs does not exist: " + u.toString());
-      VirtualFile vf = directory.findChild(u.getPath());
-      if (vf == null) throw new IOException("vfs does not exist: " + u.toString());
-      return new VirtualFileURLConnection(u, vf);
-   }
-
 }

@@ -26,7 +26,7 @@ import java.net.URISyntaxException;
 import java.io.IOException;
 
 /**
- * comment
+ * Factory for creating AssembledDirectory.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
@@ -35,8 +35,16 @@ public class AssembledContextFactory
 {
    private ConcurrentHashMap<String, AssembledDirectory> registry = new ConcurrentHashMap<String, AssembledDirectory>();
    private volatile int count;
-   private static  AssembledContextFactory singleton = new AssembledContextFactory();
+   private static  AssembledContextFactory instance = new AssembledContextFactory();
 
+   /**
+    * Creates an assembly returning the root AssembledDirectory .
+    * Creates an assembly base and registers it with a local hashmap under name.
+    *
+    * @param name the name of this assembly
+    * @param rootName the name of the root directory you want
+    * @return
+    */
    public AssembledDirectory create(String name, String rootName)
    {
       if (registry.containsKey(name)) throw new RuntimeException("Assembled context already exists for name: " + name);
@@ -57,17 +65,36 @@ public class AssembledContextFactory
       }
    }
 
+   /**
+    * Find an assembly.  Usually used only by the URL protocol handlers.
+    *
+    * @param name
+    * @return
+    */
    public AssembledDirectory find(String name)
    {
       return registry.get(name);
    }
 
+   /**
+    * Creates an assembly returning the root AssembledDirectory .
+    * 
+    * The assembly name will be randomly generated and registered with the internal hashmap registry.
+    *
+    * @param rootName the name of the root AssembledDirectory
+    * @return
+    */
    public AssembledDirectory create(String rootName)
    {
       String name = "" + System.currentTimeMillis() + "" + count++;
       return create(name, rootName);
    }
 
+   /**
+    * Remove an assembly
+    *
+    * @param directory
+    */
    public void remove(AssembledDirectory directory)
    {
       try
@@ -81,13 +108,13 @@ public class AssembledContextFactory
       registry.remove(((AssembledContext)directory.getHandler().getVFSContext()).getName());
    }
 
-   public static AssembledContextFactory getSingleton()
+   public static AssembledContextFactory getInstance()
    {
-      return singleton;
+      return instance;
    }
 
-   public static void setSingleton(AssembledContextFactory singleton)
+   public static void setInstance(AssembledContextFactory instance)
    {
-      AssembledContextFactory.singleton = singleton;
+      AssembledContextFactory.instance = instance;
    }
 }

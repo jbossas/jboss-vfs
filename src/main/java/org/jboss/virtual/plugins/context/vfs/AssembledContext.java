@@ -29,7 +29,7 @@ import java.net.URI;
 import java.io.IOException;
 
 /**
- * JarContext.
+ * AssembledContext.
  *
  * @author Scott.Stark@jboss.org
  * @author <a href="adrian@jboss.com">Adrian Brock</a>

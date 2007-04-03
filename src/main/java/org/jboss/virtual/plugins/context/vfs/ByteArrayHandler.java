@@ -22,96 +22,87 @@
 package org.jboss.virtual.plugins.context.vfs;
 
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URI;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 /**
+ * comment
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
  */
 @Assembled
-public class AssembledFileHandler extends AbstractVirtualFileHandler
+public class ByteArrayHandler extends AbstractVirtualFileHandler
 {
-   private VirtualFileHandler delegate;
+   private byte[] bytes;
+   private final long lastModified = System.currentTimeMillis();
 
-   public AssembledFileHandler(AssembledContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
+
+   public ByteArrayHandler(AssembledContext context, VirtualFileHandler parent, String name, byte[] bytes) throws IOException
    {
       super(context, parent, name);
-      this.delegate = delegate;
+      this.bytes = bytes;
       vfsUrl = new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context));
-
    }
 
 
+   @Override
+   public URL toURL() throws MalformedURLException, URISyntaxException
+   {
+      return vfsUrl;
+   }
+
+   public URI toURI() throws URISyntaxException
+   {
+      return vfsUrl.toURI();
+   }
+
+   public long getLastModified() throws IOException
+   {
+      return lastModified;
+   }
+
+   public long getSize() throws IOException
+   {
+      return bytes.length;
+   }
+
+   public boolean exists() throws IOException
+   {
+      return true;
+   }
+
+   public boolean isLeaf() throws IOException
+   {
+      return true;
+   }
+
+   public boolean isHidden() throws IOException
+   {
+      return false;
+   }
+
+   public InputStream openStream() throws IOException
+   {
+      return new ByteArrayInputStream(bytes);
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      throw new IOException("File cannot have children: " + this);
+      throw new IOException("File cannot have children");
    }
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
-      throw new IOException("File cannot have children: " + this);
-   }
-
-   public URL toURL()
-           throws MalformedURLException, URISyntaxException
-   {
-      return delegate.toURL();
-   }
-
-   public long getLastModified()
-           throws IOException
-   {
-      return delegate.getLastModified();
-   }
-
-   public boolean hasBeenModified()
-           throws IOException
-   {
-      return delegate.hasBeenModified();
-   }
-
-   public long getSize()
-           throws IOException
-   {
-      return delegate.getSize();
-   }
-
-   public boolean exists()
-           throws IOException
-   {
-      return delegate.exists();
-   }
-
-   public boolean isLeaf()
-           throws IOException
-   {
-      return delegate.isLeaf();
-   }
-
-   public boolean isHidden()
-           throws IOException
-   {
-      return delegate.isHidden();
-   }
-
-   public InputStream openStream()
-           throws IOException
-   {
-      return delegate.openStream();
-   }
-
-   public URI toURI()
-           throws URISyntaxException
-   {
-      return delegate.toURI();
+      throw new IOException("File cannot have children");
    }
 }

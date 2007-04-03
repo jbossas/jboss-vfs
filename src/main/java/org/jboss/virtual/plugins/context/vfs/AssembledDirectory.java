@@ -36,7 +36,8 @@ import java.util.regex.Pattern;
 import java.util.List;
 
 /**
- * comment
+ * Extension of VirtualFile that represents a virtual directory that can be composed of arbitrary files and resources
+ * spread throughout the file system or embedded in jar files.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
@@ -51,16 +52,44 @@ public class AssembledDirectory extends VirtualFile
       directory = (AssembledDirectoryHandler) handler;
    }
 
+   /**
+    * Find the underlying .class file representing this class and create it within this directory, along with
+    * its packages.
+    *
+    * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
+    * and an entry in the acme directory would be the .class file.
+    *
+    * @param clazz
+    */
    public void addClass(Class clazz)
    {
       addClass(clazz.getName(), clazz.getClassLoader());
    }
 
+   /**
+    * Find the underlying .class file representing this class and create it within this directory, along with
+    * its packages.
+    *
+    * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
+    * and an entry in the acme directory would be the .class file.
+    *
+    * @param className
+    */
    public void addClass(String className)
    {
       addClass(className, Thread.currentThread().getContextClassLoader());
    }
 
+   /**
+    * Find the underlying .class file representing this class and create it within this directory, along with
+    * its packages.
+    *
+    * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
+    * and an entry in the acme directory would be the .class file.
+    *
+    * @param className
+    * @param loader ClassLoader to look for class resource
+    */
    public void addClass(String className, ClassLoader loader)
    {
       String resource = className.replace('.', '/') + ".class";
@@ -101,17 +130,60 @@ public class AssembledDirectory extends VirtualFile
       return p;
    }
 
+   /**
+    * Locate the .class resource of baseResource.  From this resource, determine the base of the resource
+    * i.e. what jar or classpath directory it lives in.
+    *
+    * Once the base of the resource is found, scan all files recursively within the base using the include and exclude
+    * patterns.  A mirror file structure will be created within this AssembledDirectory. Ths is very useful when you
+    * want to create a virtual jar that contains a subset of .class files in your classpath.
+    *
+    * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
+    *
+    * @param baseResource
+    * @param includes
+    * @param excludes
+    */
    public void addResources(Class baseResource, String[] includes, String[] excludes)
    {
       String resource = baseResource.getName().replace('.', '/') + ".class";
       addResources(resource, includes, excludes);
    }
 
+   /**
+    * From the baseResource, determine the base of that resource
+    * i.e. what jar or classpath directory it lives in.  The Thread.currentThread().getContextClassloader() will be used
+    *
+    * Once the base of the resource is found, scan all files recursively within the base using the include and exclude
+    * patterns.  A mirror file structure will be created within this AssembledDirectory. Ths is very useful when you
+    * want to create a virtual jar that contains a subset of .class files in your classpath.
+    *
+    * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
+    *
+    * @param baseResource
+    * @param includes
+    * @param excludes
+    */
    public void addResources(String baseResource, final String[] includes, final String[] excludes)
    {
       addResources(baseResource, includes, excludes, Thread.currentThread().getContextClassLoader());   
    }
 
+   /**
+    * From the baseResource, determine the base of that resource
+    * i.e. what jar or classpath directory it lives in.  The loader parameter will be used to find the resource.
+    *
+    * Once the base of the resource is found, scan all files recursively within the base using the include and exclude
+    * patterns.  A mirror file structure will be created within this AssembledDirectory. Ths is very useful when you
+    * want to create a virtual jar that contains a subset of .class files in your classpath.
+    *
+    * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
+    *
+    * @param baseResource
+    * @param includes
+    * @param excludes
+    * @param loader
+    */
    public void addResources(String baseResource, final String[] includes, final String[] excludes, ClassLoader loader)
    {
       URL url = loader.getResource(baseResource);
@@ -171,6 +243,12 @@ public class AssembledDirectory extends VirtualFile
       }
    }
 
+   /**
+    * Create a regular expression pattern from an Ant file matching pattern
+    *
+    * @param matcher
+    * @return
+    */
    public static Pattern getPattern(String matcher)
    {
       matcher = matcher.replace(".", "\\.");
@@ -180,6 +258,13 @@ public class AssembledDirectory extends VirtualFile
 
    }
 
+   /**
+    * Determine whether a given file path matches an Ant pattern.
+    *
+    * @param path
+    * @param expression
+    * @return
+    */
    public static boolean antMatch(String path, String expression)
    {
       if (path.startsWith("/")) path = path.substring(1);
@@ -220,16 +305,30 @@ public class AssembledDirectory extends VirtualFile
       return true;
    }
 
-   public void addChild(VirtualFile vf)
+   /**
+    * Add a VirtualFile as a child to this AssembledDirectory.
+    *
+    * @param vf
+    */
+   public VirtualFile addChild(VirtualFile vf)
    {
-      directory.addChld(vf.getHandler());
+      return directory.addChld(vf.getHandler()).getVirtualFile();
    }
 
-   public void addChild(VirtualFile vf, String newName)
+   /**
+    * Add a VirtualFile as a child to this AssembledDirectory.  This file will be added
+    * under a new aliased name.
+    *
+    * @param vf
+    * @param newName
+    */
+   public VirtualFile addChild(VirtualFile vf, String newName)
    {
       try
       {
-         directory.addChld(new AssembledFileHandler((AssembledContext) directory.getVFSContext(), directory, newName, vf.getHandler()));
+         AssembledFileHandler handler = new AssembledFileHandler((AssembledContext) directory.getVFSContext(), directory, newName, vf.getHandler());
+         directory.addChld(handler);
+         return handler.getVirtualFile();
       }
       catch (IOException e)
       {
@@ -237,30 +336,61 @@ public class AssembledDirectory extends VirtualFile
       }
    }
 
-   public void addResource(String resource)
+   /**
+    * Add a classloader found resource to as a child to this AssembledDirectory.  The base file name of the
+    * resource will be used as the child's name.
+    *
+    * Thread.currentThread.getCOntextClassLoader() will be used to load the resource.
+    *
+    * @param resource
+    */
+   public VirtualFile addResource(String resource)
    {
-      addResource(resource, Thread.currentThread().getContextClassLoader());
+      return addResource(resource, Thread.currentThread().getContextClassLoader());
    }
 
-   public void addResource(String resource, String newName)
+   /**
+    * Add a classloader found resource to as a child to this AssembledDirectory.  The newName parameter will be used
+    * as the name of the child.
+    *
+    * Thread.currentThread.getCOntextClassLoader() will be used to load the resource.
+    *
+    * @param resource
+    * @param newName
+    */
+   public VirtualFile addResource(String resource, String newName)
    {
-      addResource(resource, Thread.currentThread().getContextClassLoader(), newName);
+      return addResource(resource, Thread.currentThread().getContextClassLoader(), newName);
    }
 
-   public void addResource(String resource, ClassLoader loader)
+   /**
+    * Add a classloader found resource to as a child to this AssembledDirectory.  The base file name of the
+    * resource will be used as the child's name.
+    *
+    * The loader parameter will be used to load the resource.
+    *
+    * @param resource
+    * @param loader
+    */
+   public VirtualFile addResource(String resource, ClassLoader loader)
    {
       URL url = loader.getResource(resource);
       if (url == null) throw new RuntimeException("Could not find resource: " + resource);
 
-      addResource(url);
+      return addResource(url);
    }
 
-   public void addResource(URL url)
+   /**
+    * Add a resource identified by the URL as a child to this AssembledDirectory.
+    *
+    * @param url
+    */
+   public VirtualFile addResource(URL url)
    {
       try
       {
          VirtualFile vf = VFS.getRoot(url);
-         addChild(vf);
+         return addChild(vf);
       }
       catch (IOException e)
       {
@@ -268,14 +398,24 @@ public class AssembledDirectory extends VirtualFile
       }
    }
 
-   public void addResource(String resource, ClassLoader loader, String newName)
+   /**
+    * Add a classloader found resource to as a child to this AssembledDirectory.  The newName parameter will be used
+    * as the name of the child.
+    *
+    * The loader parameter will be used to load the resource.
+    *
+    * @param resource
+    * @param loader
+    * @param newName
+    */
+   public VirtualFile addResource(String resource, ClassLoader loader, String newName)
    {
       URL url = loader.getResource(resource);
       if (url == null) throw new RuntimeException("Could not find resource: " + resource);
       try
       {
          VirtualFile vf = VFS.getRoot(url);
-         addChild(vf, newName);
+         return addChild(vf, newName);
       }
       catch (IOException e)
       {
@@ -283,6 +423,35 @@ public class AssembledDirectory extends VirtualFile
       }
    }
 
+   /**
+    * Add raw bytes as a file to this assembled directory
+    *
+    *
+    * @param bytes
+    * @param name
+    * @return
+    */
+   public VirtualFile addBytes(byte[] bytes, String name)
+   {
+      ByteArrayHandler handler = null;
+      try
+      {
+         handler = new ByteArrayHandler((AssembledContext) directory.getVFSContext(), directory, name, bytes);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      directory.addChld(handler);
+      return handler.getVirtualFile();
+   }
+
+   /**
+    * Create a directory within this directory.
+    *
+    * @param name
+    * @return
+    */
    public AssembledDirectory mkdir(String name)
    {
       AssembledDirectoryHandler handler = null;
@@ -297,4 +466,5 @@ public class AssembledDirectory extends VirtualFile
       }
       return new AssembledDirectory(handler);
    }
+
 }
