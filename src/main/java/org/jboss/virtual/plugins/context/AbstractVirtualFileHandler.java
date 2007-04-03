@@ -210,7 +210,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * 
     * @return the resulting count
     */
-   private int increment()
+   protected int increment()
    {
       return references.incrementAndGet();
    }
@@ -220,7 +220,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * 
     * @return the resulting count
     */
-   private int decrement()
+   protected int decrement()
    {
       return references.decrementAndGet();
    }

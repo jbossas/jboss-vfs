@@ -65,7 +65,9 @@ public class VFS
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
       // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
-      ArchiveBrowser.factoryFinder.put("vfsfile", new VfsArchiveBrowserFactory());      
+      ArchiveBrowser.factoryFinder.put("vfsfile", new VfsArchiveBrowserFactory());
+      ArchiveBrowser.factoryFinder.put("vfsjar", new VfsArchiveBrowserFactory());
+      ArchiveBrowser.factoryFinder.put("vfs", new VfsArchiveBrowserFactory());      
    }
 
    /**

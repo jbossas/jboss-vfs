@@ -54,6 +54,12 @@ public class VirtualFileURLConnection extends URLConnection
       this.relativePath = relativePath;
    }
 
+   public VirtualFileURLConnection(URL url, VirtualFile file)
+   {
+      super(url);
+      this.file = file;
+   }
+
    public void connect() throws IOException
    {
    }
