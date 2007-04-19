@@ -4,7 +4,7 @@
   <groupId>jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0.snapshot</version>
+  <version>1.0.0.GA</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A set of commonly used classed classes</description>
@@ -18,31 +18,12 @@
     <name>JBoss, A division of Red Hat</name>
     <url>http://www.jboss.org</url>
   </organization>
+  <parent>
+    <groupId>jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>1</version>
+  </parent>
 
-  <repositories>
-    <repository>
-      <id>jboss</id>
-      <name>JBoss Inc. Repository</name>
-      <layout>default</layout>
-      <url>http://repository.jboss.com/maven2/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  
-  <pluginRepositories>
-    <pluginRepository>
-      <id>jbosspluginrepo</id>
-      <name>jboss plugin repository</name>
-      <url>http://repository.jboss.com/maven2</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
@@ -81,12 +62,7 @@
           <disableXmlReport>false</disableXmlReport>
           <testFailureIgnore>true</testFailureIgnore>
           <forkMode>once</forkMode> <!-- required to correctly run the PojoServer tests -->
-          <systemProperties>
-            <property>
-              <name>java.protocol.handler.pkgs</name>
-              <value>org.jboss.virtual.protocol</value>
-            </property>
-          </systemProperties>
+          <useSystemClassLoader>true</useSystemClassLoader>
         </configuration>
       </plugin>
       <plugin>
@@ -101,7 +77,13 @@
     <dependency>
       <groupId>jboss</groupId>
       <artifactId>jboss-common</artifactId>
-      <version>1.0.4.GA</version>
+      <version>1.2.0.GA</version>
+    </dependency>
+    <dependency>
+      <groupId>apache-log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.8</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>jboss</groupId>
