@@ -578,6 +578,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
    public void testClassScanUnpacked()
       throws Exception
    {
+      super.enableTrace("org.jboss");
       URL rootURL = getResource("/vfs/test/unpacked-outer.jar");
       VFS vfs = VFS.getVFS(rootURL);
    
@@ -599,7 +600,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
             count ++;
          }
       }
-      assertEquals("There were 4 classes", 4, count);
+      assertEquals("There were 4 classes, actual: "+classes, 4, count);
    }
 
    /**
