@@ -53,7 +53,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 {
    /** The log */
-   protected Logger log = Logger.getLogger(getClass());
+   protected static final Logger log = Logger.getLogger(AbstractVirtualFileHandler.class);
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
    /** The class serial fields */
@@ -397,7 +397,5 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.context = factory.getVFS(rootURI);
       this.references = new AtomicInteger(0);
       this.vfsUrl = (URL)fields.get("vfsUrl", null);
-      // Restore the log
-      log = Logger.getLogger(getClass());
    }
 }
