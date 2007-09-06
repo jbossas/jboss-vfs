@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
@@ -9,13 +8,13 @@
   <groupId>org.jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.0.0.Beta4</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/tags/</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/</developerConnection>   
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/tags/2.0.0.Beta4</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.0.0.Beta4</developerConnection>   
   </scm>
   <licenses>
     <license>
