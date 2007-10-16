@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.logging.Logger;
 import org.jboss.virtual.plugins.context.file.FileSystemContextFactory;
 import org.jboss.virtual.plugins.context.jar.JarContextFactory;
+import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory;
 import org.jboss.util.file.ArchiveBrowser;
 
@@ -244,6 +245,9 @@ public class VFSContextFactoryLocator
       // No jar protocol, use the default 
       if (factoryByProtocol.containsKey("jar") == false)
          registerFactory(new JarContextFactory());
+      
+      if (factoryByProtocol.containsKey("vfsmemory") == false)
+         registerFactory(MemoryContextFactory.getInstance());
 
       initialized = true;
    }
