@@ -51,6 +51,7 @@ public class Handler extends URLStreamHandler
       return new VirtualFileURLConnection(u, vf);
       
    }
+
    public static void main(String[] args) throws Exception
    {
       System.setProperty("java.protocol.handler.pkgs", "org.jboss.virtual.protocol");
@@ -82,6 +83,5 @@ public class Handler extends URLStreamHandler
          System.out.print((char)is2.read());
       }
       is.close();
-
    }
 }

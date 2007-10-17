@@ -39,7 +39,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 
 
 /**
- * 
+ * Virtual memory context handler.
+ *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
@@ -48,10 +49,9 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
 
-   private transient List<VirtualFileHandler> entryChildren = Collections.EMPTY_LIST;
-   private transient Map<String, MemoryContextHandler> entryMap = Collections.EMPTY_MAP;
-   byte[] contents;
-   
+   private transient List<VirtualFileHandler> entryChildren = Collections.emptyList();
+   private transient Map<String, MemoryContextHandler> entryMap = Collections.emptyMap();
+   private byte[] contents;
 
    public MemoryContextHandler(VFSContext context, VirtualFileHandler parent, URL url, String name)
    {
@@ -121,6 +121,11 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return true;
    }
    
+   byte[] getContents()
+   {
+      return contents;
+   }
+
    public void setContents(byte[] contents)
    {
       if (entryChildren.size() > 0)

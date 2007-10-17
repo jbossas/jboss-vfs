@@ -22,27 +22,27 @@
 package org.jboss.virtual.plugins.context.memory;
 
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * 
+ * Virtual memory context.
+ *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
-public class MemoryContext extends AbstractVFSContext
+public class MemoryContext extends AbstractVFSContext implements Serializable
 {
    private static final long serialVersionUID = 1L;
+
    /** The root file */
    private final MemoryContextHandler root;
    
@@ -55,7 +55,6 @@ public class MemoryContext extends AbstractVFSContext
       root = new MemoryContextHandler(this, null, url, url.getFile());
       rootFile = root.getVirtualFile();
    }
-
 
    public VirtualFileHandler getRoot() throws IOException
    {
@@ -71,9 +70,6 @@ public class MemoryContext extends AbstractVFSContext
    {
       try
       {
-         URI uri = VFSUtils.toURI(url);
-         
-         
          String[] tokens = PathTokenizer.getTokens(url.getPath());
          if (tokens == null || tokens.length == 0)
          {
@@ -107,7 +103,7 @@ public class MemoryContext extends AbstractVFSContext
             }   
             
             URL localUrl = new URL(path.toString());
-            if (current.contents != null)
+            if (current.getContents() != null)
             {
                throw new IllegalStateException("Cannot add a child to " + current + " it already has contents");
             }
@@ -121,10 +117,5 @@ public class MemoryContext extends AbstractVFSContext
       {
          throw new RuntimeException(e);
       }
-      catch (URISyntaxException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-   
+   }  
 }

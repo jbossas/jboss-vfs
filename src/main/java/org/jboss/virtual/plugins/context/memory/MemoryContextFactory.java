@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
@@ -44,11 +45,10 @@ public class MemoryContextFactory implements VFSContextFactory
    private static final String[] PROTOCOLS = {"vfsmemory"};
    
    private static MemoryContextFactory instance = new MemoryContextFactory();
-   private ConcurrentHashMap<String, MemoryContext> registry = new ConcurrentHashMap<String, MemoryContext>();
+   private Map<String, MemoryContext> registry = new ConcurrentHashMap<String, MemoryContext>();
    
    private MemoryContextFactory()
    {
-      
    }
    
    /**
@@ -124,7 +124,7 @@ public class MemoryContextFactory implements VFSContextFactory
 
    /**
     * Creates a 'directory' within the context determined by the url host part
-    * @param URL url The url of the directory we want tot create
+    * @param url The url of the directory we want tot create
     * @return The created directory
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
     */
@@ -142,8 +142,8 @@ public class MemoryContextFactory implements VFSContextFactory
    
    /**
     * Creates a 'file' within the context determined by the url host part
-    * @param URL url The url of the directory we want tot create
-    * @param byte[] contents The contents of the file
+    * @param url The url of the directory we want tot create
+    * @param contents The contents of the file
     * @return The created file
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
     */
@@ -161,7 +161,7 @@ public class MemoryContextFactory implements VFSContextFactory
    
    /**
     * Deletes a root MemoryContext 
-    * @param The url of the root context we want to delete 
+    * @param url of the root context we want to delete
     * @return true if we deleted a root MemoryContext, false otherwise
     * @throws IllegalArgumentException If the url parameter contains a path
     */
@@ -178,7 +178,7 @@ public class MemoryContextFactory implements VFSContextFactory
 
    /**
     * Deletes a 'file' or a 'directory' 
-    * @param The url of the 'file' or 'directory' we want to delete 
+    * @param url of the 'file' or 'directory' we want to delete 
     * @return true if we deleted a 'file' or 'directory', false otherwise
     */
    public boolean delete(URL url)
