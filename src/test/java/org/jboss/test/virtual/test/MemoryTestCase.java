@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
@@ -32,7 +34,6 @@ import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 import junit.framework.TestCase;
 
@@ -147,6 +148,10 @@ public class MemoryTestCase extends TestCase
          VFSContext ctx = mfactory.createRoot(root);
          URL url = new URL("vfsmemory://aopdomain/org/acme/test/Test.class");
          mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
+         URL url2 = new URL("vfsmemory://aopdomain/org/acme/test/Test2.class");
+         mfactory.putFile(url2,  new byte[] {'a', 'b', 'c'});
+         URL url3 = new URL("vfsmemory://aopdomain/org/acme/test/Test3.class");
+         mfactory.putFile(url3,  new byte[] {'a', 'b', 'c'});
          
          VFS vfs = ctx.getVFS();
          VirtualFile file = vfs.getVirtualFile(root, "/org/acme/test/Test.class");
@@ -154,10 +159,29 @@ public class MemoryTestCase extends TestCase
          
          VirtualFile file2 = vfs.getVirtualFile(root, "/org");
          assertNotNull(file2);
-         VirtualFile file3 = file2.findChild("/acme/test/Test.class");
-         assertNotNull(file3);
+         VirtualFile test = file2.findChild("/acme/test/Test.class");
+         assertNotNull(test);
+         assertSame(file.getHandler(), test.getHandler());
          
-         assertSame(file.getHandler(), file3.getHandler());
+         //acme
+         List<VirtualFile> children = file2.getChildren();
+         assertEquals(1,children.size());
+         VirtualFile child = children.get(0);
+         //test
+         children = child.getChildren();
+         assertEquals(1,children.size());
+         child = children.get(0);
+         //test/*.class
+         children = child.getChildren();
+         assertEquals(3,children.size());
+         HashMap<String, VirtualFile> childMap = new HashMap<String, VirtualFile>();  
+         for (VirtualFile cur : children)
+         {
+            childMap.put(cur.getName(), cur);
+         }
+         assertNotNull(childMap.get("Test.class"));
+         assertNotNull(childMap.get("Test2.class"));
+         assertNotNull(childMap.get("Test3.class"));
       }
       finally
       {
@@ -165,6 +189,64 @@ public class MemoryTestCase extends TestCase
       }
    }
 
+   public void testLeaf() throws Exception
+   {
+      MemoryContextFactory mfactory = MemoryContextFactory.getInstance();
+      URL root = new URL("vfsmemory://aopdomain");
+      try
+      {
+         VFSContext ctx = mfactory.createRoot(root);
+         URL url = new URL("vfsmemory://aopdomain/org/acme/leaf");
+         mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
+
+         URL url2 = new URL("vfsmemory://aopdomain/org/acme/leaf/shouldnotwork");
+         try
+         {
+            mfactory.putFile(url2,  new byte[] {'d', 'e', 'f'});
+            fail("It should not have been possible to add a child to a leaf node");
+         }
+         catch(Exception e)
+         {
+         }
+         
+         VirtualFile classFile = VFS.getVirtualFile(new URL("vfsmemory://aopdomain"), "org/acme/leaf");
+         assertNotNull(classFile);
+         try
+         {
+            VirtualFile classFile2 = VFS.getVirtualFile(new URL("vfsmemory://aopdomain"), "org/acme/leaf/shouldnotwork");
+            fail("It should not have been possible to find a child of a leaf node");
+         }
+         catch (Exception expected)
+         {
+         }
+         
+         
+         try
+         {
+            URL url3 = new URL("vfsmemory://aopdomain/org/acme");
+            mfactory.putFile(url3, new byte[] {'1', '2', '3'});
+            fail("Should not have been possible to set contents for a non-leaf node");
+         }
+         catch (Exception expected)
+         {
+         }
+         
+         try
+         {
+            URL url4 = new URL("vfsmemory://aopdomain/org");
+            mfactory.putFile(url4, new byte[] {'1', '2', '3'});
+            fail("Should not have been possible to set contents for a non-leaf node");
+         }
+         catch (Exception expected)
+         {
+         }
+      }
+      finally
+      {
+         mfactory.deleteRoot(root);
+      }
+   }
+   
    protected void setUp()
    {
       VFS.init();

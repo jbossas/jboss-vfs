@@ -115,6 +115,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return child;
    }
 
+   @Override
    public boolean exists() throws IOException
    {
       return true;
@@ -126,14 +127,33 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       {
          throw new RuntimeException("Cannot set contents for non-leaf node");
       }
+      initCacheLastModified();
       this.contents = contents;
    }
    
+   @Override
    protected void initCacheLastModified()
    {
       this.cachedLastModified = System.currentTimeMillis();
    }
 
+   @Override
+   public long getSize() throws IOException
+   {
+      if (contents != null)
+      {
+         return contents.length;
+      }
+      return 0;
+   }
+   
+   @Override
+   public long getLastModified() throws IOException
+   {
+      return cachedLastModified;
+   }
+
+   @Override
    public InputStream openStream() throws IOException
    {
       if (contents != null)
