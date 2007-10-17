@@ -32,6 +32,7 @@ import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 import junit.framework.TestCase;
 
@@ -71,13 +72,23 @@ public class MemoryTestCase extends TestCase
       URL root = new URL("vfsmemory://aopdomain");
       try
       {
+         long now = System.currentTimeMillis();
          VFSContext ctx = mfactory.createRoot(root);
          URL url = new URL("vfsmemory://aopdomain/org/acme/test/Test.class");
          mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
          
          String read = readURL(url);
          assertEquals("abc", read);
-         
+
+         VirtualFile classFile = VFS.getVirtualFile(new URL("vfsmemory://aopdomain"), "org/acme/test/Test.class");
+         InputStream bis = classFile.openStream();
+         read = readIS(bis);
+         assertEquals("abc", read);
+         assertEquals(3, classFile.getSize());
+         assertTrue(classFile.exists());
+         assertTrue(classFile.isLeaf());
+         assertTrue(classFile.getLastModified() >= now);
+
          assertTrue(mfactory.delete(url));
          try
          {
@@ -153,13 +164,23 @@ public class MemoryTestCase extends TestCase
          mfactory.deleteRoot(root);
       }
    }
-   
+
+   protected void setUp()
+   {
+      VFS.init();
+      System.out.println("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
+   }
    private String readURL(URL url) throws IOException
    {
-      InputStream is = null;
+      InputStream is = url.openStream();
+      String s = readIS(is);
+      return s;
+   }
+   private String readIS(InputStream is)
+      throws IOException
+   {
       try
       {
-         is = url.openStream();
          StringBuffer sb = new StringBuffer();
          while (is.available() != 0)
          {
@@ -179,7 +200,7 @@ public class MemoryTestCase extends TestCase
             {
             }
          }
-      }
+      }      
    }
    
 }
