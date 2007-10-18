@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,7 +101,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return entryChildren;
    }
 
-   public boolean isLeaf() throws IOException
+   public boolean isLeaf()
    {
       return contents != null;
    }
@@ -168,4 +170,23 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return new ByteArrayInputStream(new byte[0]);
    }
 
+   @Override
+   public URL toVfsUrl() throws MalformedURLException, URISyntaxException
+   {
+      if (super.vfsUrl == null)
+      {
+         if (isLeaf())
+         {
+            super.vfsUrl = getURL();
+         }
+         else
+         {
+            String vfsString = getURL().toString(); 
+            if (!vfsString.endsWith("/"));
+            super.vfsUrl = new URL(vfsString + "/");
+         }
+      }
+      return super.vfsUrl;
+   }
+   
 }
