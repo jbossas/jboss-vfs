@@ -21,15 +21,14 @@
 */
 package org.jboss.virtual.plugins.vfs;
 
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.VirtualFile;
-
-import java.net.URLStreamHandler;
-import java.net.URLConnection;
-import java.net.URL;
-import java.net.URISyntaxException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+
+import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Used when creating VFS urls so we don't have to go through the handlers all the time
@@ -41,7 +40,6 @@ public class VirtualFileUrlStreamHandler extends URLStreamHandler
 {
    private final VFSContext context;
 
-
    public VirtualFileUrlStreamHandler(VirtualFileHandler handler)
    {
       this.context = handler.getVFSContext();
@@ -49,7 +47,7 @@ public class VirtualFileUrlStreamHandler extends URLStreamHandler
 
    protected URLConnection openConnection(URL u) throws IOException
    {
-      String baseRootUrl = null;
+      String baseRootUrl;
       try
       {
          baseRootUrl = context.getRoot().toVfsUrl().toString();
@@ -64,10 +62,14 @@ public class VirtualFileUrlStreamHandler extends URLStreamHandler
       }
       String urlString = u.toString();
       int idx = urlString.indexOf(baseRootUrl);
-      if (idx == -1) throw new IOException(u.toString() + " does not belong to the same VFS context as " + baseRootUrl);
+      if (idx == -1)
+         throw new IOException(u.toString() + " does not belong to the same VFS context as " + baseRootUrl);
+
       String path = urlString.substring(baseRootUrl.length());
       VirtualFileHandler vf = context.getRoot().findChild(path);
-      if (vf == null) throw new IOException(path + " was not found in VFS context " + baseRootUrl);
+      if (vf == null)
+         throw new IOException(path + " was not found in VFS context " + baseRootUrl);
+
       return new VirtualFileURLConnection(u, vf.getVirtualFile());
    }
 }

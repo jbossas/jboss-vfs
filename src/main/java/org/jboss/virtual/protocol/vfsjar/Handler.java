@@ -46,6 +46,7 @@ public class Handler extends URLStreamHandler
       URL url = new URL(file);
       return new VirtualFileURLConnection(u, url, path);
    }
+
    public static void main(String[] args) throws Exception
    {
       System.setProperty("java.protocol.handler.pkgs", "org.jboss.virtual.protocol");

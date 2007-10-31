@@ -21,15 +21,15 @@
 */
 package org.jboss.virtual.protocol.vfs;
 
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
 import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
-import org.jboss.virtual.VirtualFile;
-
-import java.net.URLStreamHandler;
-import java.net.URLConnection;
-import java.net.URL;
-import java.io.IOException;
+import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
  * URLStreamHandler for VFS
@@ -43,9 +43,13 @@ public class Handler extends URLStreamHandler
    {
       String host = u.getHost();
       AssembledDirectory directory = AssembledContextFactory.getInstance().find(host);
-      if (directory == null) throw new IOException("vfs does not exist: " + u.toString());
+      if (directory == null)
+         throw new IOException("vfs does not exist: " + u.toString());
+
       VirtualFile vf = directory.findChild(u.getPath());
-      if (vf == null) throw new IOException("vfs does not exist: " + u.toString());
+      if (vf == null)
+         throw new IOException("vfs does not exist: " + u.toString());
+
       return new VirtualFileURLConnection(u, vf);
    }
 

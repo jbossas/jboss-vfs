@@ -21,13 +21,13 @@
 */
 package org.jboss.virtual.protocol.vfsfile;
 
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+
+import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
  * URLStreamHandler for VFS
@@ -68,7 +68,7 @@ public class Handler extends URLStreamHandler
 
       if (vfsurl == null)
          throw new IOException("vfsfile does not exist: " + u.toString());
+
       return new VirtualFileURLConnection(u, vfsurl, relative);
    }
-
 }

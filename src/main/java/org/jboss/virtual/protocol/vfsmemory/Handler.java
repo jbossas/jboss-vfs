@@ -44,12 +44,14 @@ public class Handler extends URLStreamHandler
    {
       String host = u.getHost();
       MemoryContext ctx = MemoryContextFactory.getInstance().find(host);
+      if (ctx == null)
+         throw new IOException("vfs does not exist: " + u.toString());
 
-      if (ctx == null) throw new IOException("vfs does not exist: " + u.toString());
       VirtualFile vf = ctx.findChild(ctx.getRoot(), u.getPath()).getVirtualFile();
-      if (vf == null) throw new IOException("vfs does not exist: " + u.toString());
+      if (vf == null)
+         throw new IOException("vfs does not exist: " + u.toString());
+
       return new VirtualFileURLConnection(u, vf);
-      
    }
 
    public static void main(String[] args) throws Exception

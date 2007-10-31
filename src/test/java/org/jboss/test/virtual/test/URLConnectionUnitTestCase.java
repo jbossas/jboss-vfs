@@ -34,7 +34,7 @@ public class URLConnectionUnitTestCase extends TestCase
     * Test url content
     * @throws Exception for any error
     */
-   public void testFileURLs() throws Exception
+   public void testContent() throws Exception
    {
    }
 }
