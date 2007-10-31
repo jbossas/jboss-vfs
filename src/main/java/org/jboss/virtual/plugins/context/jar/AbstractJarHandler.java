@@ -337,7 +337,7 @@ public class AbstractJarHandler extends AbstractURLHandler
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
-      return super.structuredFindChild(path);
+      return structuredFindChild(path);
    }
 
    public VirtualFileHandler createChildHandler(String name) throws IOException

@@ -21,18 +21,19 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
+
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URI;
-import java.util.List;
-
 /**
+ * The assembled file handler.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
@@ -49,7 +50,6 @@ public class AssembledFileHandler extends AbstractVirtualFileHandler
       vfsUrl = new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context));
 
    }
-
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {

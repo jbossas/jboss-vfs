@@ -21,6 +21,11 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
@@ -29,11 +34,6 @@ import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
 import org.jboss.virtual.spi.VirtualFileHandler;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.regex.Pattern;
-import java.util.List;
 
 /**
  * Extension of VirtualFile that represents a virtual directory that can be composed of arbitrary files and resources
@@ -122,7 +122,7 @@ public class AssembledDirectory extends VirtualFile
             {
                throw new RuntimeException(e);
             }
-            dir.addChld(next);
+            dir.addChild(next);
          }
          dir = next;
       }
@@ -312,7 +312,7 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addChild(VirtualFile vf)
    {
-      return directory.addChld(vf.getHandler()).getVirtualFile();
+      return directory.addChild(vf.getHandler()).getVirtualFile();
    }
 
    /**
@@ -327,7 +327,7 @@ public class AssembledDirectory extends VirtualFile
       try
       {
          AssembledFileHandler handler = new AssembledFileHandler((AssembledContext) directory.getVFSContext(), directory, newName, vf.getHandler());
-         directory.addChld(handler);
+         directory.addChild(handler);
          return handler.getVirtualFile();
       }
       catch (IOException e)
@@ -442,7 +442,7 @@ public class AssembledDirectory extends VirtualFile
       {
          throw new RuntimeException(e);
       }
-      directory.addChld(handler);
+      directory.addChild(handler);
       return handler.getVirtualFile();
    }
 
@@ -458,7 +458,7 @@ public class AssembledDirectory extends VirtualFile
       try
       {
          handler = new AssembledDirectoryHandler((AssembledContext) directory.getVFSContext(), directory, name);
-         directory.addChld(handler);
+         directory.addChild(handler);
       }
       catch (IOException e)
       {

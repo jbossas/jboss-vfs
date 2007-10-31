@@ -145,7 +145,7 @@ public class FileHandler extends AbstractURLHandler
       if (files == null)
          throw new IOException("Error listing files: " + parent.getCanonicalPath());
       // We need to validate the files list due to jdk bug 6192331
-      ArrayList<File> tmpFiles = new ArrayList<File>();
+      List<File> tmpFiles = new ArrayList<File>();
       for (File file : files)
       {
          if( file.canRead() == true )
@@ -168,7 +168,7 @@ public class FileHandler extends AbstractURLHandler
       {
          try
          {
-            VirtualFileHandler handler = null;
+            VirtualFileHandler handler;
             handler = oldCache.get(file.getName());
             // if underlying file has been modified then create a new handler instead of using the cached one
             if (handler != null && handler.hasBeenModified())

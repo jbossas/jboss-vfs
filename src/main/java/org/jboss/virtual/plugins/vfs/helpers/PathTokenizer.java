@@ -84,7 +84,7 @@ public class PathTokenizer
       if (tokens == null)
          throw new IllegalArgumentException("Null tokens");
       if (i < 0 || i >= tokens.length)
-         throw new IllegalArgumentException("i is not in the range of tokens: 0" + (tokens.length-1));
+         throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (tokens.length-1));
       
       if (i == tokens.length-1)
          return tokens[tokens.length-1];

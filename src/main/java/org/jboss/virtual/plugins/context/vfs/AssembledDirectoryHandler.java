@@ -21,23 +21,24 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.VirtualFile;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
+ * The assembled directory handler.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
@@ -49,7 +50,6 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    private List<VirtualFileHandler> children = new ArrayList<VirtualFileHandler>();
    private Map<String, VirtualFileHandler> childrenMap = new HashMap<String, VirtualFileHandler>();
 
-
    public AssembledDirectoryHandler(AssembledContext context, AssembledDirectoryHandler parent, String name) throws IOException
    {
       super(context, parent, name);
@@ -58,7 +58,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       vfsUrl = new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context));
    }
 
-   public VirtualFileHandler addChld(VirtualFileHandler handler)
+   public VirtualFileHandler addChild(VirtualFileHandler handler)
    {
       if (!handler.getClass().isAnnotationPresent(Assembled.class))
       {
@@ -122,7 +122,6 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       return children;
    }
 
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       VirtualFileHandler handler = childrenMap.get(name);
@@ -134,7 +133,6 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    {
       return structuredFindChild(path);
    }
-
 
    @Override
    public VirtualFile getVirtualFile()

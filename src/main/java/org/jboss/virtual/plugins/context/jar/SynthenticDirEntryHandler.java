@@ -152,7 +152,7 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
-      return super.structuredFindChild(path);
+      return structuredFindChild(path);
    }
 
    /**

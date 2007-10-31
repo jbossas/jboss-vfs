@@ -54,14 +54,15 @@ public class LinkHandler extends AbstractURLHandler
    private static final long serialVersionUID = 1;
    /** The link information */
    private List<LinkInfo> links;
-   private HashMap<String, VirtualFileHandler> linkTargets =
-      new HashMap<String, VirtualFileHandler>(3);
+   /** The link targets */
+   private HashMap<String, VirtualFileHandler> linkTargets = new HashMap<String, VirtualFileHandler>(3);
 
    class ParentOfLink extends AbstractURLHandler
       implements StructuredVirtualFileHandler
    {
       private static final long serialVersionUID = 1;
-      private HashMap<String, VirtualFileHandler> children = 
+
+      private HashMap<String, VirtualFileHandler> children =
          new HashMap<String, VirtualFileHandler>(1);
 
       public ParentOfLink(VFSContext context, VirtualFileHandler parent, URL url, String name)
@@ -76,10 +77,12 @@ public class LinkHandler extends AbstractURLHandler
             throw new RuntimeException(e);
          }
       }
+
       void addChild(VirtualFileHandler child, String name)
       {
          children.put(name, child);
       }
+
       public VirtualFileHandler findChild(String path) throws IOException
       {
          return structuredFindChild(path);
@@ -99,8 +102,6 @@ public class LinkHandler extends AbstractURLHandler
       {
          return false;
       }
-
-
    }
 
    /**
@@ -196,6 +197,7 @@ public class LinkHandler extends AbstractURLHandler
    {
       return structuredFindChild(path);
    }
+
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       VirtualFileHandler handler = linkTargets.get(name);
@@ -223,5 +225,4 @@ public class LinkHandler extends AbstractURLHandler
       // TODO: if the factory caches contexts the root handler may not point to the link
       return new DelegatingHandler(this.getVFSContext(), parent, name, rootHandler);
    }
-
 }

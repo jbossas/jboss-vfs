@@ -21,16 +21,16 @@
 */
 package org.jboss.virtual.plugins.vfs;
 
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VFS;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.jboss.virtual.VFS;
+import org.jboss.virtual.VirtualFile;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -45,7 +45,6 @@ public class VirtualFileURLConnection extends URLConnection
    protected VirtualFile file;
    protected URL vfsurl;
    protected String relativePath;
-
 
    public VirtualFileURLConnection(URL url, URL vfsurl, String relativePath)
    {
@@ -62,6 +61,11 @@ public class VirtualFileURLConnection extends URLConnection
 
    public void connect() throws IOException
    {
+   }
+
+   public Object getContent() throws IOException
+   {
+      return getVirtualFile();
    }
 
    public static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
@@ -84,7 +88,6 @@ public class VirtualFileURLConnection extends URLConnection
          }
       }
       return vfs.findChild(relativePath);
-
    }
 
    public static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
@@ -108,7 +111,6 @@ public class VirtualFileURLConnection extends URLConnection
       }
       return file;
    }
-
 
    public InputStream getInputStream() throws IOException
    {
