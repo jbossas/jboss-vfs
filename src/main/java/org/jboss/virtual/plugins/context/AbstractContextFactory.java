@@ -47,6 +47,13 @@ public abstract class AbstractContextFactory implements VFSContextFactory
       return protocols;
    }
 
+   /**
+    * Check if URL param is already VFS URL.
+    *
+    * @param url the url
+    * @return stripped url
+    * @throws MalformedURLException for any error
+    */
    protected static URL fromVFS(URL url) throws MalformedURLException
    {
       String externalForm = url.toExternalForm();
@@ -56,6 +63,13 @@ public abstract class AbstractContextFactory implements VFSContextFactory
       return url;
    }
 
+   /**
+    * Check if URI param is already VFS URI.
+    *
+    * @param uri the uri
+    * @return stripped uri
+    * @throws URISyntaxException for any error
+    */
    protected static URI fromVFS(URI uri) throws URISyntaxException
    {
       String scheme = uri.getScheme();
