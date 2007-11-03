@@ -74,7 +74,7 @@ public class JARCacheUnitTestCase extends BaseTestCase
       }
       
       // If we don't delete, VFS will give ZIP errors (related issue?)
-      assertTrue(testFile.delete());
+      assertTrue("test file deleted: " + testFile, testFile.delete());
       
       // Create a new test.jar with manifest v2
       {

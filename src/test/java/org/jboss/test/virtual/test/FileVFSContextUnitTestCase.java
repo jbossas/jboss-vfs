@@ -52,4 +52,15 @@ public class FileVFSContextUnitTestCase extends AbstractVFSContextTest
       URL url = getResource("/vfs/context/file/" + name + "/");
       return new FileSystemContext(url);
    }
+
+   protected VFSContext getParentVFSContext() throws Exception
+   {
+      URL url = getResource("/vfs/context/file/");
+      return new FileSystemContext(url);
+   }
+
+   protected String getSuffix()
+   {
+      return "";
+   }
 }

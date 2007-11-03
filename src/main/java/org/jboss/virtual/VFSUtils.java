@@ -21,20 +21,26 @@
 */
 package org.jboss.virtual;
 
-import org.jboss.logging.Logger;
-import org.jboss.util.StringPropertyReplacer;
-import org.jboss.virtual.spi.LinkInfo;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import org.jboss.logging.Logger;
+import org.jboss.util.StringPropertyReplacer;
+import org.jboss.virtual.spi.LinkInfo;
 
 /**
  * VFS Utilities
@@ -358,7 +364,6 @@ public class VFSUtils
       String urispec = url.toExternalForm();
       // Escape any spaces
       urispec = urispec.replaceAll(" ", "%20");
-      URI uri = new URI(urispec);
-      return uri;
+      return new URI(urispec);
    }
 }

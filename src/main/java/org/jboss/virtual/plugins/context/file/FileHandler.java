@@ -151,11 +151,10 @@ public class FileHandler extends AbstractURLHandler
          if( file.canRead() == true )
             tmpFiles.add(file);
       }
-      files = new File[tmpFiles.size()];
-      tmpFiles.toArray(files);
-      if (files.length == 0)
+      if (tmpFiles.isEmpty())
          return Collections.emptyList();
 
+      files = tmpFiles.toArray(new File[tmpFiles.size()]);
       FileSystemContext context = getVFSContext();
       
       List<VirtualFileHandler> result = new ArrayList<VirtualFileHandler>();

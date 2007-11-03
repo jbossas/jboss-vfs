@@ -48,6 +48,10 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    
    protected abstract VFSContext getVFSContext(String name) throws Exception;
 
+   protected abstract VFSContext getParentVFSContext() throws Exception;
+
+   protected abstract String getSuffix();
+
    /* TODO URI testing
    public void testRootURI() throws Exception
    {
@@ -60,8 +64,10 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       URI rootURI = context.getRootURI();
       VFS vfs = context.getVFS();
       VirtualFile rootFile = vfs.getRoot();
-      
-      assertEquals(new URI("vfs" + rootURI), rootFile.toURI());
+
+      URI uri = new URI("vfs" + rootURI);
+      URI rfUri = rootFile.toURI();
+      assertEquals(uri, rfUri);
    }
    
    public void testGetRoot() throws Exception
@@ -191,6 +197,26 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       {
          checkThrowable(IllegalArgumentException.class, t);
       }
+   }
+
+   public void testSimpleReversePath() throws Exception
+   {
+      checkReversePath("simple" + getSuffix() + "/../complex" + getSuffix() + "/subfolder/subsubfolder/../subchild", "subchild");
+   }
+
+   public void testComplexReversePath() throws Exception
+   {
+      checkReversePath("complex" + getSuffix() + "/../simple" + getSuffix() + "/child", "child");
+   }
+
+   public void checkReversePath(String path, String fileName) throws Exception
+   {
+      VFSContext context = getParentVFSContext();
+      VirtualFileHandler root = context.getRoot();
+      VirtualFileHandler child = context.findChild(root, path);
+      assertNotNull(child);
+      assertTrue(child.isLeaf());
+      assertEquals(fileName, child.getName());
    }
 
    public void testVisit() throws Exception

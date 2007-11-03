@@ -27,8 +27,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.jboss.virtual.plugins.context.AbstractContextFactory;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
 
 /**
  * A jar context factory
@@ -37,21 +37,18 @@ import org.jboss.virtual.spi.VFSContextFactory;
  * @author adrian@jboss.org
  * @version $Revision: 44217 $
  */
-public class JarContextFactory implements VFSContextFactory
+public class JarContextFactory extends AbstractContextFactory
 {
-   /** The protocols supported */
-   private static final String[] PROTOCOLS = { "jar" };
-
-   public String[] getProtocols()
+   public JarContextFactory()
    {
-      return PROTOCOLS;
+      super("jar", "vfsjar");
    }
 
    public VFSContext getVFS(URL root) throws IOException
    {
       try
       {
-         return new JarContext(root);
+         return new JarContext(fromVFS(root));
       }
       catch(URISyntaxException e)
       {
@@ -60,17 +57,9 @@ public class JarContextFactory implements VFSContextFactory
          throw ex;
       }
    }
+
    public VFSContext getVFS(URI root) throws IOException
    {
-      try
-      {
-         return new JarContext(root.toURL());
-      }
-      catch(URISyntaxException e)
-      {
-         MalformedURLException ex = new MalformedURLException("non-URI compliant URL");
-         ex.initCause(e);
-         throw ex;
-      }
+      return getVFS(root.toURL());
    }
 }

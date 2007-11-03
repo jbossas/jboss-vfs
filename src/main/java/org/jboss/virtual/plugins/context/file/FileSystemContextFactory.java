@@ -21,14 +21,14 @@
  */
 package org.jboss.virtual.plugins.context.file;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.io.IOException;
 
+import org.jboss.virtual.plugins.context.AbstractContextFactory;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
 
 /**
  * A file system context factory
@@ -37,21 +37,18 @@ import org.jboss.virtual.spi.VFSContextFactory;
  * @author adrian@jboss.org
  * @version $Revision: 44217 $
  */
-public class FileSystemContextFactory implements VFSContextFactory
+public class FileSystemContextFactory extends AbstractContextFactory
 {
-   /** The protocols supported */
-   private static final String[] PROTOCOLS = { "file" };
-
-   public String[] getProtocols()
+   public FileSystemContextFactory()
    {
-      return PROTOCOLS;
+      super("file", "vfsfile");
    }
 
    public VFSContext getVFS(URL root) throws IOException
    {
       try
       {
-         return new FileSystemContext(root);
+         return new FileSystemContext(fromVFS(root));
       }
       catch(URISyntaxException e)
       {
@@ -60,8 +57,18 @@ public class FileSystemContextFactory implements VFSContextFactory
          throw ex;
       }
    }
+
    public VFSContext getVFS(URI root) throws IOException
    {
-      return new FileSystemContext(root);
+      try
+      {
+         return new FileSystemContext(fromVFS(root));
+      }
+      catch(URISyntaxException e)
+      {
+         MalformedURLException ex = new MalformedURLException("non-URI compliant URI");
+         ex.initCause(e);
+         throw ex;
+      }
    }
 }

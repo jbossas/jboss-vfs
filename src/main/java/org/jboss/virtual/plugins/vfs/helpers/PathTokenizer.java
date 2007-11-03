@@ -31,6 +31,9 @@ import java.util.StringTokenizer;
  */
 public class PathTokenizer
 {
+   /** The reverse path const */
+   private static final String REVERSE_PATH = "..";
+
    /**
     * Utility class
     */
@@ -63,8 +66,8 @@ public class PathTokenizer
 
          if (token.equals(""))
             throw new IllegalArgumentException("A path element is empty: " + path);
-         if (token.equals(".") || token.equals(".."))
-            throw new IllegalArgumentException("Reverse paths are not allowed (containing a . or ..), use getParent(): " + path);
+         if (token.equals("."))
+            throw new IllegalArgumentException("Single . in path is not allowed: " + path);
 
          tokens[i++] = token;
       }
@@ -97,5 +100,16 @@ public class PathTokenizer
       }
       buffer.append(tokens[tokens.length-1]);
       return buffer.toString();
+   }
+
+   /**
+    * Is reverse token.
+    *
+    * @param token the token to check
+    * @return true if token matches reverse path token 
+    */
+   public static boolean isReverseToken(String token)
+   {
+      return REVERSE_PATH.equals(token);
    }
 }

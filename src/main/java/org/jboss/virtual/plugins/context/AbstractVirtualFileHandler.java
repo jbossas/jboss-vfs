@@ -274,7 +274,16 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       {
          if (current.isLeaf())
             throw new IOException("File cannot have children: " + current);
-         if (current instanceof StructuredVirtualFileHandler)
+
+         if (PathTokenizer.isReverseToken(tokens[i]))
+         {
+            VirtualFileHandler parent = current.getParent();
+            if (parent == null)
+               throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
+            else
+               current = parent;
+         }
+         else if (current instanceof StructuredVirtualFileHandler)
          {
             StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
             current = structured.createChildHandler(tokens[i]);
