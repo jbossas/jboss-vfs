@@ -209,7 +209,30 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       checkReversePath("complex" + getSuffix() + "/../simple" + getSuffix() + "/child", "child");
    }
 
-   public void checkReversePath(String path, String fileName) throws Exception
+   public void testDirectOverTheTop() throws Exception
+   {
+      checkOverTheTop("..");
+   }
+
+   public void testMiddleOverTheTop() throws Exception
+   {
+      checkOverTheTop("complex" + getSuffix() + "/subfolder/../../../complex" + getSuffix() + "/subfolder");
+   }
+
+   protected void checkOverTheTop(String path) throws Exception
+   {
+      try
+      {
+         checkReversePath(path, null);
+         fail("Should not be here.");
+      }
+      catch(Exception e)
+      {
+         assertInstanceOf(e, IOException.class);
+      }
+   }
+
+   protected void checkReversePath(String path, String fileName) throws Exception
    {
       VFSContext context = getParentVFSContext();
       VirtualFileHandler root = context.getRoot();
