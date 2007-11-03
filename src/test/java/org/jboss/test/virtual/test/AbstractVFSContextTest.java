@@ -228,7 +228,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       }
       catch(Exception e)
       {
-         assertInstanceOf(e, IOException.class);
+         checkThrowable(IOException.class, e);
       }
    }
 
