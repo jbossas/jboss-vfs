@@ -60,8 +60,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    private static final ObjectStreamField[] serialPersistentFields = {
       new ObjectStreamField("rootURI", URI.class),
       new ObjectStreamField("parent", VirtualFileHandler.class),
-           new ObjectStreamField("name", String.class),
-           new ObjectStreamField("vfsUrl", URL.class)
+      new ObjectStreamField("name", String.class),
+      new ObjectStreamField("vfsUrl", URL.class)
    };
 
    /** The VFS context
@@ -82,11 +82,13 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /** The vfsPath */
    private transient String vfsPath;
 
+   /** The vfs URL */
    protected URL vfsUrl;
 
    /** The reference count */
    private transient AtomicInteger references = new AtomicInteger(0);
 
+   /** The cached last modified */
    protected transient long cachedLastModified;
 
    /**
@@ -396,6 +398,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       fields.put("vfsUrl", vfsUrl);
       out.writeFields();
    }
+
    private void readObject(ObjectInputStream in)
       throws IOException, ClassNotFoundException
    {

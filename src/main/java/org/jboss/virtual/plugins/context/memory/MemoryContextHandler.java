@@ -58,13 +58,13 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    public MemoryContextHandler(VFSContext context, VirtualFileHandler parent, URL url, String name)
    {
       super(context, parent, url, name);
-      if (parent != null)
+      if (parent != null && parent instanceof MemoryContextHandler)
       {
          ((MemoryContextHandler)parent).addChild(name, this);
       }
    }
 
-   private void addChild(String name, MemoryContextHandler child)
+   protected void addChild(String name, MemoryContextHandler child)
    {
       if (entryChildren == Collections.EMPTY_LIST)
       {
@@ -112,7 +112,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       VirtualFileHandler child = entryMap.get(name);
-      if( child == null )
+      if(child == null)
          throw new FileNotFoundException(this+" has no child: "+name);
       return child;
    }
@@ -173,20 +173,20 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    @Override
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
-      if (super.vfsUrl == null)
+      if (vfsUrl == null)
       {
          if (isLeaf())
          {
-            super.vfsUrl = getURL();
+            vfsUrl = getURL();
          }
          else
          {
             String vfsString = getURL().toString(); 
-            if (!vfsString.endsWith("/"));
-            super.vfsUrl = new URL(vfsString + "/");
+            if (vfsString.endsWith("/") == false)
+               vfsUrl = new URL(vfsString + "/");
          }
       }
-      return super.vfsUrl;
+      return vfsUrl;
    }
    
 }
