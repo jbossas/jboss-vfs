@@ -94,9 +94,9 @@ public class PathTokenizer
       {
          String token = tokenizer.nextToken();
 
-         if (token.equals(""))
+         if ("".equals(token))
             throw new IllegalArgumentException("A path element is empty: " + path);
-         if (token.equals("."))
+         if (".".equals(token))
             throw new IllegalArgumentException("Single . in path is not allowed: " + path);
 
          tokens[i++] = token;
