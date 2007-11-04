@@ -30,7 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,9 +50,9 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
 {
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
-
-   private transient List<VirtualFileHandler> entryChildren = Collections.emptyList();
-   private transient Map<String, MemoryContextHandler> entryMap = Collections.emptyMap();
+   /** The entries */
+   private Map<String, MemoryContextHandler> entryMap = Collections.emptyMap();
+   /** The content */
    private byte[] contents;
 
    public MemoryContextHandler(VFSContext context, VirtualFileHandler parent, URL url, String name)
@@ -66,24 +66,16 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
 
    protected void addChild(String name, MemoryContextHandler child)
    {
-      if (entryChildren == Collections.EMPTY_LIST)
-      {
-         entryChildren = new ArrayList<VirtualFileHandler>();
-      }
       if (entryMap == Collections.EMPTY_MAP)
       {
-         entryMap = new HashMap<String, MemoryContextHandler>();
+         entryMap = new LinkedHashMap<String, MemoryContextHandler>();
       }
-      entryChildren.add(child);
       entryMap.put(name, child);
    }
    
    boolean deleteChild(MemoryContextHandler child)
    {
-      boolean removedA = entryMap.remove(child.getName()) != null;
-      boolean removedB = entryChildren.remove(child);
-      
-      return removedA && removedB;
+      return entryMap.remove(child.getName()) != null;
    }
    
    public VirtualFileHandler findChild(String path) throws IOException
@@ -98,7 +90,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      return entryChildren;
+      return new ArrayList<VirtualFileHandler>(entryMap.values());
    }
 
    public boolean isLeaf()
@@ -130,7 +122,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
 
    public void setContents(byte[] contents)
    {
-      if (entryChildren.size() > 0)
+      if (entryMap.size() > 0)
       {
          throw new RuntimeException("Cannot set contents for non-leaf node");
       }
@@ -188,5 +180,4 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       }
       return vfsUrl;
    }
-   
 }
