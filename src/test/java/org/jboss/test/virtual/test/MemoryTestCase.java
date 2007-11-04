@@ -28,22 +28,61 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
+import org.jboss.virtual.plugins.context.memory.MemoryContextHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
-
-import junit.framework.TestCase;
+import org.jboss.virtual.spi.VirtualFileHandler;
+import junit.framework.Test;
 
 /**
  * 
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
-public class MemoryTestCase extends TestCase
+public class MemoryTestCase extends BaseTestCase
 {
+   public MemoryTestCase(String name)
+   {
+      super(name);
+   }
+
+   public static Test suite()
+   {
+      return suite(MemoryTestCase.class);
+   }
+
+   public void testSerializable() throws Exception
+   {
+      URI uri = new URI("vfsmemory://aopdomain");
+      URL root = new URL("vfsmemory://aopdomain");
+      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(uri);
+      VFSContext ctx = factory.getVFS(uri);
+      MemoryContextHandler parent = new MemoryContextHandler(ctx, null, root, "aopdomain");
+
+      URI uri2 = new URI("vfsmemory://aopdomain/child");
+      URL root2 = new URL("vfsmemory://aopdomain/child");
+      VFSContextFactory factory2 = VFSContextFactoryLocator.getFactory(uri2);
+      VFSContext ctx2 = factory2.getVFS(uri);
+      MemoryContextHandler child = new MemoryContextHandler(ctx2, parent, root2, "child");
+
+      serializeDeserialize(child, MemoryContextHandler.class);
+
+      byte[] bytes = serialize(parent);
+      Object deserializedObject = deserialize(bytes);
+      assertInstanceOf(deserializedObject, MemoryContextHandler.class);
+      MemoryContextHandler desParent = (MemoryContextHandler)deserializedObject;
+
+      List<VirtualFileHandler> list = desParent.getChildren(true);
+      assertNotNull(list);
+      assertFalse(list.isEmpty());
+      assertNotNull(desParent.findChild("child"));
+   }
+
    public void testContextFactory()throws Exception
    {
       URI uri = new URI("vfsmemory://aopdomain");
