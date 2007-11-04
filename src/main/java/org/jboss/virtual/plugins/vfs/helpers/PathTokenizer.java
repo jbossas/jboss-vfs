@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import java.util.StringTokenizer;
+import java.io.IOException;
 
 /**
  * PathTokenizer.
@@ -40,7 +41,36 @@ public class PathTokenizer
    private PathTokenizer()
    {
    }
-   
+
+   /**
+    * Get the remaining path from some tokens
+    *
+    * @param tokens the tokens
+    * @param i the current location
+    * @param end the end index
+    * @return the remaining path
+    * @throws IllegalArgumentException for null tokens or i is out of range
+    */
+   protected static String getRemainingPath(String[] tokens, int i, int end)
+   {
+      if (tokens == null)
+         throw new IllegalArgumentException("Null tokens");
+      if (i < 0 || i >= end)
+         throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (end-1));
+
+      if (i == end-1)
+         return tokens[end-1];
+
+      StringBuilder buffer = new StringBuilder();
+      for (; i < end-1; ++i)
+      {
+         buffer.append(tokens[i]);
+         buffer.append("/");
+      }
+      buffer.append(tokens[end-1]);
+      return buffer.toString();
+   }
+
    /**
     * Get the tokens
     * 
@@ -86,20 +116,35 @@ public class PathTokenizer
    {
       if (tokens == null)
          throw new IllegalArgumentException("Null tokens");
-      if (i < 0 || i >= tokens.length)
-         throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (tokens.length-1));
-      
-      if (i == tokens.length-1)
-         return tokens[tokens.length-1];
-      
-      StringBuilder buffer = new StringBuilder();
-      for (; i < tokens.length-1; ++i)
+
+      return getRemainingPath(tokens, i, tokens.length);
+   }
+
+   /**
+    * Apply any .. paths in the path param.
+    *
+    * @param path the path
+    * @return simple path, containing no .. paths
+    * @throws IOException if reverse path goes over the top path
+    */
+   public static String applyReversePaths(String path) throws IOException
+   {
+      String[] tokens = getTokens(path);
+      if (tokens == null)
+         return null;
+
+      int i = 0;
+      for(int j = 0; j < tokens.length; j++)
       {
-         buffer.append(tokens[i]);
-         buffer.append("/");
+         if (isReverseToken(tokens[j]))
+            i--;
+         else
+            tokens[i++] = tokens[j];
+
+         if (i < 0)
+            throw new IOException("Using reverse path on top path: " + path);
       }
-      buffer.append(tokens[tokens.length-1]);
-      return buffer.toString();
+      return getRemainingPath(tokens, 0, i);
    }
 
    /**

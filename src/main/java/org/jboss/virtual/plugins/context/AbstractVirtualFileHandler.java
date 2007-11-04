@@ -315,10 +315,12 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       if (path.length() == 0)
          return this;
 
+      // check for reverse .. path
+      String appliedPath = PathTokenizer.applyReversePaths(path);
       List<VirtualFileHandler> children = getChildren(false);
       for (VirtualFileHandler child : children)
       {
-         if (child.getName().equals(path))
+         if (child.getName().equals(appliedPath))
             return child;
       }
       throw new IOException("Child not found " + path + " for " + this);

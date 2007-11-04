@@ -1223,6 +1223,36 @@ public class VirtualFileUnitTestCase extends AbstractMockVFSTest
       assertFindChild(root, "folder3/child3", child3);
    }
 
+   public void testFindSimpleReverse() throws Exception
+   {
+      MockVFSContext context = registerSimpleVFSContextWithChildrenAndNonLeafs();
+      VirtualFile child1 = getChildHandler(context, "folder1/child1").getVirtualFile();
+      VirtualFile child2 = getChildHandler(context, "folder2/child2").getVirtualFile();
+      VirtualFile child3 = getChildHandler(context, "folder3/child3").getVirtualFile();
+
+      VirtualFile root = VFS.getRoot(context.getRootURI());
+
+      assertFindChild(root, "", root);
+      assertFindChild(root, "folder2/../folder1/child1", child1);
+      assertFindChild(root, "folder3/child1/../../folder2/child2", child2);
+      try
+      {
+         assertFindChild(root, "../folder3/child3", child3);
+      }
+      catch (Exception e)
+      {
+         checkThrowable(IOException.class, e);
+      }
+      try
+      {
+         assertFindChild(root, "folder2/../../folder3/child3", child3);
+      }
+      catch (Exception e)
+      {
+         checkThrowable(IOException.class, e);
+      }
+   }
+
    public void testFindChildSubChildren() throws Exception
    {
       MockVFSContext context = registerStructuredVFSContextWithSubChildren();
