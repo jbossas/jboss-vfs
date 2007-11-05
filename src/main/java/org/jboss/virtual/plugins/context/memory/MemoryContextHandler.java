@@ -64,7 +64,7 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       }
    }
 
-   protected void addChild(String name, MemoryContextHandler child)
+   protected synchronized void addChild(String name, MemoryContextHandler child)
    {
       if (entryMap == Collections.EMPTY_MAP)
       {
