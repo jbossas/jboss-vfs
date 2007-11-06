@@ -53,7 +53,7 @@ public class JARCacheUnitTestCase extends BaseTestCase
    public void test1() throws Exception
    {
       // Create a test.jar with v1 in manifest
-      File testFile = File.createTempFile("test", ".jar");
+      File testFile = new File("test.jar");
       {
          Manifest manifest = new Manifest();
          manifest.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1");
