@@ -13,8 +13,9 @@
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/tags/</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/</developerConnection>   
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/trunk/</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/trunk/</developerConnection>
+    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/vfs/trunk/</url>
   </scm>
   <licenses>
     <license>
@@ -66,6 +67,13 @@
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>
       </plugin>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-release-plugin</artifactId>
+         <configuration>
+           <tagBase>https://svn.jboss.org/repos/jbossas/projects/vfs/tags</tagBase>
+         </configuration>
+       </plugin>
     </plugins>
   </build>
 
