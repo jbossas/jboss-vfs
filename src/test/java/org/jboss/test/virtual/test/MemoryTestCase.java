@@ -286,17 +286,19 @@ public class MemoryTestCase extends BaseTestCase
       }
    }
    
-   protected void setUp()
+   protected void setUp() throws Exception
    {
+      super.setUp();
       VFS.init();
-      System.out.println("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
+      getLog().info("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
    }
+
    private String readURL(URL url) throws IOException
    {
       InputStream is = url.openStream();
-      String s = readIS(is);
-      return s;
+      return readIS(is);
    }
+
    private String readIS(InputStream is)
       throws IOException
    {
