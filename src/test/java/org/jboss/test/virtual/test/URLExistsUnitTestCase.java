@@ -23,12 +23,14 @@ package org.jboss.test.virtual.test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import junit.framework.TestCase;
+import org.jboss.test.BaseTestCase;
 
 /**
  * Basic tests of URL existence based on URLConnection.getLastModified
@@ -36,8 +38,13 @@ import junit.framework.TestCase;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
-public class URLExistsUnitTestCase extends TestCase
+public class URLExistsUnitTestCase extends BaseTestCase
 {
+   public URLExistsUnitTestCase(String name)
+   {
+      super(name);
+   }
+
    /**
     * Test file deletion can be detected via URLConnection.getLastModified == 0.
     * @throws Exception
@@ -48,9 +55,18 @@ public class URLExistsUnitTestCase extends TestCase
       File tmp = File.createTempFile("testFileURLs", null);
       URL tmpURL = tmp.toURL();
       URLConnection conn = tmpURL.openConnection();
-      long lastModified = conn.getLastModified();
-      System.out.println("lastModified, "+lastModified);
-      assertNotSame("lastModified", 0, lastModified);
+      InputStream in = conn.getInputStream();
+      long lastModified;
+      try
+      {
+         lastModified = conn.getLastModified();
+         System.out.println("lastModified, "+lastModified);
+         assertNotSame("lastModified", 0, lastModified);
+      }
+      finally
+      {
+         in.close();
+      }
       assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete());
       conn = tmpURL.openConnection();
       lastModified = conn.getLastModified();

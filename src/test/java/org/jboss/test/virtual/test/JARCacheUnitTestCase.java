@@ -24,6 +24,7 @@ package org.jboss.test.virtual.test;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -40,7 +41,7 @@ import org.jboss.virtual.VirtualFile;
  * Test the caching strategy of VFS with jar files.
  *
  * @author <a href="mailto:carlo.dewolf@jboss.com">Carlo de Wolf</a>
- * @version $Revision: $
+ * @version $Revision$
  */
 public class JARCacheUnitTestCase extends BaseTestCase
 {
@@ -52,7 +53,7 @@ public class JARCacheUnitTestCase extends BaseTestCase
    public void test1() throws Exception
    {
       // Create a test.jar with v1 in manifest
-      File testFile = new File("test.jar");
+      File testFile = File.createTempFile("test", ".jar");
       {
          Manifest manifest = new Manifest();
          manifest.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1");
