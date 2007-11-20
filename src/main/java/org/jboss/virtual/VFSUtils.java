@@ -132,8 +132,9 @@ public class VFSUtils
       }
       catch(URISyntaxException e)
       {
-         IOException ioe = new IOException("Failed to get parent URL");
+         IOException ioe = new IOException("Failed to get parent URL for " + file);
          ioe.initCause(e);
+         throw ioe;
       }
 
       StringTokenizer tokenizer = new StringTokenizer(classPath);
