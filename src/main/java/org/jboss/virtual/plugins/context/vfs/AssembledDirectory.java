@@ -63,6 +63,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public void addClass(Class clazz)
    {
+      if (clazz == null)
+         throw new IllegalArgumentException("Null clazz");
       addClass(clazz.getName(), clazz.getClassLoader());
    }
 
@@ -92,6 +94,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public void addClass(String className, ClassLoader loader)
    {
+      if (className == null)
+         throw new IllegalArgumentException("Null className");
+      if (loader == null)
+         throw new IllegalArgumentException("Null loader");
       String resource = className.replace('.', '/') + ".class";
       URL url = loader.getResource(resource);
       if (url == null) throw new RuntimeException("Could not find resource: " + resource);
@@ -107,6 +113,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public AssembledDirectory mkdirs(String path)
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
       String[] pkgs = path.split("/");
       AssembledDirectoryHandler dir = directory;
       for (int i = 0; i < pkgs.length - 1; i++)
@@ -146,8 +154,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public void addResources(Class baseResource, String[] includes, String[] excludes)
    {
+      if (baseResource == null)
+         throw new IllegalArgumentException("Null base resource");
       String resource = baseResource.getName().replace('.', '/') + ".class";
-      addResources(resource, includes, excludes);
+      addResources(resource, includes, excludes, baseResource.getClassLoader());
    }
 
    /**
@@ -166,6 +176,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public void addResources(String baseResource, final String[] includes, final String[] excludes)
    {
+      if (baseResource == null)
+         throw new IllegalArgumentException("Null base resource");
       addResources(baseResource, includes, excludes, Thread.currentThread().getContextClassLoader());   
    }
 
@@ -186,6 +198,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public void addResources(String baseResource, final String[] includes, final String[] excludes, ClassLoader loader)
    {
+      if (baseResource == null)
+         throw new IllegalArgumentException("Null baseResource");
+      if (loader == null)
+         throw new IllegalArgumentException("Null loader");
       URL url = loader.getResource(baseResource);
       if (url == null) throw new RuntimeException("Could not find baseResource: " + baseResource);
       String urlString = url.toString();
@@ -251,6 +267,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public static Pattern getPattern(String matcher)
    {
+      if (matcher == null)
+         throw new IllegalArgumentException("Null matcher");
       matcher = matcher.replace(".", "\\.");
       matcher = matcher.replace("*", ".*");
       matcher = matcher.replace("?", ".{1}");
@@ -267,6 +285,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public static boolean antMatch(String path, String expression)
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+      if (expression == null)
+         throw new IllegalArgumentException("Null expression");
       if (path.startsWith("/")) path = path.substring(1);
       if (expression.endsWith("/")) expression += "**";
       String[] paths = path.split("/");
@@ -312,6 +334,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addChild(VirtualFile vf)
    {
+      if (vf == null)
+         throw new IllegalArgumentException("Null virtual file");
       return directory.addChild(vf.getHandler()).getVirtualFile();
    }
 
@@ -374,6 +398,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addResource(String resource, ClassLoader loader)
    {
+      if (resource == null)
+         throw new IllegalArgumentException("Null resource");
+      if (loader == null)
+         throw new IllegalArgumentException("Null loader");
       URL url = loader.getResource(resource);
       if (url == null) throw new RuntimeException("Could not find resource: " + resource);
 
@@ -387,6 +415,9 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addResource(URL url)
    {
+      if (url == null)
+         throw new IllegalArgumentException("Null url");
+   
       try
       {
          VirtualFile vf = VFS.getRoot(url);
@@ -410,6 +441,13 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addResource(String resource, ClassLoader loader, String newName)
    {
+      if (resource == null)
+         throw new IllegalArgumentException("Null resource");
+      if (loader == null)
+         throw new IllegalArgumentException("Null loader");
+      if (newName == null)
+         throw new IllegalArgumentException("Null newName");
+
       URL url = loader.getResource(resource);
       if (url == null) throw new RuntimeException("Could not find resource: " + resource);
       try
@@ -433,6 +471,10 @@ public class AssembledDirectory extends VirtualFile
     */
    public VirtualFile addBytes(byte[] bytes, String name)
    {
+      if (bytes == null)
+         throw new IllegalArgumentException("Null bytes");
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
       ByteArrayHandler handler = null;
       try
       {
@@ -454,6 +496,8 @@ public class AssembledDirectory extends VirtualFile
     */
    public AssembledDirectory mkdir(String name)
    {
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
       AssembledDirectoryHandler handler = null;
       try
       {
