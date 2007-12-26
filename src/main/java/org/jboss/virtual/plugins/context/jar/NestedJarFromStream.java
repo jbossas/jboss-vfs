@@ -48,25 +48,26 @@ public class NestedJarFromStream extends AbstractJarHandler
    /**
     * Create a nested jar from the parent zip inputstream/zip entry.
     *
-    * @param context - the context containing the jar
-    * @param parent  - the jar handler for this nested jar
-    * @param zis     - the jar zip input stream
-    * @param jarURL  - the URL to use as the jar URL
-    * @param jar     - the parent jar file for the nested jar
-    * @param entry   - the parent jar ZipEntry for the nested jar
+    * @param context   - the context containing the jar
+    * @param parent    - the jar handler for this nested jar
+    * @param zis       - the jar zip input stream
+    * @param jarURL    - the URL to use as the jar URL
+    * @param jar       - the parent jar file for the nested jar
+    * @param entry     - the zip entry
+    * @param entryName - the entry name
     * @throws IOException for any error
     */
-   public NestedJarFromStream(VFSContext context, VirtualFileHandler parent, ZipInputStream zis, URL jarURL, JarFile jar, ZipEntry entry) throws IOException
+   public NestedJarFromStream(VFSContext context, VirtualFileHandler parent, ZipInputStream zis, URL jarURL, JarFile jar, ZipEntry entry, String entryName) throws IOException
    {
-      super(context, parent, jarURL, jar, entry, entry.getName());
+      super(context, parent, jarURL, jar, entry, entryName);
       this.jarURL = jarURL;
       this.lastModified = entry.getTime();
       this.size = entry.getSize();
       this.zis = zis;
       try
       {
-         setPathName(getChildPathName(getName(), false));
-         setVfsUrl(getChildVfsUrl(getName(), false));
+         setPathName(getChildPathName(entryName, false));
+         setVfsUrl(getChildVfsUrl(entryName, false));
       }
       catch (Exception e)
       {

@@ -85,7 +85,7 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
          {
             zis = new ZipInputStream(is);
          }
-         njar = new NestedJarFromStream(context, parent, zis, url, parentJar, entry);
+         njar = new NestedJarFromStream(context, parent, zis, url, parentJar, entry, entryName);
       }
       catch (IOException original)
       {

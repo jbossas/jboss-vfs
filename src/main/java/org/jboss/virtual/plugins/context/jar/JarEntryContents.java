@@ -60,18 +60,17 @@ public class JarEntryContents extends AbstractJarHandler
            throws IOException
    {
       super(context, parent, jarURL, null, entry, entry.getName());
-      String entryName = entry.getName();
       try
       {
-         setPathName(getChildPathName(entryName, false));
-         setVfsUrl(getChildVfsUrl(entryName, false));
+         setPathName(getChildPathName(getName(), false));
+         setVfsUrl(getChildVfsUrl(getName(), false));
       }
       catch (Exception e)
       {
          throw new RuntimeException(e);
       }
       this.entryURL = entryURL;
-      this.isJar = JarUtils.isArchive(entryName);
+      this.isJar = JarUtils.isArchive(getName());
       int size = (int) entry.getSize();
       if (size <= 0)
          return;
@@ -215,7 +214,7 @@ public class JarEntryContents extends AbstractJarHandler
       {
          ByteArrayInputStream bais = new ByteArrayInputStream(contents);
          ZipInputStream zis = new ZipInputStream(bais);
-         njar = new NestedJarFromStream(getVFSContext(), this, zis, entryURL, null, getEntry());
+         njar = new NestedJarFromStream(getVFSContext(), this, zis, entryURL, null, getEntry(), getName());
       }
    }
 }

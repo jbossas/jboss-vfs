@@ -129,7 +129,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
       VFSContext parent1 = pf1.getVFS(jar1URL);
 
       ZipInputStream jis1 = new ZipInputStream(jf.getInputStream(jar1));
-      NestedJarFromStream njfs = new NestedJarFromStream(context, parent1.getRoot(), jis1, jar1URL, jf, jar1);
+      NestedJarFromStream njfs = new NestedJarFromStream(context, parent1.getRoot(), jis1, jar1URL, jf, jar1, "jar1.jar");
       JarEntryContents e1 = njfs.getEntry("org/jboss/test/vfs/support/jar1/ClassInJar1.class");
       assertNotNull(e1);
       log.info("org/jboss/test/vfs/support/CommonClass.class: "+e1);
@@ -149,7 +149,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
       VFSContext parent2 = pf2.getVFS(jar2URL);
 
       ZipInputStream jis2 = new ZipInputStream(jf.getInputStream(jar2));
-      NestedJarFromStream njfs2 = new NestedJarFromStream(context, parent2.getRoot(), jis2, jar2URL, jf, jar2);
+      NestedJarFromStream njfs2 = new NestedJarFromStream(context, parent2.getRoot(), jis2, jar2URL, jf, jar2, "jar2.jar");
       JarEntryContents e2 = njfs2.getEntry("org/jboss/test/vfs/support/jar2/ClassInJar2.class");
       assertNotNull(e2);
       log.info("org/jboss/test/vfs/support/CommonClass.class: "+e2);
