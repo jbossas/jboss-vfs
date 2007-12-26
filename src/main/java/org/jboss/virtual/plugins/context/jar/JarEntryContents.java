@@ -72,18 +72,20 @@ public class JarEntryContents extends AbstractJarHandler
       this.entryURL = entryURL;
       this.isJar = JarUtils.isArchive(getName());
       int size = (int) entry.getSize();
-      if (size <= 0)
-         return;
-
-      ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-      byte[] tmp = new byte[1024];
-      while (zis.available() > 0)
+      if (size > 0)
       {
-         int length = zis.read(tmp);
-         if (length > 0)
-            baos.write(tmp, 0, length);
+         ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
+         byte[] tmp = new byte[1024];
+         while (zis.available() > 0)
+         {
+            int length = zis.read(tmp);
+            if (length > 0)
+               baos.write(tmp, 0, length);
+         }
+         contents = baos.toByteArray();
       }
-      contents = baos.toByteArray();
+      else
+         contents = new byte[0];
    }
 
    /**
