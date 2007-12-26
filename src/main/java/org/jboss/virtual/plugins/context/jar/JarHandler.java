@@ -37,7 +37,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class JarHandler extends AbstractJarHandler
+public class JarHandler extends AbstractStructuredJarHandler
 {
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
@@ -54,13 +54,12 @@ public class JarHandler extends AbstractJarHandler
     */
    public JarHandler(VFSContext context, VirtualFileHandler parent, URL url, String name) throws IOException
    {
-      super(context, parent, url, name);
-      this.vfsUrl = new URL("vfs" + url.toString());
+      super(context, parent, url, ((JarURLConnection) url.openConnection()).getJarFile(), null, name);
+      setVfsUrl(new URL("vfs" + url.toString()));
 
       try
       {
-         JarURLConnection connection =  (JarURLConnection) url.openConnection();
-         initJarFile(connection.getJarFile());
+         initJarFile();
       }
       catch (IOException original)
       {
@@ -73,12 +72,12 @@ public class JarHandler extends AbstractJarHandler
 
    public JarHandler(VFSContext context, VirtualFileHandler parent, File file, URL url, String name) throws IOException
    {
-      super(context, parent, url, name);
-      this.vfsUrl = new URL("vfs" + url.toString());
+      super(context, parent, url, new JarFile(file), null, name);
+      setVfsUrl(new URL("vfs" + url.toString()));
 
       try
       {
-         initJarFile(new JarFile(file));
+         initJarFile();
       }
       catch (IOException original)
       {
@@ -88,20 +87,4 @@ public class JarHandler extends AbstractJarHandler
          throw e;
       }
    }
-
-   /**
-    * Restore the jar file from the parent jar and entry name
-    *
-    * @param in
-    * @throws IOException
-    * @throws ClassNotFoundException
-    */
-   private void readObject(ObjectInputStream in)
-      throws IOException, ClassNotFoundException
-   {
-      JarFile parentJar = super.getJar();
-      // Initial the parent jar entries
-      initJarFile(parentJar);
-   }
-
 }

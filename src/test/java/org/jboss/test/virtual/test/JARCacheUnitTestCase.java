@@ -24,7 +24,6 @@ package org.jboss.test.virtual.test;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -32,7 +31,6 @@ import java.util.jar.Manifest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;

@@ -35,7 +35,7 @@ public class AssembledContextFactory
 {
    private ConcurrentHashMap<String, AssembledDirectory> registry = new ConcurrentHashMap<String, AssembledDirectory>();
    private volatile int count;
-   private static  AssembledContextFactory instance = new AssembledContextFactory();
+   private static AssembledContextFactory instance = new AssembledContextFactory();
 
    /**
     * Creates an assembly returning the root AssembledDirectory .
@@ -47,7 +47,8 @@ public class AssembledContextFactory
     */
    public AssembledDirectory create(String name, String rootName)
    {
-      if (registry.containsKey(name)) throw new RuntimeException("Assembled context already exists for name: " + name);
+      if (registry.containsKey(name))
+         throw new RuntimeException("Assembled context already exists for name: " + name);
       try
       {
          AssembledContext context = new AssembledContext(name, rootName);

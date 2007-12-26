@@ -54,13 +54,14 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    {
       super(context, parent, name);
       String path = getPathName();
-      if (!path.endsWith("/")) path += "/";
-      vfsUrl = new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context));
+      if (path.endsWith("/") == false)
+         path += "/";
+      setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
    public VirtualFileHandler addChild(VirtualFileHandler handler)
    {
-      if (!handler.getClass().isAnnotationPresent(Assembled.class))
+      if (handler.getClass().isAnnotationPresent(Assembled.class) == false)
       {
          try
          {
@@ -84,7 +85,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
 
    public URI toURI() throws URISyntaxException
    {
-      return vfsUrl.toURI();
+      return getVfsUrl().toURI();
    }
 
    public long getLastModified() throws IOException
@@ -125,7 +126,8 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       VirtualFileHandler handler = childrenMap.get(name);
-      if (handler == null) throw new IOException("Could not locate child: " + name);
+      if (handler == null)
+         throw new IOException("Could not locate child: " + name);
       return handler;
    }
 
@@ -145,6 +147,6 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    @Override
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
-      return vfsUrl;
+      return getVfsUrl();
    }
 }

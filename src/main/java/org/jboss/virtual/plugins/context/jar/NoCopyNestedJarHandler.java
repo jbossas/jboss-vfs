@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.zip.ZipInputStream;
 
 import org.jboss.virtual.spi.VFSContext;
@@ -43,8 +44,7 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
 
-   /** The jar entry */
-   private transient JarEntry entry;
+   /** The nested jar */
    private NestedJarFromStream njar;
 
    /**
@@ -55,27 +55,27 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
     * @param parentJar the parent jar file
     * @param entry the jar entry
     * @param url the url
+    * @param entryName the entry name
     * @throws IOException for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url or vfsPath
     */
-   public NoCopyNestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, JarEntry entry, URL url) throws IOException
+   public NoCopyNestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, JarEntry entry, URL url, String entryName) throws IOException
    {
-      super(context, parent, url, getEntryName(entry));
-
+      super(context, parent, url, parentJar, entry, entryName);
       
       try
       {
          InputStream is = parentJar.getInputStream(entry);
-         ZipInputStream jis;
+         ZipInputStream zis;
          if( (is instanceof ZipInputStream) )
          {
-            jis = (ZipInputStream) is;
+            zis = (JarInputStream) is;
          }
          else
          {
-            jis = new ZipInputStream(is);
+            zis = new ZipInputStream(is);
          }
-         njar = new NestedJarFromStream(context, parent, jis, url, entry); 
+         njar = new NestedJarFromStream(context, parent, zis, url, parentJar, entry);
       }
       catch (IOException original)
       {
@@ -84,19 +84,10 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
          e.setStackTrace(original.getStackTrace());
          throw e;
       }
-      
-      this.entry = entry;
    }
    
-   /**
-    * Get the entry
-    * 
-    * @return the file
-    */
-   protected JarEntry getEntry()
+   protected void initCacheLastModified()
    {
-      checkClosed();
-      return entry;
    }
 
    @Override
@@ -117,16 +108,13 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       return getJar().getInputStream(getEntry());
    }
 
-   @Override
    public VirtualFileHandler findChild(String path) throws IOException
    {
       return njar.findChild(path);
    }
 
-   @Override
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      return super.getChildren(ignoreErrors);
+      return njar.getChildren(ignoreErrors);
    }
-   
 }

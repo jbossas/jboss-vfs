@@ -25,15 +25,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
-import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
@@ -55,6 +56,7 @@ public abstract class AbstractVFSContext implements VFSContext
    
    /** The root url */
    private final URI rootURI;
+
    /** Options associated with the root URL */
    private Map<String, String> rootOptions;
 
@@ -72,15 +74,15 @@ public abstract class AbstractVFSContext implements VFSContext
       String query = rootURI.getQuery();
       rootOptions = VFSUtils.parseURLQuery(query);
    }
+
    /**
     * Create a new AbstractVFSContext.
     * 
     * @param rootURL the root url
-    * @throws URISyntaxException 
+    * @throws URISyntaxException for illegal URL
     * @throws IllegalArgumentException if rootURI is null
     */
-   protected AbstractVFSContext(URL rootURL)
-      throws URISyntaxException
+   protected AbstractVFSContext(URL rootURL) throws URISyntaxException
    {
       this(rootURL.toURI());
    }
@@ -97,9 +99,14 @@ public abstract class AbstractVFSContext implements VFSContext
       return rootURI;
    }
 
+   protected void addOption(String key, String value)
+   {
+      rootOptions.put(key, value);
+   }
+
    public Map<String, String> getOptions()
    {
-      return rootOptions;
+      return Collections.unmodifiableMap(rootOptions);
    }
 
    public List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException

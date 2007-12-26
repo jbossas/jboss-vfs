@@ -33,7 +33,6 @@ import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Extension of VirtualFile that represents a virtual directory that can be composed of arbitrary files and resources
@@ -46,10 +45,10 @@ public class AssembledDirectory extends VirtualFile
 {
    private AssembledDirectoryHandler directory;
 
-   public AssembledDirectory(VirtualFileHandler handler)
+   public AssembledDirectory(AssembledDirectoryHandler handler)
    {
       super(handler);
-      directory = (AssembledDirectoryHandler) handler;
+      directory = handler;
    }
 
    /**
@@ -59,7 +58,7 @@ public class AssembledDirectory extends VirtualFile
     * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
     * and an entry in the acme directory would be the .class file.
     *
-    * @param clazz
+    * @param clazz the class
     */
    public void addClass(Class clazz)
    {
@@ -134,8 +133,7 @@ public class AssembledDirectory extends VirtualFile
          }
          dir = next;
       }
-      AssembledDirectory p = (AssembledDirectory) dir.getVirtualFile();
-      return p;
+      return (AssembledDirectory) dir.getVirtualFile();
    }
 
    /**
@@ -232,12 +230,14 @@ public class AssembledDirectory extends VirtualFile
                      break;
                   }
                }
-               if (!matched) return false;
+               if (matched == false)
+                  return false;
                if (excludes != null)
                {
                   for (String exclude : excludes)
                   {
-                     if (antMatch(path, exclude)) return false;
+                     if (antMatch(path, exclude))
+                        return false;
                   }
                }
                return true;
@@ -305,7 +305,8 @@ public class AssembledDirectory extends VirtualFile
             {
                x++;
             } while (x < expressions.length && expressions[x].equals("**"));
-            if (x == expressions.length) return true; // "**" with nothing after it
+            if (x == expressions.length)
+               return true; // "**" with nothing after it
             pattern = getPattern(expressions[x]);
          }
          String element = paths[p];
@@ -322,8 +323,10 @@ public class AssembledDirectory extends VirtualFile
             return false;
          }
       }
-      if (p < paths.length) return false;
-      if (x < expressions.length) return false;
+      if (p < paths.length)
+         return false;
+      if (x < expressions.length)
+         return false;
       return true;
    }
 
@@ -403,7 +406,8 @@ public class AssembledDirectory extends VirtualFile
       if (loader == null)
          throw new IllegalArgumentException("Null loader");
       URL url = loader.getResource(resource);
-      if (url == null) throw new RuntimeException("Could not find resource: " + resource);
+      if (url == null)
+         throw new RuntimeException("Could not find resource: " + resource);
 
       return addResource(url);
    }
@@ -449,7 +453,8 @@ public class AssembledDirectory extends VirtualFile
          throw new IllegalArgumentException("Null newName");
 
       URL url = loader.getResource(resource);
-      if (url == null) throw new RuntimeException("Could not find resource: " + resource);
+      if (url == null)
+         throw new RuntimeException("Could not find resource: " + resource);
       try
       {
          VirtualFile vf = VFS.getRoot(url);

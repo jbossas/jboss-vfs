@@ -102,7 +102,8 @@ public class JarContext extends AbstractVFSContext
       {
          entryName = null;
       }
-      if (entryName.trim().equals("")) return null;
+      if (entryName == null || "".equals(entryName.trim()))
+         return null;
       
       return entryName;
    }
@@ -126,5 +127,4 @@ public class JarContext extends AbstractVFSContext
          rootFile.close();
       super.finalize();
    }
-
 }

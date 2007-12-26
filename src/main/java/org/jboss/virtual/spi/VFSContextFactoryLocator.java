@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
@@ -132,7 +133,7 @@ public class VFSContextFactoryLocator
       if (factory == null)
          throw new IllegalArgumentException("Null VFSContextFactory");
 
-      ArrayList<String> protocols = new ArrayList<String>();
+      List<String> protocols = new ArrayList<String>();
       for (Map.Entry<String, VFSContextFactory> entry : factoryByProtocol.entrySet())
       {
          if (factory == entry.getValue())
@@ -262,7 +263,7 @@ public class VFSContextFactoryLocator
     */
    private static VFSContextFactory[] loadFactories(URL serviceURL, ClassLoader loader)
    {
-      ArrayList<VFSContextFactory> temp = new ArrayList<VFSContextFactory>();
+      List<VFSContextFactory> temp = new ArrayList<VFSContextFactory>();
       try
       {
          InputStream is = serviceURL.openStream();
@@ -305,6 +306,7 @@ public class VFSContextFactoryLocator
     * 
     * @param cl the classloader
     * @param className the class name
+    * @param context the context
     * @return the vfs context factory
     */
    private static VFSContextFactory createVFSContextFactory(ClassLoader cl, String className, String context)

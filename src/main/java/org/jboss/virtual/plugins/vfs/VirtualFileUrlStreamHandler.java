@@ -56,10 +56,6 @@ public class VirtualFileUrlStreamHandler extends URLStreamHandler
       {
          throw new RuntimeException(e);
       }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
       String urlString = u.toString();
       int idx = urlString.indexOf(baseRootUrl);
       if (idx == -1)

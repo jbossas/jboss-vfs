@@ -34,71 +34,53 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.jboss.virtual.plugins.context.AbstractURLHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * JarEntryHandler.
- * 
+ *
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class JarEntryHandler extends AbstractURLHandler
-   implements StructuredVirtualFileHandler
+public class JarEntryHandler extends AbstractJarHandler implements StructuredVirtualFileHandler
 {
-   /** serialVersionUID */
+   /**
+    * serialVersionUID
+    */
    private static final long serialVersionUID = 1L;
 
-   /** The jar file */
-   private transient final JarFile jar;
-   
-   /** The jar entry */
-   private transient final JarEntry entry;
-   private transient List<VirtualFileHandler> entryChildren;
+   private List<VirtualFileHandler> entryChildren;
    private transient Map<String, VirtualFileHandler> entryMap;
-   
+
    /**
     * Create a new JarHandler.
-    * 
-    * @param context the context
-    * @param parent the parent
-    * @param jar the jar file
-    * @param entry the entry
+    *
+    * @param context   the context
+    * @param parent    the parent
+    * @param jar       the jar file
+    * @param entry     the entry
     * @param entryName the entry name
-    * @param url the url
-    * @throws IOException for an error accessing the file system
+    * @param url       the url
+    * @throws IOException              for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url, jar or entry
     */
-   public JarEntryHandler(VFSContext context, VirtualFileHandler parent, JarFile jar,
-      JarEntry entry, String entryName, URL url)
-      throws IOException
+   public JarEntryHandler(VFSContext context, VirtualFileHandler parent, JarFile jar, JarEntry entry, String entryName, URL url)
+         throws IOException
    {
-      super(context, parent, url, entryName);
+      super(context, parent, url, jar, entry, entryName);
       try
       {
-         URL parentVfsUrl = parent.toVfsUrl();
-         String vfsParentUrl = parentVfsUrl.toString();
-         String vfsUrlString = null;
-         if (vfsParentUrl.endsWith("/")) vfsUrlString = vfsParentUrl + entryName;
-         else vfsUrlString = vfsParentUrl + "/" + entryName;
-         if (entry.isDirectory()) vfsUrlString += "/";
-         vfsUrl = new URL(vfsUrlString);
+         setVfsUrl(getChildVfsUrl(entryName, entry.isDirectory()));
       }
       catch (URISyntaxException e)
       {
          throw new RuntimeException(e);
       }
-
-      if (jar == null)
-         throw new IllegalArgumentException("Null jar");
-      
-      this.jar = jar;
-      this.entry = entry;
    }
-
 
    @Override
    protected void initCacheLastModified()
@@ -114,26 +96,16 @@ public class JarEntryHandler extends AbstractURLHandler
 
    /**
     * Add a child to an entry
-    * @param child
+    *
+    * @param child the child
     */
    public void addChild(VirtualFileHandler child)
    {
-      if( entryChildren == null )
+      if (entryChildren == null)
          entryChildren = new ArrayList<VirtualFileHandler>();
       entryChildren.add(child);
    }
 
-   /**
-    * Get the entry
-    * 
-    * @return the file
-    */
-   protected JarEntry getEntry()
-   {
-      checkClosed();
-      return entry;
-   }
-   
    @Override
    public long getLastModified()
    {
@@ -160,10 +132,9 @@ public class JarEntryHandler extends AbstractURLHandler
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       checkClosed();
-      List<VirtualFileHandler> children = entryChildren;
-      if( entryChildren == null )
-         children = Collections.emptyList();
-      return children;
+      if (entryChildren == null)
+         return Collections.emptyList();
+      return Collections.unmodifiableList(entryChildren);
    }
 
    public VirtualFileHandler findChild(String path) throws IOException
@@ -174,28 +145,25 @@ public class JarEntryHandler extends AbstractURLHandler
    @Override
    public InputStream openStream() throws IOException
    {
-      return jar.getInputStream(getEntry());
+      return getJar().getInputStream(getEntry());
    }
-
-
 
    /**
     * TODO: synchronization on lazy entryMap creation
     */
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      if( entryChildren == null )
-         throw new FileNotFoundException(this+" has no children");
-      if( entryMap == null )
+      if (entryChildren == null)
+         throw new FileNotFoundException(this + " has no children");
+      if (entryMap == null)
       {
          entryMap = new HashMap<String, VirtualFileHandler>();
-         for(VirtualFileHandler child : entryChildren)
+         for (VirtualFileHandler child : entryChildren)
             entryMap.put(child.getName(), child);
       }
       VirtualFileHandler child = entryMap.get(name);
-      if( child == null )
-         throw new FileNotFoundException(this+" has no child: "+name);
+      if (child == null)
+         throw new FileNotFoundException(this + " has no child: " + name);
       return child;
    }
-
 }

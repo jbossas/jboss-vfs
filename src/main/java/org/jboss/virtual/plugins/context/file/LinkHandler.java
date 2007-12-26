@@ -48,8 +48,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class LinkHandler extends AbstractURLHandler
-   implements StructuredVirtualFileHandler
+public class LinkHandler extends AbstractURLHandler implements StructuredVirtualFileHandler
 {
    private static final long serialVersionUID = 1;
    /** The link information */
@@ -57,20 +56,18 @@ public class LinkHandler extends AbstractURLHandler
    /** The link targets */
    private HashMap<String, VirtualFileHandler> linkTargets = new HashMap<String, VirtualFileHandler>(3);
 
-   class ParentOfLink extends AbstractURLHandler
-      implements StructuredVirtualFileHandler
+   class ParentOfLink extends AbstractURLHandler implements StructuredVirtualFileHandler
    {
       private static final long serialVersionUID = 1;
 
-      private HashMap<String, VirtualFileHandler> children =
-         new HashMap<String, VirtualFileHandler>(1);
+      private HashMap<String, VirtualFileHandler> children = new HashMap<String, VirtualFileHandler>(1);
 
       public ParentOfLink(VFSContext context, VirtualFileHandler parent, URL url, String name)
       {
          super(context, parent, url, name);
          try
          {
-            this.vfsUrl = new URL("vfs" + url.toString());
+            setVfsUrl(new URL("vfs" + url.toString()));
          }
          catch (MalformedURLException e)
          {
@@ -123,7 +120,7 @@ public class LinkHandler extends AbstractURLHandler
       // TODO: This URL is not consistent with the getName, but does point to the raw link file
       super(context, parent, uri.toURL(), name);
       this.links = links;
-      this.vfsUrl = new URL("vfs" + uri.toURL().toString());
+      setVfsUrl(new URL("vfs" + uri.toURL().toString()));
       // Create handlers for the links and add
       for(LinkInfo link : links)
       {
@@ -174,7 +171,7 @@ public class LinkHandler extends AbstractURLHandler
             {
                linkTargets.put(atom, linkHandler);
             }
-            else
+            else if (linkParent instanceof ParentOfLink)
             {
                ParentOfLink prevPOL = (ParentOfLink) linkParent;
                prevPOL.addChild(linkHandler, atom);

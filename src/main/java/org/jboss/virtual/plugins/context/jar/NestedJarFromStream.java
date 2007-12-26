@@ -3,25 +3,25 @@
  */
 package org.jboss.virtual.plugins.context.jar;
 
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * A nested jar implementation used to represent a jar within a jar.
@@ -29,8 +29,7 @@ import java.util.zip.ZipInputStream;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 44334 $
  */
-public class NestedJarFromStream
-        extends AbstractVirtualFileHandler
+public class NestedJarFromStream extends AbstractJarHandler
 {
    /**
     * serialVersionUID
@@ -38,14 +37,12 @@ public class NestedJarFromStream
    private static final long serialVersionUID = 1L;
 
    private ZipInputStream zis;
-   private HashMap<String, JarEntryContents> entries = new HashMap<String, JarEntryContents>();
+   private Map<String, JarEntryContents> entries = new HashMap<String, JarEntryContents>();
    private URL jarURL;
    private URL entryURL;
-   private String vfsPath;
-   private String name;
    private long lastModified;
    private long size;
-   private boolean inited;
+   private AtomicBoolean inited = new AtomicBoolean(false);
 
    /**
     * Create a nested jar from the parent zip inputstream/zip entry.
@@ -54,24 +51,21 @@ public class NestedJarFromStream
     * @param parent  - the jar handler for this nested jar
     * @param zis     - the jar zip input stream
     * @param jarURL  - the URL to use as the jar URL
+    * @param jar     - the parent jar file for the nested jar
     * @param entry   - the parent jar ZipEntry for the nested jar
+    * @throws IOException for any error
     */
-   public NestedJarFromStream(VFSContext context, VirtualFileHandler parent, ZipInputStream zis, URL jarURL, ZipEntry entry)
+   public NestedJarFromStream(VFSContext context, VirtualFileHandler parent, ZipInputStream zis, URL jarURL, JarFile jar, ZipEntry entry) throws IOException
    {
-      super(context, parent, entry.getName());
+      super(context, parent, jarURL, jar, entry, entry.getName());
       this.jarURL = jarURL;
-      this.name = entry.getName();
       this.lastModified = entry.getTime();
       this.size = entry.getSize();
       this.zis = zis;
       try
       {
-         if (parent != null)
-         {
-            String vfsParentUrl = parent.toVfsUrl().toString();
-            if (vfsParentUrl.endsWith("/")) vfsUrl = new URL(vfsParentUrl + this.name);
-            else vfsUrl = new URL(vfsParentUrl + "/" + this.name);
-         }
+         setPathName(getChildPathName(getName(), false));
+         setVfsUrl(getChildVfsUrl(getName(), false));
       }
       catch (Exception e)
       {
@@ -79,21 +73,70 @@ public class NestedJarFromStream
       }
    }
 
+   protected void initCacheLastModified()
+   {
+      cachedLastModified = lastModified;
+   }
+
+   /**
+    * Initialize entries.
+    *
+    * @throws IOException for any error
+    */
+   protected void init() throws IOException
+   {
+      if (inited.get())
+         return;
+
+      inited.set(true);
+      try
+      {
+         ZipEntry entry = zis.getNextEntry();
+         while (entry != null)
+         {
+            try
+            {
+               String entryName = entry.getName();
+               String url = toURI().toASCIIString() + "!/" + entryName;
+               URL jecURL = new URL(url);
+               JarEntryContents jec = new JarEntryContents(getVFSContext(), this, entry, toURL(), jecURL, zis);
+               entries.put(entryName, jec);
+               entry = zis.getNextEntry();
+            }
+            catch (Throwable t)
+            {
+               IOException ioe = new IOException("Exception while reading nested jar entry: " + this);
+               ioe.initCause(t);
+               ioe.setStackTrace(t.getStackTrace());
+               throw ioe;
+            }
+         }
+      }
+      finally
+      {
+         try
+         {
+            zis.close();
+         }
+         catch (IOException ignored)
+         {
+         }
+         zis = null;
+      }
+   }
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
-      if (inited == false)
-         init();
-      return entries.get(name);
+      JarEntryContents handler = getEntry(path);
+      if (handler == null)
+         throw new IOException("No such child: " + path);
+      return handler;
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      if (inited == false)
-         init();
-      List<VirtualFileHandler> children = new ArrayList<VirtualFileHandler>();
-      children.addAll(entries.values());
-      return children;
+      init();
+      return new ArrayList<VirtualFileHandler>(entries.values());
    }
 
    /**
@@ -103,11 +146,6 @@ public class NestedJarFromStream
    public boolean exists() throws IOException
    {
       return true;
-   }
-
-   public boolean isLeaf() throws IOException
-   {
-      return false;
    }
 
    public boolean isHidden()
@@ -125,49 +163,28 @@ public class NestedJarFromStream
       return lastModified;
    }
 
-
-   public Iterator<JarEntryContents> getEntries()
-           throws IOException
+   public Iterator<JarEntryContents> getEntries() throws IOException
    {
-      if (inited == false)
-         init();
+      init();
       return entries.values().iterator();
    }
 
-   public JarEntryContents getEntry(String name)
-           throws IOException
+   public JarEntryContents getEntry(String name) throws IOException
    {
-      if (inited == false)
-         init();
+      init();
       return entries.get(name);
    }
 
-   public ZipEntry getJarEntry(String name)
-           throws IOException
+   public ZipEntry getZipEntry(String name) throws IOException
    {
-      if (inited == false)
-         init();
-      JarEntryContents jec = entries.get(name);
+      JarEntryContents jec = getEntry(name);
       return (jec != null ? jec.getEntry() : null);
    }
 
-   public byte[] getContents(String name)
-           throws IOException
+   public byte[] getContents(String name) throws IOException
    {
-      if (inited == false)
-         init();
-      JarEntryContents jec = entries.get(name);
+      JarEntryContents jec = getEntry(name);
       return (jec != null ? jec.getContents() : null);
-   }
-
-   public String getName()
-   {
-      return name;
-   }
-
-   public String getPathName()
-   {
-      return vfsPath;
    }
 
    // Stream accessor
@@ -229,211 +246,16 @@ public class NestedJarFromStream
       return tmp.toString();
    }
 
-   protected void init()
-           throws IOException
+   /**
+    * First, if not already, initialize entries.
+    * Then do simple write. 
+    *
+    * @param out object output stream
+    * @throws IOException for any error
+    */
+   private void writeObject(ObjectOutputStream out) throws IOException
    {
-      inited = true;
-      ZipEntry entry = zis.getNextEntry();
-      while (entry != null)
-      {
-         try
-         {
-            String url = toURI().toASCIIString() + "!/" + entry.getName();
-            URL jecURL = new URL(url);
-            JarEntryContents jec = new JarEntryContents(getVFSContext(), this, entry, jecURL, zis, getPathName());
-            entries.put(entry.getName(), jec);
-            entry = zis.getNextEntry();
-         }
-         catch (URISyntaxException e)
-         {
-            e.printStackTrace();
-         }
-      }
-      zis.close();
-      zis = null;
-   }
-
-   public static class JarEntryContents
-           extends AbstractVirtualFileHandler
-   {
-      /**
-       * serialVersionUID
-       */
-      private static final long serialVersionUID = 1L;
-      private ZipEntry entry;
-      private URL entryURL;
-      private String vfsPath;
-      private byte[] contents;
-      private boolean isJar;
-      private NestedJarFromStream njar;
-      private InputStream openStream;
-
-      JarEntryContents(VFSContext context, VirtualFileHandler parent, ZipEntry entry, URL entryURL, InputStream zis,
-                       String parentVfsPath)
-              throws IOException
-      {
-         super(context, parent, entry.getName());
-         this.entry = entry;
-         this.entryURL = entryURL;
-         this.vfsPath = parentVfsPath + "/" + entry.getName();
-         this.isJar = JarUtils.isArchive(entry.getName());
-         int size = (int) entry.getSize();
-         if (size <= 0)
-            return;
-
-         ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-         byte[] tmp = new byte[1024];
-         while (zis.available() > 0)
-         {
-            int length = zis.read(tmp);
-            if (length > 0)
-               baos.write(tmp, 0, length);
-         }
-         contents = baos.toByteArray();
-      }
-
-      /**
-       * TODO: removing the entry/jar that resulted in this needs
-       * to be detected.
-       */
-      public boolean exists() throws IOException
-      {
-         return true;
-      }
-
-      public boolean isHidden() throws IOException
-      {
-         return false;
-      }
-
-      public ZipEntry getEntry()
-      {
-         return entry;
-      }
-
-      public byte[] getContents()
-      {
-         return contents;
-      }
-
-      public String getName()
-      {
-         return entry.getName();
-      }
-
-      public String getPathName()
-      {
-         return vfsPath;
-      }
-
-      public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
-      {
-         List<VirtualFileHandler> children = null;
-         if (isJar)
-         {
-            initNestedJar();
-            children = njar.getChildren(ignoreErrors);
-         }
-         return children;
-      }
-
-      public VirtualFileHandler findChild(String path) throws IOException
-      {
-         VirtualFileHandler child;
-         if (isJar)
-         {
-            initNestedJar();
-            child = njar.findChild(path);
-         }
-         else
-         {
-            throw new FileNotFoundException("JarEntryContents(" + entry.getName() + ") has no children");
-         }
-         return child;
-      }
-
-      // Convience attribute accessors
-      public long getLastModified()
-      {
-         return entry.getTime();
-      }
-
-      public long getSize()
-      {
-         return entry.getSize();
-      }
-
-      public boolean isLeaf()
-      {
-         if (isJar)
-            return false;
-         return entry.isDirectory() == false;
-      }
-
-      // Stream accessor
-      public synchronized InputStream openStream()
-              throws IOException
-      {
-         initNestedJar();
-         if (njar != null)
-            openStream = njar.openStream();
-         else
-            openStream = new ByteArrayInputStream(contents);
-         return openStream;
-      }
-
-      public synchronized void close()
-      {
-         if (openStream != null)
-         {
-            try
-            {
-               openStream.close();
-            }
-            catch (IOException e)
-            {
-               log.error("close error", e);
-            }
-            openStream = null;
-         }
-      }
-
-      public URI toURI() throws URISyntaxException
-      {
-         return entryURL.toURI();
-      }
-
-      public String toString()
-      {
-         StringBuffer tmp = new StringBuffer(super.toString());
-         tmp.append('[');
-         tmp.append("name=");
-         tmp.append(entry.getName());
-         tmp.append(",size=");
-         tmp.append(entry.getSize());
-         tmp.append(",time=");
-         tmp.append(entry.getTime());
-         tmp.append(",URI=");
-         try
-         {
-            tmp.append(toURI());
-         }
-         catch (URISyntaxException e)
-         {
-         }
-         tmp.append(']');
-         return tmp.toString();
-      }
-
-      private synchronized void initNestedJar()
-              throws IOException
-      {
-         if (isJar && njar == null)
-         {
-            ByteArrayInputStream bais = new ByteArrayInputStream(contents);
-            ZipInputStream zis = new ZipInputStream(bais);
-            njar = new NestedJarFromStream(getVFSContext(), this, zis, entryURL, entry);
-         }
-      }
+      init();
+      out.defaultWriteObject();
    }
 }

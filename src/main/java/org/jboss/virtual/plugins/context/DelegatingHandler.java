@@ -57,10 +57,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
     * @param name - the name of the delegate in this VFS
     * @param delegate - the handler delegate
     */
-   public DelegatingHandler(VFSContext context, VirtualFileHandler parent, String name,
-         VirtualFileHandler delegate)
+   public DelegatingHandler(VFSContext context, VirtualFileHandler parent, String name, VirtualFileHandler delegate)
    {
       super(context, parent, name);
+      if (delegate == null)
+         throw new IllegalArgumentException("Null delegate");
       this.delegate = delegate;
    }
 

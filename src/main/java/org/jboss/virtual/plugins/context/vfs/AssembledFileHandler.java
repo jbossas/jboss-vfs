@@ -46,9 +46,10 @@ public class AssembledFileHandler extends AbstractVirtualFileHandler
    public AssembledFileHandler(AssembledContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
    {
       super(context, parent, name);
+      if (delegate == null)
+         throw new IllegalArgumentException("Null delegate");
       this.delegate = delegate;
-      vfsUrl = new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context));
-
+      setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
@@ -61,56 +62,47 @@ public class AssembledFileHandler extends AbstractVirtualFileHandler
       throw new IOException("File cannot have children: " + this);
    }
 
-   public URL toURL()
-           throws MalformedURLException, URISyntaxException
+   public URL toURL() throws MalformedURLException, URISyntaxException
    {
       return delegate.toURL();
    }
 
-   public long getLastModified()
-           throws IOException
+   public long getLastModified() throws IOException
    {
       return delegate.getLastModified();
    }
 
-   public boolean hasBeenModified()
-           throws IOException
+   public boolean hasBeenModified() throws IOException
    {
       return delegate.hasBeenModified();
    }
 
-   public long getSize()
-           throws IOException
+   public long getSize() throws IOException
    {
       return delegate.getSize();
    }
 
-   public boolean exists()
-           throws IOException
+   public boolean exists() throws IOException
    {
       return delegate.exists();
    }
 
-   public boolean isLeaf()
-           throws IOException
+   public boolean isLeaf() throws IOException
    {
       return delegate.isLeaf();
    }
 
-   public boolean isHidden()
-           throws IOException
+   public boolean isHidden() throws IOException
    {
       return delegate.isHidden();
    }
 
-   public InputStream openStream()
-           throws IOException
+   public InputStream openStream() throws IOException
    {
       return delegate.openStream();
    }
 
-   public URI toURI()
-           throws URISyntaxException
+   public URI toURI() throws URISyntaxException
    {
       return delegate.toURI();
    }

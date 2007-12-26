@@ -42,14 +42,11 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class NestedJarHandler extends AbstractJarHandler
+public class NestedJarHandler extends AbstractStructuredJarHandler
 {
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
 
-   /** The jar entry */
-   private transient JarEntry entry;
-   
    /** The temporary file */
    private transient File temp;
 
@@ -103,8 +100,7 @@ public class NestedJarHandler extends AbstractJarHandler
    public static NestedJarHandler create(VFSContext context, VirtualFileHandler parent,
          JarFile parentJar, JarEntry entry, URL url, String entryName) throws IOException
    {
-      File temp = null;
-
+      File temp;
       try
       {
          temp = File.createTempFile("nestedjar", null);
@@ -133,17 +129,14 @@ public class NestedJarHandler extends AbstractJarHandler
     * @throws IOException for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url or vfsPath
     */
-   protected NestedJarHandler(VFSContext context, VirtualFileHandler parent,
-         JarFile parentJar, JarEntry entry, URL original, File temp, String entryName)
+   protected NestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, JarEntry entry, URL original, File temp, String entryName)
       throws IOException
    {
-      super(context, parent, temp.toURL(), entryName);
+      super(context, parent, temp.toURL(), createTempJar(temp, parentJar, entry), entry, entryName);
 
       try
       {
-         String vfsParentUrl = parent.toVfsUrl().toString();
-         if (vfsParentUrl.endsWith("/")) vfsUrl = new URL(vfsParentUrl + entryName);
-         else vfsUrl = new URL(vfsParentUrl + "/" + entryName);
+         setVfsUrl(getChildVfsUrl(entryName, false));
       }
       catch (URISyntaxException e)
       {
@@ -155,7 +148,7 @@ public class NestedJarHandler extends AbstractJarHandler
       
       try
       {
-         initJarFile(createTempJar(temp, parentJar, entry));
+         initJarFile();
       }
       catch (IOException old)
       {
@@ -164,19 +157,6 @@ public class NestedJarHandler extends AbstractJarHandler
          e.setStackTrace(old.getStackTrace());
          throw e;
       }
-      
-      this.entry = entry;
-   }
-   
-   /**
-    * Get the entry
-    * 
-    * @return the file
-    */
-   protected JarEntry getEntry()
-   {
-      checkClosed();
-      return entry;
    }
 
    @Override
@@ -197,23 +177,6 @@ public class NestedJarHandler extends AbstractJarHandler
    @Override
    public InputStream openStream() throws IOException
    {
-      FileInputStream fis = new FileInputStream(temp);
-      return fis;
+      return new FileInputStream(temp);
    }
-
-   /**
-    * Restore the jar file from the parent jar and entry name
-    * 
-    * @param in
-    * @throws IOException
-    * @throws ClassNotFoundException
-    */
-   private void readObject(ObjectInputStream in)
-      throws IOException, ClassNotFoundException
-   {
-      JarFile parentJar = super.getJar();
-      // Initial the parent jar entries
-      super.initJarFile(parentJar);
-   }
-
 }

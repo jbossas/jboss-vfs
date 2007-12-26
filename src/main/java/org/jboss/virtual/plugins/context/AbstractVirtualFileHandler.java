@@ -46,6 +46,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * AbstractVirtualFileHandler.
  * 
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
@@ -83,7 +84,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    private transient String vfsPath;
 
    /** The vfs URL */
-   protected URL vfsUrl;
+   private URL vfsUrl;
 
    /** The reference count */
    private transient AtomicInteger references = new AtomicInteger(0);
@@ -110,6 +111,57 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.name = VFSUtils.fixName(name);
    }
 
+   /**
+    * Check if parent exists.
+    */
+   protected void checkParentExists()
+   {
+      if (parent == null)
+         throw new IllegalArgumentException("Parent must exist!");
+   }
+
+   /**
+    * Get child url.
+    *
+    * @param childPath the child path
+    * @param isDirectory is directory
+    * @return full child URL
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   protected URL getChildVfsUrl(String childPath, boolean isDirectory) throws IOException, URISyntaxException
+   {
+      checkParentExists();
+      URL parentVfsUrl = getParent().toVfsUrl();
+      String vfsUrlString = parentVfsUrl.toString();
+      if (vfsUrlString.length() > 0 && vfsUrlString.endsWith("/") == false)
+         vfsUrlString += "/";
+      vfsUrlString += childPath;
+      if (isDirectory)
+         vfsUrlString += "/";
+      return new URL(vfsUrlString);
+   }
+
+   /**
+    * Get child path name.
+    *
+    * @param childPath the child path
+    * @param isDirectory is directory
+    * @return full child URL
+    * @throws IOException for any io error
+    */
+   protected String getChildPathName(String childPath, boolean isDirectory) throws IOException
+   {
+      checkParentExists();
+      String childPathName = getParent().getPathName();
+      if (childPathName.length() > 0 && childPathName.endsWith("/") == false)
+         childPathName += "/";
+      childPathName += childPath;
+      if (isDirectory)
+         childPathName += "/";
+      return childPathName;
+   }
+
    public boolean hasBeenModified() throws IOException
    {
       boolean hasBeenModified = false;
@@ -121,7 +173,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       }
       return hasBeenModified;
    }
-
 
    public String getName()
    {
@@ -149,17 +200,34 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.vfsPath = path;
    }
 
-
-
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
       return toURI().toURL();
    }
 
-
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
       return vfsUrl;
+   }
+
+   /**
+    * Get VFS url.
+    *
+    * @return vfs url
+    */
+   protected URL getVfsUrl()
+   {
+      return vfsUrl;
+   }
+
+   /**
+    * Set the vfs URL.
+    *
+    * @param vfsUrl vfs url
+    */
+   protected void setVfsUrl(URL vfsUrl)
+   {
+      this.vfsUrl = vfsUrl;
    }
 
    /**

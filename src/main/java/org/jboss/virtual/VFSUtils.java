@@ -121,9 +121,9 @@ public class VFSUtils
       if (parent == null)
          throw new IllegalStateException(file + " has no parent.");
 
-      URL parentURL = null;
-      URL vfsRootURL = null;
-      int rootPathLength = 0;
+      URL parentURL;
+      URL vfsRootURL;
+      int rootPathLength;
       try
       {
          parentURL = parent.toURL();
@@ -141,7 +141,6 @@ public class VFSUtils
       while (tokenizer.hasMoreTokens())
       {
          String path = tokenizer.nextToken();
-
          try
          {
             URL libURL = new URL(parentURL, path);
@@ -275,7 +274,7 @@ public class VFSUtils
     */
    public static Map<String, String> parseURLQuery(String query)
    {
-	   HashMap<String, String> pairsMap = new HashMap<String, String>();
+	   Map<String, String> pairsMap = new HashMap<String, String>();
       if( query != null )
       {
    	   StringTokenizer tokenizer = new StringTokenizer(query, "=&");
@@ -313,7 +312,7 @@ public class VFSUtils
    public static List<LinkInfo> readLinkInfo(InputStream is, String name, Properties props)
       throws IOException, URISyntaxException
    {
-      ArrayList<LinkInfo> info = new ArrayList<LinkInfo>();
+      List<LinkInfo> info = new ArrayList<LinkInfo>();
       if( name.endsWith(".properties") )
          parseLinkProperties(is, info, props);
       else

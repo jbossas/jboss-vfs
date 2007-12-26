@@ -46,13 +46,12 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class FileHandler extends AbstractURLHandler
-   implements StructuredVirtualFileHandler
+public class FileHandler extends AbstractURLHandler implements StructuredVirtualFileHandler
 {
    private static final long serialVersionUID = 1;
    /** The file */
    private transient File file;
-   
+   /** The child cache */
    private transient Map<String, VirtualFileHandler> childCache = Collections.synchronizedMap(new HashMap<String, VirtualFileHandler>());
 
    /**
@@ -72,7 +71,7 @@ public class FileHandler extends AbstractURLHandler
       this.file = file;
       if (file.exists() == false)
          throw new FileNotFoundException("File does not exist: " + file.getCanonicalPath());
-      this.vfsUrl = new URL("vfs" + url.toString());
+      setVfsUrl(new URL("vfs" + url.toString()));
    }
    /**
     * Create a new FileHandler
@@ -89,14 +88,13 @@ public class FileHandler extends AbstractURLHandler
       this(context, parent, file, uri.toURL());
    }
 
-
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
-      if (vfsUrl == null)
+      if (getVfsUrl() == null)
       {
-         vfsUrl = new URL("vfs" + getURL().toString());
+         setVfsUrl(new URL("vfs" + getURL().toString()));
       }
-      return vfsUrl;
+      return getVfsUrl();
    }
 
    @Override
@@ -219,12 +217,11 @@ public class FileHandler extends AbstractURLHandler
       return handler;
    }
 
-   private void readObject(ObjectInputStream in)
-      throws IOException, ClassNotFoundException
+   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
    {
       in.defaultReadObject();
       // Initialize the transient values
       this.file = new File(getURL().getPath());
+      this.childCache = Collections.synchronizedMap(new HashMap<String, VirtualFileHandler>());
    }
-
 }

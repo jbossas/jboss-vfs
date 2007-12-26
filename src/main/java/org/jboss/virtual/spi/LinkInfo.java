@@ -60,5 +60,4 @@ public class LinkInfo implements Serializable
    {
       return name;
    }
-
 }

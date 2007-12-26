@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
@@ -77,13 +78,13 @@ public class ExtensibleFilter implements VirtualFileFilter
           "SCCS", "TAGS", "core", "tags"};
 
    /** The list of disallowed suffixes, sorted using reverse values */
-   private ArrayList<String> suffixes;
+   private List<String> suffixes;
 
    /** The sorted list of disallowed prefixes */
-   private ArrayList<String> prefixes;
+   private List<String> prefixes;
 
    /** The sorted list of disallowed values */
-   private ArrayList<String> matches;
+   private List<String> matches;
 
    /** Use the default values for suffixes, prefixes, and matches */
    public ExtensibleFilter()

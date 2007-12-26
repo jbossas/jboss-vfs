@@ -43,26 +43,22 @@ import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
  */
 public class VfsArchiveBrowser implements Iterator
 {
-   /** TODO WHAT DOES THIS DO? It is unused */
-   private ArchiveBrowser.Filter filter;
    private VirtualFile vf;
    private Iterator<VirtualFile> it;
 
-
-   public VfsArchiveBrowser(final ArchiveBrowser.Filter filter, VirtualFile vf)
+   public VfsArchiveBrowser(ArchiveBrowser.Filter filter, VirtualFile vf)
    {
-      this.filter = filter;
       this.vf = vf;
-      List<VirtualFile> classes = getResources(new VirtualFileFilter() {
-         public boolean accepts(VirtualFile file)
-         {
-            return filter.accept(file.getName());
-         }
-      });
-
+      List<VirtualFile> classes = getResources(new ArchiveBrowserFilter(filter));
       it = classes.iterator();
    }
 
+   /**
+    * Get resources.
+    *
+    * @param filter the filter
+    * @return resources list
+    */
    public List<VirtualFile> getResources(VirtualFileFilter filter)
    {
       VisitorAttributes va = new VisitorAttributes();
@@ -70,7 +66,6 @@ public class VfsArchiveBrowser implements Iterator
       SuffixesExcludeFilter noJars = new SuffixesExcludeFilter(JarUtils.getSuffixes());
       va.setRecurseFilter(noJars);
       FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, va);
-
       try
       {
          vf.visit(visitor);
@@ -81,7 +76,6 @@ public class VfsArchiveBrowser implements Iterator
       }
       return visitor.getMatched();
    }
-
 
    public boolean hasNext()
    {
@@ -103,5 +97,25 @@ public class VfsArchiveBrowser implements Iterator
    public void remove()
    {
       it.remove();
+   }
+
+   /**
+    * Archive browser delegate filter.
+    */
+   private class ArchiveBrowserFilter implements VirtualFileFilter
+   {
+      private ArchiveBrowser.Filter filter;
+
+      public ArchiveBrowserFilter(ArchiveBrowser.Filter filter)
+      {
+         if (filter == null)
+            throw new IllegalArgumentException("Null filter");
+         this.filter = filter;
+      }
+
+      public boolean accepts(VirtualFile file)
+      {
+         return filter.accept(file.getName());
+      }
    }
 }

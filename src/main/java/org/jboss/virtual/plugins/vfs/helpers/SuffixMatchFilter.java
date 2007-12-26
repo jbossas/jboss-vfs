@@ -21,9 +21,9 @@
  */
 package org.jboss.virtual.plugins.vfs.helpers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VirtualFile;
@@ -65,9 +65,7 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes
    @SuppressWarnings("unchecked")      
    public SuffixMatchFilter(String suffix, VisitorAttributes attributes)
    {
-      this(Collections.EMPTY_LIST, attributes);
-      suffixes.add(suffix);
-      trace = log.isTraceEnabled();
+      this(Collections.singleton(suffix), attributes);
    }
    /**
     * Create a new SuffixMatchFilter.
@@ -89,8 +87,9 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes
       super(attributes == null ? VisitorAttributes.DEFAULT : attributes);
       if (suffixes == null)
          throw new IllegalArgumentException("Null suffixes");
-      this.suffixes = new ArrayList<String>();
+      this.suffixes = new LinkedHashSet<String>();
       this.suffixes.addAll(suffixes);
+      trace = log.isTraceEnabled();
    }
 
    /**

@@ -128,12 +128,13 @@ public class JarUtils
    {
       if (name == null)
          throw new IllegalArgumentException("Null name");
-      
-      int index = name.lastIndexOf('.');
-      if (index == -1)
-         return false;
-      String suffix = name.substring(index);
-      return jarSuffixes.contains(suffix);
+
+      for(String suffix : jarSuffixes)
+      {
+         if (name.endsWith(suffix))
+            return true;
+      }
+      return false;
    }
    
    /**

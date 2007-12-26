@@ -59,8 +59,8 @@ public interface VirtualFileHandler extends Serializable
     * Get a VFS-based URL
     *
     * @return the url
-    * @throws MalformedURLException
-    * @throws URISyntaxException
+    * @throws URISyntaxException for an error parsing the URI
+    * @throws MalformedURLException for any error
     */
    URL toVfsUrl() throws MalformedURLException, URISyntaxException;
    
@@ -95,8 +95,8 @@ public interface VirtualFileHandler extends Serializable
     * Returns true if the file has been modified since this method was last called
     * Last modified time is initialized at handler instantiation.
     *
-    * @return
-    * @throws IOException
+    * @return true if modified, false otherwise
+    * @throws IOException for any error
     */
    boolean hasBeenModified() throws IOException;
    

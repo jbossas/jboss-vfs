@@ -24,8 +24,8 @@ package org.jboss.virtual.plugins.context.jar;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,49 +39,46 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * SynthenticDirEntryHandler represents non-existent directory jar entry.
- * 
+ *
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
 public class SynthenticDirEntryHandler extends AbstractURLHandler
-   implements StructuredVirtualFileHandler
+      implements StructuredVirtualFileHandler
 {
-   /** serialVersionUID */
+   /**
+    * serialVersionUID
+    */
    private static final long serialVersionUID = 1L;
 
-   /** The jar file */
+   /**
+    * The jar file
+    */
    private long lastModified;
    private transient List<VirtualFileHandler> entryChildren;
    private transient Map<String, VirtualFileHandler> entryMap;
-   
+
    /**
     * Create a new SynthenticDirEntryHandler.
-    * 
-    * @param context the context
-    * @param parent the parent
-    * @param entryName - the simple name for the dir
+    *
+    * @param context      the context
+    * @param parent       the parent
+    * @param entryName    - the simple name for the dir
     * @param lastModified the timestamp for the dir
-    * @param url the full url
-    * @throws IOException for an error accessing the file system
+    * @param url          the full url
+    * @throws IOException              for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url, jar or entry
     */
    public SynthenticDirEntryHandler(VFSContext context, VirtualFileHandler parent,
-      String entryName, long lastModified, URL url)
-      throws IOException
+                                    String entryName, long lastModified, URL url)
+         throws IOException
    {
       super(context, parent, url, entryName);
       try
       {
          URL parentVfsUrl = parent.toVfsUrl();
          String vfsParentUrl = parentVfsUrl.toString();
-         if (vfsParentUrl.endsWith("/"))
-         {
-            vfsUrl = new URL(vfsParentUrl + entryName);
-         }
-         else
-         {
-            vfsUrl = new URL(vfsParentUrl + "/" + entryName + "/");
-         }
+         setVfsUrl(getChildVfsUrl(entryName, vfsParentUrl.endsWith("/") == false));
       }
       catch (URISyntaxException e)
       {
@@ -92,14 +89,15 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
 
    /**
     * Add a child to an entry
-    * @param child
+    *
+    * @param child the child file handler
     */
    public synchronized void addChild(VirtualFileHandler child)
    {
-      if( entryChildren == null )
+      if (entryChildren == null)
          entryChildren = new ArrayList<VirtualFileHandler>();
       entryChildren.add(child);
-      if( entryMap != null )
+      if (entryMap != null)
          entryMap.put(child.getName(), child);
    }
 
@@ -144,10 +142,9 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       checkClosed();
-      List<VirtualFileHandler> children = entryChildren;
-      if( entryChildren == null )
-         children = Collections.emptyList();
-      return children;
+      if (entryChildren == null)
+         return Collections.emptyList();
+      return Collections.unmodifiableList(entryChildren);
    }
 
    public VirtualFileHandler findChild(String path) throws IOException
@@ -158,26 +155,26 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    /**
     * Create a child handler for the given name. This looks to the entryMap
     * for an existing child.
+    *
     * @param name - the simple name of an immeadiate child.
     * @return the VirtualFileHandler previously added via addChild.
     * @throws IOException - thrown if there are no children or the
-    *  name does not match a child
+    *                     name does not match a child
     */
    public synchronized VirtualFileHandler createChildHandler(String name)
-      throws IOException
+         throws IOException
    {
-      if( entryChildren == null )
-         throw new FileNotFoundException(this+" has no children");
-      if( entryMap == null )
+      if (entryChildren == null)
+         throw new FileNotFoundException(this + " has no children");
+      if (entryMap == null)
       {
          entryMap = new HashMap<String, VirtualFileHandler>();
-         for(VirtualFileHandler child : entryChildren)
+         for (VirtualFileHandler child : entryChildren)
             entryMap.put(child.getName(), child);
       }
       VirtualFileHandler child = entryMap.get(name);
-      if( child == null )
-         throw new FileNotFoundException(this+" has no child: "+name);
+      if (child == null)
+         throw new FileNotFoundException(this + " has no child: " + name);
       return child;
    }
-
 }

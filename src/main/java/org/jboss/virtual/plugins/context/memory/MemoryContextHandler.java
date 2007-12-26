@@ -165,19 +165,19 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
    @Override
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
-      if (vfsUrl == null)
+      if (getVfsUrl() == null)
       {
          if (isLeaf())
          {
-            vfsUrl = getURL();
+            setVfsUrl(getURL());
          }
          else
          {
             String vfsString = getURL().toString(); 
             if (vfsString.endsWith("/") == false)
-               vfsUrl = new URL(vfsString + "/");
+               setVfsUrl(new URL(vfsString + "/"));
          }
       }
-      return vfsUrl;
+      return getVfsUrl();
    }
 }

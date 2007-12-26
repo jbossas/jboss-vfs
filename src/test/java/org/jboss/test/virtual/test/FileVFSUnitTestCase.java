@@ -43,15 +43,15 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.test.BaseTestCase;
 import org.jboss.test.virtual.support.ClassPathIterator;
-import org.jboss.test.virtual.support.MetaDataMatchFilter;
 import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
+import org.jboss.test.virtual.support.MetaDataMatchFilter;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.plugins.context.jar.JarEntryContents;
 import org.jboss.virtual.plugins.context.jar.NestedJarFromStream;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter;
 import org.jboss.virtual.spi.LinkInfo;
@@ -125,12 +125,15 @@ public class FileVFSUnitTestCase extends BaseTestCase
 
       JarEntry jar1 = jf.getJarEntry("jar1.jar");
       URL jar1URL = new URL(outerJar.toURL(), "jar1.jar");
+      VFSContextFactory pf1 = VFSContextFactoryLocator.getFactory(jar1URL);
+      VFSContext parent1 = pf1.getVFS(jar1URL);
+
       ZipInputStream jis1 = new ZipInputStream(jf.getInputStream(jar1));
-      NestedJarFromStream njfs = new NestedJarFromStream(context, null, jis1, jar1URL, jar1);
-      NestedJarFromStream.JarEntryContents e1 = njfs.getEntry("org/jboss/test/vfs/support/jar1/ClassInJar1.class");
+      NestedJarFromStream njfs = new NestedJarFromStream(context, parent1.getRoot(), jis1, jar1URL, jf, jar1);
+      JarEntryContents e1 = njfs.getEntry("org/jboss/test/vfs/support/jar1/ClassInJar1.class");
       assertNotNull(e1);
       log.info("org/jboss/test/vfs/support/CommonClass.class: "+e1);
-      NestedJarFromStream.JarEntryContents mfe1 = njfs.getEntry("META-INF/MANIFEST.MF");
+      JarEntryContents mfe1 = njfs.getEntry("META-INF/MANIFEST.MF");
       assertNotNull("jar1!/META-INF/MANIFEST.MF", mfe1);
       InputStream mfIS = mfe1.openStream();
       Manifest mf = new Manifest(mfIS);
@@ -142,12 +145,15 @@ public class FileVFSUnitTestCase extends BaseTestCase
 
       JarEntry jar2 = jf.getJarEntry("jar2.jar");
       URL jar2URL = new URL(outerJar.toURL(), "jar2.jar");
+      VFSContextFactory pf2 = VFSContextFactoryLocator.getFactory(jar2URL);
+      VFSContext parent2 = pf2.getVFS(jar2URL);
+
       ZipInputStream jis2 = new ZipInputStream(jf.getInputStream(jar2));
-      NestedJarFromStream njfs2 = new NestedJarFromStream(context, null, jis2, jar2URL, jar2);
-      NestedJarFromStream.JarEntryContents e2 = njfs2.getEntry("org/jboss/test/vfs/support/jar2/ClassInJar2.class");
+      NestedJarFromStream njfs2 = new NestedJarFromStream(context, parent2.getRoot(), jis2, jar2URL, jf, jar2);
+      JarEntryContents e2 = njfs2.getEntry("org/jboss/test/vfs/support/jar2/ClassInJar2.class");
       assertNotNull(e2);
       log.info("org/jboss/test/vfs/support/CommonClass.class: "+e2);
-      NestedJarFromStream.JarEntryContents mfe2 = njfs2.getEntry("META-INF/MANIFEST.MF");
+      JarEntryContents mfe2 = njfs2.getEntry("META-INF/MANIFEST.MF");
       assertNotNull("jar2!/META-INF/MANIFEST.MF", mfe2);
       InputStream mf2IS = mfe2.openStream();
       Manifest mf2 = new Manifest(mf2IS);
@@ -855,7 +861,6 @@ public class FileVFSUnitTestCase extends BaseTestCase
       ObjectOutputStream oos = new ObjectOutputStream(fos);
       oos.writeObject(inner);
       oos.close();
-
       
       // Read in the VF from the serialized file
       FileInputStream fis = new FileInputStream(vfsSer);

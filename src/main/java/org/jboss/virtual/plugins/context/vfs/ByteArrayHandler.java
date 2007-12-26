@@ -21,18 +21,17 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.util.List;
+
+import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * comment
@@ -44,26 +43,25 @@ import java.util.List;
 public class ByteArrayHandler extends AbstractVirtualFileHandler
 {
    private byte[] bytes;
-   private final long lastModified = System.currentTimeMillis();
-
+   private final long lastModified;
 
    public ByteArrayHandler(AssembledContext context, VirtualFileHandler parent, String name, byte[] bytes) throws IOException
    {
       super(context, parent, name);
       this.bytes = bytes;
-      vfsUrl = new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context));
+      lastModified = System.currentTimeMillis();
+      setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));
    }
-
 
    @Override
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
-      return vfsUrl;
+      return getVfsUrl();
    }
 
    public URI toURI() throws URISyntaxException
    {
-      return vfsUrl.toURI();
+      return getVfsUrl().toURI();
    }
 
    public long getLastModified() throws IOException

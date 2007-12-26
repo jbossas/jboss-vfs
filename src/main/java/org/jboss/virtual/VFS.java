@@ -51,6 +51,9 @@ public class VFS
       init();
    }
 
+   /**
+    * Initialize VFS protocol handlers package property. 
+    */
    public static void init()
    {
       String pkgs = System.getProperty("java.protocol.handler.pkgs");
