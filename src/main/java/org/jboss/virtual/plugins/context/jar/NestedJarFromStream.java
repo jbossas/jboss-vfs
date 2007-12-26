@@ -26,6 +26,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * A nested jar implementation used to represent a jar within a jar.
  *
+ * @author Ales.Justin@jboss.org
  * @author Scott.Stark@jboss.org
  * @version $Revision: 44334 $
  */
@@ -127,6 +128,12 @@ public class NestedJarFromStream extends AbstractJarHandler
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
+      if ("".equals(path))
+         return this;
+
       JarEntryContents handler = getEntry(path);
       if (handler == null)
          throw new IOException("No such child: " + path);

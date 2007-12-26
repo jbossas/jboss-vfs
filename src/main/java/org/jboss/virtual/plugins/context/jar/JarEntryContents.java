@@ -122,6 +122,12 @@ public class JarEntryContents extends AbstractJarHandler
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
+      if ("".equals(path))
+         return this;
+
       if (isJar)
       {
          initNestedJar();

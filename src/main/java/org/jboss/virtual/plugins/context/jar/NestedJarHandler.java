@@ -137,6 +137,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler
 
       try
       {
+         setPathName(getChildPathName(entryName, false));
          setVfsUrl(getChildVfsUrl(entryName, false));
       }
       catch (URISyntaxException e)

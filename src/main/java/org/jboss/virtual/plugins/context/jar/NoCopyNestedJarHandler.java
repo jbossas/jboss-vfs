@@ -24,6 +24,7 @@ package org.jboss.virtual.plugins.context.jar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -63,6 +64,16 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
    {
       super(context, parent, url, parentJar, entry, entryName);
       
+      try
+      {
+         setPathName(getChildPathName(entryName, false));
+         setVfsUrl(getChildVfsUrl(entryName, false));
+      }
+      catch (URISyntaxException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       try
       {
          InputStream is = parentJar.getInputStream(entry);
@@ -110,6 +121,12 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
 
    public VirtualFileHandler findChild(String path) throws IOException
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
+      if ("".equals(path))
+         return this;
+
       return njar.findChild(path);
    }
 
