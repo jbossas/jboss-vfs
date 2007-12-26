@@ -134,10 +134,12 @@ public class JarEntryContents extends AbstractJarHandler
          initNestedJar();
          return njar.findChild(path);
       }
-      else
+      else if (getEntry().isDirectory())
       {
-         throw new FileNotFoundException("JarEntryContents(" + getName() + ") has no children");
+         checkParentExists();
+         return getParent().findChild(getEntry().getName() + path);
       }
+      throw new FileNotFoundException("JarEntryContents(" + getName() + ") has no children");
    }
 
    // Convience attribute accessors
