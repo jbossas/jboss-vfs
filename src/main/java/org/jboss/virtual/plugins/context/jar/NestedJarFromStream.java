@@ -102,7 +102,8 @@ public class NestedJarFromStream extends AbstractJarHandler
                String url = toURI().toASCIIString() + "!/" + entryName;
                URL jecURL = new URL(url);
                JarEntryContents jec = new JarEntryContents(getVFSContext(), this, entry, toURL(), jecURL, zis);
-               entries.put(entryName, jec);
+               int end = entry.isDirectory() ? entryName.length() - 1 : entryName.length();
+               entries.put(entryName.substring(0, end), jec);
                entry = zis.getNextEntry();
             }
             catch (Throwable t)

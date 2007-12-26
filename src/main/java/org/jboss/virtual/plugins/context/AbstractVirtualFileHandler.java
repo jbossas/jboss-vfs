@@ -137,7 +137,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       if (vfsUrlString.length() > 0 && vfsUrlString.endsWith("/") == false)
          vfsUrlString += "/";
       vfsUrlString += childPath;
-      if (isDirectory)
+      if (isDirectory && vfsUrlString.endsWith("/") == false)
          vfsUrlString += "/";
       return new URL(vfsUrlString);
    }
