@@ -22,33 +22,25 @@
 package org.jboss.virtual.plugins.context.vfs;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * The assembled file handler.
  *
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
  */
 @Assembled
-public class AssembledFileHandler extends AbstractVirtualFileHandler
+public class AssembledFileHandler extends DelegatingHandler
 {
-   private VirtualFileHandler delegate;
-
    public AssembledFileHandler(AssembledContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
    {
-      super(context, parent, name);
-      if (delegate == null)
-         throw new IllegalArgumentException("Null delegate");
-      this.delegate = delegate;
+      super(context, parent, name, delegate);
       setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));
    }
 
@@ -60,50 +52,5 @@ public class AssembledFileHandler extends AbstractVirtualFileHandler
    public VirtualFileHandler findChild(String path) throws IOException
    {
       throw new IOException("File cannot have children: " + this);
-   }
-
-   public URL toURL() throws MalformedURLException, URISyntaxException
-   {
-      return delegate.toURL();
-   }
-
-   public long getLastModified() throws IOException
-   {
-      return delegate.getLastModified();
-   }
-
-   public boolean hasBeenModified() throws IOException
-   {
-      return delegate.hasBeenModified();
-   }
-
-   public long getSize() throws IOException
-   {
-      return delegate.getSize();
-   }
-
-   public boolean exists() throws IOException
-   {
-      return delegate.exists();
-   }
-
-   public boolean isLeaf() throws IOException
-   {
-      return delegate.isLeaf();
-   }
-
-   public boolean isHidden() throws IOException
-   {
-      return delegate.isHidden();
-   }
-
-   public InputStream openStream() throws IOException
-   {
-      return delegate.openStream();
-   }
-
-   public URI toURI() throws URISyntaxException
-   {
-      return delegate.toURI();
    }
 }
