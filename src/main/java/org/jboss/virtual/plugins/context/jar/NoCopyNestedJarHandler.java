@@ -23,12 +23,11 @@ package org.jboss.virtual.plugins.context.jar;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.zip.ZipInputStream;
 
 import org.jboss.virtual.spi.VFSContext;
@@ -78,9 +77,9 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       {
          InputStream is = parentJar.getInputStream(entry);
          ZipInputStream zis;
-         if( (is instanceof ZipInputStream) )
+         if(is instanceof ZipInputStream)
          {
-            zis = (JarInputStream) is;
+            zis = (ZipInputStream) is;
          }
          else
          {
