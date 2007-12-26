@@ -27,8 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -38,6 +38,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * Nested Jar Handler.
  * 
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
@@ -178,5 +179,17 @@ public class NestedJarHandler extends AbstractStructuredJarHandler
    public InputStream openStream() throws IOException
    {
       return new FileInputStream(temp);
+   }
+
+   /**
+    * Restore the temp file
+    *
+    * @param in the input stream
+    * @throws IOException for any error reading the jar file
+    * @throws ClassNotFoundException for any jar class finding errors
+    */
+   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
+   {
+      // TODO - temp?
    }
 }
