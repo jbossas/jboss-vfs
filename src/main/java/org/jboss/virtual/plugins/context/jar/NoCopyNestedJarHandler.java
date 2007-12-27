@@ -36,6 +36,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * Nested Jar Handler.
  * 
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */

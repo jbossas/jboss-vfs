@@ -26,7 +26,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * A handler that has children.
  *
- * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
 public interface HierarchyVirtualFileHandler
 {
