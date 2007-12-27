@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.jboss.virtual.plugins.context.AbstractURLHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -44,7 +45,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @version $Revision: 1.1 $
  */
 public class SynthenticDirEntryHandler extends AbstractURLHandler
-      implements StructuredVirtualFileHandler
+      implements StructuredVirtualFileHandler, HierarchyVirtualFileHandler
 {
    /**
     * serialVersionUID
@@ -55,7 +56,7 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
     * The jar file
     */
    private long lastModified;
-   private transient List<VirtualFileHandler> entryChildren;
+   private List<VirtualFileHandler> entryChildren;
    private transient Map<String, VirtualFileHandler> entryMap;
 
    /**

@@ -5,16 +5,13 @@ package org.jboss.virtual.plugins.context.jar;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -30,15 +27,14 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 44334 $
  */
-public class NestedJarFromStream extends AbstractJarHandler
+public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
 {
    /**
     * serialVersionUID
     */
    private static final long serialVersionUID = 1L;
 
-   private ZipInputStream zis;
-   private Map<String, JarEntryContents> entries = new HashMap<String, JarEntryContents>();
+   private transient ZipInputStream zis;
    private URL jarURL;
    private URL entryURL;
    private long lastModified;
@@ -87,65 +83,70 @@ public class NestedJarFromStream extends AbstractJarHandler
     */
    protected void init() throws IOException
    {
-      if (inited.get())
-         return;
-
-      inited.set(true);
-      try
+      if (inited.get() == false)
       {
-         ZipEntry entry = zis.getNextEntry();
-         while (entry != null)
-         {
-            try
-            {
-               String entryName = entry.getName();
-               String url = toURI().toASCIIString() + "!/" + entryName;
-               URL jecURL = new URL(url);
-               JarEntryContents jec = new JarEntryContents(getVFSContext(), this, entry, toURL(), jecURL, zis);
-               int end = entry.isDirectory() ? entryName.length() - 1 : entryName.length();
-               entries.put(entryName.substring(0, end), jec);
-               entry = zis.getNextEntry();
-            }
-            catch (Throwable t)
-            {
-               IOException ioe = new IOException("Exception while reading nested jar entry: " + this);
-               ioe.initCause(t);
-               ioe.setStackTrace(t.getStackTrace());
-               throw ioe;
-            }
-         }
-      }
-      finally
-      {
+         inited.set(true);
          try
          {
-            zis.close();
+            initJarFile(new ZisEnumeration());
          }
-         catch (IOException ignored)
+         finally
          {
+            close();
          }
-         zis = null;
       }
-   }
-
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-
-      if ("".equals(path))
-         return this;
-
-      JarEntryContents handler = getEntry(path);
-      if (handler == null)
-         throw new IOException("No such child: " + path);
-      return handler;
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       init();
-      return new ArrayList<VirtualFileHandler>(entries.values());
+      return super.getChildren(ignoreErrors);
+   }
+
+   public VirtualFileHandler findChild(String path) throws IOException
+   {
+      init();
+      return super.findChild(path);
+   }
+
+   protected void extraWrapperInfo(ZipEntryWrapper<byte[]> wrapper) throws IOException
+   {
+      byte[] contents;
+      int size = (int)wrapper.getSize();
+      if (size > 0)
+      {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
+         byte[] tmp = new byte[1024];
+         while (zis.available() > 0)
+         {
+            int length = zis.read(tmp);
+            if (length > 0)
+               baos.write(tmp, 0, length);
+         }
+         contents = baos.toByteArray();
+      }
+      else
+         contents = new byte[0];
+      wrapper.setExtra(contents);
+   }
+
+   protected VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, ZipEntryWrapper<byte[]> wrapper, String entryName) throws IOException
+   {
+      try
+      {
+         String url = toURI().toASCIIString() + "!/" + wrapper.getName();
+         URL jecURL = new URL(url);
+         VFSContext context = parent.getVFSContext();
+         byte[] contents = wrapper.getExtra();
+         return new JarEntryContents(context, parent, wrapper.getEntry(), entryName, toURL(), jecURL, contents);
+      }
+      catch (Throwable t)
+      {
+         IOException ioe = new IOException("Exception while reading nested jar entry: " + this);
+         ioe.initCause(t);
+         ioe.setStackTrace(t.getStackTrace());
+         throw ioe;
+      }
    }
 
    /**
@@ -172,30 +173,6 @@ public class NestedJarFromStream extends AbstractJarHandler
       return lastModified;
    }
 
-   public Iterator<JarEntryContents> getEntries() throws IOException
-   {
-      init();
-      return entries.values().iterator();
-   }
-
-   public JarEntryContents getEntry(String name) throws IOException
-   {
-      init();
-      return entries.get(name);
-   }
-
-   public ZipEntry getZipEntry(String name) throws IOException
-   {
-      JarEntryContents jec = getEntry(name);
-      return (jec != null ? jec.getEntry() : null);
-   }
-
-   public byte[] getContents(String name) throws IOException
-   {
-      JarEntryContents jec = getEntry(name);
-      return (jec != null ? jec.getContents() : null);
-   }
-
    // Stream accessor
    public InputStream openStream() throws IOException
    {
@@ -204,7 +181,6 @@ public class NestedJarFromStream extends AbstractJarHandler
 
    public void close()
    {
-      entries.clear();
       if (zis != null)
       {
          try
@@ -255,16 +231,40 @@ public class NestedJarFromStream extends AbstractJarHandler
       return tmp.toString();
    }
 
-   /**
-    * First, if not already, initialize entries.
-    * Then do simple write. 
-    *
-    * @param out object output stream
-    * @throws IOException for any error
-    */
-   private void writeObject(ObjectOutputStream out) throws IOException
+   protected void initJarFile() throws IOException
    {
-      init();
-      out.defaultWriteObject();
+      // todo - deserialize
+   }
+
+   private class ZisEnumeration implements Enumeration<ZipEntryWrapper<byte[]>>
+   {
+      private boolean moved = true;
+      private ZipEntry next = null;
+
+      public boolean hasMoreElements()
+      {
+         if (zis == null)
+            return false;
+         
+         try
+         {
+            if (moved)
+            {
+               next = zis.getNextEntry();
+               moved = false;
+            }
+            return next != null;
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+
+      public ZipEntryWrapper<byte[]> nextElement()
+      {
+         moved = true;
+         return new ZipEntryWrapper<byte[]>(next);
+      }
    }
 }

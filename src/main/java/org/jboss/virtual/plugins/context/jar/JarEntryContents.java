@@ -22,18 +22,22 @@
 package org.jboss.virtual.plugins.context.jar;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
+import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -43,7 +47,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Ales.Justin@jboss.org
  * @author Scott.Stark@jboss.org
  */
-public class JarEntryContents extends AbstractJarHandler
+public class JarEntryContents extends AbstractJarHandler implements StructuredVirtualFileHandler, HierarchyVirtualFileHandler
 {
    /**
     * serialVersionUID
@@ -56,14 +60,17 @@ public class JarEntryContents extends AbstractJarHandler
    private NestedJarFromStream njar;
    private InputStream openStream;
 
-   JarEntryContents(VFSContext context, VirtualFileHandler parent, ZipEntry entry, URL jarURL, URL entryURL, InputStream zis)
+   private List<VirtualFileHandler> entryChildren;
+   private transient Map<String, VirtualFileHandler> entryMap;
+
+   JarEntryContents(VFSContext context, VirtualFileHandler parent, ZipEntry entry, String entryName, URL jarURL, URL entryURL, byte[] contents)
            throws IOException
    {
-      super(context, parent, jarURL, null, entry, entry.getName());
+      super(context, parent, jarURL, null, entry, entryName);
       try
       {
-         setPathName(getChildPathName(getName(), false));
-         setVfsUrl(getChildVfsUrl(getName(), false));
+         setPathName(getChildPathName(entryName, false));
+         setVfsUrl(getChildVfsUrl(entryName, false));
       }
       catch (Exception e)
       {
@@ -71,21 +78,25 @@ public class JarEntryContents extends AbstractJarHandler
       }
       this.entryURL = entryURL;
       this.isJar = JarUtils.isArchive(getName());
-      int size = (int) entry.getSize();
-      if (size > 0)
-      {
-         ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
-         byte[] tmp = new byte[1024];
-         while (zis.available() > 0)
-         {
-            int length = zis.read(tmp);
-            if (length > 0)
-               baos.write(tmp, 0, length);
-         }
-         contents = baos.toByteArray();
-      }
-      else
-         contents = new byte[0];
+      this.contents = contents;
+   }
+
+   protected void initCacheLastModified()
+   {
+   }
+
+   /**
+    * Add a child to an entry
+    *
+    * @param child the child
+    */
+   public synchronized void addChild(VirtualFileHandler child)
+   {
+      if (entryChildren == null)
+         entryChildren = new ArrayList<VirtualFileHandler>();
+      entryChildren.add(child);
+      if (entryMap != null)
+         entryMap.put(child.getName(), child);
    }
 
    /**
@@ -109,12 +120,18 @@ public class JarEntryContents extends AbstractJarHandler
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      List<VirtualFileHandler> children = null;
+      List<VirtualFileHandler> children;
+
       if (isJar)
       {
          initNestedJar();
          children = njar.getChildren(ignoreErrors);
       }
+      else
+      {
+         children = entryChildren;
+      }
+
       if (children == null)
          return Collections.emptyList();
       else
@@ -136,10 +153,25 @@ public class JarEntryContents extends AbstractJarHandler
       }
       else if (getEntry().isDirectory())
       {
-         checkParentExists();
-         return getParent().findChild(getEntry().getName() + path);
+         return structuredFindChild(path);
       }
       throw new FileNotFoundException("JarEntryContents(" + getName() + ") has no children");
+   }
+
+   public VirtualFileHandler createChildHandler(String name) throws IOException
+   {
+      if (entryChildren == null)
+         throw new FileNotFoundException(this + " has no children");
+      if (entryMap == null)
+      {
+         entryMap = new HashMap<String, VirtualFileHandler>();
+         for (VirtualFileHandler child : entryChildren)
+            entryMap.put(child.getName(), child);
+      }
+      VirtualFileHandler child = entryMap.get(name);
+      if (child == null)
+         throw new FileNotFoundException(this + " has no child: " + name);
+      return child;
    }
 
    // Convience attribute accessors

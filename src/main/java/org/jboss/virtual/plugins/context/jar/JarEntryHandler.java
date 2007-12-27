@@ -31,10 +31,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -46,7 +47,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class JarEntryHandler extends AbstractJarHandler implements StructuredVirtualFileHandler
+public class JarEntryHandler extends AbstractJarHandler implements StructuredVirtualFileHandler, HierarchyVirtualFileHandler
 {
    /**
     * serialVersionUID
@@ -68,7 +69,7 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
     * @throws IOException              for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url, jar or entry
     */
-   public JarEntryHandler(VFSContext context, VirtualFileHandler parent, JarFile jar, JarEntry entry, String entryName, URL url)
+   public JarEntryHandler(VFSContext context, VirtualFileHandler parent, JarFile jar, ZipEntry entry, String entryName, URL url)
          throws IOException
    {
       super(context, parent, url, jar, entry, entryName);

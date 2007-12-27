@@ -26,8 +26,8 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.jboss.virtual.spi.VFSContext;
@@ -59,7 +59,7 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
     * @throws IOException for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url or vfsPath
     */
-   public NoCopyNestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, JarEntry entry, URL url, String entryName) throws IOException
+   public NoCopyNestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, ZipEntry entry, URL url, String entryName) throws IOException
    {
       super(context, parent, url, parentJar, entry, entryName);
       

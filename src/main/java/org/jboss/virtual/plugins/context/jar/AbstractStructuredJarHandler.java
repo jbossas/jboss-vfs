@@ -31,10 +31,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
+import java.util.zip.ZipEntry;
 
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -42,9 +44,10 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * AbstractStructuredJarHandler.
  *
+ * @param <T> exact extra wrapper type
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class AbstractStructuredJarHandler extends AbstractJarHandler implements StructuredVirtualFileHandler
+public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler implements StructuredVirtualFileHandler
 {
    /**
     * serialVersionUID
@@ -69,7 +72,7 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
     * @throws java.io.IOException              for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url or vfsPath
     */
-   protected AbstractStructuredJarHandler(VFSContext context, VirtualFileHandler parent, URL url, JarFile jar, JarEntry entry, String name) throws IOException
+   protected AbstractStructuredJarHandler(VFSContext context, VirtualFileHandler parent, URL url, JarFile jar, ZipEntry entry, String name) throws IOException
    {
       super(context, parent, url, jar, entry, name);
    }
@@ -86,8 +89,18 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
       if (this.jar != null)
          throw new IllegalStateException("jarFile has already been set");
       */
+      Enumeration<ZipEntryWrapper<T>> enumeration = new JarEntryEnumeration(getJar().entries());
+      initJarFile(enumeration);
+   }
 
-      Enumeration<JarEntry> enumeration = getJar().entries();
+   /**
+    * Initialise the jar file.
+    *
+    * @param enumeration jar entry enumeration
+    * @throws IOException for any error
+    */
+   protected void initJarFile(Enumeration<ZipEntryWrapper<T>> enumeration) throws IOException
+   {
       if (enumeration.hasMoreElements() == false)
       {
          entries = Collections.emptyList();
@@ -97,54 +110,55 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
 
       // Go through and create a structured representation of the jar
       Map<String, VirtualFileHandler> parentMap = new HashMap<String, VirtualFileHandler>();
-      ArrayList<ArrayList<JarEntry>> levelMapList = new ArrayList<ArrayList<JarEntry>>();
+      List<ArrayList<ZipEntryWrapper<T>>> levelMapList = new ArrayList<ArrayList<ZipEntryWrapper<T>>>();
       entries = new ArrayList<VirtualFileHandler>();
       entryMap = new HashMap<String, VirtualFileHandler>();
       boolean trace = log.isTraceEnabled();
       while (enumeration.hasMoreElements())
       {
-         JarEntry entry = enumeration.nextElement();
-         String[] paths = entry.getName().split("/");
+         ZipEntryWrapper<T> wrapper = enumeration.nextElement();
+         extraWrapperInfo(wrapper);
+         String[] paths = wrapper.getName().split("/");
          int depth = paths.length;
          if (depth >= levelMapList.size())
          {
             for (int n = levelMapList.size(); n <= depth; n++)
-               levelMapList.add(new ArrayList<JarEntry>());
+               levelMapList.add(new ArrayList<ZipEntryWrapper<T>>());
          }
-         ArrayList<JarEntry> levelMap = levelMapList.get(depth);
-         levelMap.add(entry);
+         ArrayList<ZipEntryWrapper<T>> levelMap = levelMapList.get(depth);
+         levelMap.add(wrapper);
          if (trace)
-            log.trace("added " + entry.getName() + " at depth " + depth);
+            log.trace("added " + wrapper.getName() + " at depth " + depth);
       }
       // Process each level to build the handlers in parent first order
       int level = 0;
-      for (ArrayList<JarEntry> levels : levelMapList)
+      for (ArrayList<ZipEntryWrapper<T>> levels : levelMapList)
       {
          if (trace)
             log.trace("Level(" + level++ + "): " + levels);
-         for (JarEntry entry : levels)
+         for (ZipEntryWrapper<T> wrapper : levels)
          {
-            String name = entry.getName();
-            int slash = entry.isDirectory() ? name.lastIndexOf('/', name.length() - 2) :
+            String name = wrapper.getName();
+            int slash = wrapper.isDirectory() ? name.lastIndexOf('/', name.length() - 2) :
                     name.lastIndexOf('/', name.length() - 1);
             VirtualFileHandler parent = this;
             if (slash >= 0)
             {
-               // Need to include the slash in the name to match the JarEntry.name
+               // Need to include the slash in the name to match the ZipEntry.name
                String parentName = name.substring(0, slash + 1);
                parent = parentMap.get(parentName);
                if (parent == null)
                {
                   // Build up the parent(s)
-                  parent = buildParents(parentName, parentMap, entry);
+                  parent = buildParents(parentName, parentMap, wrapper);
                }
             }
             // Get the entry name without any directory '/' ending
             int start = slash + 1;
-            int end = entry.isDirectory() ? name.length() - 1 : name.length();
+            int end = wrapper.isDirectory() ? name.length() - 1 : name.length();
             String entryName = name.substring(start, end);
-            VirtualFileHandler handler = createVirtualFileHandler(parent, entry, entryName);
-            if (entry.isDirectory())
+            VirtualFileHandler handler = createVirtualFileHandler(parent, wrapper, entryName);
+            if (wrapper.isDirectory())
             {
                parentMap.put(name, handler);
                if (trace)
@@ -156,16 +170,9 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
                entries.add(handler);
                entryMap.put(entryName, handler);
             }
-            else if (parent instanceof JarEntryHandler)
+            else if (parent instanceof HierarchyVirtualFileHandler)
             {
-               // This is a child of the jar entry handler
-               JarEntryHandler ehandler = (JarEntryHandler) parent;
-               ehandler.addChild(handler);
-            }
-            else if (parent instanceof SynthenticDirEntryHandler)
-            {
-               // This is a child of the jar entry handler
-               SynthenticDirEntryHandler ehandler = (SynthenticDirEntryHandler) parent;
+               HierarchyVirtualFileHandler ehandler = (HierarchyVirtualFileHandler) parent;
                ehandler.addChild(handler);
             }
          }
@@ -173,15 +180,25 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
    }
 
    /**
+    * Handle additional information about wrapper.
+    *
+    * @param wrapper the zip entry wrapper
+    * @throws IOException for any error
+    */
+   protected void extraWrapperInfo(ZipEntryWrapper<T> wrapper) throws IOException
+   {
+   }
+
+   /**
     * Create any missing parents.
     *
     * @param parentName full vfs path name of parent
     * @param parentMap  initJarFile parentMap
-    * @param entry      JarEntry missing a parent
+    * @param wrapper    ZipEntryWrapper missing a parent
     * @return the VirtualFileHandler for the parent
     * @throws java.io.IOException for any IO error
     */
-   protected VirtualFileHandler buildParents(String parentName, Map<String, VirtualFileHandler> parentMap, JarEntry entry)
+   protected VirtualFileHandler buildParents(String parentName, Map<String, VirtualFileHandler> parentMap, ZipEntryWrapper<T> wrapper)
            throws IOException
    {
       VirtualFileHandler parent = this;
@@ -200,23 +217,16 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
          {
             // Create a synthetic parent
             URL url = getURL(parent, path, true);
-            next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, entry.getTime(), url);
+            next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, wrapper.getTime(), url);
             if (parent == this)
             {
                // This is an immeadiate child of the jar handler
                entries.add(next);
                entryMap.put(path, next);
             }
-            else if (parent instanceof JarEntryHandler)
+            else if (parent instanceof HierarchyVirtualFileHandler)
             {
-               // This is a child of the jar entry handler
-               JarEntryHandler ehandler = (JarEntryHandler) parent;
-               ehandler.addChild(next);
-            }
-            else if (parent instanceof SynthenticDirEntryHandler)
-            {
-               // This is a child of the jar entry handler
-               SynthenticDirEntryHandler ehandler = (SynthenticDirEntryHandler) parent;
+               HierarchyVirtualFileHandler ehandler = (HierarchyVirtualFileHandler) parent;
                ehandler.addChild(next);
             }
          }
@@ -252,20 +262,21 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
     * Create a new virtual file handler
     *
     * @param parent the parent
-    * @param entry  the entry
+    * @param wrapper  the entry wrapper
     * @param entryName - the entry name without any trailing '/'
     * @return the handler
     * @throws java.io.IOException              for any error accessing the file system
     * @throws IllegalArgumentException for a null parent or entry
     */
-   protected VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, JarEntry entry, String entryName)
+   protected VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, ZipEntryWrapper<T> wrapper, String entryName)
            throws IOException
    {
       if (parent == null)
          throw new IllegalArgumentException("Null parent");
-      if (entry == null)
-         throw new IllegalArgumentException("Null entry");
+      if (wrapper == null)
+         throw new IllegalArgumentException("Null entry wrapper");
 
+      ZipEntry entry = wrapper.getEntry();
       URL url = getURL(parent, entryName, entry.isDirectory());
       VFSContext context = parent.getVFSContext();
 
@@ -299,5 +310,28 @@ public class AbstractStructuredJarHandler extends AbstractJarHandler implements 
    {
       // Initial the parent jar entries
       initJarFile();
+   }
+
+   private class JarEntryEnumeration implements Enumeration<ZipEntryWrapper<T>>
+   {
+      private Enumeration<JarEntry> enumeration;
+
+      public JarEntryEnumeration(Enumeration<JarEntry> enumeration)
+      {
+         if (enumeration == null)
+            throw new IllegalArgumentException("Null enumeration");
+         this.enumeration = enumeration;
+      }
+
+      public boolean hasMoreElements()
+      {
+         return enumeration.hasMoreElements();
+      }
+
+      public ZipEntryWrapper<T> nextElement()
+      {
+         JarEntry entry = enumeration.nextElement();
+         return new ZipEntryWrapper<T>(entry);
+      }
    }
 }

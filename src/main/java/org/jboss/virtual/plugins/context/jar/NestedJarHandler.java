@@ -29,8 +29,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -43,7 +43,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class NestedJarHandler extends AbstractStructuredJarHandler
+public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
 {
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
@@ -63,7 +63,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler
     * @return the jar file
     * @throws IOException for any error
     */
-   private static JarFile createTempJar(File temp, JarFile parentJar, JarEntry entry) throws IOException
+   private static JarFile createTempJar(File temp, JarFile parentJar, ZipEntry entry) throws IOException
    {
       InputStream inputStream = parentJar.getInputStream(entry);
       try
@@ -99,7 +99,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler
    }
 
    public static NestedJarHandler create(VFSContext context, VirtualFileHandler parent,
-         JarFile parentJar, JarEntry entry, URL url, String entryName) throws IOException
+         JarFile parentJar, ZipEntry entry, URL url, String entryName) throws IOException
    {
       File temp;
       try
@@ -130,7 +130,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler
     * @throws IOException for an error accessing the file system
     * @throws IllegalArgumentException for a null context, url or vfsPath
     */
-   protected NestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, JarEntry entry, URL original, File temp, String entryName)
+   protected NestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, ZipEntry entry, URL original, File temp, String entryName)
       throws IOException
    {
       super(context, parent, temp.toURL(), createTempJar(temp, parentJar, entry), entry, entryName);

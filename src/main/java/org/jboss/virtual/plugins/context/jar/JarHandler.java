@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.jar;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.JarFile;
@@ -37,7 +36,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class JarHandler extends AbstractStructuredJarHandler
+public class JarHandler extends AbstractStructuredJarHandler<Object>
 {
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
