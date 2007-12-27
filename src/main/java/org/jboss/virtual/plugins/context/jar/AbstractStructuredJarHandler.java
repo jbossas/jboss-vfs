@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
@@ -59,6 +61,18 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
     */
    private transient List<VirtualFileHandler> entries;
    private transient Map<String, VirtualFileHandler> entryMap;
+
+   /**
+    * Force no copy nested jar handler.
+    */
+   private static boolean forceNoCopy;
+
+   static
+   {
+      forceNoCopy = AccessController.doPrivileged(new CheckForceNoCopy());
+      if (forceNoCopy)
+         log.info("VFS force NoCopyJarHandler is enabled.");
+   }
 
    /**
     * Create a new JarHandler.
@@ -286,7 +300,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
          String flag = context.getOptions().get("useNoCopyJarHandler");
          boolean useNoCopyJarHandler = Boolean.valueOf(flag);
 
-         if (useNoCopyJarHandler)
+         if (useNoCopyJarHandler || forceNoCopy)
             vfh = new NoCopyNestedJarHandler(context, parent, getJar(), entry, url, entryName);
          else
             vfh = NestedJarHandler.create(context, parent, getJar(), entry, url, entryName);
@@ -332,6 +346,18 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       {
          JarEntry entry = enumeration.nextElement();
          return new ZipEntryWrapper<T>(entry);
+      }
+   }
+
+   /**
+    * Check if force no copy system property exists.
+    */
+   private static class CheckForceNoCopy implements PrivilegedAction<Boolean>
+   {
+      public Boolean run()
+      {
+         String forceString = System.getProperty("jboss.vfs.forceNoCopy", "false");
+         return Boolean.valueOf(forceString);
       }
    }
 }
