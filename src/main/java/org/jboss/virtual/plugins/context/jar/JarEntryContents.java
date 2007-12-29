@@ -250,7 +250,7 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       {
          ByteArrayInputStream bais = new ByteArrayInputStream(contents);
          ZipInputStream zis = new ZipInputStream(bais);
-         njar = new NestedJarFromStream(getVFSContext(), this, zis, entryURL, null, getEntry(), getName());
+         njar = new NestedJarFromStream(getVFSContext(), getParent(), zis, entryURL, null, getEntry(), getName());
       }
    }
 }
