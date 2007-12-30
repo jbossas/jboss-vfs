@@ -83,7 +83,9 @@ public class JarContext extends AbstractVFSContext
       String entryPath = urlStr;
       entryPath = entryPath(entryPath);
       JarHandler jar =  new JarHandler(this, parent, url, jarName);
-      if (entryPath == null) return jar;
+      if (entryPath == null)
+         return jar;
+      
       // todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
       AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.findChild(entryPath);
       result.setPathName("");

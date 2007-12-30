@@ -71,7 +71,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       this.file = file;
       if (file.exists() == false)
          throw new FileNotFoundException("File does not exist: " + file.getCanonicalPath());
-      setVfsUrl(new URL("vfs" + url.toString()));
+      setVfsUrl(new URL("vfs" + url));
    }
    /**
     * Create a new FileHandler
@@ -92,7 +92,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
    {
       if (getVfsUrl() == null)
       {
-         setVfsUrl(new URL("vfs" + getURL().toString()));
+         setVfsUrl(new URL("vfs" + getURL()));
       }
       return getVfsUrl();
    }
