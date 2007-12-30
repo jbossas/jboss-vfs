@@ -81,7 +81,7 @@ public class VirtualFileURLConnection extends URLConnection
          // if the root of VFS has changed on disk, lets purge it
          // this is important for Jar files as we don't want stale jars as the
          // root of the VFS (i.e., on redeployment)
-         if (vfs.getRoot().getHandler().hasBeenModified())
+         if (vfs.getRoot().hasBeenModified())
          {
             vfs = VFS.getVFS(vfsurl);
             urlCache.put(vfsurl, vfs);
