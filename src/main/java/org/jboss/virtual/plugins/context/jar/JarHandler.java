@@ -54,7 +54,7 @@ public class JarHandler extends AbstractStructuredJarHandler<Object>
    public JarHandler(VFSContext context, VirtualFileHandler parent, URL url, String name) throws IOException
    {
       super(context, parent, url, ((JarURLConnection) url.openConnection()).getJarFile(), null, name);
-      setVfsUrl(new URL("vfs" + url.toString()));
+      setVfsUrl(new URL("vfs" + url));
 
       try
       {
@@ -72,7 +72,7 @@ public class JarHandler extends AbstractStructuredJarHandler<Object>
    public JarHandler(VFSContext context, VirtualFileHandler parent, File file, URL url, String name) throws IOException
    {
       super(context, parent, url, new JarFile(file), null, name);
-      setVfsUrl(new URL("vfs" + url.toString()));
+      setVfsUrl(new URL("vfs" + url));
 
       try
       {
