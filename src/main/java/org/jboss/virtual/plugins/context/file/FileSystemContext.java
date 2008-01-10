@@ -59,16 +59,19 @@ public class FileSystemContext extends AbstractVFSContext
     * @param uri the url
     * @return the file
     * @throws IOException for any error accessing the file system
+    * @throws URISyntaxException 
     * @throws IllegalArgumentException for a null url
     */
-   private static File getFile(URI uri) throws IOException
+   private static File getFile(URI uri) throws IOException, URISyntaxException
    {
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
-      
+      // This ctor will not accept uris with authority, fragment or query
+      if(uri.getAuthority() != null || uri.getFragment() != null || uri.getQuery() != null)
+         uri = new URI("file", null, uri.getPath(), null);
       return new File(uri);
    }
-   
+
    /**
     * Get the url for a file
     * 
@@ -122,7 +125,7 @@ public class FileSystemContext extends AbstractVFSContext
     * @param rootURI the root uri
     * @throws IOException for an error accessing the file system
     */
-   public FileSystemContext(URI rootURI) throws IOException
+   public FileSystemContext(URI rootURI) throws IOException, URISyntaxException
    {
       this(rootURI, getFile(rootURI));
    }
