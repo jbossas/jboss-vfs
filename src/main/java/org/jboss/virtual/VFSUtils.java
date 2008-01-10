@@ -181,7 +181,8 @@ public class VFSUtils
       }
       catch (IOException ignored)
       {
-         log.debug("Can't find manifest for " + archive.getPathName());
+         if (log.isTraceEnabled())
+            log.trace("Can't find manifest for " + archive.getPathName());
          return null;
       }
       return readManifest(manifest);
