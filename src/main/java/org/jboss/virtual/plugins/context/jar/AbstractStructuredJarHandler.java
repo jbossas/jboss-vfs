@@ -272,6 +272,16 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       return child;
    }
 
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return entryMap.get(name);
+   }
+
    /**
     * Create a new virtual file handler
     *

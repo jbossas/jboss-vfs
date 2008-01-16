@@ -192,27 +192,45 @@ public class VFS
    
    /**
     * Find a child from the root
-    * 
+    *
     * @param path the child path
     * @return the child
     * @throws IOException for any problem accessing the VFS (including the child does not exist)
     * @throws IllegalArgumentException if the path is null
+    * @deprecated use getChild, and handle null if not found
     */
+   @Deprecated
    public VirtualFile findChild(String path) throws IOException
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
       
       VirtualFileHandler handler = context.getRoot();
-      path = VFSUtils.fixName(path);
-      VirtualFileHandler result = context.findChild(handler, path);
+      VirtualFileHandler result = context.findChild(handler, VFSUtils.fixName(path));
       return result.getVirtualFile();
    }
    
    /**
+   * Get a child
+   *
+   * @param path the child path
+   * @return the child or <code>null</code> if not found
+   * @throws IOException if a real problem occurs
+   */
+   public VirtualFile getChild(String path) throws IOException
+   {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
+      VirtualFileHandler handler = context.getRoot();
+      VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
+      return result != null ? result.getVirtualFile() : null;
+   }
+
+   /**
     * Find a child from the root
     * 
-    * @Deprecated use {@link #findChild(String)}
+    * @deprecated use {@link #findChild(String)}
     * @param path the child path
     * @return the child
     * @throws IOException for any problem accessing the VFS (including the child does not exist)

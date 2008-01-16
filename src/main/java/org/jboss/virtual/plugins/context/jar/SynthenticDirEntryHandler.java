@@ -162,11 +162,39 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
     * @throws IOException - thrown if there are no children or the
     *                     name does not match a child
     */
-   public synchronized VirtualFileHandler createChildHandler(String name)
-         throws IOException
+   public synchronized VirtualFileHandler createChildHandler(String name) throws IOException
+   {
+      return findChildHandler(name, false);
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return findChildHandler(name, true);
+   }
+
+   /**
+    * Find the handler.
+    * TODO: synchronization on lazy entryMap creation
+    *
+    * @param name the path name
+    * @param allowNull do we allow nulls
+    * @return handler or <code>null</code> is it doesn't exist
+    * @throws IOException for any error
+    */
+   protected synchronized VirtualFileHandler findChildHandler(String name, boolean allowNull) throws IOException
    {
       if (entryChildren == null)
+      {
+         if (allowNull)
+            return null;
          throw new FileNotFoundException(this + " has no children");
+      }
+
       if (entryMap == null)
       {
          entryMap = new HashMap<String, VirtualFileHandler>();
@@ -174,7 +202,7 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
             entryMap.put(child.getName(), child);
       }
       VirtualFileHandler child = entryMap.get(name);
-      if (child == null)
+      if (child == null && allowNull == false)
          throw new FileNotFoundException(this + " has no child: " + name);
       return child;
    }

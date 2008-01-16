@@ -63,4 +63,19 @@ public class MockStructuredVirtualFileHandler extends AbstractMockVirtualFileHan
       }
       throw new IOException("Child not found: " + name + " for " + toURI());
    }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      for (VirtualFileHandler child : getChildren(false))
+      {
+         if (name.equals(child.getName()))
+            return child;
+      }
+      return null;
+   }
 }

@@ -217,6 +217,17 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return handler;
    }
 
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   // TODO - this OK?
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return createChildHandler(name);
+   }
+
    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
    {
       in.defaultReadObject();

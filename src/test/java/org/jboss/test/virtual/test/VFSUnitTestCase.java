@@ -639,19 +639,36 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       }
    }
 
-   public void testFindChildSimpleDoesNotExist() throws Exception
+   public void testGetChildNullPath() throws Exception
    {
       MockVFSContext context = registerSimpleVFSContextWithChildren();
 
       try
       {
          VFS vfs = VFS.getVFS(context.getRootURI());
+         vfs.getChild(null);
+         fail("Should not be here");
+      }
+      catch (Throwable t)
+      {
+         checkThrowable(IllegalArgumentException.class, t);
+      }
+   }
+
+   public void testFindChildSimpleDoesNotExist() throws Exception
+   {
+      MockVFSContext context = registerSimpleVFSContextWithChildren();
+
+      VFS vfs = VFS.getVFS(context.getRootURI());
+      try
+      {
          vfs.findChild("doesnotexist");
          fail("Should not be here");
       }
       catch (Throwable t)
       {
          checkThrowable(IOException.class, t);
+         assertNull(vfs.getChild("doesnotexist"));
       }
    }
 
@@ -659,15 +676,16 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
    {
       MockVFSContext context = registerStructuredVFSContextWithSubChildren();
 
+      VFS vfs = VFS.getVFS(context.getRootURI());
       try
       {
-         VFS vfs = VFS.getVFS(context.getRootURI());
          vfs.findChild("child1/doesnotexist");
          fail("Should not be here");
       }
       catch (Throwable t)
       {
          checkThrowable(IOException.class, t);
+         assertNull(vfs.getChild("child1/doesnotexist"));
       }
    }
 
@@ -680,6 +698,23 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       {
          VFS vfs = VFS.getVFS(context.getRootURI());
          vfs.findChild("child1");
+         fail("Should not be here");
+      }
+      catch (Throwable t)
+      {
+         checkThrowable(IOException.class, t);
+      }
+   }
+
+   public void testGetChildIOException() throws Exception
+   {
+      MockVFSContext context = registerSimpleVFSContextWithChildren();
+      context.getMockRoot().setIOException("getChild");
+
+      try
+      {
+         VFS vfs = VFS.getVFS(context.getRootURI());
+         vfs.getChild("child1");
          fail("Should not be here");
       }
       catch (Throwable t)

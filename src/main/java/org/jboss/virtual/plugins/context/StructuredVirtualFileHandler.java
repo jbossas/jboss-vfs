@@ -43,4 +43,14 @@ public interface StructuredVirtualFileHandler
     * @throws IllegalArgumentException for a null name
     */
    VirtualFileHandler createChildHandler(String name) throws IOException;
+
+   /**
+    * Get a virtual file context
+    *
+    * @param name the name
+    * @return the handler or <code>null</code> if cannot create one
+    * @throws IOException for any error accessing the virtual file system
+    * @throws IllegalArgumentException for a null name
+    */
+   VirtualFileHandler getChildHandler(String name) throws IOException;
 }

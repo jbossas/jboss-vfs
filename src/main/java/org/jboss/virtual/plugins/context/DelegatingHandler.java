@@ -70,6 +70,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate.findChild(path);
    }
 
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return delegate.getChild(path);
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       return delegate.getChildren(ignoreErrors);

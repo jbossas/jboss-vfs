@@ -90,6 +90,16 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
          return children.get(name);
       }
 
+      public VirtualFileHandler getChild(String path) throws IOException
+      {
+         return structuredGetChild(path);
+      }
+
+      public VirtualFileHandler getChildHandler(String name) throws IOException
+      {
+         return children.get(name);
+      }
+
       public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
       {
          return null;
@@ -198,11 +208,20 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       VirtualFileHandler handler = linkTargets.get(name);
-      if( handler == null )
-      {
-         throw new FileNotFoundException("Failed to find link for: "+name+", parent: "+this);
-      }
+      if(handler == null)
+         throw new FileNotFoundException("Failed to find link for: " + name + ", parent: " + this);
+
       return handler;
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return linkTargets.get(name);
    }
 
    @Override

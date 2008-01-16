@@ -125,6 +125,15 @@ public abstract class AbstractVFSContext implements VFSContext
       return parent.findChild(path);
    }
 
+   public VirtualFileHandler getChild(VirtualFileHandler parent, String path) throws IOException
+   {
+      if (parent == null)
+         throw new IllegalArgumentException("Null parent");
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+      return parent.getChild(path);
+   }
+
    public void visit(VirtualFileHandler handler, VirtualFileHandlerVisitor visitor) throws IOException
    {
       if (handler == null)
@@ -138,8 +147,7 @@ public abstract class AbstractVFSContext implements VFSContext
       boolean ignoreErrors = attributes.isIgnoreErrors();
       boolean includeHidden = attributes.isIncludeHidden();
       VirtualFileFilter recurseFilter = attributes.getRecurseFilter();
-      visit(handler, visitor, includeRoot, leavesOnly, ignoreErrors,
-            includeHidden, recurseFilter);
+      visit(handler, visitor, includeRoot, leavesOnly, ignoreErrors, includeHidden, recurseFilter);
    }
 
    /**

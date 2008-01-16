@@ -371,7 +371,9 @@ public class VirtualFile implements Serializable
     * @throws IOException for any problem accessing the VFS (including the child does not exist)
     * @throws IllegalArgumentException if the path is null
     * @throws IllegalStateException if the file is closed or it is a leaf node
+    * @deprecated use getChild, and handle null if not found
     */
+   @Deprecated
    public VirtualFile findChild(String path) throws IOException
    {
       VirtualFileHandler handler = getHandler();
@@ -379,9 +381,28 @@ public class VirtualFile implements Serializable
       if (handler.isLeaf())
          throw new IllegalStateException("File cannot contain children: " + this);
 
-      path = VFSUtils.fixName(path);
-      VirtualFileHandler child = handler.findChild(path);
+      VirtualFileHandler child = handler.findChild(VFSUtils.fixName(path));
       return child.getVirtualFile();
+   }
+
+   /**
+    * Get a child
+    *
+    * @param path the path
+    * @return the child or <code>null</code> if not found
+    * @throws IOException for any problem accessing the VFS
+    * @throws IllegalArgumentException if the path is null
+    * @throws IllegalStateException if the file is closed or it is a leaf node
+    */
+   public VirtualFile getChild(String path) throws IOException
+   {
+      VirtualFileHandler handler = getHandler();
+      VirtualFileHandler child = null;
+      if (handler.isLeaf() == false)
+      {
+         child = handler.getChild(VFSUtils.fixName(path));
+      }
+      return child != null ? child.getVirtualFile() : null;
    }
 
    @Override
@@ -406,5 +427,4 @@ public class VirtualFile implements Serializable
       VirtualFile other = (VirtualFile) obj;
       return handler.equals(other.handler);
    }
-
 }

@@ -136,6 +136,11 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       return structuredFindChild(path);
    }
 
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return childrenMap.get(name);
+   }
+
    @Override
    public VirtualFile getVirtualFile()
    {

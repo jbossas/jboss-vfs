@@ -109,6 +109,16 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return child;
    }
 
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredGetChild(path);
+   }
+
+   public VirtualFileHandler getChildHandler(String name) throws IOException
+   {
+      return entryMap.get(name);
+   }
+
    @Override
    public boolean exists() throws IOException
    {
