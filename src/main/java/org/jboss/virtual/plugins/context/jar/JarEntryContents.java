@@ -138,29 +138,9 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
          return Collections.unmodifiableList(children);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-
-      if ("".equals(path))
-         return this;
-
-      if (isJar)
-      {
-         initNestedJar();
-         return njar.findChild(path);
-      }
-      else if (getEntry().isDirectory())
-      {
-         return structuredFindChild(path);
-      }
-      throw new FileNotFoundException("JarEntryContents(" + getName() + ") has no children");
-   }
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      return findChildHandler(name, false);
+      return findChildHandler(name, true);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
@@ -174,18 +154,13 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       if (isJar)
       {
          initNestedJar();
-         return njar.findChild(path);
+         return njar.getChild(path);
       }
       else if (getEntry().isDirectory())
       {
-         return structuredGetChild(path);
+         return structuredFindChild(path);
       }
       return null;
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return findChildHandler(name, true);
    }
 
    /**

@@ -62,7 +62,7 @@ public class VirtualFileUrlStreamHandler extends URLStreamHandler
          throw new IOException(u.toString() + " does not belong to the same VFS context as " + baseRootUrl);
 
       String path = urlString.substring(baseRootUrl.length());
-      VirtualFileHandler vf = context.getRoot().findChild(path);
+      VirtualFileHandler vf = context.getRoot().getChild(path);
       if (vf == null)
          throw new IOException(path + " was not found in VFS context " + baseRootUrl);
 

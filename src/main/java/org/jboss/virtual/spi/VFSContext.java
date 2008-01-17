@@ -78,17 +78,6 @@ public interface VFSContext
    List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException;
    
    /**
-    * Find a child
-    * 
-    * @param parent the parent
-    * @param path the path
-    * @return the child
-    * @throws IOException for any problem accessing the VFS
-    * @throws IllegalArgumentException for a null parent or name
-    */
-   VirtualFileHandler findChild(VirtualFileHandler parent, String path) throws IOException;
-   
-   /**
     * Get a child
     *
     * @param parent the parent

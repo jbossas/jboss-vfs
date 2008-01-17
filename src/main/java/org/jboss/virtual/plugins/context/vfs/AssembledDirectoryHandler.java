@@ -78,9 +78,14 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       return handler;
    }
 
-   public VirtualFileHandler getChild(String name)
+   public VirtualFileHandler findChild(String name)
    {
       return childrenMap.get(name);
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredFindChild(path);
    }
 
    public URI toURI() throws URISyntaxException
@@ -124,19 +129,6 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    }
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
-   {
-      VirtualFileHandler handler = childrenMap.get(name);
-      if (handler == null)
-         throw new IOException("Could not locate child: " + name);
-      return handler;
-   }
-
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
    {
       return childrenMap.get(name);
    }

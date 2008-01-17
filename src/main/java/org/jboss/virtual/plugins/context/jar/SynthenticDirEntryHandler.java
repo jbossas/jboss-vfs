@@ -148,11 +148,6 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
       return Collections.unmodifiableList(entryChildren);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    /**
     * Create a child handler for the given name. This looks to the entryMap
     * for an existing child.
@@ -164,17 +159,12 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
     */
    public synchronized VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      return findChildHandler(name, false);
+      return findChildHandler(name, true);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return findChildHandler(name, true);
+      return structuredFindChild(path);
    }
 
    /**

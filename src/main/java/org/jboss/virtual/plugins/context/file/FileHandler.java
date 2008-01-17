@@ -192,11 +192,6 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return result;
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       FileSystemContext context = getVFSContext();
@@ -219,13 +214,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   // TODO - this OK?
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return createChildHandler(name);
+      return structuredFindChild(path);
    }
 
    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException

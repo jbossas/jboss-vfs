@@ -49,11 +49,6 @@ public class MockStructuredVirtualFileHandler extends AbstractMockVirtualFileHan
       super(context, parent, name);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       for (VirtualFileHandler child : getChildren(false))
@@ -61,21 +56,11 @@ public class MockStructuredVirtualFileHandler extends AbstractMockVirtualFileHan
          if (name.equals(child.getName()))
             return child;
       }
-      throw new IOException("Child not found: " + name + " for " + toURI());
+      return null;
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      for (VirtualFileHandler child : getChildren(false))
-      {
-         if (name.equals(child.getName()))
-            return child;
-      }
-      return null;
+      return structuredFindChild(path);
    }
 }

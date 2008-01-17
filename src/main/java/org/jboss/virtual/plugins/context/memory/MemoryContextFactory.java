@@ -194,7 +194,7 @@ public class MemoryContextFactory implements VFSContextFactory
          MemoryContext ctx = registry.get(rootName);
          if (ctx != null)
          {
-            MemoryContextHandler child = (MemoryContextHandler)ctx.findChild(ctx.getRoot(), url.getPath());
+            MemoryContextHandler child = (MemoryContextHandler)ctx.getChild(ctx.getRoot(), url.getPath());
             MemoryContextHandler parent = (MemoryContextHandler)child.getParent();
             return parent.deleteChild(child);
          }

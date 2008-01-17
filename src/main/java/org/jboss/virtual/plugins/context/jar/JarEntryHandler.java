@@ -138,11 +138,6 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       return Collections.unmodifiableList(entryChildren);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    @Override
    public InputStream openStream() throws IOException
    {
@@ -151,17 +146,12 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      return findChildHandler(name, false);
+      return findChildHandler(name, true);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return findChildHandler(name, true);
+      return structuredFindChild(path);
    }
 
    /**

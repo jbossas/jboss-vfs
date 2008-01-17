@@ -376,12 +376,16 @@ public class VirtualFile implements Serializable
    @Deprecated
    public VirtualFile findChild(String path) throws IOException
    {
-      VirtualFileHandler handler = getHandler();
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
 
+      VirtualFileHandler handler = getHandler();      
       if (handler.isLeaf())
          throw new IllegalStateException("File cannot contain children: " + this);
 
-      VirtualFileHandler child = handler.findChild(VFSUtils.fixName(path));
+      VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
+      if (child == null)
+         throw new IOException("Child not found " + path + " for " + handler);
       return child.getVirtualFile();
    }
 
@@ -396,12 +400,11 @@ public class VirtualFile implements Serializable
     */
    public VirtualFile getChild(String path) throws IOException
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
       VirtualFileHandler handler = getHandler();
-      VirtualFileHandler child = null;
-      if (handler.isLeaf() == false)
-      {
-         child = handler.getChild(VFSUtils.fixName(path));
-      }
+      VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
       return child != null ? child.getVirtualFile() : null;
    }
 

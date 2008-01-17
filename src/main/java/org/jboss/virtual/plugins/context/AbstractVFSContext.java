@@ -116,15 +116,6 @@ public abstract class AbstractVFSContext implements VFSContext
       return parent.getChildren(ignoreErrors);
    }
 
-   public VirtualFileHandler findChild(VirtualFileHandler parent, String path) throws IOException
-   {
-      if (parent == null)
-         throw new IllegalArgumentException("Null parent");
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-      return parent.findChild(path);
-   }
-
    public VirtualFileHandler getChild(VirtualFileHandler parent, String path) throws IOException
    {
       if (parent == null)

@@ -49,7 +49,7 @@ public class AssembledFileHandler extends DelegatingHandler
       throw new IOException("File cannot have children: " + this);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
+   public VirtualFileHandler getChild(String path) throws IOException
    {
       throw new IOException("File cannot have children: " + this);
    }

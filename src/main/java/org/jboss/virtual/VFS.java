@@ -206,7 +206,9 @@ public class VFS
          throw new IllegalArgumentException("Null path");
       
       VirtualFileHandler handler = context.getRoot();
-      VirtualFileHandler result = context.findChild(handler, VFSUtils.fixName(path));
+      VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
+      if (result == null)
+         throw new IOException("Child not found " + path + " for " + handler);
       return result.getVirtualFile();
    }
    

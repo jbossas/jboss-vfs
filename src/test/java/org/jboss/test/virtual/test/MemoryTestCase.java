@@ -80,7 +80,7 @@ public class MemoryTestCase extends BaseTestCase
       List<VirtualFileHandler> list = desParent.getChildren(true);
       assertNotNull(list);
       assertFalse(list.isEmpty());
-      assertNotNull(desParent.findChild("child"));
+      assertNotNull(desParent.getChild("child"));
    }
 
    public void testContextFactory()throws Exception

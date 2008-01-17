@@ -342,7 +342,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
    public void testGetVirtualFileURIIOExceptionFindChild() throws Exception
    {
       MockVFSContext context = registerSimpleVFSContextWithChildren();
-      context.getMockRoot().setIOException("findChild");
+      context.getMockRoot().setIOException("getChild");
 
       try
       {
@@ -530,7 +530,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
    public void testGetVirtualFileURLIOExceptionFindChild() throws Exception
    {
       MockVFSContext context = registerSimpleVFSContextWithChildren();
-      context.getMockRoot().setIOException("findChild");
+      context.getMockRoot().setIOException("getChild");
 
       try
       {
@@ -692,7 +692,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
    public void testFindChildIOException() throws Exception
    {
       MockVFSContext context = registerSimpleVFSContextWithChildren();
-      context.getMockRoot().setIOException("findChild");
+      context.getMockRoot().setIOException("getChild");
 
       try
       {

@@ -321,55 +321,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    }
 
    /**
-    * Structured implementation of find child
-    * 
-    * @param path the path
-    * @return the handler
-    * @throws IOException for any error accessing the virtual file system
-    * @throws IllegalArgumentException for a null name
-    */
-   public VirtualFileHandler structuredFindChild(String path) throws IOException
-   {
-      checkClosed();
-
-      // Parse the path
-      String[] tokens = PathTokenizer.getTokens(path);
-      if (tokens == null || tokens.length == 0)
-         return this;
-
-      // Go through each context starting from ours 
-      // check the parents are not leaves.
-      VirtualFileHandler current = this;
-      for (int i = 0; i < tokens.length; ++i)
-      {
-         if (current.isLeaf())
-            throw new IOException("File cannot have children: " + current);
-
-         if (PathTokenizer.isReverseToken(tokens[i]))
-         {
-            VirtualFileHandler parent = current.getParent();
-            if (parent == null)
-               throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
-            else
-               current = parent;
-         }
-         else if (current instanceof StructuredVirtualFileHandler)
-         {
-            StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-            current = structured.createChildHandler(tokens[i]);
-         }
-         else
-         {
-            String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
-            return current.findChild(remainingPath);
-         }
-      }
-      
-      // The last one is the result
-      return current;
-   }
-
-   /**
     * Structured implementation of get child
     *
     * @param path the path
@@ -377,7 +328,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * @throws IOException for any error accessing the virtual file system
     * @throws IllegalArgumentException for a null name
     */
-   public VirtualFileHandler structuredGetChild(String path) throws IOException
+   public VirtualFileHandler structuredFindChild(String path) throws IOException
    {
       checkClosed();
 
@@ -397,7 +348,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (PathTokenizer.isReverseToken(tokens[i]))
          {
             VirtualFileHandler parent = current.getParent();
-            if (parent == null)
+            if (parent == null) // TODO - still IOE or null?
                throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
             else
                current = parent;
@@ -405,7 +356,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          else if (current instanceof StructuredVirtualFileHandler)
          {
             StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-            current = structured.getChildHandler(tokens[i]);
+            current = structured.createChildHandler(tokens[i]);
          }
          else
          {
@@ -428,20 +379,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    public VirtualFileHandler simpleFindChild(String path) throws IOException
    {
-      return simpleFindChild(path, false);     
-   }
-
-   /**
-    * Simple implementation of findChild
-    *
-    * @param path the path
-    * @param allowNull do we allow null
-    * @return the handler or <code>null</code> if not found
-    * @throws IOException for any error accessing the virtual file system
-    * @throws IllegalArgumentException for a null name
-    */
-   protected VirtualFileHandler simpleFindChild(String path, boolean allowNull) throws IOException
-   {
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
@@ -456,10 +393,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (child.getName().equals(appliedPath))
             return child;
       }
-      if (allowNull)
-         return null;
-      else
-         throw new IOException("Child not found " + path + " for " + this);
+      return null;
    }
 
    @Override

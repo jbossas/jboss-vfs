@@ -21,24 +21,23 @@
 */
 package org.jboss.virtual.plugins.context.jar;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import java.security.PrivilegedAction;
-import java.security.AccessController;
 
-import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
+import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -223,31 +222,33 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
          VirtualFileHandler next;
          pathName.append(path);
          pathName.append('/');
-         try
-         {
-            next = parent.findChild(path);
-         }
-         catch (IOException e)
-         {
-            // Create a synthetic parent
-            URL url = getURL(parent, path, true);
-            next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, wrapper.getTime(), url);
-            if (parent == this)
-            {
-               // This is an immeadiate child of the jar handler
-               entries.add(next);
-               entryMap.put(path, next);
-            }
-            else if (parent instanceof HierarchyVirtualFileHandler)
-            {
-               HierarchyVirtualFileHandler ehandler = (HierarchyVirtualFileHandler) parent;
-               ehandler.addChild(next);
-            }
-         }
+         next = parent.getChild(path);
+         if (next == null)
+            next = createSynthenticParent(parent, path, wrapper);
          parentMap.put(pathName.toString(), next);
          parent = next;
       }
       return parent;
+   }
+
+   protected VirtualFileHandler createSynthenticParent(VirtualFileHandler parent, String path, ZipEntryWrapper<T> wrapper)
+         throws IOException
+   {
+      VirtualFileHandler next;// Create a synthetic parent
+      URL url = getURL(parent, path, true);
+      next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, wrapper.getTime(), url);
+      if (parent == this)
+      {
+         // This is an immeadiate child of the jar handler
+         entries.add(next);
+         entryMap.put(path, next);
+      }
+      else if (parent instanceof HierarchyVirtualFileHandler)
+      {
+         HierarchyVirtualFileHandler ehandler = (HierarchyVirtualFileHandler) parent;
+         ehandler.addChild(next);
+      }
+      return next;
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
@@ -259,27 +260,14 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
          return Collections.unmodifiableList(entries);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      VirtualFileHandler child = entryMap.get(name);
-      if (child == null)
-         throw new FileNotFoundException(this + " has no child: " + name);
-      return child;
+      return entryMap.get(name);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return entryMap.get(name);
+      return structuredFindChild(path);
    }
 
    /**

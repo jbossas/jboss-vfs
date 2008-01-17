@@ -22,7 +22,6 @@
 package org.jboss.virtual.plugins.context.memory;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -78,11 +77,6 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return entryMap.remove(child.getName()) != null;
    }
    
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    MemoryContextHandler getDirectChild(String name)
    {
       return entryMap.get(name);
@@ -103,20 +97,12 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
     */
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      VirtualFileHandler child = entryMap.get(name);
-      if(child == null)
-         throw new FileNotFoundException(this+" has no child: "+name);
-      return child;
+      return entryMap.get(name);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredGetChild(path);
-   }
-
-   public VirtualFileHandler getChildHandler(String name) throws IOException
-   {
-      return entryMap.get(name);
+      return structuredFindChild(path);
    }
 
    @Override

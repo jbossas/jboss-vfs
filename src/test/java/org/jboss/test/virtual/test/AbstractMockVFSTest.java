@@ -275,7 +275,7 @@ public abstract class AbstractMockVFSTest extends AbstractVFSTest
 
       VirtualFileHandler root = context.getRoot();
       assertNotNull(root);
-      VirtualFileHandler handler = context.findChild(root, path);
+      VirtualFileHandler handler = context.getChild(root, path);
       assertNotNull(handler);
       return handler;
    }

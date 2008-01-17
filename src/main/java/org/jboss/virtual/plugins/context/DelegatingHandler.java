@@ -65,11 +65,6 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       this.delegate = delegate;
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return delegate.findChild(path);
-   }
-
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return delegate.getChild(path);

@@ -87,7 +87,7 @@ public class JarContext extends AbstractVFSContext
          return jar;
       
       // todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
-      AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.findChild(entryPath);
+      AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.getChild(entryPath);
       result.setPathName("");
       return result;
    }
