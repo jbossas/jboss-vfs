@@ -164,14 +164,14 @@ public interface VirtualFileHandler extends Serializable
    List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException;
 
    /**
-    * Find a child
-    * 
+    * Get a child
+    *
     * @param path the path
-    * @return the child
-    * @throws IOException for an error accessing the file system (or the child doesn't exist)
+    * @return the child or <code>null</code> if not found
+    * @throws IOException for an error accessing the file system
     * @throws IllegalStateException if closed
     */
-   VirtualFileHandler findChild(String path) throws IOException;
+   VirtualFileHandler getChild(String path) throws IOException;
 
    /**
     * Get the VFSContext this file belongs to

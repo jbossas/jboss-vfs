@@ -47,7 +47,7 @@ public class Handler extends URLStreamHandler
       if (ctx == null)
          throw new IOException("vfs does not exist: " + u.toString());
 
-      VirtualFile vf = ctx.findChild(ctx.getRoot(), u.getPath()).getVirtualFile();
+      VirtualFile vf = ctx.getChild(ctx.getRoot(), u.getPath()).getVirtualFile();
       if (vf == null)
          throw new IOException("vfs does not exist: " + u.toString());
 

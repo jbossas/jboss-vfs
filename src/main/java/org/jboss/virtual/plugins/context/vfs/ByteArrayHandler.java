@@ -99,7 +99,7 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
       throw new IOException("File cannot have children");
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
+   public VirtualFileHandler getChild(String path) throws IOException
    {
       throw new IOException("File cannot have children");
    }

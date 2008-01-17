@@ -21,12 +21,11 @@
 */
 package org.jboss.virtual.plugins.context.file;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,14 +79,14 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
          children.put(name, child);
       }
 
-      public VirtualFileHandler findChild(String path) throws IOException
-      {
-         return structuredFindChild(path);
-      }
-
       public VirtualFileHandler createChildHandler(String name) throws IOException
       {
          return children.get(name);
+      }
+
+      public VirtualFileHandler getChild(String path) throws IOException
+      {
+         return structuredFindChild(path);
       }
 
       public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
@@ -133,16 +132,16 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
             int n = 0;
             VirtualFileHandler linkParent = this;
             String atom;
-            // Look for an existing parent           
+            // Look for an existing parent
+            VirtualFileHandler previous;
             for(; n < paths.length-1; n ++)
             {
+               previous = linkParent;
                atom = paths[n];
-               try
+               linkParent = previous.getChild(atom);
+               if (linkParent == null)
                {
-                  linkParent = linkParent.findChild(atom);
-               }
-               catch(IOException e)
-               {
+                  linkParent = previous;
                   break;
                }
             }
@@ -156,10 +155,14 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
                {
                   linkTargets.put(atom, pol);
                }
-               else
+               else if (linkParent instanceof ParentOfLink)
                {
                   ParentOfLink prevPOL = (ParentOfLink) linkParent;
                   prevPOL.addChild(pol, atom);
+               }
+               else
+               {
+                  throw new IOException("Link parent not ParentOfLink.");
                }
                linkParent = pol;
             }
@@ -190,19 +193,14 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
       return new ArrayList<VirtualFileHandler>(linkTargets.values());
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      VirtualFileHandler handler = linkTargets.get(name);
-      if( handler == null )
-      {
-         throw new FileNotFoundException("Failed to find link for: "+name+", parent: "+this);
-      }
-      return handler;
+      return linkTargets.get(name);
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredFindChild(path);
    }
 
    @Override

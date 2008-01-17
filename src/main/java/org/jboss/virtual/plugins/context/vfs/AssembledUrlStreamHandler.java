@@ -47,7 +47,7 @@ public class AssembledUrlStreamHandler extends URLStreamHandler
    protected URLConnection openConnection(URL url) throws IOException
    {
       String path = url.getPath();
-      VirtualFileHandler vf = context.getRoot().findChild(path);
+      VirtualFileHandler vf = context.getRoot().getChild(path);
       if (vf == null)
          throw new IOException(path + " was not found in Assembled VFS context " + context.getName());
 

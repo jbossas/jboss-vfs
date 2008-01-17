@@ -138,7 +138,12 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
          return Collections.unmodifiableList(children);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
+   public VirtualFileHandler createChildHandler(String name) throws IOException
+   {
+      return findChildHandler(name, true);
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
@@ -149,19 +154,33 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       if (isJar)
       {
          initNestedJar();
-         return njar.findChild(path);
+         return njar.getChild(path);
       }
       else if (getEntry().isDirectory())
       {
          return structuredFindChild(path);
       }
-      throw new FileNotFoundException("JarEntryContents(" + getName() + ") has no children");
+      return null;
    }
 
-   public VirtualFileHandler createChildHandler(String name) throws IOException
+   /**
+    * Find the handler.
+    * TODO: synchronization on lazy entryMap creation
+    *
+    * @param name the path name
+    * @param allowNull do we allow nulls
+    * @return handler or <code>null</code> is it doesn't exist
+    * @throws IOException for any error
+    */
+   protected synchronized VirtualFileHandler findChildHandler(String name, boolean allowNull) throws IOException
    {
       if (entryChildren == null)
+      {
+         if (allowNull)
+            return null;
          throw new FileNotFoundException(this + " has no children");
+      }
+
       if (entryMap == null)
       {
          entryMap = new HashMap<String, VirtualFileHandler>();
@@ -169,7 +188,7 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
             entryMap.put(child.getName(), child);
       }
       VirtualFileHandler child = entryMap.get(name);
-      if (child == null)
+      if (child == null && allowNull == false)
          throw new FileNotFoundException(this + " has no child: " + name);
       return child;
    }

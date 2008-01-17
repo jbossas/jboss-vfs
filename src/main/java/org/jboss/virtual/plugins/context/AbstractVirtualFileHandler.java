@@ -321,10 +321,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    }
 
    /**
-    * Structured implementation of find child
-    * 
+    * Structured implementation of get child
+    *
     * @param path the path
-    * @return the handler
+    * @return the handler or <code>null</code> if it doesn't exist
     * @throws IOException for any error accessing the virtual file system
     * @throws IllegalArgumentException for a null name
     */
@@ -337,18 +337,18 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       if (tokens == null || tokens.length == 0)
          return this;
 
-      // Go through each context starting from ours 
+      // Go through each context starting from ours
       // check the parents are not leaves.
       VirtualFileHandler current = this;
       for (int i = 0; i < tokens.length; ++i)
       {
-         if (current.isLeaf())
-            throw new IOException("File cannot have children: " + current);
+         if (current == null || current.isLeaf())
+            return null;
 
          if (PathTokenizer.isReverseToken(tokens[i]))
          {
             VirtualFileHandler parent = current.getParent();
-            if (parent == null)
+            if (parent == null) // TODO - still IOE or null?
                throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
             else
                current = parent;
@@ -361,10 +361,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          else
          {
             String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
-            return current.findChild(remainingPath);
+            return current.getChild(remainingPath);
          }
       }
-      
+
       // The last one is the result
       return current;
    }
@@ -393,7 +393,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (child.getName().equals(appliedPath))
             return child;
       }
-      throw new IOException("Child not found " + path + " for " + this);
+      return null;
    }
 
    @Override

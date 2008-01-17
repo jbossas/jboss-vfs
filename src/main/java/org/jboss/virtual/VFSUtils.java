@@ -177,7 +177,7 @@ public class VFSUtils
       VirtualFile manifest;
       try
       {
-         manifest = archive.findChild(JarFile.MANIFEST_NAME); 
+         manifest = archive.findChild(JarFile.MANIFEST_NAME);
       }
       catch (IOException ignored)
       {

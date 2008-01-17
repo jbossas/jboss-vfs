@@ -1337,7 +1337,7 @@ public class VirtualFileUnitTestCase extends AbstractMockVFSTest
    public void testFindChildIOException() throws Exception
    {
       MockVFSContext context = registerSimpleVFSContextWithChildren();
-      context.getMockRoot().setIOException("findChild");
+      context.getMockRoot().setIOException("getChild");
 
       VirtualFile file = VFS.getRoot(context.getRootURI());
       try

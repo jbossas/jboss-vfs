@@ -127,7 +127,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       VFSContext context = getVFSContext("complex");
       VirtualFileHandler root = context.getRoot();
-      VirtualFileHandler found = context.findChild(root, "");
+      VirtualFileHandler found = context.getChild(root, "");
       assertEquals(root, found);
    }
 
@@ -135,7 +135,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       VFSContext context = getVFSContext("complex");
       VirtualFileHandler root = context.getRoot();
-      VirtualFileHandler found = context.findChild(root, "child");
+      VirtualFileHandler found = context.getChild(root, "child");
       assertEquals("child", found.getPathName());
    }
 
@@ -143,7 +143,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       VFSContext context = getVFSContext("complex");
       VirtualFileHandler root = context.getRoot();
-      VirtualFileHandler found = context.findChild(root, "subfolder");
+      VirtualFileHandler found = context.getChild(root, "subfolder");
       assertEquals("subfolder", found.getPathName());
    }
 
@@ -151,7 +151,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       VFSContext context = getVFSContext("complex");
       VirtualFileHandler root = context.getRoot();
-      VirtualFileHandler found = context.findChild(root, "subfolder/subchild");
+      VirtualFileHandler found = context.getChild(root, "subfolder/subchild");
       assertEquals("subfolder/subchild", found.getPathName());
    }
 
@@ -161,8 +161,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       VirtualFileHandler root = context.getRoot();
       try
       {
-         context.findChild(root, "doesnotexist");
-         fail("Should not be here!");
+         assertNull(context.getChild(root, "doesnotexist"));
       }
       catch (Throwable t)
       {
@@ -175,7 +174,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       VFSContext context = getVFSContext("complex");
       try
       {
-         context.findChild(null, "");
+         context.getChild(null, "");
          fail("Should not be here!");
       }
       catch (Throwable t)
@@ -190,7 +189,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       VirtualFileHandler root = context.getRoot();
       try
       {
-         context.findChild(root, null);
+         context.getChild(root, null);
          fail("Should not be here!");
       }
       catch (Throwable t)
@@ -236,7 +235,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       VFSContext context = getParentVFSContext();
       VirtualFileHandler root = context.getRoot();
-      VirtualFileHandler child = context.findChild(root, path);
+      VirtualFileHandler child = context.getChild(root, path);
       assertNotNull(child);
       assertTrue(child.isLeaf());
       assertEquals(fileName, child.getName());

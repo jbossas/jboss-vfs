@@ -21,14 +21,13 @@
 */
 package org.jboss.test.virtual.test;
 
-import junit.framework.TestCase;
-
-import java.util.regex.Pattern;
 import java.util.List;
+import java.util.regex.Pattern;
 
-import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
-import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
+import junit.framework.TestCase;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
+import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
 
 /**
  * comment
@@ -227,12 +226,10 @@ public class AssembledContextTest extends TestCase
       assertTrue("VirtualFile.class was found", found);
 
       found = false;
-      VirtualFile plugins = null;
       for (VirtualFile child: children)
       {
          if (child.getName().equals("plugins"))
          {
-            plugins = child;
             found = true;
             break;
          }

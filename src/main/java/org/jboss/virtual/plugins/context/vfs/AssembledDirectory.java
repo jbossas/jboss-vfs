@@ -118,7 +118,7 @@ public class AssembledDirectory extends VirtualFile
       AssembledDirectoryHandler dir = directory;
       for (int i = 0; i < pkgs.length - 1; i++)
       {
-         AssembledDirectoryHandler next = (AssembledDirectoryHandler) dir.getChild(pkgs[i]);
+         AssembledDirectoryHandler next = (AssembledDirectoryHandler) dir.findChild(pkgs[i]);
          if (next == null)
          {
             try

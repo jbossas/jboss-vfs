@@ -119,7 +119,7 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       return getJar().getInputStream(getEntry());
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
+   public VirtualFileHandler getChild(String path) throws IOException
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
@@ -127,7 +127,7 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       if ("".equals(path))
          return this;
 
-      return njar.findChild(path);
+      return njar.getChild(path);
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException

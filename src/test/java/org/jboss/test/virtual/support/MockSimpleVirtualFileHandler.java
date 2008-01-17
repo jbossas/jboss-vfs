@@ -48,9 +48,9 @@ public class MockSimpleVirtualFileHandler extends AbstractMockVirtualFileHandler
       super(context, parent, name);
    }
 
-   public VirtualFileHandler findChild(String path) throws IOException
+   public VirtualFileHandler getChild(String path) throws IOException
    {
-      throwIOException("findChild");
+      throwIOException("getChild");
       return simpleFindChild(path);
    }
 }
