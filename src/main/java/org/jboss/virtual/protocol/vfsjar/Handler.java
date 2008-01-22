@@ -22,7 +22,6 @@
 package org.jboss.virtual.protocol.vfsjar;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -45,20 +44,5 @@ public class Handler extends URLStreamHandler
       String path = urlString.substring(index + 2);
       URL url = new URL(file);
       return new VirtualFileURLConnection(u, url, path);
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      System.setProperty("java.protocol.handler.pkgs", "org.jboss.virtual.protocol");
-      //URL url = new URL("vfsfile:/c:/tmp/urlstream.java");
-      //URL url = new URL("vfsfile:/C:\\jboss\\jboss-head\\build\\output\\jboss-5.0.0.Beta\\server\\default\\lib\\jboss.jar\\schema\\xml.xsd");
-      URL url = new URL("vfsjar:file:/c:/tmp/parent.jar!/foo.jar/urlstream.java");
-      InputStream is = url.openStream();
-      while (is.available() != 0)
-      {
-         System.out.print((char)is.read());
-      }
-      is.close();
-
    }
 }
