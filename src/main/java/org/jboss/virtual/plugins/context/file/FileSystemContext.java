@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.file;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -251,8 +250,6 @@ public class FileSystemContext extends AbstractVFSContext
                break;
             }
          }
-         if( handler == null )
-            throw new FileNotFoundException("File does not exist: " + file.getCanonicalPath());
       }
       else if (file.exists())
       {

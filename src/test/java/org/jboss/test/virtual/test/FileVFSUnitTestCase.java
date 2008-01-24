@@ -509,6 +509,18 @@ public class FileVFSUnitTestCase extends BaseTestCase
       assertFalse("root isDirectory", root.isLeaf());
    }
 
+   public void testFileNotFoundInUnpackedJar()
+      throws Exception
+   {
+      URL rootURL = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(rootURL);
+
+      // Find the outer.jar
+      VirtualFile outerJar = vfs.findChild("unpacked-outer.jar");
+      assertNotNull("unpacked-outer.jar", outerJar);
+      assertNull(outerJar.getChild("WEB-INF"));
+   }
+
    /**
     * Test file resolution with nested jars
     * @throws Exception
