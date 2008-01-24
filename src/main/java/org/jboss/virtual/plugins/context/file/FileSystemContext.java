@@ -254,7 +254,7 @@ public class FileSystemContext extends AbstractVFSContext
          if( handler == null )
             throw new FileNotFoundException("File does not exist: " + file.getCanonicalPath());
       }
-      else
+      else if (file.exists())
       {
          handler = new FileHandler(this, parent, file, uri);
       }

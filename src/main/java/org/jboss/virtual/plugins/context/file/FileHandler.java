@@ -194,7 +194,6 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      FileSystemContext context = getVFSContext();
       File parentFile = getFile();
       File child = new File(parentFile, name);
       VirtualFileHandler handler = childCache.get(name);
@@ -206,6 +205,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       }
       if (handler == null)
       {
+         FileSystemContext context = getVFSContext();
          handler = context.createVirtualFileHandler(this, child);
          childCache.put(name, handler);
       }
