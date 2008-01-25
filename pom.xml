@@ -13,9 +13,9 @@
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.0.0.Beta6</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.0.0.Beta6</developerConnection>
-    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.0.0.Beta6</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/trunk</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</developerConnection>
+    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</url>
   </scm>
   <licenses>
     <license>
@@ -86,6 +86,7 @@
       <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-release-plugin</artifactId>
+         <version>2.0-beta-7</version>
          <configuration>
            <tagBase>https://svn.jboss.org/repos/jbossas/projects/vfs/tags</tagBase>
          </configuration>
@@ -124,26 +125,4 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>jboss</id>
-      <name>JBoss Repository</name>
-      <url>http://repository.jboss.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>jboss-snapshots</id>
-      <name>JBoss Snapshot Repository</name>
-      <url>http://snapshots.jboss.org/maven2</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  
 </project>
