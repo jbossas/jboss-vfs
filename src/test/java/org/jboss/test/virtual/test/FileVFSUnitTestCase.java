@@ -521,6 +521,23 @@ public class FileVFSUnitTestCase extends BaseTestCase
       assertNull(outerJar.getChild("WEB-INF"));
    }
 
+/*
+   public void testNestedNestedParent()
+      throws Exception
+   {
+      URL rootURL = getResource("/vfs/seam/jboss-seam-booking.ear");
+      VFS vfs = VFS.getVFS(rootURL);
+
+      // Find the outer.jar
+      VirtualFile props = vfs.getChild("jboss-seam-booking.war/WEB-INF/lib/jboss-seam-debug.jar/seam.properties");
+      assertNotNull("seam.properties", props);
+      VirtualFile debug = props.getParent();
+      assertNotNull(debug);
+      VirtualFile lib = debug.getParent();
+      assertNotNull(lib);
+   }
+*/
+
    /**
     * Test file resolution with nested jars
     * @throws Exception

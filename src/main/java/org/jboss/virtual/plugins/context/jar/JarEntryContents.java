@@ -140,7 +140,13 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      return findChildHandler(name, true);
+      if (isJar)
+      {
+         initNestedJar();
+         return njar.createChildHandler(name);
+      }
+      else
+         return findChildHandler(name, true);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException

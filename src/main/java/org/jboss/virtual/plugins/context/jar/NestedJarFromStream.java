@@ -109,6 +109,12 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
       return super.getChild(path);
    }
 
+   public VirtualFileHandler createChildHandler(String name) throws IOException
+   {
+      init();
+      return super.createChildHandler(name);
+   }
+
    protected void extraWrapperInfo(ZipEntryWrapper<byte[]> wrapper) throws IOException
    {
       byte[] contents;
