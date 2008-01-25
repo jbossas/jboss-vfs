@@ -143,7 +143,10 @@ public class VFSUtils
          String path = tokenizer.nextToken();
          try
          {
-            URL libURL = new URL(parentURL, path);
+            String parentPath = parentURL.toString();
+            if(parentPath.endsWith("/") == false)
+               parentPath += "/";
+            URL libURL = new URL(parentPath + path);
             String libPath = libURL.getPath();
             // TODO, this occurs for inner jars. Doubtful that such a mf cp is valid
             if( rootPathLength > libPath.length() )
