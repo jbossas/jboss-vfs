@@ -34,6 +34,9 @@ import java.io.IOException;
 public class PathTokenizer
 {
    /** The reverse path const */
+   private static final String CURRENT_PATH = ".";
+
+   /** The reverse path const */
    private static final String REVERSE_PATH = "..";
 
    /**
@@ -97,8 +100,6 @@ public class PathTokenizer
 
          if ("".equals(token))
             throw new IllegalArgumentException("A path element is empty: " + path);
-         if (".".equals(token))
-            throw new IllegalArgumentException("Single . in path is not allowed: " + path);
 
          tokens[i++] = token;
       }
@@ -122,13 +123,13 @@ public class PathTokenizer
    }
 
    /**
-    * Apply any .. paths in the path param.
+    * Apply any . or .. paths in the path param.
     *
     * @param path the path
-    * @return simple path, containing no .. paths
+    * @return simple path, containing no . or .. paths
     * @throws IOException if reverse path goes over the top path
     */
-   public static String applyReversePaths(String path) throws IOException
+   public static String applySpecialPaths(String path) throws IOException
    {
       String[] tokens = getTokens(path);
       if (tokens == null)
@@ -137,10 +138,14 @@ public class PathTokenizer
       int i = 0;
       for(int j = 0; j < tokens.length; j++)
       {
-         if (isReverseToken(tokens[j]))
+         String token = tokens[j];
+
+         if (isCurrentToken(token))
+            continue;
+         else if (isReverseToken(token))
             i--;
          else
-            tokens[i++] = tokens[j];
+            tokens[i++] = token;
 
          if (i < 0)
             throw new IOException("Using reverse path on top path: " + path);
@@ -149,10 +154,21 @@ public class PathTokenizer
    }
 
    /**
+    * Is current token.
+    *
+    * @param token the token to check
+    * @return true if token matches current path token
+    */
+   public static boolean isCurrentToken(String token)
+   {
+      return CURRENT_PATH.equals(token);
+   }
+
+   /**
     * Is reverse token.
     *
     * @param token the token to check
-    * @return true if token matches reverse path token 
+    * @return true if token matches reverse path token
     */
    public static boolean isReverseToken(String token)
    {

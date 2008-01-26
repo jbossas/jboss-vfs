@@ -200,12 +200,12 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
 
    public void testSimpleReversePath() throws Exception
    {
-      checkReversePath("simple" + getSuffix() + "/../complex" + getSuffix() + "/subfolder/subsubfolder/../subchild", "subchild");
+      checkSpecialPath("simple" + getSuffix() + "/../complex" + getSuffix() + "/subfolder/subsubfolder/../subchild", "subchild");
    }
 
    public void testComplexReversePath() throws Exception
    {
-      checkReversePath("complex" + getSuffix() + "/../simple" + getSuffix() + "/child", "child");
+      checkSpecialPath("complex" + getSuffix() + "/../simple" + getSuffix() + "/child", "child");
    }
 
    public void testDirectOverTheTop() throws Exception
@@ -222,7 +222,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       try
       {
-         checkReversePath(path, null);
+         checkSpecialPath(path, null);
          fail("Should not be here.");
       }
       catch(Exception e)
@@ -231,7 +231,25 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       }
    }
 
-   protected void checkReversePath(String path, String fileName) throws Exception
+   public void testCurrentAtTheStart() throws Exception
+   {
+      checkSpecialPath("./simple" + getSuffix() + "/child", "child");
+      checkSpecialPath("./complex" + getSuffix() + "/subfolder/subchild", "subchild");
+   }
+
+   public void testCurrentInTheMiddle() throws Exception
+   {
+      checkSpecialPath("simple" + getSuffix() + "/./child", "child");
+      checkSpecialPath("complex" + getSuffix() + "/./subfolder/subchild", "subchild");
+   }
+
+   public void testConcurrentCurrent() throws Exception
+   {
+      checkSpecialPath("././simple" + getSuffix() + "/././child", "child");
+      checkSpecialPath("././complex" + getSuffix() + "/././subfolder/subchild", "subchild");
+   }
+
+   protected void checkSpecialPath(String path, String fileName) throws Exception
    {
       VFSContext context = getParentVFSContext();
       VirtualFileHandler root = context.getRoot();

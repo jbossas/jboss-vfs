@@ -345,23 +345,26 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (current == null || current.isLeaf())
             return null;
 
-         if (PathTokenizer.isReverseToken(tokens[i]))
+         if (PathTokenizer.isCurrentToken(tokens[i]) == false)
          {
-            VirtualFileHandler parent = current.getParent();
-            if (parent == null) // TODO - still IOE or null?
-               throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
+            if (PathTokenizer.isReverseToken(tokens[i]))
+            {
+               VirtualFileHandler parent = current.getParent();
+               if (parent == null) // TODO - still IOE or null?
+                  throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
+               else
+                  current = parent;
+            }
+            else if (current instanceof StructuredVirtualFileHandler)
+            {
+               StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
+               current = structured.createChildHandler(tokens[i]);
+            }
             else
-               current = parent;
-         }
-         else if (current instanceof StructuredVirtualFileHandler)
-         {
-            StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-            current = structured.createChildHandler(tokens[i]);
-         }
-         else
-         {
-            String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
-            return current.getChild(remainingPath);
+            {
+               String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
+               return current.getChild(remainingPath);
+            }
          }
       }
 
@@ -386,7 +389,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          return this;
 
       // check for reverse .. path
-      String appliedPath = PathTokenizer.applyReversePaths(path);
+      String appliedPath = PathTokenizer.applySpecialPaths(path);
       List<VirtualFileHandler> children = getChildren(false);
       for (VirtualFileHandler child : children)
       {

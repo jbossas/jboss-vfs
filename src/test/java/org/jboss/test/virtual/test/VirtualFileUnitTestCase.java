@@ -1235,6 +1235,9 @@ public class VirtualFileUnitTestCase extends AbstractMockVFSTest
       assertFindChild(root, "", root);
       assertFindChild(root, "folder2/../folder1/child1", child1);
       assertFindChild(root, "folder3/child1/../../folder2/child2", child2);
+      assertFindChild(root, "./folder1/child1", child1);
+      assertFindChild(root, "folder2/./child2", child2);
+      assertFindChild(root, "././folder2/././child2", child2);
       try
       {
          assertFindChild(root, "../folder3/child3", child3);
