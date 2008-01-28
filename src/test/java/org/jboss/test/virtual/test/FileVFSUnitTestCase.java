@@ -1192,14 +1192,18 @@ public class FileVFSUnitTestCase extends BaseTestCase
       assertNotNull(outerjar);
       VirtualFile jar1 = outerjar.getChild("jar1.jar");
       assertNotNull(jar1);
+      VirtualFile jar2 = outerjar.getChild("jar2.jar");
+      assertNotNull(jar2);
       VirtualFile innerjar = outerjar.getChild("innermf.jar");
       assertNotNull("innermf.jar != null", innerjar);
    
       ArrayList<VirtualFile> cp = new ArrayList<VirtualFile>();
       VFSUtils.addManifestLocations(innerjar, cp);
-      assertEquals(1, cp.size());
+      assertEquals(2, cp.size());
       VirtualFile cp0 = cp.get(0);
       assertEquals(jar1, cp0);
+      VirtualFile cp1 = cp.get(1);
+      assertEquals(jar2, cp1);
    }
 
    /**

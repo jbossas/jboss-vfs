@@ -152,8 +152,16 @@ public class VFSUtils
             if( rootPathLength > libPath.length() )
                throw new IOException("Invalid rootPath: "+vfsRootURL+", libPath: "+libPath);
             String vfsLibPath = libPath.substring(rootPathLength);
-            VirtualFile vf = file.getVFS().findChild(vfsLibPath);
-            paths.add(vf);
+            VirtualFile vf = file.getVFS().getChild(vfsLibPath);
+            if(vf != null)
+            {
+               if(paths.contains(vf) == false)
+               {
+                  paths.add(vf);
+                  // Recursively process the jar
+                  addManifestLocations(vf, paths);
+               }
+            }
          }
          catch (IOException e)
          {
