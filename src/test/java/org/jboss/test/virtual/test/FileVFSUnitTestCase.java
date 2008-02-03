@@ -522,19 +522,24 @@ public class FileVFSUnitTestCase extends BaseTestCase
    }
 
 /*
-   public void testNestedNestedParent()
+   public void testNoCopyNestedStream()
       throws Exception
    {
       URL rootURL = getResource("/vfs/seam/jboss-seam-booking.ear");
       VFS vfs = VFS.getVFS(rootURL);
 
-      // Find the outer.jar
-      VirtualFile props = vfs.getChild("jboss-seam-booking.war/WEB-INF/lib/jboss-seam-debug.jar/seam.properties");
-      assertNotNull("seam.properties", props);
-      VirtualFile debug = props.getParent();
-      assertNotNull(debug);
-      VirtualFile lib = debug.getParent();
-      assertNotNull(lib);
+      VirtualFile clazz = vfs.getChild("lib/commons-beanutils.jar/org/apache/commons/beanutils/BeanComparator.class");
+      assertNotNull(clazz);
+      URL url = clazz.toURL();
+      InputStream is = url.openStream();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      byte[] tmp = new byte[1024];
+      int read = 0;
+      while ( (read = is.read(tmp)) >= 0 )
+         baos.write(tmp, 0, read);
+      byte[] bytes = baos.toByteArray();
+      int size = bytes.length;
+      System.out.println("size = " + size);
    }
 */
 

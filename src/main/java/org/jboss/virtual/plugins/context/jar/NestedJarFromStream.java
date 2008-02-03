@@ -119,9 +119,9 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
    {
       byte[] contents;
       int size = (int)wrapper.getSize();
-      if (size > 0)
+      if (size != 0)
       {
-         ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
+         ByteArrayOutputStream baos = size > 0 ? new ByteArrayOutputStream(size) : new ByteArrayOutputStream();
          byte[] tmp = new byte[1024];
          while (zis.available() > 0)
          {
