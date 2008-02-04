@@ -521,6 +521,16 @@ public class FileVFSUnitTestCase extends BaseTestCase
       assertNull(outerJar.getChild("WEB-INF"));
    }
 
+   public void testNestedNestedParent() throws Exception
+   {
+      // TODO
+   }
+
+   public void testNoCopyNestedStream() throws Exception
+   {
+      // TODO
+   }
+
 /*
    public void testNoCopyNestedStream()
       throws Exception
