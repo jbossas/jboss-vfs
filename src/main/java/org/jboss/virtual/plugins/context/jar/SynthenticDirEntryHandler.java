@@ -55,7 +55,6 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    /**
     * The jar file
     */
-   private long lastModified;
    private List<VirtualFileHandler> entryChildren;
    private transient Map<String, VirtualFileHandler> entryMap;
 
@@ -85,7 +84,11 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
       {
          throw new RuntimeException(e);
       }
-      this.lastModified = lastModified;
+      this.cachedLastModified = lastModified;
+   }
+
+   protected void initCacheLastModified()
+   {
    }
 
    /**
@@ -105,7 +108,9 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    @Override
    public long getLastModified()
    {
-      return lastModified;
+      if (cachedLastModified == 0)
+         cachedLastModified = System.currentTimeMillis();
+      return cachedLastModified;
    }
 
    @Override
