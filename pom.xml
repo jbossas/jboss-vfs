@@ -51,6 +51,7 @@
         optimization flag set, and define the source and target to be 1.5,
         these setting will be inherited by child projects -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.0</version>
         <configuration>
@@ -74,11 +75,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.3</version>
+        <version>2.3.1</version>
         <configuration>
-          <testFailureIgnore>true</testFailureIgnore>
-          <disableXmlReport>false</disableXmlReport>
-          <forkMode>once</forkMode> <!-- required to correctly run the PojoServer tests -->
+          <forkMode>always</forkMode> <!-- required to correctly run the PojoServer tests -->
           <useSystemClassLoader>true</useSystemClassLoader>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>
