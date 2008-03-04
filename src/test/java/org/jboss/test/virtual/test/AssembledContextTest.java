@@ -21,10 +21,11 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
+import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
 import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
@@ -33,10 +34,16 @@ import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
  * comment
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class AssembledContextTest extends TestCase
+public class AssembledContextTest extends BaseTestCase
 {
+   public AssembledContextTest(String name)
+   {
+      super(name);
+   }
+
    public void testRegex()
    {
       String[] files = {".java", "x.java", "FooBar.java"};
@@ -179,6 +186,14 @@ public class AssembledContextTest extends TestCase
 
    public void testAddResources() throws Exception
    {
+      // Find test.classes.url location for vfs/links/war1.vfslink.properties
+      URL classesURL = getClass().getProtectionDomain().getCodeSource().getLocation();
+      assertNotNull("classesURL", classesURL);
+      System.setProperty("test.classes.url", classesURL.toString());
+      URL libURL = super.getResource("/vfs/sundry/jar");
+      assertNotNull("libURL", libURL);      
+      System.setProperty("test.lib.url", libURL.toString());
+
       AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
       String[] includes = {"org/jboss/virtual/*.class", "org/jboss/virtual/**/context/jar/*.class"};
       String[] excludes = {"**/Nested*"};
