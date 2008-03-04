@@ -620,6 +620,8 @@ public class FileVFSUnitTestCase extends BaseTestCase
       HashSet<String> expectedClasses = new HashSet<String>();
       expectedClasses.add("jar1.jar/org/jboss/test/vfs/support/jar1/ClassInJar1.class");
       expectedClasses.add("jar1.jar/org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class");
+      expectedClasses.add("jar1-filesonly.jar/org/jboss/test/vfs/support/jar1/ClassInJar1.class");
+      expectedClasses.add("jar1-filesonly.jar/org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class");
       expectedClasses.add("jar2.jar/org/jboss/test/vfs/support/jar2/ClassInJar2.class");
       expectedClasses.add("org/jboss/test/vfs/support/CommonClass.class");
       super.enableTrace("org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter");
@@ -635,7 +637,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
             count ++;
          }
       }
-      assertEquals("There were 4 classes", 4, count);
+      assertEquals("There were 6 classes", 6, count);
    }
 
    /**
@@ -653,7 +655,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
       expectedClasses.add("jar1.jar/org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class");
       expectedClasses.add("jar2.jar/org/jboss/test/vfs/support/jar2/ClassInJar2.class");
       // FIXME: .class files are not being copied from the resources directory
-      //expectedClasses.add("org/jboss/test/vfs/support/CommonClass.class");
+      expectedClasses.add("org/jboss/test/vfs/support/CommonClass.class");
       super.enableTrace("org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter");
       SuffixMatchFilter classVisitor = new SuffixMatchFilter(".class", VisitorAttributes.RECURSE);
       List<VirtualFile> classes = vfs.getChildren(classVisitor);
@@ -667,7 +669,7 @@ public class FileVFSUnitTestCase extends BaseTestCase
             count ++;
          }
       }
-      assertEquals("There were 3 classes", 3, count);
+      assertEquals("There were 4 classes", 4, count);
    }
 
    /**
