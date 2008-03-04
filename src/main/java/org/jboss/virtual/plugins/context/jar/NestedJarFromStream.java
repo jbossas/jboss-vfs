@@ -3,9 +3,15 @@
  */
 package org.jboss.virtual.plugins.context.jar;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamField;
+import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream.PutField;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,14 +38,22 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
    /**
     * serialVersionUID
     */
-   private static final long serialVersionUID = 1L;
+   private static final long serialVersionUID = 2L;
+   /** The class serial fields */
+   private static final ObjectStreamField[] serialPersistentFields = {
+      new ObjectStreamField("zisBytes", byte[].class),
+      new ObjectStreamField("jarURL", URL.class),
+      new ObjectStreamField("entryURL", String.class),
+      new ObjectStreamField("lastModified", long.class),
+      new ObjectStreamField("size", long.class)
+   };
 
    private transient ZipInputStream zis;
+   private transient AtomicBoolean inited = new AtomicBoolean(false);
    private URL jarURL;
    private URL entryURL;
    private long lastModified;
    private long size;
-   private AtomicBoolean inited = new AtomicBoolean(false);
 
    /**
     * Create a nested jar from the parent zip inputstream/zip entry.
@@ -272,5 +286,83 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
          moved = true;
          return new ZipEntryWrapper<byte[]>(next);
       }
+   }
+   /**
+    * Write the jar contents and information
+    * @param out
+    * @throws IOException
+    */
+   private void writeObject(ObjectOutputStream out)
+      throws IOException
+   {
+      PutField fields = out.putFields();
+
+      byte[] zisBytes = null;
+      ZipInputStream jarStream = zis;
+      if(jarStream == null)
+      {
+         // Need to obtain this nested jar input stream from parent
+         InputStream parentIS = super.getParent().openStream();
+         if(parentIS == null)
+            throw new IOException("Failed to open parent stream, "+this);
+         if(parentIS instanceof ZipInputStream)
+         {
+            jarStream = (ZipInputStream) parentIS;
+         }
+         else
+         {
+            jarStream = new ZipInputStream(parentIS);
+         }
+         // First find our entry
+         ZipEntry entry = jarStream.getNextEntry();
+         while(entry != null)
+         {
+            if(entry.getName().equals(getName()))
+               break;
+            entry = jarStream.getNextEntry();
+         }
+         if(entry == null)
+            throw new IOException("Failed to find nested jar entry: "+this.getName()+" in parent: "+getParent());
+      }
+      // Now read zis for this entry
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      byte[] tmp = new byte[1024];
+      int length = jarStream.read(tmp);
+      while(length > 0)
+      {
+         baos.write(tmp, 0, length);
+         length = jarStream.read(tmp);
+      }
+      jarStream.close();
+      jarStream = null;
+      zisBytes = baos.toByteArray();
+      fields.put("zisBytes", zisBytes);
+      fields.put("jarURL", jarURL);
+      fields.put("entryURL", entryURL);
+      fields.put("lastModified", lastModified);
+      fields.put("size", size);
+      out.writeFields();
+   }
+   /**
+    * Read the jar contents and reinitialize the entry map
+    * @param in
+    * @throws IOException
+    * @throws ClassNotFoundException
+    */
+   private void readObject(ObjectInputStream in)
+      throws IOException, ClassNotFoundException
+   {
+      // Read in the serialPersistentFields
+      GetField fields = in.readFields();
+      byte[] zisBytes =  (byte[]) fields.get("zisBytes", null);
+      this.jarURL = (URL) fields.get("jarURL", null);
+      this.entryURL = (URL) fields.get("entryURL", null);
+      this.lastModified = fields.get("lastModified", (long)-1);
+      this.size = fields.get("size", (long)-1);
+      // Initialize the jar entry map
+      inited = new AtomicBoolean(false);
+      ByteArrayInputStream bais = new ByteArrayInputStream(zisBytes);
+      zis = new ZipInputStream(bais);
+      this.init();
    }
 }
