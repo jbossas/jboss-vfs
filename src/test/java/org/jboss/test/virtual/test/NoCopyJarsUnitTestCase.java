@@ -138,6 +138,10 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       assertEquals("jar1", title1);
       jar1DSMF.close();
    }
+   /**
+    * JBVFS-17 test
+    * @throws Exception
+    */
    public void testInnerJarFilesOnlyFileSerialization()
       throws Exception
    {
@@ -167,7 +171,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       VirtualFile jar1DS = (VirtualFile) ois.readObject();
       ois.close();
       assertNotNull("jar1 deserialized", jar1DS);
-      VirtualFile jar1DSMF = jar1.findChild("META-INF/MANIFEST.MF");
+      VirtualFile jar1DSMF = jar1DS.getChild("META-INF/MANIFEST.MF");
       assertNotNull("jar1-filesonly!/META-INF/MANIFEST.MF", jar1DSMF);
       mfIS = jar1DSMF.openStream();
       mf1 = new Manifest(mfIS);
