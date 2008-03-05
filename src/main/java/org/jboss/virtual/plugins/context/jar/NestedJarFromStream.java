@@ -196,6 +196,31 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
    // Stream accessor
    public InputStream openStream() throws IOException
    {
+      if(zis == null)
+      {
+         // Need to obtain this nested jar input stream from parent
+         InputStream parentIS = super.getParent().openStream();
+         if(parentIS == null)
+            throw new IOException("Failed to open parent stream, "+this);
+         if(parentIS instanceof ZipInputStream)
+         {
+            zis = (ZipInputStream) parentIS;
+         }
+         else
+         {
+            zis = new ZipInputStream(parentIS);
+         }
+         // First find our entry
+         ZipEntry entry = zis.getNextEntry();
+         while(entry != null)
+         {
+            if(entry.getName().equals(getName()))
+               break;
+            entry = zis.getNextEntry();
+         }
+         if(entry == null)
+            throw new IOException("Failed to find nested jar entry: "+this.getName()+" in parent: "+getParent());
+      }
       return zis;
    }
 
@@ -305,14 +330,7 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
          InputStream parentIS = super.getParent().openStream();
          if(parentIS == null)
             throw new IOException("Failed to open parent stream, "+this);
-         if(parentIS instanceof ZipInputStream)
-         {
-            jarStream = (ZipInputStream) parentIS;
-         }
-         else
-         {
-            jarStream = new ZipInputStream(parentIS);
-         }
+         jarStream = new ZipInputStream(parentIS);
          // First find our entry
          ZipEntry entry = jarStream.getNextEntry();
          while(entry != null)
