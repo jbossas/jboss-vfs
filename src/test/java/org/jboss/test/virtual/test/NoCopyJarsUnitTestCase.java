@@ -21,18 +21,15 @@
  */
 package org.jboss.test.virtual.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
@@ -40,6 +37,7 @@ import org.jboss.virtual.VirtualFile;
 /**
  * Tests of no copy nested jars
  * 
+ * @author ales.justin@jboss.org
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
  * @version $Revision$
@@ -68,8 +66,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
     * Test reading the contents of nested jar entries.
     * @throws Exception
     */
-   public void testInnerJarFile()
-      throws Exception
+   public void testInnerJarFile() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
@@ -99,8 +96,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       jar2MF.close();
    }
 
-   public void testInnerJarFileSerialization()
-      throws Exception
+   public void testInnerJarFileSerialization() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
@@ -121,14 +117,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       assertEquals("jar1", title1);
       jar1MF.close();
    
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(jar1);
-      oos.close();
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      ObjectInputStream ois = new ObjectInputStream(bais);
-      VirtualFile jar1DS = (VirtualFile) ois.readObject();
-      ois.close();
+      VirtualFile jar1DS = serializeDeserialize(jar1, VirtualFile.class);
       assertNotNull("jar1 deserialized", jar1DS);
       VirtualFile jar1DSMF = jar1.findChild("META-INF/MANIFEST.MF");
       mfIS = jar1DSMF.openStream();
@@ -142,8 +131,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
     * JBVFS-17 test
     * @throws Exception
     */
-   public void testInnerJarFilesOnlyFileSerialization()
-      throws Exception
+   public void testInnerJarFilesOnlyFileSerialization() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
@@ -162,14 +150,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       assertEquals("jar1-filesonly", title1);
       jar1MF.close();
    
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(jar1);
-      oos.close();
-      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-      ObjectInputStream ois = new ObjectInputStream(bais);
-      VirtualFile jar1DS = (VirtualFile) ois.readObject();
-      ois.close();
+      VirtualFile jar1DS = serializeDeserialize(jar1, VirtualFile.class);
       assertNotNull("jar1 deserialized", jar1DS);
       VirtualFile jar1DSMF = jar1DS.getChild("META-INF/MANIFEST.MF");
       assertNotNull("jar1-filesonly!/META-INF/MANIFEST.MF", jar1DSMF);
@@ -180,4 +161,70 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       assertEquals("jar1-filesonly", title1);
       jar1DSMF.close();
    }
+
+   public void testLevelZips() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile one = vfs.findChild("level1.zip");
+      VirtualFile textOne = one.findChild("test1.txt");
+      testText(textOne);
+      VirtualFile two = one.findChild("level2.zip");
+      VirtualFile textTwo = two.findChild("test2.txt");
+      testText(textTwo);
+      VirtualFile three = two.findChild("level3.zip");
+      VirtualFile textThree = three.findChild("test3.txt");
+      testText(textThree);
+
+      three = serializeDeserialize(three, VirtualFile.class);
+      textThree = three.findChild("test3.txt");
+      testText(textThree);
+
+      two = serializeDeserialize(two, VirtualFile.class);
+      textTwo = two.findChild("test2.txt");
+      testText(textTwo);
+      three = two.findChild("level3.zip");
+      textThree = two.findChild("level3.zip/test3.txt");
+      testText(textThree);
+      textThree = three.findChild("test3.txt");
+      testText(textThree);
+
+      one = serializeDeserialize(one, VirtualFile.class);
+      textOne = one.findChild("test1.txt");
+      testText(textOne);
+      two = one.findChild("level2.zip");
+      textTwo = one.findChild("level2.zip/test2.txt");
+      testText(textTwo);
+      textTwo = two.findChild("test2.txt");
+      testText(textTwo);
+      three = one.findChild("level2.zip/level3.zip");
+      textThree = three.findChild("test3.txt");
+      testText(textThree);
+      textThree = one.findChild("level2.zip/level3.zip/test3.txt");
+      testText(textThree);
+      three = two.findChild("level3.zip");
+      textThree = three.findChild("test3.txt");
+      testText(textThree);
+      textThree = two.findChild("level3.zip/test3.txt");
+      testText(textThree);
+   }
+
+   protected void testText(VirtualFile file) throws Exception
+   {
+      InputStream in = file.openStream();
+      try
+      {
+         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+         String line;
+         while ((line = reader.readLine()) != null)
+         {
+            assertEquals("Some test.", line);
+         }
+      }
+      finally
+      {
+         in.close();
+      }
+   }
+
 }
