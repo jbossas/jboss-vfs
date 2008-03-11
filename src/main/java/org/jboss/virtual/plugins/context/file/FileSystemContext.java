@@ -184,7 +184,7 @@ public class FileSystemContext extends AbstractVFSContext
          }
          catch (IOException e)
          {
-            log.debug("Exception while trying handle file (" + name + ") as a jar: " + e.getMessage());
+            log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
          }
       }
       return createVirtualFileHandler(parent, file, getFileURI(file));
