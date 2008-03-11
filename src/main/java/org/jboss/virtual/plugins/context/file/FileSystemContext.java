@@ -175,20 +175,19 @@ public class FileSystemContext extends AbstractVFSContext
       if (file == null)
          throw new IllegalArgumentException("Null file");
       
-      URI fileURL = getFileURI(file);
-      if (file.isFile() && JarUtils.isArchive(file.getName()))
+      String name = file.getName();
+      if (file.isFile() && JarUtils.isArchive(name))
       {
-         String name = file.getName();
          try
          {
             return new JarHandler(this, parent, file, file.toURL(), name);
          }
          catch (IOException e)
          {
-            log.debug(e.getMessage());
+            log.debug("Exception while trying handle file (" + name + ") as a jar: " + e.getMessage());
          }
       }
-      return createVirtualFileHandler(parent, file, fileURL);
+      return createVirtualFileHandler(parent, file, getFileURI(file));
    }
 
    /**
