@@ -21,7 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.jar;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -34,8 +33,8 @@ import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
+import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -145,33 +144,11 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       return getJar().getInputStream(getEntry());
    }
 
-   public VirtualFileHandler createChildHandler(String name) throws IOException
-   {
-      return findChildHandler(name, true);
-   }
-
-   public VirtualFileHandler getChild(String path) throws IOException
-   {
-      return structuredFindChild(path);
-   }
-
-   /**
-    * Find the handler.
-    * TODO: synchronization on lazy entryMap creation
-    *
-    * @param name the path name
-    * @param allowNull do we allow nulls
-    * @return handler or <code>null</code> is it doesn't exist
-    * @throws IOException for any error
-    */
-   protected synchronized VirtualFileHandler findChildHandler(String name, boolean allowNull) throws IOException
+   // TODO: synchronization on lazy entryMap creation
+   public synchronized VirtualFileHandler createChildHandler(String name) throws IOException
    {
       if (entryChildren == null)
-      {
-         if (allowNull)
-            return null;
-         throw new FileNotFoundException(this + " has no children");
-      }
+         return null;
 
       if (entryMap == null)
       {
@@ -179,9 +156,11 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
          for (VirtualFileHandler child : entryChildren)
             entryMap.put(child.getName(), child);
       }
-      VirtualFileHandler child = entryMap.get(name);
-      if (child == null && allowNull == false)
-         throw new FileNotFoundException(this + " has no child: " + name);
-      return child;
+      return entryMap.get(name);
+   }
+
+   public VirtualFileHandler getChild(String path) throws IOException
+   {
+      return structuredFindChild(path);
    }
 }

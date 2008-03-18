@@ -22,7 +22,6 @@
 package org.jboss.virtual.plugins.context.jar;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -146,7 +145,7 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
          return njar.createChildHandler(name);
       }
       else
-         return findChildHandler(name, true);
+         return findChildHandler(name);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
@@ -174,18 +173,13 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
     * TODO: synchronization on lazy entryMap creation
     *
     * @param name the path name
-    * @param allowNull do we allow nulls
     * @return handler or <code>null</code> is it doesn't exist
     * @throws IOException for any error
     */
-   protected synchronized VirtualFileHandler findChildHandler(String name, boolean allowNull) throws IOException
+   protected synchronized VirtualFileHandler findChildHandler(String name) throws IOException
    {
       if (entryChildren == null)
-      {
-         if (allowNull)
-            return null;
-         throw new FileNotFoundException(this + " has no children");
-      }
+         return null;
 
       if (entryMap == null)
       {
@@ -193,10 +187,7 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
          for (VirtualFileHandler child : entryChildren)
             entryMap.put(child.getName(), child);
       }
-      VirtualFileHandler child = entryMap.get(name);
-      if (child == null && allowNull == false)
-         throw new FileNotFoundException(this + " has no child: " + name);
-      return child;
+      return entryMap.get(name);
    }
 
    // Convience attribute accessors
