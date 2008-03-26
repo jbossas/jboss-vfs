@@ -286,6 +286,16 @@ public class MemoryTestCase extends BaseTestCase
       }
    }
    
+   public void testUrlHandling()throws Exception
+   {
+      URL directory = new URL("vfsmemory://guid");
+      URL classes = new URL(directory, "classes");
+
+      URL classes2 = new URL(directory + "/classes");
+      
+      assertEquals(classes, classes2);
+   }
+   
    protected void setUp() throws Exception
    {
       super.setUp();
