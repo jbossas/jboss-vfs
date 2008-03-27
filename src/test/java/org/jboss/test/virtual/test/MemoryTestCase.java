@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.jboss.test.BaseTestCase;
+import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
@@ -288,12 +289,14 @@ public class MemoryTestCase extends BaseTestCase
    
    public void testUrlHandling()throws Exception
    {
-      URL directory = new URL("vfsmemory://guid");
-      URL classes = new URL(directory, "classes");
+      String guid = GUID.asString();
+      URL rootA = new URL("vfsmemory://" + guid);
+      URL rootB = new URL("vfsmemory", guid, "");
+      assertEquals(rootA, rootB);
 
-      URL classes2 = new URL(directory + "/classes");
-      
-      assertEquals(classes, classes2);
+      URL rootC = new URL("vfsmemory://" + guid + "/classes");
+      URL rootD = new URL("vfsmemory", guid, "/classes");
+      assertEquals(rootC, rootD);
    }
    
    protected void setUp() throws Exception
