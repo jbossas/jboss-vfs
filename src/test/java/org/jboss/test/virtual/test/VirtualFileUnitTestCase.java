@@ -1089,15 +1089,10 @@ public class VirtualFileUnitTestCase extends AbstractMockVFSTest
       VirtualFile file = VFS.getRoot(context.getRootURI());
       MockVirtualFileFilter filter = new MockVirtualFileFilter();
       FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter);
-      try
-      {
-         file.visit(visitor);
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      file.visit(visitor);
+      List<VirtualFile> matched = visitor.getMatched();
+      assertNotNull(matched);
+      assertEmpty(matched);
    }
 
    public void testVisitAllChildrenNullVisitor() throws Exception

@@ -353,14 +353,12 @@ public class VirtualFile implements Serializable
     * @param visitor the visitor
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalArgumentException if the visitor is null
-    * @throws IllegalStateException if the file is closed or it is a leaf node
+    * @throws IllegalStateException if the file is closed
     */
    public void visit(VirtualFileVisitor visitor) throws IOException
    {
-      if (isLeaf())
-         throw new IllegalStateException("File cannot contain children: " + this);
-
-      getVFS().visit(this, visitor);
+      if (isLeaf() == false)
+         getVFS().visit(this, visitor);
    }
 
    /**
