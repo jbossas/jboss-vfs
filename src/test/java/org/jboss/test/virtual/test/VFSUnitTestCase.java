@@ -778,15 +778,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       MockVFSContext context = registerSimpleVFSContext();
       
       VFS vfs = VFS.getVFS(context.getRootURI());
-      try
-      {
-         vfs.getChildren();
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeaf(vfs);
    }
 
    public void testGetAllChildrenIOException() throws Exception
@@ -861,15 +853,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       MockVFSContext context = registerSimpleVFSContext();
       
       VFS vfs = VFS.getVFS(context.getRootURI());
-      try
-      {
-         vfs.getChildren(null);
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeaf(vfs, null);
    }
 
    public void testGetAllChildrenWithNullFilterIOException() throws Exception
@@ -951,15 +935,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       
       VFS vfs = VFS.getVFS(context.getRootURI());
       MockVirtualFileFilter filter = new MockVirtualFileFilter();
-      try
-      {
-         vfs.getChildren(filter);
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeaf(vfs, filter);
    }
 
    public void testGetAllChildrenWithFilterIOException() throws Exception
@@ -1047,15 +1023,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       MockVFSContext context = registerSimpleVFSContext();
       
       VFS vfs = VFS.getVFS(context.getRootURI());
-      try
-      {
-         vfs.getChildrenRecursively();
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeafRecursively(vfs);
    }
 
    public void testGetAllChildrenRecursivelyIOException() throws Exception
@@ -1142,15 +1110,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       MockVFSContext context = registerSimpleVFSContext();
       
       VFS vfs = VFS.getVFS(context.getRootURI());
-      try
-      {
-         vfs.getChildrenRecursively(null);
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeafRecursively(vfs, null);
    }
 
    public void testGetAllChildrenRecursivelyWithNullFilterIOException() throws Exception
@@ -1244,15 +1204,7 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
       
       VFS vfs = VFS.getVFS(context.getRootURI());
       MockVirtualFileFilter filter = new MockVirtualFileFilter();
-      try
-      {
-         vfs.getChildren(filter);
-         fail("Should not be here!");
-      }
-      catch (Throwable t)
-      {
-         checkThrowable(IllegalStateException.class, t);
-      }
+      assertChildrenOnLeafRecursively(vfs, filter);
    }
 
    public void testGetAllChildrenRecursivelyWithFilterIOException() throws Exception

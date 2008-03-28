@@ -23,6 +23,7 @@ package org.jboss.test.virtual.test;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.jboss.test.virtual.support.MockSimpleVirtualFileHandler;
 import org.jboss.test.virtual.support.MockStructuredVirtualFileHandler;
@@ -30,6 +31,7 @@ import org.jboss.test.virtual.support.MockVFSContext;
 import org.jboss.test.virtual.support.MockVFSContextFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -38,6 +40,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * AbstractMockVFSTest.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractMockVFSTest extends AbstractVFSTest
@@ -311,5 +314,59 @@ public abstract class AbstractMockVFSTest extends AbstractVFSTest
       assertNotNull(found);
       assertEquals(expected, found);
       return found;
+   }
+
+   protected void assertChildrenOnLeaf(VirtualFile file) throws Exception
+   {
+      assertNotNull(file);
+      assertChildrenOnLeaf(file.getChildren());
+   }
+
+   protected void assertChildrenOnLeaf(VFS vfs) throws Exception
+   {
+      assertNotNull(vfs);
+      assertChildrenOnLeaf(vfs.getChildren());
+   }
+
+   protected void assertChildrenOnLeaf(VirtualFile file, VirtualFileFilter filter) throws Exception
+   {
+      assertNotNull(file);
+      assertChildrenOnLeaf(file.getChildren(filter));
+   }
+
+   protected void assertChildrenOnLeaf(VFS vfs, VirtualFileFilter filter) throws Exception
+   {
+      assertNotNull(vfs);
+      assertChildrenOnLeaf(vfs.getChildren(filter));
+   }
+
+   protected void assertChildrenOnLeafRecursively(VirtualFile file) throws Exception
+   {
+      assertNotNull(file);
+      assertChildrenOnLeaf(file.getChildrenRecursively());
+   }
+
+   protected void assertChildrenOnLeafRecursively(VFS vfs) throws Exception
+   {
+      assertNotNull(vfs);
+      assertChildrenOnLeaf(vfs.getChildrenRecursively());
+   }
+
+   protected void assertChildrenOnLeafRecursively(VirtualFile file, VirtualFileFilter filter) throws Exception
+   {
+      assertNotNull(file);
+      assertChildrenOnLeaf(file.getChildrenRecursively(filter));
+   }
+
+   protected void assertChildrenOnLeafRecursively(VFS vfs, VirtualFileFilter filter) throws Exception
+   {
+      assertNotNull(vfs);
+      assertChildrenOnLeaf(vfs.getChildrenRecursively(filter));
+   }
+
+   protected void assertChildrenOnLeaf(List<VirtualFile> children) throws Exception
+   {
+      assertNotNull(children);
+      assertEmpty(children);
    }
 }

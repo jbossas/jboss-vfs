@@ -302,7 +302,7 @@ public class VirtualFile implements Serializable
    public List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException
    {
       if (isLeaf())
-         throw new IllegalStateException("File cannot contain children: " + this);
+         return Collections.emptyList();
 
       if (filter == null)
          filter = MatchAllVirtualFileFilter.INSTANCE;
@@ -338,7 +338,7 @@ public class VirtualFile implements Serializable
    public List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException
    {
       if (isLeaf())
-         throw new IllegalStateException("File cannot contain children: " + this);
+         return Collections.emptyList();
 
       if (filter == null)
          filter = MatchAllVirtualFileFilter.INSTANCE;
