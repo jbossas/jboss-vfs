@@ -25,6 +25,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.jboss.test.BaseTestCase;
+import org.jboss.test.virtual.support.OperatingSystem;
 
 /**
  * OS aware test, temp hack.
@@ -35,7 +36,7 @@ import org.jboss.test.BaseTestCase;
  */
 public abstract class OSAwareVFSTest extends BaseTestCase
 {
-   private Boolean isWindows;
+   private OperatingSystem os;
 
    protected OSAwareVFSTest(String name)
    {
@@ -49,20 +50,25 @@ public abstract class OSAwareVFSTest extends BaseTestCase
     */
    protected boolean isWindowsOS()
    {
-      if (isWindows == null)
+      return OperatingSystem.WINDOWS == getOS();
+   }
+
+   protected OperatingSystem getOS()
+   {
+      if (os == null)
       {
          SecurityManager sm = suspendSecurity();
          try
          {
             String osName = System.getProperty("os.name");
-            isWindows = osName != null && osName.contains("Windows");
+            os = OperatingSystem.matchOS(osName);
          }
          finally
          {
             resumeSecurity(sm);
          }
       }
-      return isWindows;
+      return os;
    }
 
    /**
