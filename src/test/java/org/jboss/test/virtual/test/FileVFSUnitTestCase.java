@@ -43,7 +43,6 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.jboss.test.BaseTestCase;
 import org.jboss.test.virtual.support.ClassPathIterator;
 import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.test.virtual.support.MetaDataMatchFilter;
@@ -66,7 +65,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author adrian@jboss.org
  * @version $Revision: 55523 $
  */
-public class FileVFSUnitTestCase extends BaseTestCase
+public class FileVFSUnitTestCase extends OSAwareVFSTest
 {
    public FileVFSUnitTestCase(String name)
    {
@@ -1343,9 +1342,9 @@ public class FileVFSUnitTestCase extends BaseTestCase
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
-      assertTrue("tmp.delete()", tmp.delete());
-      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
-      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+      assertTrue("tmp.delete()", tmp.delete() || isWindowsOS());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists() && isWindowsOS() == false);
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete() || isWindowsOS());
    }
 
    /**
@@ -1400,9 +1399,9 @@ public class FileVFSUnitTestCase extends BaseTestCase
       VirtualFile tmpVF = vfs.findChild(tmpJar.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
       assertTrue(tmpVF.getPathName()+".size() > 0", tmpVF.getSize() > 0);
-      assertTrue("tmp.delete()", tmpJar.delete());
-      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
-      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+      assertTrue("tmp.delete()", tmpJar.delete() || isWindowsOS());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists() && isWindowsOS() == false);
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete() || isWindowsOS());
    }
 
    /**
