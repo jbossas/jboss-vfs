@@ -24,7 +24,6 @@ package org.jboss.test.virtual.test;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -101,16 +100,9 @@ public class JARCacheUnitTestCase extends OSAwareVFSTest
 //         System.err.println("modified = " + vf.hasBeenModified());
        
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
-         try
-         {
-            Manifest manifest = new Manifest(manifestFile.openStream());
-            String actual = manifest.getMainAttributes().getValue("test");
-            assertEquals("VFS found the wrong manifest", "v2", actual);
-         }
-         catch (IOException e)
-         {
-            assertTrue("TMP allowed to fail only under winz", isWindowsOS());
-         }
+         Manifest manifest = new Manifest(manifestFile.openStream());
+         String actual = manifest.getMainAttributes().getValue("test");
+         assertEquals("VFS found the wrong manifest", "v2", actual);
       }
    }
 
