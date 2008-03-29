@@ -35,6 +35,8 @@ import org.jboss.test.BaseTestCase;
  */
 public abstract class OSAwareVFSTest extends BaseTestCase
 {
+   private Boolean isWindows;
+
    protected OSAwareVFSTest(String name)
    {
       super(name);
@@ -47,16 +49,20 @@ public abstract class OSAwareVFSTest extends BaseTestCase
     */
    protected boolean isWindowsOS()
    {
-      SecurityManager sm = suspendSecurity();
-      try
+      if (isWindows == null)
       {
-         String osName = System.getProperty("os.name");
-         return osName != null && osName.contains("Windows");
+         SecurityManager sm = suspendSecurity();
+         try
+         {
+            String osName = System.getProperty("os.name");
+            isWindows = osName != null && osName.contains("Windows");
+         }
+         finally
+         {
+            resumeSecurity(sm);
+         }
       }
-      finally
-      {
-         resumeSecurity(sm);
-      }
+      return isWindows;
    }
 
    /**
