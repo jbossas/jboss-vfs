@@ -50,6 +50,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler implements StructuredVirtualFileHandler
 {
+   public static final String FORCE_NO_COPY_KEY = "jboss.vfs.forceNoCopy";
+
    /**
     * serialVersionUID
     */
@@ -354,7 +356,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    {
       public Boolean run()
       {
-         String forceString = System.getProperty("jboss.vfs.forceNoCopy", "false");
+         String forceString = System.getProperty(FORCE_NO_COPY_KEY, "false");
          return Boolean.valueOf(forceString);
       }
    }

@@ -33,6 +33,7 @@ import junit.framework.TestSuite;
 import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.context.jar.AbstractStructuredJarHandler;
 
 /**
  * Tests of no copy nested jars
@@ -44,6 +45,8 @@ import org.jboss.virtual.VirtualFile;
  */
 public class NoCopyJarsUnitTestCase extends BaseTestCase
 {
+   private String forceCopy;
+
    public NoCopyJarsUnitTestCase(String name)
    {
       super(name);
@@ -54,12 +57,19 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       return new TestSuite(NoCopyJarsUnitTestCase.class);
    }
 
-   
    @Override
    protected void setUp() throws Exception
    {
       super.setUp();
-      System.setProperty("jboss.vfs.forceNoCopy", "true");
+      forceCopy = System.getProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, "false");
+      System.setProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, "true");
+   }
+
+   @Override
+   protected void tearDown() throws Exception
+   {
+      System.setProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, forceCopy);
+      super.tearDown();
    }
 
    /**
