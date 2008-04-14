@@ -59,6 +59,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(new TestSuite(AssembledContextTest.class));
       suite.addTest(MemoryTestCase.suite());
       suite.addTest(new TestSuite(URLConnectionUnitTestCase.class));
+      suite.addTest(PathQueryTestCase.suite());
 
       return suite;
    }
