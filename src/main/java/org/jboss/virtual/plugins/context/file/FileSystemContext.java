@@ -58,7 +58,7 @@ public class FileSystemContext extends AbstractVFSContext
     * @param uri the url
     * @return the file
     * @throws IOException for any error accessing the file system
-    * @throws URISyntaxException 
+    * @throws URISyntaxException if cannot create URI 
     * @throws IllegalArgumentException for a null url
     */
    private static File getFile(URI uri) throws IOException, URISyntaxException
