@@ -42,6 +42,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * FileSystemContext.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class FileSystemContext extends AbstractVFSContext
@@ -123,6 +124,7 @@ public class FileSystemContext extends AbstractVFSContext
     * 
     * @param rootURI the root uri
     * @throws IOException for an error accessing the file system
+    * @throws URISyntaxException if cannot create URI
     */
    public FileSystemContext(URI rootURI) throws IOException, URISyntaxException
    {
