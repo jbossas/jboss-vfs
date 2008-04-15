@@ -29,9 +29,9 @@
   </organization>
 
   <properties>
-    <version.jboss.common.core>2.2.4.GA</version.jboss.common.core>
-    <version.jboss.logging>2.0.4.GA</version.jboss.logging>
-    <version.jboss.test>1.0.4.GA</version.jboss.test>
+    <version.jboss.common.core>2.2.5.GA</version.jboss.common.core>
+    <version.jboss.logging>2.0.5.GA</version.jboss.logging>
+    <version.jboss.test>1.1.0.GA</version.jboss.test>
     <version.junit>3.8.1</version.junit>
   </properties>
 
@@ -100,19 +100,13 @@
       <version>${version.jboss.common.core}</version>
     </dependency>
     <dependency>
-      <groupId>jboss</groupId>
-      <artifactId>jboss-common-logging-spi</artifactId>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-spi</artifactId>
       <version>${version.jboss.logging}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss</groupId>
+      <groupId>org.jboss.test</groupId>
       <artifactId>jboss-test</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>jboss</groupId>
-          <artifactId>jboss-common-core</artifactId>
-        </exclusion>
-      </exclusions>
       <version>${version.jboss.test}</version>
       <scope>test</scope>
     </dependency>
