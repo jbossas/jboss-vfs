@@ -29,47 +29,31 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
-import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 
 /**
  * Tests of no copy nested jars
- * 
+ *
  * @author ales.justin@jboss.org
  * @author Scott.Stark@jboss.org
- * @author adrian@jboss.org
- * @version $Revision$
+ * @version $Revision: 72234 $
  */
-public class NoCopyJarsUnitTestCase extends BaseTestCase
+public class JARSerializationUnitTestCase extends AbstractVFSTest
 {
-   private String forceCopy;
-
-   public NoCopyJarsUnitTestCase(String name)
+   public JARSerializationUnitTestCase(String name)
    {
       super(name);
    }
-   
+
+   protected JARSerializationUnitTestCase(String name, boolean forceCopy)
+   {
+      super(name, forceCopy);
+   }
+
    public static Test suite()
    {
-      return new TestSuite(NoCopyJarsUnitTestCase.class);
-   }
-
-   @Override
-   protected void setUp() throws Exception
-   {
-      super.setUp();
-      forceCopy = System.getProperty(VFSUtils.FORCE_COPY_KEY, "false");
-      System.setProperty(VFSUtils.FORCE_COPY_KEY, "true");
-   }
-
-   @Override
-   protected void tearDown() throws Exception
-   {
-      System.setProperty(VFSUtils.FORCE_COPY_KEY, forceCopy);
-      super.tearDown();
+      return suite(JARSerializationUnitTestCase.class);
    }
 
    /**
@@ -117,7 +101,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       assertTrue("outer.jar/jar1.jar != null", jar1 != null);
       VirtualFile jar2 = outerjar.findChild("jar2.jar");
       assertTrue("outer.jar/jar2.jar != null", jar2 != null);
-   
+
       VirtualFile jar1MF = jar1.findChild("META-INF/MANIFEST.MF");
       assertNotNull("jar1!/META-INF/MANIFEST.MF", jar1MF);
       InputStream mfIS = jar1MF.openStream();
@@ -126,7 +110,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       String title1 = mainAttrs1.getValue(Attributes.Name.SPECIFICATION_TITLE);
       assertEquals("jar1", title1);
       jar1MF.close();
-   
+
       VirtualFile jar1DS = serializeDeserialize(jar1, VirtualFile.class);
       assertNotNull("jar1 deserialized", jar1DS);
       VirtualFile jar1DSMF = jar1.findChild("META-INF/MANIFEST.MF");
@@ -150,7 +134,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       log.info("outer.jar: "+outerjar);
       VirtualFile jar1 = outerjar.findChild("jar1-filesonly.jar");
       assertTrue("outer.jar/jar1-filesonly.jar != null", jar1 != null);
-   
+
       VirtualFile jar1MF = jar1.findChild("META-INF/MANIFEST.MF");
       assertNotNull("jar1-filesonly!/META-INF/MANIFEST.MF", jar1MF);
       InputStream mfIS = jar1MF.openStream();
@@ -159,7 +143,7 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       String title1 = mainAttrs1.getValue(Attributes.Name.SPECIFICATION_TITLE);
       assertEquals("jar1-filesonly", title1);
       jar1MF.close();
-   
+
       VirtualFile jar1DS = serializeDeserialize(jar1, VirtualFile.class);
       assertNotNull("jar1 deserialized", jar1DS);
       VirtualFile jar1DSMF = jar1DS.getChild("META-INF/MANIFEST.MF");
@@ -174,7 +158,6 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
 
    public void testLevelZips() throws Exception
    {
-/*
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile one = vfs.findChild("level1.zip");
@@ -218,7 +201,6 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
       testText(textThree);
       textThree = two.findChild("level3.zip/test3.txt");
       testText(textThree);
-*/
    }
 
    protected void testText(VirtualFile file) throws Exception

@@ -30,7 +30,6 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
@@ -47,7 +46,18 @@ public class JARCacheUnitTestCase extends OSAwareVFSTest
       super(name);
    }
 
-   public void test1() throws Exception
+   protected JARCacheUnitTestCase(String name, boolean forceCopy)
+   {
+      super(name, forceCopy);
+   }
+
+   public static Test suite()
+   {
+      VFS.init();
+      return suite(JARCacheUnitTestCase.class);
+   }
+
+   public void testJarCache() throws Exception
    {
       // Create a test.jar with v1 in manifest
       File testFile = new File("test.jar");
@@ -104,11 +114,5 @@ public class JARCacheUnitTestCase extends OSAwareVFSTest
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("VFS found the wrong manifest", "v2", actual);
       }
-   }
-
-   public static Test suite()
-   {
-      VFS.init();
-      return new TestSuite(JARCacheUnitTestCase.class);
    }
 }

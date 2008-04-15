@@ -21,11 +21,10 @@
 */
 package org.jboss.test.virtual.test;
 
-import org.jboss.virtual.VFS;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
+import org.jboss.virtual.VFS;
 
 /**
  * VFS All Test Suite.
@@ -44,7 +43,7 @@ public class VFSAllTestSuite extends TestSuite
    public static Test suite()
    {
       VFS.init();
-      TestSuite suite = new TestSuite("VFS Tests");
+      TestSuite suite = new TestSuite("VFS Tests default");
 
       // vfs / spi
       suite.addTest(VFSUnitTestCase.suite());
@@ -55,12 +54,16 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(URLConnectionUnitTestCase.suite());
       // files
       suite.addTest(FileVFSUnitTestCase.suite());
+      suite.addTest(CopyFileVFSUnitTestCase.suite());
       suite.addTest(FileVFSContextUnitTestCase.suite());
       suite.addTest(FileVirtualFileHandlerUnitTestCase.suite());
       // jars
       suite.addTest(JARCacheUnitTestCase.suite());
+      suite.addTest(CopyJARCacheUnitTestCase.suite());
       suite.addTest(JARVFSContextUnitTestCase.suite());
       suite.addTest(JARVirtualFileHandlerUnitTestCase.suite());
+      suite.addTest(JARSerializationUnitTestCase.suite());
+      suite.addTest(CopyJARSerializationUnitTestCase.suite());
       // contexts
       suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());

@@ -42,6 +42,11 @@ public abstract class OSAwareVFSTest extends AbstractVFSTest
       super(name);
    }
 
+   protected OSAwareVFSTest(String name, boolean forceCopy)
+   {
+      super(name, forceCopy);
+   }
+
    /**
     * Are we running Windows.
     *

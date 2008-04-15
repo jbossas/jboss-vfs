@@ -26,44 +26,51 @@ import java.net.URL;
 import java.net.URISyntaxException;
 import java.io.IOException;
 
+import org.jboss.virtual.VFSUtils;
+
 /**
+ * Flag holder.
+ * 
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
 public class OptionsAwareURI
 {
-   private static final String Copy = "useCopyJarHandler=true";
+   private static final String Copy = VFSUtils.USE_COPY_QUERY + "=true";
 
-   private static ThreadLocal<Boolean> flag = new ThreadLocal<Boolean>()
+   private static ThreadLocal<Boolean> flag = new InheritableThreadLocal<Boolean>()
    {
       protected Boolean initialValue()
       {
          return Boolean.FALSE;
       }
+
+      public String toString()
+      {
+         Boolean value = get();
+         return String.valueOf(value);
+      }
    };
 
    public static void set()
    {
-      flag.set(true);
+      flag.set(Boolean.TRUE);
+   }
+
+   public static boolean get()
+   {
+      return flag.get();
    }
 
    public static void clear()
    {
-      flag.set(false);
+      flag.set(Boolean.FALSE);
    }
 
    public static URL toURL(URL url) throws IOException
    {
-      if (flag.get())
+      if (get())
       {
-         try
-         {
-            URI uri = toURI(url.toURI());
-            return uri.toURL();
-         }
-         catch (URISyntaxException e)
-         {
-            throw new IOException(e.getReason());
-         }
+         return new URL(url.toExternalForm() + "?" + Copy);
       }
       else
          return url;
@@ -71,12 +78,11 @@ public class OptionsAwareURI
 
    public static URI toURI(URI uri) throws IOException
    {
-      if (flag.get())
+      if (get())
       {
          try
          {
-            return new URI(uri.toString() + "?" + Copy);
-//            return new URI(uri.getScheme(), uri.getUserInfo(), uri.getPath(), NoCopy, uri.getFragment());
+            return new URI(uri.getScheme(), uri.getUserInfo(), uri.getPath(), Copy, uri.getFragment());
          }
          catch (URISyntaxException e)
          {
@@ -85,5 +91,10 @@ public class OptionsAwareURI
       }
       else
          return uri;
+   }
+
+   public String toString()
+   {
+      return "flag=" + get();
    }
 }

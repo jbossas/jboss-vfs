@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
-import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
 import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
@@ -38,7 +37,7 @@ import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class AssembledContextTestCase extends BaseTestCase
+public class AssembledContextTestCase extends AbstractVFSTest
 {
    public AssembledContextTestCase(String name)
    {

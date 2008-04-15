@@ -72,6 +72,11 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       super(name);
    }
    
+   protected FileVFSUnitTestCase(String name, boolean forceCopy)
+   {
+      super(name, forceCopy);
+   }
+
    public static Test suite()
    {
       return new TestSuite(FileVFSUnitTestCase.class);

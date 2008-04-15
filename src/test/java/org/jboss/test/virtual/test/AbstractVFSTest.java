@@ -21,17 +21,22 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import java.io.IOException;
 
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
+import org.jboss.test.virtual.support.OptionsAwareURI;
+import org.jboss.test.virtual.support.FileOAContextFactory;
+import org.jboss.test.virtual.support.JarOAContextFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSContextFactoryLocator;
+import org.jboss.virtual.spi.VFSContextFactory;
 
 /**
  * AbstractVFSTest.
@@ -41,11 +46,49 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public abstract class AbstractVFSTest extends BaseTestCase
 {
+   private static final VFSContextFactory fileFactory = new FileOAContextFactory();
+   private static final VFSContextFactory jarFactory = new JarOAContextFactory();
+
+   private boolean forceCopy;
+
    public AbstractVFSTest(String name)
    {
       super(name);
    }
-   
+
+   public AbstractVFSTest(String name, boolean forceCopy)
+   {
+      super(name);
+      this.forceCopy = forceCopy;
+   }
+
+   protected void setUp() throws Exception
+   {
+      super.setUp();
+
+      VFSContextFactoryLocator.registerFactory(fileFactory);
+      VFSContextFactoryLocator.registerFactory(jarFactory);
+
+      getLog().info("Force copy: " + forceCopy);
+      if (forceCopy)
+      {
+         OptionsAwareURI.set();
+      }
+   }
+
+   protected void tearDown() throws Exception
+   {
+      VFSContextFactoryLocator.unregisterFactory(jarFactory);
+      VFSContextFactoryLocator.unregisterFactory(fileFactory);
+
+      if (forceCopy)
+      {
+         OptionsAwareURI.clear();
+      }
+
+      super.tearDown();
+   }
+
    // TODO move to AbstractTestCase
    public URL getResource(String name)
    {

@@ -25,8 +25,6 @@ import java.net.URL;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
@@ -37,7 +35,7 @@ import org.jboss.virtual.plugins.context.jar.JarUtils;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class SundryVFSUnitTestCase extends BaseTestCase
+public class SundryVFSUnitTestCase extends AbstractVFSTest
 {
    public SundryVFSUnitTestCase(String name)
    {
