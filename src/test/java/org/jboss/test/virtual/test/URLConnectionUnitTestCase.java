@@ -22,14 +22,13 @@
 package org.jboss.test.virtual.test;
 
 import junit.framework.Test;
-import org.jboss.test.BaseTestCase;
 
 /**
  * Basic tests of URL connection
  *
  * @author ales.jutin@jboss.org
  */
-public class URLConnectionUnitTestCase extends BaseTestCase
+public class URLConnectionUnitTestCase extends AbstractVFSTest
 {
    public URLConnectionUnitTestCase(String name)
    {

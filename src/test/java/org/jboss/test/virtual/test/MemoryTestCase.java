@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
-import org.jboss.test.BaseTestCase;
+import junit.framework.Test;
 import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
@@ -38,14 +38,13 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import junit.framework.Test;
 
 /**
  * 
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
-public class MemoryTestCase extends BaseTestCase
+public class MemoryTestCase extends AbstractVFSTest
 {
    public MemoryTestCase(String name)
    {
