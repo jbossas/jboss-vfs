@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public class OptionsAwareURI
 {
-   private static final String NoCopy = "useNoCopyJarHandler=true";
+   private static final String Copy = "useCopyJarHandler=true";
 
    private static ThreadLocal<Boolean> flag = new ThreadLocal<Boolean>()
    {
@@ -75,7 +75,7 @@ public class OptionsAwareURI
       {
          try
          {
-            return new URI(uri.toString() + "?" + NoCopy);
+            return new URI(uri.toString() + "?" + Copy);
 //            return new URI(uri.getScheme(), uri.getUserInfo(), uri.getPath(), NoCopy, uri.getFragment());
          }
          catch (URISyntaxException e)

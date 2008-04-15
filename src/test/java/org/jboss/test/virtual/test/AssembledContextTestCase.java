@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import junit.framework.Test;
 import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
@@ -37,11 +38,16 @@ import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 1.1 $
  */
-public class AssembledContextTest extends BaseTestCase
+public class AssembledContextTestCase extends BaseTestCase
 {
-   public AssembledContextTest(String name)
+   public AssembledContextTestCase(String name)
    {
       super(name);
+   }
+
+   public static Test suite()
+   {
+      return suite(AssembledContextTestCase.class);
    }
 
    public void testRegex()

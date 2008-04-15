@@ -21,8 +21,8 @@
  */
 package org.jboss.test.virtual.test;
 
-import java.io.InputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.jar.Attributes;
@@ -32,8 +32,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.test.BaseTestCase;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.jar.AbstractStructuredJarHandler;
 
 /**
  * Tests of no copy nested jars
@@ -61,14 +61,14 @@ public class NoCopyJarsUnitTestCase extends BaseTestCase
    protected void setUp() throws Exception
    {
       super.setUp();
-      forceCopy = System.getProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, "false");
-      System.setProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, "true");
+      forceCopy = System.getProperty(VFSUtils.FORCE_COPY_KEY, "false");
+      System.setProperty(VFSUtils.FORCE_COPY_KEY, "true");
    }
 
    @Override
    protected void tearDown() throws Exception
    {
-      System.setProperty(AbstractStructuredJarHandler.FORCE_NO_COPY_KEY, forceCopy);
+      System.setProperty(VFSUtils.FORCE_COPY_KEY, forceCopy);
       super.tearDown();
    }
 

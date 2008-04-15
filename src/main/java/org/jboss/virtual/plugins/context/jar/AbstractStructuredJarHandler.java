@@ -36,6 +36,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
@@ -49,12 +50,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
 public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler implements StructuredVirtualFileHandler
-{
-   /**
-    * The system property no force copy key
-    */
-   public static final String FORCE_NO_COPY_KEY = "jboss.vfs.forceNoCopy";
-
+{  
    /**
     * serialVersionUID
     */
@@ -69,13 +65,13 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    /**
     * Force no copy nested jar handler.
     */
-   private static boolean forceNoCopy;
+   private static boolean forceCopy;
 
    static
    {
-      forceNoCopy = AccessController.doPrivileged(new CheckForceNoCopy());
-      if (forceNoCopy)
-         log.info("VFS force NoCopyNestedJarHandler is enabled.");
+      forceCopy = AccessController.doPrivileged(new CheckForceCopy());
+      if (forceCopy)
+         log.info("VFS force CopyNestedJarHandler is enabled.");
    }
 
    /**
@@ -300,13 +296,17 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       VirtualFileHandler vfh;
       if (JarUtils.isArchive(entry.getName()))
       {
-         String flag = context.getOptions().get("useNoCopyJarHandler");
-         boolean useNoCopyJarHandler = Boolean.valueOf(flag);
+         boolean useCopyJarHandler = forceCopy;
+         if (useCopyJarHandler == false)
+         {
+            String flag = context.getOptions().get(VFSUtils.USE_COPY_QUERY);
+            useCopyJarHandler = Boolean.valueOf(flag);
+         }
 
-         if (useNoCopyJarHandler || forceNoCopy)
-            vfh = new NoCopyNestedJarHandler(context, parent, getJar(), entry, url, entryName);
-         else
+         if (useCopyJarHandler)
             vfh = NestedJarHandler.create(context, parent, getJar(), entry, url, entryName);
+         else
+            vfh = new NoCopyNestedJarHandler(context, parent, getJar(), entry, url, entryName);
       }
       else
       {
@@ -355,11 +355,11 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    /**
     * Check if force no copy system property exists.
     */
-   private static class CheckForceNoCopy implements PrivilegedAction<Boolean>
+   private static class CheckForceCopy implements PrivilegedAction<Boolean>
    {
       public Boolean run()
       {
-         String forceString = System.getProperty(FORCE_NO_COPY_KEY, "false");
+         String forceString = System.getProperty(VFSUtils.FORCE_COPY_KEY, "false");
          return Boolean.valueOf(forceString);
       }
    }

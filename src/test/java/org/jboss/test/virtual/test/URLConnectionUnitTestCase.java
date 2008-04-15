@@ -21,15 +21,26 @@
 */
 package org.jboss.test.virtual.test;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import org.jboss.test.BaseTestCase;
 
 /**
  * Basic tests of URL connection
  *
  * @author ales.jutin@jboss.org
  */
-public class URLConnectionUnitTestCase extends TestCase
+public class URLConnectionUnitTestCase extends BaseTestCase
 {
+   public URLConnectionUnitTestCase(String name)
+   {
+      super(name);
+   }
+
+   public static Test suite()
+   {
+      return suite(URLConnectionUnitTestCase.class);
+   }
+
    /**
     * Test url content
     * @throws Exception for any error

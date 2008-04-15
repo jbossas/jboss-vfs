@@ -50,10 +50,10 @@ public class PathQueryTestCase extends AbstractVFSTest
    protected void assertOption(String name) throws Throwable
    {
       URL url = getResource("/vfs/context/" + name);
-      URI uri = new URI(url.toExternalForm() + "?foobar=qwert&useNoCopyJarHandler=true");
+      URI uri = new URI(url.toExternalForm() + "?foobar=qwert&useCopyJarHandler=true");
       VirtualFile vf = VFS.getRoot(uri);
       assertOption(vf, "foobar", "qwert");
-      assertOption(vf, "useNoCopyJarHandler", "true");
+      assertOption(vf, "useCopyJarHandler", "true");
    }
 
    protected void assertOption(VirtualFile vf, String key, String value)

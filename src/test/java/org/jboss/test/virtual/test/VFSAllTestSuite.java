@@ -31,6 +31,7 @@ import junit.textui.TestRunner;
  * VFS All Test Suite.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 46146 $
  */
 public class VFSAllTestSuite extends TestSuite
@@ -45,20 +46,26 @@ public class VFSAllTestSuite extends TestSuite
       VFS.init();
       TestSuite suite = new TestSuite("VFS Tests");
 
-      suite.addTest(new TestSuite(URLResolutionUnitTestCase.class));
-      suite.addTest(new TestSuite(URLExistsUnitTestCase.class));
+      // vfs / spi
       suite.addTest(VFSUnitTestCase.suite());
       suite.addTest(VirtualFileUnitTestCase.suite());
+      // url
+      suite.addTest(URLResolutionUnitTestCase.suite());
+      suite.addTest(URLExistsUnitTestCase.suite());
+      suite.addTest(URLConnectionUnitTestCase.suite());
+      // files
       suite.addTest(FileVFSUnitTestCase.suite());
-      suite.addTest(SundryVFSUnitTestCase.suite());
       suite.addTest(FileVFSContextUnitTestCase.suite());
       suite.addTest(FileVirtualFileHandlerUnitTestCase.suite());
+      // jars
       suite.addTest(JARCacheUnitTestCase.suite());
       suite.addTest(JARVFSContextUnitTestCase.suite());
       suite.addTest(JARVirtualFileHandlerUnitTestCase.suite());
-      suite.addTest(new TestSuite(AssembledContextTest.class));
+      // contexts
+      suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());
-      suite.addTest(new TestSuite(URLConnectionUnitTestCase.class));
+      suite.addTest(SundryVFSUnitTestCase.suite());
+      // options / policy
       suite.addTest(PathQueryTestCase.suite());
 
       return suite;

@@ -29,6 +29,8 @@ import java.net.URLConnection;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import junit.framework.Test;
+
 /**
  * Basic tests of URL existence based on URLConnection.getLastModified
  * 
@@ -40,6 +42,11 @@ public class URLExistsUnitTestCase extends OSAwareVFSTest
    public URLExistsUnitTestCase(String name)
    {
       super(name);
+   }
+
+   public static Test suite()
+   {
+      return suite(URLExistsUnitTestCase.class);
    }
 
    /**

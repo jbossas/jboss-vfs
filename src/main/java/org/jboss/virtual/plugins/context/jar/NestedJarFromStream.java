@@ -361,6 +361,7 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
       fields.put("size", size);
       out.writeFields();
    }
+
    /**
     * Read the jar contents and reinitialize the entry map
     * @param in

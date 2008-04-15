@@ -52,11 +52,18 @@ public class VFSUtils
 {
    /** The log */
    private static final Logger log = Logger.getLogger(VFSUtils.class);
-   /** */
+   /** The link */
    public static final String VFS_LINK_PREFIX = ".vfslink";
-   /** */
+   /** The link name */
    public static final String VFS_LINK_NAME = "vfs.link.name";
+   /** The link target */
    public static final String VFS_LINK_TARGET = "vfs.link.target";
+
+   /**
+    * The system no force copy key / query
+    */
+   public static final String FORCE_COPY_KEY = "jboss.vfs.forceCopy";
+   public static final String USE_COPY_QUERY = "useCopyJarHandler";
 
    /**
     * Get the paths string for a collection of virtual files

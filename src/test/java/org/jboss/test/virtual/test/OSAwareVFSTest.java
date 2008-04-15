@@ -24,7 +24,6 @@ package org.jboss.test.virtual.test;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.jboss.test.BaseTestCase;
 import org.jboss.test.virtual.support.OperatingSystem;
 
 /**
@@ -34,7 +33,7 @@ import org.jboss.test.virtual.support.OperatingSystem;
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class OSAwareVFSTest extends BaseTestCase
+public abstract class OSAwareVFSTest extends AbstractVFSTest
 {
    private OperatingSystem os;
 

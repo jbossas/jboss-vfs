@@ -23,7 +23,8 @@ package org.jboss.test.virtual.test;
 
 import java.net.URL;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import org.jboss.test.BaseTestCase;
 
 /**
  * Basic tests of URL resolution
@@ -31,8 +32,18 @@ import junit.framework.TestCase;
  * @author Scott.Stark@jboss.org
  * @version $Revision:$
  */
-public class URLResolutionUnitTestCase extends TestCase
+public class URLResolutionUnitTestCase extends BaseTestCase
 {
+   public URLResolutionUnitTestCase(String name)
+   {
+      super(name);
+   }
+
+   public static Test suite()
+   {
+      return suite(URLResolutionUnitTestCase.class);
+   }
+
    /**
     * Test resolution when the URL against which relative paths are resolved
     * is NOT a directory (ends in '/').
@@ -97,5 +108,4 @@ public class URLResolutionUnitTestCase extends TestCase
       expected = new URL("file:/root/sub1/peer");
       assertEquals(expected, rootPeer);
    }
-
 }
