@@ -148,4 +148,11 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    {
       return getVfsUrl();
    }
+
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      children.remove(original);
+      children.add(replacement);
+      childrenMap.put(original.getName(), replacement);
+   }
 }

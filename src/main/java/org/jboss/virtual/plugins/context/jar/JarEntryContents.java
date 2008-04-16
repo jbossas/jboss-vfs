@@ -238,6 +238,13 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       return entryURL.toURI();
    }
 
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      entryChildren.remove(original);
+      entryChildren.add(replacement);
+      entryMap.put(original.getName(), replacement);
+   }
+
    public String toString()
    {
       StringBuffer tmp = new StringBuffer(super.toString());

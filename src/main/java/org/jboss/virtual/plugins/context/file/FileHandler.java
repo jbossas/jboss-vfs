@@ -217,6 +217,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return structuredFindChild(path);
    }
 
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      childCache.put(original.getName(), replacement);
+   }
+
    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
    {
       in.defaultReadObject();

@@ -269,6 +269,12 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
       return MockVFSContext.createMockURL(uri);
    }
 
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      children.remove(original);
+      children.add(replacement);
+   }
+
    @Override
    public VirtualFileHandler getParent() throws IOException
    {

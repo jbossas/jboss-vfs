@@ -163,4 +163,11 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
    {
       return structuredFindChild(path);
    }
+
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      entryChildren.remove(original);
+      entryChildren.add(replacement);
+      entryMap.put(original.getName(), replacement);
+   }
 }

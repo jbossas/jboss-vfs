@@ -193,4 +193,12 @@ public interface VirtualFileHandler extends Serializable
     * Close the resources
     */
    void close();
+
+   /**
+    * Replace child.
+    *
+    * @param original the original
+    * @param replacement the replacement
+    */
+   void replaceChild(VirtualFileHandler original, VirtualFileHandler replacement);
 }

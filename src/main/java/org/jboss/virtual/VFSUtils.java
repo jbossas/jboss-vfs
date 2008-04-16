@@ -21,8 +21,11 @@
 */
 package org.jboss.virtual;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +43,9 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.plugins.context.jar.AbstractJarHandler;
+import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -398,6 +404,9 @@ public class VFSUtils
     */
    private static Map<String, String> getOptions(VirtualFile file)
    {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+
       VirtualFileHandler handler = file.getHandler();
       VFSContext context = handler.getVFSContext();
       return context.getOptions();
@@ -442,5 +451,100 @@ public class VFSUtils
          throw new IllegalArgumentException("Cannot disable copy on null options: " + file);
 
       options.remove(USE_COPY_QUERY);
+   }
+
+   /**
+    * Unpack the artifact under original param.
+    *
+    * @param file the file to unpack
+    * @return unpacked file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile unpack(VirtualFile file) throws IOException, URISyntaxException
+   {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+      if (file.isLeaf())
+         return file;
+
+      VirtualFileHandler handler = file.getHandler();
+      // already unpacked
+      if (handler instanceof NestedJarHandler)
+         return file;
+      if (handler instanceof AbstractJarHandler == false)
+         throw new IllegalArgumentException("Can only handle jar files: " + file);
+
+      File unpacked = File.createTempFile("nestedjar", null);
+      unpack(handler, unpacked);
+      FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
+      VirtualFileHandler newHandler = fileSystemContext.getRoot();
+      VirtualFileHandler parent = handler.getParent();
+      if (parent != null)
+         parent.replaceChild(handler, newHandler);
+
+      return newHandler.getVirtualFile();
+   }
+
+   /**
+    * Unpack the root into file.
+    * Repeat this on the root's children.
+    *
+    * @param root the root
+    * @param file the file
+    * @throws IOException for any error
+    */
+   private static void unpack(VirtualFileHandler root, File file) throws IOException
+   {
+      rewrite(root, file);
+      List<VirtualFileHandler> children = root.getChildren(true);
+      if (children != null && children.isEmpty() == false)
+      {
+         for (VirtualFileHandler handler : children)
+         {
+            File next = new File(file, handler.getName());
+            unpack(handler, next);
+         }
+      }
+   }
+
+   /**
+    * Rewrite contents of handler into file.
+    *
+    * @param handler the handler
+    * @param file the file
+    * @throws IOException for any error
+    */
+   private static void rewrite(VirtualFileHandler handler, File file) throws IOException
+   {
+      OutputStream out = new FileOutputStream(file);
+      InputStream in = handler.openStream();
+      try
+      {
+         byte[] bytes = new byte[1024];
+         while (in.available() > 0)
+         {
+            int length = in.read(bytes);
+            if (length > 0)
+               out.write(bytes, 0, length);
+         }
+      }
+      finally
+      {
+         try
+         {
+            in.close();
+         }
+         catch (IOException ignored)
+         {
+         }
+         try
+         {
+            out.close();
+         }
+         catch (IOException ignored)
+         {
+         }
+      }
    }
 }

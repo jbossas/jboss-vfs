@@ -399,6 +399,27 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return null;
    }
 
+   public void replaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      internalReplaceChild(original, replacement);
+      if (replacement instanceof AbstractVirtualFileHandler)
+      {
+         AbstractVirtualFileHandler avfh = (AbstractVirtualFileHandler)replacement;
+         avfh.parent = this;
+      }
+   }
+
+   /**
+    * Replace original child with unpacked replacement.
+    *
+    * @param original the original
+    * @param replacement the replacement
+    */
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      throw new UnsupportedOperationException("Replacement is unsupported: " + toString());
+   }
+
    @Override
    public String toString()
    {

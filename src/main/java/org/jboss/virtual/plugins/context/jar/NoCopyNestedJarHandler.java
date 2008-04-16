@@ -134,4 +134,9 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
    {
       return njar.getChildren(ignoreErrors);
    }
+
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      njar.internalReplaceChild(original, replacement);
+   }
 }

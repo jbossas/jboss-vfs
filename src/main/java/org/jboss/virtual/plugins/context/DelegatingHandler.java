@@ -114,4 +114,9 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    {
       return delegate.toURL();
    }
+
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      delegate.replaceChild(original, replacement);
+   }
 }

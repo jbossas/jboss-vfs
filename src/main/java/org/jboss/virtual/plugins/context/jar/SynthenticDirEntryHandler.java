@@ -180,4 +180,11 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    {
       return structuredFindChild(path);
    }
+
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      entryChildren.remove(original);
+      entryChildren.add(replacement);
+      entryMap.put(original.getName(), replacement);
+   }
 }

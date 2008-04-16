@@ -316,6 +316,13 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       return vfh;
    }
 
+   protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
+   {
+      entries.remove(original);
+      entries.add(replacement);
+      entryMap.put(original.getName(), replacement);
+   }
+
    /**
     * Restore the jar file
     *
