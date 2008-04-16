@@ -30,6 +30,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
+import org.jboss.util.id.GUID;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.AbstractJarHandler;
 import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
@@ -72,6 +75,27 @@ public class VFSUtils
     */
    public static final String FORCE_COPY_KEY = "jboss.vfs.forceCopy";
    public static final String USE_COPY_QUERY = "useCopyJarHandler";
+
+   private static File tempDir;
+
+   private static class GetTempDir implements PrivilegedAction<File>
+   {
+      public File run()
+      {
+         String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
+         return new File(System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")));
+      }
+   }
+
+   private synchronized static File getTempDirectory()
+   {
+      if (tempDir == null)
+      {
+         tempDir = AccessController.doPrivileged(new GetTempDir());
+         log.info("VFS temp dir: " + tempDir);
+      }
+      return tempDir;
+   }
 
    /**
     * Get the paths string for a collection of virtual files
@@ -470,13 +494,19 @@ public class VFSUtils
 
       VirtualFileHandler handler = file.getHandler();
       // already unpacked
-      if (handler instanceof NestedJarHandler)
+      if (handler instanceof NestedJarHandler || handler instanceof AbstractJarHandler == false)
+      {
+         if (log.isTraceEnabled())
+            log.trace("Should already be unpacked: " + file);
          return file;
-      if (handler instanceof AbstractJarHandler == false)
-         throw new IllegalArgumentException("Can only handle jar files: " + file);
+      }
 
-      File unpacked = File.createTempFile("nestedjar", null);
-      unpack(handler, unpacked);
+      File unpacked = new File(getTempDirectory(), GUID.asString());
+      if (unpacked.mkdir() == false)
+         throw new IllegalArgumentException("Cannot create directory: " + unpacked);
+      unpacked.deleteOnExit();
+
+      unpack(handler, unpacked, false);
       FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
       VirtualFileHandler parent = handler.getParent();
@@ -492,18 +522,26 @@ public class VFSUtils
     *
     * @param root the root
     * @param file the file
+    * @param writeRoot do we write root
     * @throws IOException for any error
     */
-   private static void unpack(VirtualFileHandler root, File file) throws IOException
+   private static void unpack(VirtualFileHandler root, File file, boolean writeRoot) throws IOException
    {
-      rewrite(root, file);
+      // should we write trhe root
+      if (writeRoot)
+         rewrite(root, file);
+
       List<VirtualFileHandler> children = root.getChildren(true);
       if (children != null && children.isEmpty() == false)
       {
          for (VirtualFileHandler handler : children)
          {
             File next = new File(file, handler.getName());
-            unpack(handler, next);
+            if (handler.isLeaf() == false && next.mkdir() == false)
+               throw new IllegalArgumentException("Problems creating new file: " + next);
+            next.deleteOnExit();
+
+            unpack(handler, next, handler.isLeaf());
          }
       }
    }

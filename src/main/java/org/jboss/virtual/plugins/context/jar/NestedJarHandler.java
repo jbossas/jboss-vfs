@@ -51,9 +51,6 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
    /** The temporary file */
    private transient File temp;
 
-   /** TODO WHAT DOES THIS DO? It is unused */
-   private transient URL original;
-
    /**
     * Create a temporary jar
     * 
@@ -146,8 +143,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       }
 
       this.temp = temp;
-      this.original = original;
-      
+
       try
       {
          initJarFile();

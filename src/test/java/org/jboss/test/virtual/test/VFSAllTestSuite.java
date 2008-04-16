@@ -70,6 +70,8 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(SundryVFSUnitTestCase.suite());
       // options / policy
       suite.addTest(PathQueryTestCase.suite());
+      // unpack
+      suite.addTest(UnpackTestCase.suite());
 
       return suite;
    }

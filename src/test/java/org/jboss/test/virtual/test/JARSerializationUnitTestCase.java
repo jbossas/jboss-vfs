@@ -220,5 +220,4 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
          in.close();
       }
    }
-
 }
