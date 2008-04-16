@@ -478,7 +478,7 @@ public class VFSUtils
    }
 
    /**
-    * Unpack the artifact under original param.
+    * Unpack the artifact under file param.
     *
     * @param file the file to unpack
     * @return unpacked file
@@ -501,11 +501,28 @@ public class VFSUtils
          return file;
       }
 
+      return move(file);
+   }
+
+   /**
+    * Move the artifact under file param.
+    *
+    * @param file the file to move
+    * @return moved file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile move(VirtualFile file) throws IOException, URISyntaxException
+   {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+
       File unpacked = new File(getTempDirectory(), GUID.asString());
       if (unpacked.mkdir() == false)
          throw new IllegalArgumentException("Cannot create directory: " + unpacked);
       unpacked.deleteOnExit();
 
+      VirtualFileHandler handler = file.getHandler();
       unpack(handler, unpacked, false);
       FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
