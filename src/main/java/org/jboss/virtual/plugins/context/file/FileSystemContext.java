@@ -155,7 +155,15 @@ public class FileSystemContext extends AbstractVFSContext
    {
       super(rootURI);
       root = createVirtualFileHandler(null, file);
+      if (root == null)
+         throw new IllegalArgumentException("Null root, rootURI: " + rootURI + ", file: " + file);
+
       rootFile = root.getVirtualFile();
+   }
+
+   public String getName()
+   {
+      return root.getName();
    }
 
    public VirtualFileHandler getRoot() throws IOException

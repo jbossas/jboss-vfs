@@ -19,18 +19,17 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.context.vfs;
+package org.jboss.virtual;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VirtualFileFilter;
-import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.context.vfs.AssembledDirectoryHandler;
+import org.jboss.virtual.plugins.context.vfs.AssembledFileHandler;
+import org.jboss.virtual.plugins.context.vfs.ByteArrayHandler;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
 
@@ -39,6 +38,7 @@ import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
  * spread throughout the file system or embedded in jar files.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class AssembledDirectory extends VirtualFile
@@ -97,9 +97,12 @@ public class AssembledDirectory extends VirtualFile
          throw new IllegalArgumentException("Null className");
       if (loader == null)
          throw new IllegalArgumentException("Null loader");
+
       String resource = className.replace('.', '/') + ".class";
       URL url = loader.getResource(resource);
-      if (url == null) throw new RuntimeException("Could not find resource: " + resource);
+      if (url == null)
+         throw new RuntimeException("Could not find resource: " + resource);
+
       AssembledDirectory p = mkdirs(resource);
       p.addResource(resource, loader);
    }
@@ -114,6 +117,7 @@ public class AssembledDirectory extends VirtualFile
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
+
       String[] pkgs = path.split("/");
       AssembledDirectoryHandler dir = directory;
       for (int i = 0; i < pkgs.length - 1; i++)
@@ -123,7 +127,7 @@ public class AssembledDirectory extends VirtualFile
          {
             try
             {
-               next = new AssembledDirectoryHandler((AssembledContext) dir.getVFSContext(), dir, pkgs[i]);
+               next = new AssembledDirectoryHandler(dir.getVFSContext(), dir, pkgs[i]);
             }
             catch (IOException e)
             {
@@ -146,14 +150,15 @@ public class AssembledDirectory extends VirtualFile
     *
     * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
     *
-    * @param baseResource
-    * @param includes
-    * @param excludes
+    * @param baseResource the base resource
+    * @param includes the includes
+    * @param excludes the excludes
     */
    public void addResources(Class baseResource, String[] includes, String[] excludes)
    {
       if (baseResource == null)
          throw new IllegalArgumentException("Null base resource");
+
       String resource = baseResource.getName().replace('.', '/') + ".class";
       addResources(resource, includes, excludes, baseResource.getClassLoader());
    }
@@ -168,9 +173,9 @@ public class AssembledDirectory extends VirtualFile
     *
     * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
     *
-    * @param baseResource
-    * @param includes
-    * @param excludes
+    * @param baseResource the base resource
+    * @param includes the includes
+    * @param excludes the excludes
     */
    public void addResources(String baseResource, final String[] includes, final String[] excludes)
    {
@@ -189,10 +194,10 @@ public class AssembledDirectory extends VirtualFile
     *
     * The include/exclude patterns follow the Ant file pattern matching syntax.  See ant.apache.org for more details.
     *
-    * @param baseResource
-    * @param includes
-    * @param excludes
-    * @param loader
+    * @param baseResource the base resource
+    * @param includes the includes
+    * @param excludes the excludes
+    * @param loader the loader
     */
    public void addResources(String baseResource, final String[] includes, final String[] excludes, ClassLoader loader)
    {
@@ -200,8 +205,11 @@ public class AssembledDirectory extends VirtualFile
          throw new IllegalArgumentException("Null baseResource");
       if (loader == null)
          throw new IllegalArgumentException("Null loader");
+
       URL url = loader.getResource(baseResource);
-      if (url == null) throw new RuntimeException("Could not find baseResource: " + baseResource);
+      if (url == null)
+         throw new RuntimeException("Could not find baseResource: " + baseResource);
+
       String urlString = url.toString();
       int idx = urlString.lastIndexOf(baseResource);
       urlString = urlString.substring(0, idx);
@@ -262,26 +270,26 @@ public class AssembledDirectory extends VirtualFile
    /**
     * Create a regular expression pattern from an Ant file matching pattern
     *
-    * @param matcher
-    * @return
+    * @param matcher the matcher pattern
+    * @return the pattern instance
     */
    public static Pattern getPattern(String matcher)
    {
       if (matcher == null)
          throw new IllegalArgumentException("Null matcher");
+
       matcher = matcher.replace(".", "\\.");
       matcher = matcher.replace("*", ".*");
       matcher = matcher.replace("?", ".{1}");
       return Pattern.compile(matcher);
-
    }
 
    /**
     * Determine whether a given file path matches an Ant pattern.
     *
-    * @param path
-    * @param expression
-    * @return
+    * @param path the path
+    * @param expression the expression
+    * @return true if we match
     */
    public static boolean antMatch(String path, String expression)
    {
@@ -333,12 +341,14 @@ public class AssembledDirectory extends VirtualFile
    /**
     * Add a VirtualFile as a child to this AssembledDirectory.
     *
-    * @param vf
+    * @param vf the virtual file
+    * @return the file
     */
    public VirtualFile addChild(VirtualFile vf)
    {
       if (vf == null)
          throw new IllegalArgumentException("Null virtual file");
+
       return directory.addChild(vf.getHandler()).getVirtualFile();
    }
 
@@ -346,14 +356,15 @@ public class AssembledDirectory extends VirtualFile
     * Add a VirtualFile as a child to this AssembledDirectory.  This file will be added
     * under a new aliased name.
     *
-    * @param vf
-    * @param newName
+    * @param vf the virtual file
+    * @param newName the new name
+    * @return new file
     */
    public VirtualFile addChild(VirtualFile vf, String newName)
    {
       try
       {
-         AssembledFileHandler handler = new AssembledFileHandler((AssembledContext) directory.getVFSContext(), directory, newName, vf.getHandler());
+         AssembledFileHandler handler = new AssembledFileHandler(directory.getVFSContext(), directory, newName, vf.getHandler());
          directory.addChild(handler);
          return handler.getVirtualFile();
       }
@@ -369,7 +380,8 @@ public class AssembledDirectory extends VirtualFile
     *
     * Thread.currentThread.getCOntextClassLoader() will be used to load the resource.
     *
-    * @param resource
+    * @param resource the resource
+    * @return the file
     */
    public VirtualFile addResource(String resource)
    {
@@ -382,8 +394,9 @@ public class AssembledDirectory extends VirtualFile
     *
     * Thread.currentThread.getCOntextClassLoader() will be used to load the resource.
     *
-    * @param resource
-    * @param newName
+    * @param resource the resource
+    * @param newName the new name
+    * @return the file
     */
    public VirtualFile addResource(String resource, String newName)
    {
@@ -396,8 +409,9 @@ public class AssembledDirectory extends VirtualFile
     *
     * The loader parameter will be used to load the resource.
     *
-    * @param resource
-    * @param loader
+    * @param resource the resource
+    * @param loader the loader
+    * @return the file
     */
    public VirtualFile addResource(String resource, ClassLoader loader)
    {
@@ -415,7 +429,8 @@ public class AssembledDirectory extends VirtualFile
    /**
     * Add a resource identified by the URL as a child to this AssembledDirectory.
     *
-    * @param url
+    * @param url the url
+    * @return the file
     */
    public VirtualFile addResource(URL url)
    {
@@ -439,9 +454,10 @@ public class AssembledDirectory extends VirtualFile
     *
     * The loader parameter will be used to load the resource.
     *
-    * @param resource
-    * @param loader
-    * @param newName
+    * @param resource the resource
+    * @param loader the loader
+    * @param newName the new name
+    * @return the file
     */
    public VirtualFile addResource(String resource, ClassLoader loader, String newName)
    {
@@ -455,6 +471,7 @@ public class AssembledDirectory extends VirtualFile
       URL url = loader.getResource(resource);
       if (url == null)
          throw new RuntimeException("Could not find resource: " + resource);
+
       try
       {
          VirtualFile vf = VFS.getRoot(url);
@@ -469,10 +486,9 @@ public class AssembledDirectory extends VirtualFile
    /**
     * Add raw bytes as a file to this assembled directory
     *
-    *
-    * @param bytes
-    * @param name
-    * @return
+    * @param bytes the bytes
+    * @param name the name
+    * @return the file
     */
    public VirtualFile addBytes(byte[] bytes, String name)
    {
@@ -480,10 +496,11 @@ public class AssembledDirectory extends VirtualFile
          throw new IllegalArgumentException("Null bytes");
       if (name == null)
          throw new IllegalArgumentException("Null name");
-      ByteArrayHandler handler = null;
+
+      ByteArrayHandler handler;
       try
       {
-         handler = new ByteArrayHandler((AssembledContext) directory.getVFSContext(), directory, name, bytes);
+         handler = new ByteArrayHandler(directory.getVFSContext(), directory, name, bytes);
       }
       catch (IOException e)
       {
@@ -496,24 +513,23 @@ public class AssembledDirectory extends VirtualFile
    /**
     * Create a directory within this directory.
     *
-    * @param name
-    * @return
+    * @param name the name
+    * @return the directory
     */
    public AssembledDirectory mkdir(String name)
    {
       if (name == null)
          throw new IllegalArgumentException("Null name");
-      AssembledDirectoryHandler handler = null;
+
       try
       {
-         handler = new AssembledDirectoryHandler((AssembledContext) directory.getVFSContext(), directory, name);
+         AssembledDirectoryHandler handler = new AssembledDirectoryHandler(directory.getVFSContext(), directory, name);
          directory.addChild(handler);
+         return new AssembledDirectory(handler);
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      return new AssembledDirectory(handler);
    }
-
 }

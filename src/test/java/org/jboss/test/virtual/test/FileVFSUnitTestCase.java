@@ -1428,7 +1428,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       URL rootURL = tmpRoot.toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
-      log.info(tmpVF.getHandler());
+      log.info(tmpVF);
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
       assertFalse(tmpVF.getPathName()+".isLeaf()", tmpVF.isLeaf());
       assertTrue(tmp+".delete()", tmp.delete());

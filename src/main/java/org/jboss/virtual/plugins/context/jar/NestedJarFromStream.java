@@ -322,7 +322,7 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
    {
       PutField fields = out.putFields();
 
-      byte[] zisBytes = null;
+      byte[] zisBytes;
       ZipInputStream jarStream = zis;
       if(jarStream == null)
       {

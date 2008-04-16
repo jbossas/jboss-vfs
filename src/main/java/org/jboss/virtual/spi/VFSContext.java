@@ -33,10 +33,18 @@ import org.jboss.virtual.VFS;
  * 
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
+ * @author ales.justin@jboss.org
  * @version $Revision: 55466 $
  */
 public interface VFSContext
 {
+   /**
+    * Get the name.
+    *
+    * @return the name
+    */
+   String getName();
+
    /**
     * Get the root uri
     * 

@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.net.URISyntaxException;
 import java.io.IOException;
 
+import org.jboss.virtual.AssembledDirectory;
+
 /**
  * Factory for creating AssembledDirectory.
  *
@@ -33,9 +35,10 @@ import java.io.IOException;
  */
 public class AssembledContextFactory
 {
+   private static AssembledContextFactory instance = new AssembledContextFactory();
+
    private ConcurrentHashMap<String, AssembledDirectory> registry = new ConcurrentHashMap<String, AssembledDirectory>();
    private volatile int count;
-   private static AssembledContextFactory instance = new AssembledContextFactory();
 
    /**
     * Creates an assembly returning the root AssembledDirectory .
@@ -49,6 +52,7 @@ public class AssembledContextFactory
    {
       if (registry.containsKey(name))
          throw new RuntimeException("Assembled context already exists for name: " + name);
+
       try
       {
          AssembledContext context = new AssembledContext(name, rootName);
@@ -94,28 +98,29 @@ public class AssembledContextFactory
    /**
     * Remove an assembly
     *
-    * @param directory
+    * @param directory the directory
     */
    public void remove(AssembledDirectory directory)
    {
       try
       {
-         if (directory.getParent() != null) throw new RuntimeException("This is not the root of assembly");
+         if (directory.getParent() != null)
+            throw new RuntimeException("This is not the root of assembly");
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      registry.remove(((AssembledContext)directory.getHandler().getVFSContext()).getName());
+      registry.remove(directory.getName());
    }
 
+   /**
+    * Get the instance.
+    *
+    * @return the instance
+    */
    public static AssembledContextFactory getInstance()
    {
       return instance;
-   }
-
-   public static void setInstance(AssembledContextFactory instance)
-   {
-      AssembledContextFactory.instance = instance;
    }
 }

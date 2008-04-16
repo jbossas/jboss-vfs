@@ -89,6 +89,11 @@ public class MockVFSContext extends AbstractVFSContext
       super(createRootMockURI(name));
    }
 
+   public String getName()
+   {
+      return root.getName();
+   }
+
    /**
     * Set the ioException.
     * 

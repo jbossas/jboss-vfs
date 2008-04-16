@@ -33,8 +33,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -50,7 +52,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    private List<VirtualFileHandler> children = new ArrayList<VirtualFileHandler>();
    private Map<String, VirtualFileHandler> childrenMap = new HashMap<String, VirtualFileHandler>();
 
-   public AssembledDirectoryHandler(AssembledContext context, AssembledDirectoryHandler parent, String name) throws IOException
+   public AssembledDirectoryHandler(VFSContext context, AssembledDirectoryHandler parent, String name) throws IOException
    {
       super(context, parent, name);
       String path = getPathName();
@@ -65,7 +67,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       {
          try
          {
-            handler = new AssembledFileHandler((AssembledContext)getVFSContext(), this, handler.getName(), handler);
+            handler = new AssembledFileHandler(getVFSContext(), this, handler.getName(), handler);
          }
          catch (IOException e)
          {

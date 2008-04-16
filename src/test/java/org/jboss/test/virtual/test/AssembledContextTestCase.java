@@ -27,8 +27,8 @@ import java.util.regex.Pattern;
 
 import junit.framework.Test;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
-import org.jboss.virtual.plugins.context.vfs.AssembledDirectory;
 
 /**
  * comment

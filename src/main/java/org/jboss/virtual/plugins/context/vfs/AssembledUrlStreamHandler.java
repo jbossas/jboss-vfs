@@ -27,19 +27,21 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Used when creating VFS urls so we don't have to go through the handlers all the time
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class AssembledUrlStreamHandler extends URLStreamHandler
 {
-   private final AssembledContext context;
+   private final VFSContext context;
 
-   public AssembledUrlStreamHandler(AssembledContext context)
+   public AssembledUrlStreamHandler(VFSContext context)
    {
       this.context = context;
    }
@@ -49,7 +51,7 @@ public class AssembledUrlStreamHandler extends URLStreamHandler
       String path = url.getPath();
       VirtualFileHandler vf = context.getRoot().getChild(path);
       if (vf == null)
-         throw new IOException(path + " was not found in Assembled VFS context " + context.getName());
+         throw new IOException(path + " was not found in Assembled VFS context " + context);
 
       return new VirtualFileURLConnection(url, vf.getVirtualFile());
    }

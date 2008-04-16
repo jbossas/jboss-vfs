@@ -21,22 +21,17 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
 
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
-import org.jboss.test.virtual.support.OptionsAwareURI;
 import org.jboss.test.virtual.support.FileOAContextFactory;
 import org.jboss.test.virtual.support.JarOAContextFactory;
-import org.jboss.virtual.VFS;
+import org.jboss.test.virtual.support.OptionsAwareURI;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VFSContextFactory;
+import org.jboss.virtual.spi.VFSContextFactoryLocator;
 
 /**
  * AbstractVFSTest.
@@ -120,41 +115,12 @@ public abstract class AbstractVFSTest extends BaseTestCase
    /**
     * Do we force copy handling of jars.
     *
-    * @param vfs the vfs
-    * @return true if we force copy handling
-    * @throws IOException for any error
-    */
-   protected boolean isForceCopyEnabled(VFS vfs) throws IOException
-   {
-      return isForceCopyEnabled(vfs.getRoot());
-   }
-
-   /**
-    * Do we force copy handling of jars.
-    *
-    * @param file the file
+    * @param file the virtual file
     * @return true if we force copy handling
     */
    protected boolean isForceCopyEnabled(VirtualFile file)
    {
-      return isForceCopyEnabled(file.getHandler());
-   }
-
-   /**
-    * Do we force copy handling of jars.
-    *
-    * @param handler the virtual file handler
-    * @return true if we force copy handling
-    */
-   protected boolean isForceCopyEnabled(VirtualFileHandler handler)
-   {
       boolean systemProperty = Boolean.parseBoolean(System.getProperty(VFSUtils.FORCE_COPY_KEY, "false"));
-      if (systemProperty == false)
-      {
-         VFSContext context = handler.getVFSContext();
-         Map<String, String> map = context.getOptions();
-         return (map != null && map.get(VFSUtils.USE_COPY_QUERY) != null);
-      }
-      return true;
+      return systemProperty || VFSUtils.getOption(file, VFSUtils.FORCE_COPY_KEY) != null;
    }
 }

@@ -56,6 +56,11 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
       rootFile = root.getVirtualFile();
    }
 
+   public String getName()
+   {
+      return root.getName();
+   }
+
    public VirtualFileHandler getRoot() throws IOException
    {
       return root;

@@ -41,6 +41,8 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.virtual.spi.LinkInfo;
+import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * VFS Utilities
@@ -158,6 +160,7 @@ public class VFSUtils
             // TODO, this occurs for inner jars. Doubtful that such a mf cp is valid
             if( rootPathLength > libPath.length() )
                throw new IOException("Invalid rootPath: "+vfsRootURL+", libPath: "+libPath);
+
             String vfsLibPath = libPath.substring(rootPathLength);
             VirtualFile vf = file.getVFS().getChild(vfsLibPath);
             if(vf != null)
@@ -268,8 +271,9 @@ public class VFSUtils
    }
 
    /**
-    * 
-    * @param uri
+    * Get the name.
+    *
+    * @param uri the uri
     * @return name from uri's path
     */
    public static String getName(URI uri)
@@ -384,5 +388,59 @@ public class VFSUtils
       // Escape any spaces
       urispec = urispec.replaceAll(" ", "%20");
       return new URI(urispec);
+   }
+
+   /**
+    * Get the options for this file.
+    *
+    * @param file the file
+    * @return options map
+    */
+   private static Map<String, String> getOptions(VirtualFile file)
+   {
+      VirtualFileHandler handler = file.getHandler();
+      VFSContext context = handler.getVFSContext();
+      return context.getOptions();
+   }
+
+   /**
+    * Get the option.
+    *
+    * @param file the file
+    * @param key the option key
+    * @return key's option
+    */
+   public static String getOption(VirtualFile file, String key)
+   {
+      Map<String, String> options = getOptions(file);
+      return options != null ? options.get(key) : null;
+   }
+
+   /**
+    * Enable copy for file param.
+    *
+    * @param file the file
+    */
+   public static void enableCopy(VirtualFile file)
+   {
+      Map<String, String> options = getOptions(file);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot enable copy on null options: " + file);
+
+      options.put(USE_COPY_QUERY, Boolean.TRUE.toString());
+   }
+
+   /**
+    * Disable copy for file param.
+    *
+    * @param file the file
+    */
+   public static void disableCopy(VirtualFile file)
+   {
+      Map<String, String> options = getOptions(file);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot disable copy on null options: " + file);
+
+      options.remove(USE_COPY_QUERY);
    }
 }

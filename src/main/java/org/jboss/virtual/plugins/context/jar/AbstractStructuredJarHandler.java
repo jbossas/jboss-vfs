@@ -92,7 +92,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    }
 
    /**
-    * Initialise the jar file
+    * Initialize the jar file
     *
     * @throws java.io.IOException for any error reading the jar file
     * @throws IllegalArgumentException for a null jarFile

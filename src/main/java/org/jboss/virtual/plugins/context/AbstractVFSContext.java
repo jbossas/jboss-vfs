@@ -25,16 +25,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
@@ -106,7 +105,7 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public Map<String, String> getOptions()
    {
-      return Collections.unmodifiableMap(rootOptions);
+      return rootOptions;
    }
 
    public List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException

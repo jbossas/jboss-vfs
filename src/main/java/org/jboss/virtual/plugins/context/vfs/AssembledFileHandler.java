@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -38,7 +39,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 @Assembled
 public class AssembledFileHandler extends DelegatingHandler
 {
-   public AssembledFileHandler(AssembledContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
+   public AssembledFileHandler(VFSContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
    {
       super(context, parent, name, delegate);
       setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));

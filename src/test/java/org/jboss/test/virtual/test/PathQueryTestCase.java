@@ -23,12 +23,11 @@ package org.jboss.test.virtual.test;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Map;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Test the query in url/uri.
@@ -58,11 +57,7 @@ public class PathQueryTestCase extends AbstractVFSTest
 
    protected void assertOption(VirtualFile vf, String key, String value)
    {
-      VFSContext context = vf.getHandler().getVFSContext();
-      assertNotNull(context);
-      Map<String, String> options = context.getOptions();
-      assertNotNull(options);
-      assertEquals(value, options.get(key));
+      assertEquals(value, VFSUtils.getOption(vf, key));
    }
 
    public void testURL() throws Throwable

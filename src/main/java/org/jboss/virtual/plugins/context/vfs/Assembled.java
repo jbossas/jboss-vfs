@@ -32,7 +32,8 @@ import java.lang.annotation.RetentionPolicy;
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @version $Revision: 1.1 $
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Assembled
 {
 }

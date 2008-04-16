@@ -200,7 +200,7 @@ public class MemoryTestCase extends AbstractVFSTest
          assertNotNull(file2);
          VirtualFile test = file2.findChild("/acme/test/Test.class");
          assertNotNull(test);
-         assertSame(file.getHandler(), test.getHandler());
+         assertEquals(file, test);
          
          //acme
          List<VirtualFile> children = file2.getChildren();

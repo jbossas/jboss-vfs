@@ -78,7 +78,7 @@ public class VirtualFile implements Serializable
     * @return the handler
     * @throws IllegalStateException if the file is closed
     */
-   public VirtualFileHandler getHandler()
+   VirtualFileHandler getHandler()
    {
       if (closed.get())
          throw new IllegalStateException("The virtual file is closed");

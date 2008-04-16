@@ -31,12 +31,14 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * comment
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 @Assembled
@@ -45,7 +47,7 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
    private byte[] bytes;
    private final long lastModified;
 
-   public ByteArrayHandler(AssembledContext context, VirtualFileHandler parent, String name, byte[] bytes) throws IOException
+   public ByteArrayHandler(VFSContext context, VirtualFileHandler parent, String name, byte[] bytes) throws IOException
    {
       super(context, parent, name);
       this.bytes = bytes;

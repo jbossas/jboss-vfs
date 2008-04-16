@@ -59,6 +59,11 @@ public class JarContext extends AbstractVFSContext
       rootFile = root.getVirtualFile();
    }
 
+   public String getName()
+   {
+      return root.getName();
+   }
+
    public VirtualFileHandler getRoot() throws IOException
    {
       return root;
@@ -88,6 +93,9 @@ public class JarContext extends AbstractVFSContext
       
       // todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
       AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.getChild(entryPath);
+      if (result == null)
+         throw new IllegalArgumentException("Null child, entryPath: " + entryPath);
+
       result.setPathName("");
       return result;
    }
