@@ -517,10 +517,8 @@ public class VFSUtils
       if (file == null)
          throw new IllegalArgumentException("Null file");
 
-      File unpacked = new File(getTempDirectory(), GUID.asString());
-      if (unpacked.mkdir() == false)
-         throw new IllegalArgumentException("Cannot create directory: " + unpacked);
-      unpacked.deleteOnExit();
+      File guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
+      File unpacked = createTempDirectory(guidDir, file.getName());
 
       VirtualFileHandler handler = file.getHandler();
       unpack(handler, unpacked, false);
@@ -531,6 +529,22 @@ public class VFSUtils
          parent.replaceChild(handler, newHandler);
 
       return newHandler.getVirtualFile();
+   }
+
+   /**
+    * Create the temp directory.
+    *
+    * @param parent the parent
+    * @param name the dir name
+    * @return new directory
+    */
+   private static File createTempDirectory(File parent, String name)
+   {
+      File file = new File(parent, name);
+      if (file.mkdir() == false)
+         throw new IllegalArgumentException("Cannot create directory: " + file);
+      file.deleteOnExit();
+      return file;
    }
 
    /**

@@ -25,6 +25,7 @@ import java.net.URL;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -91,7 +92,7 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip");
       replacement = VFSUtils.unpack(original);
-      assertEquals(original.getParent(), replacement.getParent());
+      assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level1.zip");
       assertEquals(replacement, child);
@@ -115,7 +116,7 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip/level2.zip");
       replacement = VFSUtils.unpack(original);
-      assertEquals(original.getParent(), replacement.getParent());
+      assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level2.zip");
       assertEquals(replacement, child);
@@ -136,13 +137,25 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip/level2.zip/level3.zip");
       replacement = VFSUtils.unpack(original);
-      assertEquals(original.getParent(), replacement.getParent());
+      assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level3.zip");
       assertEquals(replacement, child);
 
       VirtualFile textThree = replacement.findChild("test3.txt");
       testText(textThree);
+   }
+
+   protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws IOException
+   {
+      assertEquals(original.getName(), replacement.getName());
+      assertEquals(original.getPathName(), replacement.getPathName());
+      // it's a directory
+      assertEquals(0, replacement.getSize());
+      assertEquals(original.exists(), replacement.exists());
+      assertEquals(original.isLeaf(), replacement.isLeaf());
+      assertEquals(original.isHidden(), replacement.isHidden());
+      assertEquals(original.getParent(), replacement.getParent());
    }
 
    protected void testText(VirtualFile file) throws Exception
