@@ -26,12 +26,12 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Singelton implementation of a MemoryContextFactory.
@@ -77,6 +77,7 @@ public class MemoryContextFactory implements VFSContextFactory
 
    /**
     * Gets hold of a root MemoryContext
+    *
     * @param host The name of the root
     * @return the found root MemoryContext, or null if none exists for the name 
     */
@@ -102,14 +103,13 @@ public class MemoryContextFactory implements VFSContextFactory
          }
          
          String rootName = url.getHost();
-         MemoryContext ctx = registry.get(rootName);
+         MemoryContext ctx = find(rootName);
          if (ctx == null)
          {
             URL ctxURL = new URL("vfsmemory://" + rootName);
             ctx = new MemoryContext(ctxURL);
             registry.put(rootName, ctx);
          }
-//         ctx.createDirectory(url);
          return ctx;
       }
       catch(MalformedURLException e)
@@ -128,7 +128,7 @@ public class MemoryContextFactory implements VFSContextFactory
     * @return The created directory
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
     */
-   public VirtualFileHandler createDirectory(URL url)
+   public VirtualFile createDirectory(URL url)
    {
       String rootName = url.getHost();
       MemoryContext ctx = registry.get(rootName);
@@ -147,7 +147,7 @@ public class MemoryContextFactory implements VFSContextFactory
     * @return The created file
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
     */
-   public VirtualFileHandler putFile(URL url, byte[] contents)
+   public VirtualFile putFile(URL url, byte[] contents)
    {
       String rootName = url.getHost();
       MemoryContext ctx = registry.get(rootName);
@@ -205,5 +205,4 @@ public class MemoryContextFactory implements VFSContextFactory
          throw new RuntimeException(e);
       }
    }
-   
 }

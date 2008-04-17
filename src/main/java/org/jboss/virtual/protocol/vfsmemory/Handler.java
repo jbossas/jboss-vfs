@@ -26,15 +26,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+import org.jboss.virtual.MemoryFileFactory;
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.memory.MemoryContext;
-import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
  * URLStreamHandler for VFS
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class Handler extends URLStreamHandler
@@ -42,11 +43,11 @@ public class Handler extends URLStreamHandler
    protected URLConnection openConnection(URL u) throws IOException
    {
       String host = u.getHost();
-      MemoryContext ctx = MemoryContextFactory.getInstance().find(host);
-      if (ctx == null)
+      VFS vfs = MemoryFileFactory.find(host);
+      if (vfs == null)
          throw new IOException("vfs does not exist: " + u.toString());
 
-      VirtualFile vf = ctx.getChild(ctx.getRoot(), u.getPath()).getVirtualFile();
+      VirtualFile vf = vfs.getChild(u.getPath());
       if (vf == null)
          throw new IOException("vfs does not exist: " + u.toString());
 

@@ -37,6 +37,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * Virtual memory context.
  *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class MemoryContext extends AbstractVFSContext implements Serializable
@@ -66,12 +67,12 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
       return root;
    }
    
-   VirtualFileHandler createDirectory(URL url)
+   VirtualFile createDirectory(URL url)
    {
       return putFile(url, null);
    }
    
-   VirtualFileHandler putFile(URL url, byte[] contents)
+   VirtualFile putFile(URL url, byte[] contents)
    {
       try
       {
@@ -116,7 +117,7 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
          }
          
          current.setContents(contents);
-         return current;
+         return current.getVirtualFile();
       }
       catch(MalformedURLException e)
       {

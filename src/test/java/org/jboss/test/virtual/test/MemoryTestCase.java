@@ -32,6 +32,7 @@ import junit.framework.Test;
 import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextHandler;
 import org.jboss.virtual.spi.VFSContext;
@@ -42,6 +43,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * 
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class MemoryTestCase extends AbstractVFSTest
@@ -108,14 +110,12 @@ public class MemoryTestCase extends AbstractVFSTest
    
    public void testWriteAndReadData() throws Exception
    {
-      MemoryContextFactory mfactory = MemoryContextFactory.getInstance();
       URL root = new URL("vfsmemory://aopdomain");
       try
       {
          long now = System.currentTimeMillis();
-         VFSContext ctx = mfactory.createRoot(root);
          URL url = new URL("vfsmemory://aopdomain/org/acme/test/Test.class");
-         mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(url,  new byte[] {'a', 'b', 'c'});
          
          String read = readURL(url);
          assertEquals("abc", read);
@@ -129,7 +129,7 @@ public class MemoryTestCase extends AbstractVFSTest
          assertTrue(classFile.isLeaf());
          assertTrue(classFile.getLastModified() >= now);
 
-         assertTrue(mfactory.delete(url));
+         assertTrue(MemoryFileFactory.delete(url));
          try
          {
             InputStream is = url.openStream();
@@ -139,32 +139,31 @@ public class MemoryTestCase extends AbstractVFSTest
          {
          }
          
-         ctx = mfactory.find("aopdomain");
+         VFS ctx = MemoryFileFactory.find("aopdomain");
          assertNotNull(ctx);
          
-         assertTrue(mfactory.deleteRoot(root));
-         ctx = mfactory.find("aopdomain");
+         assertTrue(MemoryFileFactory.deleteRoot(root));
+         ctx = MemoryFileFactory.find("aopdomain");
          assertNull(ctx);
       }
       finally
       {
-         mfactory.deleteRoot(root);
+         MemoryFileFactory.deleteRoot(root);
       }
    }
    
    public void testMultipleFiles() throws Exception
    {
-      MemoryContextFactory mfactory = MemoryContextFactory.getInstance();
       URL root = new URL("vfsmemory://aopdomain");
       try
       {
-         VFSContext ctx = mfactory.createRoot(root);
-         
+         VFS ctx = MemoryFileFactory.createRoot(root);
+
          URL urlA = new URL("vfsmemory://aopdomain/org/acme/test/Test.class");
-         mfactory.putFile(urlA,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(urlA,  new byte[] {'a', 'b', 'c'});
          
          URL urlB = new URL("vfsmemory://aopdomain/org/foo/test/Test.class");
-         mfactory.putFile(urlB,  new byte[] {'d', 'e', 'f'});
+         MemoryFileFactory.putFile(urlB,  new byte[] {'d', 'e', 'f'});
          
          String readA = readURL(urlA);
          assertEquals("abc", readA);
@@ -174,25 +173,25 @@ public class MemoryTestCase extends AbstractVFSTest
       }
       finally
       {
-         mfactory.deleteRoot(root);
+         MemoryFileFactory.deleteRoot(root);
       }
    }
 
    public void testNavigate() throws Exception
    {
-      MemoryContextFactory mfactory = MemoryContextFactory.getInstance();
       URL root = new URL("vfsmemory://aopdomain");
       try
       {
-         VFSContext ctx = mfactory.createRoot(root);
+         MemoryFileFactory.createRoot(root);
+
          URL url = new URL("vfsmemory://aopdomain/org/acme/test/Test.class");
-         mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(url,  new byte[] {'a', 'b', 'c'});
          URL url2 = new URL("vfsmemory://aopdomain/org/acme/test/Test2.class");
-         mfactory.putFile(url2,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(url2,  new byte[] {'a', 'b', 'c'});
          URL url3 = new URL("vfsmemory://aopdomain/org/acme/test/Test3.class");
-         mfactory.putFile(url3,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(url3,  new byte[] {'a', 'b', 'c'});
          
-         VFS vfs = ctx.getVFS();
+         VFS vfs = MemoryFileFactory.createRoot(root);
          VirtualFile file = vfs.getVirtualFile(root, "/org/acme/test/Test.class");
          assertNotNull(file);
          
@@ -224,24 +223,23 @@ public class MemoryTestCase extends AbstractVFSTest
       }
       finally
       {
-         mfactory.deleteRoot(root);
+         MemoryFileFactory.deleteRoot(root);
       }
    }
 
    public void testLeaf() throws Exception
    {
-      MemoryContextFactory mfactory = MemoryContextFactory.getInstance();
       URL root = new URL("vfsmemory://aopdomain");
       try
       {
-         VFSContext ctx = mfactory.createRoot(root);
+         VFS ctx = MemoryFileFactory.createRoot(root);
          URL url = new URL("vfsmemory://aopdomain/org/acme/leaf");
-         mfactory.putFile(url,  new byte[] {'a', 'b', 'c'});
+         MemoryFileFactory.putFile(url,  new byte[] {'a', 'b', 'c'});
 
          URL url2 = new URL("vfsmemory://aopdomain/org/acme/leaf/shouldnotwork");
          try
          {
-            mfactory.putFile(url2,  new byte[] {'d', 'e', 'f'});
+            MemoryFileFactory.putFile(url2,  new byte[] {'d', 'e', 'f'});
             fail("It should not have been possible to add a child to a leaf node");
          }
          catch(Exception e)
@@ -263,7 +261,7 @@ public class MemoryTestCase extends AbstractVFSTest
          try
          {
             URL url3 = new URL("vfsmemory://aopdomain/org/acme");
-            mfactory.putFile(url3, new byte[] {'1', '2', '3'});
+            MemoryFileFactory.putFile(url3, new byte[] {'1', '2', '3'});
             fail("Should not have been possible to set contents for a non-leaf node");
          }
          catch (Exception expected)
@@ -273,7 +271,7 @@ public class MemoryTestCase extends AbstractVFSTest
          try
          {
             URL url4 = new URL("vfsmemory://aopdomain/org");
-            mfactory.putFile(url4, new byte[] {'1', '2', '3'});
+            MemoryFileFactory.putFile(url4, new byte[] {'1', '2', '3'});
             fail("Should not have been possible to set contents for a non-leaf node");
          }
          catch (Exception expected)
@@ -282,7 +280,7 @@ public class MemoryTestCase extends AbstractVFSTest
       }
       finally
       {
-         mfactory.deleteRoot(root);
+         MemoryFileFactory.deleteRoot(root);
       }
    }
    
@@ -337,5 +335,4 @@ public class MemoryTestCase extends AbstractVFSTest
          }
       }      
    }
-   
 }
