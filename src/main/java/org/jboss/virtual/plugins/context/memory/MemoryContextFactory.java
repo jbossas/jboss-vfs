@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
@@ -81,9 +82,10 @@ public class MemoryContextFactory implements VFSContextFactory
     * @param host The name of the root
     * @return the found root MemoryContext, or null if none exists for the name 
     */
-   public MemoryContext find(String host)
+   public VFS find(String host)
    {
-      return registry.get(host);
+      MemoryContext context = registry.get(host);
+      return context != null ? context.getVFS() : null;
    }
    
    /**
@@ -103,7 +105,7 @@ public class MemoryContextFactory implements VFSContextFactory
          }
          
          String rootName = url.getHost();
-         MemoryContext ctx = find(rootName);
+         MemoryContext ctx = registry.get(rootName);
          if (ctx == null)
          {
             URL ctxURL = new URL("vfsmemory://" + rootName);

@@ -26,7 +26,6 @@ import java.net.URI;
 import java.net.URL;
 
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
-import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Memory VFS API.
@@ -45,8 +44,7 @@ public class MemoryFileFactory
     */
    public static VFS find(String host)
    {
-      VFSContext context = factory.find(host);
-      return context != null ? context.getVFS() : null;
+      return factory.find(host);
    }
 
    /**
