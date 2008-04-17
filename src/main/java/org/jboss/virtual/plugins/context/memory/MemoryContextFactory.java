@@ -80,7 +80,7 @@ public class MemoryContextFactory implements VFSContextFactory
     * Gets hold of a root MemoryContext
     *
     * @param host The name of the root
-    * @return the found root MemoryContext, or null if none exists for the name 
+    * @return the found root VFS, or null if none exists for the name 
     */
    public VFS find(String host)
    {
