@@ -505,6 +505,19 @@ public class VFSUtils
    }
 
    /**
+    * Unpack recursively the artifact under file param.
+    *
+    * @param file the file to unpack recursively
+    * @return unpacked file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile unpackRecursively(VirtualFile file) throws IOException, URISyntaxException
+   {
+      throw new UnsupportedOperationException("Recursive unpack is not yet supported: " + file);
+   }
+
+   /**
     * Move the artifact under file param.
     *
     * @param file the file to move
