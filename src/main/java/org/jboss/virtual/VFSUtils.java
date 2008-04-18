@@ -501,39 +501,9 @@ public class VFSUtils
          return file;
       }
 
-      return move(file);
-   }
-
-   /**
-    * Unpack recursively the artifact under file param.
-    *
-    * @param file the file to unpack recursively
-    * @return unpacked file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile unpackRecursively(VirtualFile file) throws IOException, URISyntaxException
-   {
-      throw new UnsupportedOperationException("Recursive unpack is not yet supported: " + file);
-   }
-
-   /**
-    * Move the artifact under file param.
-    *
-    * @param file the file to move
-    * @return moved file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile move(VirtualFile file) throws IOException, URISyntaxException
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-
       File guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
       File unpacked = createTempDirectory(guidDir, file.getName());
 
-      VirtualFileHandler handler = file.getHandler();
       unpack(handler, unpacked, false);
       FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
@@ -582,7 +552,7 @@ public class VFSUtils
          {
             File next = new File(file, handler.getName());
             if (handler.isLeaf() == false && next.mkdir() == false)
-               throw new IllegalArgumentException("Problems creating new file: " + next);
+               throw new IllegalArgumentException("Problems creating new directory: " + next);
             next.deleteOnExit();
 
             unpack(handler, next, handler.isLeaf());
