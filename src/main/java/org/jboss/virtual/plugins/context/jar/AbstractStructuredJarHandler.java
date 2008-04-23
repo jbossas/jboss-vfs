@@ -127,7 +127,9 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       List<ArrayList<ZipEntryWrapper<T>>> levelMapList = new ArrayList<ArrayList<ZipEntryWrapper<T>>>();
       entries = new ArrayList<VirtualFileHandler>();
       entryMap = new HashMap<String, VirtualFileHandler>();
+
       boolean trace = log.isTraceEnabled();
+
       while (enumeration.hasMoreElements())
       {
          ZipEntryWrapper<T> wrapper = enumeration.nextElement();
@@ -153,8 +155,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
          for (ZipEntryWrapper<T> wrapper : levels)
          {
             String name = wrapper.getName();
-            int slash = wrapper.isDirectory() ? name.lastIndexOf('/', name.length() - 2) :
-                    name.lastIndexOf('/', name.length() - 1);
+            int slash = wrapper.isDirectory() ? name.lastIndexOf('/', name.length() - 2) : name.lastIndexOf('/', name.length() - 1);
             VirtualFileHandler parent = this;
             if (slash >= 0)
             {
@@ -220,10 +221,9 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       StringBuilder pathName = new StringBuilder();
       for (String path : paths)
       {
-         VirtualFileHandler next;
          pathName.append(path);
          pathName.append('/');
-         next = parent.getChild(path);
+         VirtualFileHandler next = parent.getChild(path);
          if (next == null)
             next = createSynthenticParent(parent, path, wrapper);
          parentMap.put(pathName.toString(), next);
@@ -235,9 +235,10 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    protected VirtualFileHandler createSynthenticParent(VirtualFileHandler parent, String path, ZipEntryWrapper<T> wrapper)
          throws IOException
    {
-      VirtualFileHandler next;// Create a synthetic parent
       URL url = getURL(parent, path, true);
-      next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, wrapper.getTime(), url);
+      // Create a synthetic parent
+      VirtualFileHandler next = new SynthenticDirEntryHandler(getVFSContext(), parent, path, wrapper.getTime(), url);
+
       if (parent == this)
       {
          // This is an immeadiate child of the jar handler

@@ -703,10 +703,9 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertEquals("There were 2 classes", 2, count);
 
       // Make sure we can walk path-wise to the class
-      VirtualFile jar1 = vfs.getRoot();
-      VirtualFile parent = jar1;
+      VirtualFile parent = vfs.getRoot();
       String className = "org/jboss/test/vfs/support/jar1/ClassInJar1.class";
-      VirtualFile ClassInJar1 = vfs.findChild(className);
+      VirtualFile classInJar1 = vfs.findChild(className);
       String[] paths = className.split("/");
       StringBuilder vfsPath = new StringBuilder();
       for(String path : paths)
@@ -714,11 +713,13 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
          vfsPath.append(path);
          VirtualFile vf = parent.findChild(path);
          if( path.equals("ClassInJar1.class") )
-            assertEquals("ClassInJar1.class", ClassInJar1, vf);
+            assertEquals("ClassInJar1.class", classInJar1, vf);
          else
          {
             assertEquals("vfsPath", vfsPath.toString(), vf.getPathName());
-            assertEquals("lastModified", ClassInJar1.getLastModified(), vf.getLastModified());
+            // why should this be equal?
+            // assertEquals("lastModified", classInJar1.getLastModified(), vf.getLastModified());
+            assertTrue("lastModified", classInJar1.getLastModified() <= vf.getLastModified());
          }
          vfsPath.append('/');
          parent = vf;

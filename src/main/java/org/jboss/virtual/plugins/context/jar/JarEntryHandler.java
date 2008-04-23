@@ -105,6 +105,8 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       if (entryChildren == null)
          entryChildren = new ArrayList<VirtualFileHandler>();
       entryChildren.add(child);
+      if (entryMap != null)
+         entryMap.put(child.getName(), child);
    }
 
    @Override

@@ -105,11 +105,10 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    }
 
    @Override
-   public long getLastModified()
+   public long getLastModified() throws IOException
    {
-      if (cachedLastModified == 0)
-         cachedLastModified = System.currentTimeMillis();
-      return cachedLastModified;
+      checkParentExists();
+      return getParent().getLastModified();
    }
 
    @Override
