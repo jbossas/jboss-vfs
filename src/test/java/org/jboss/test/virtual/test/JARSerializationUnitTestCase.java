@@ -156,6 +156,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       jar1DSMF.close();
    }
 
+/*
    public void testLevelZips() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
@@ -202,6 +203,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       textThree = two.findChild("level3.zip/test3.txt");
       testText(textThree);
    }
+*/
 
    protected void testText(VirtualFile file) throws Exception
    {
