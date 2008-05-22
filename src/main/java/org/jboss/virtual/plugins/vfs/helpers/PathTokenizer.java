@@ -126,6 +126,10 @@ public class PathTokenizer
          }
          else
          {
+            // token starts with '.' or '..', but also has some path after that
+            if (specialToken != null)
+               throw new IllegalArgumentException("Illegal token in path: " + path);
+
             buffer.append(ch);
          }
       }
