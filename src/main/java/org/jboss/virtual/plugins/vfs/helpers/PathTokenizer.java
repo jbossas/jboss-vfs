@@ -21,8 +21,9 @@
 */
 package org.jboss.virtual.plugins.vfs.helpers;
 
-import java.util.StringTokenizer;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PathTokenizer.
@@ -31,6 +32,7 @@ import java.io.IOException;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
+@SuppressWarnings({"StringEquality"})
 public class PathTokenizer
 {
    /** The reverse path const */
@@ -87,23 +89,54 @@ public class PathTokenizer
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
-      StringTokenizer tokenizer = new StringTokenizer(path, "/");
-      int count = tokenizer.countTokens();
-      if (count == 0)
-         return null;
+      char[] chars = path.toCharArray();
+      StringBuilder buffer = new StringBuilder();
+      List<String> list = new ArrayList<String>();
+      String specialToken = null;
 
-      String[] tokens = new String[count];
-      int i = 0;
-      while (tokenizer.hasMoreTokens())
+      for (int index=0; index < chars.length; index++)
       {
-         String token = tokenizer.nextToken();
+         char ch = chars[index];
 
-         if ("".equals(token))
-            throw new IllegalArgumentException("A path element is empty: " + path);
+         if (ch == '/')
+         {
+            if (index > 0)
+            {
+               if (buffer.length() == 0 && specialToken == null)
+                  throw new IllegalArgumentException("A path element is empty: " + path);
 
-         tokens[i++] = token;
+               if (specialToken != null)
+                  list.add(specialToken);
+               else
+                  list.add(buffer.toString());
+
+               // reset
+               buffer.setLength(0);
+               specialToken = null;
+            }
+         }
+         else if (ch == '.')
+         {
+            if (specialToken == null && buffer.length() == 0)
+               specialToken = CURRENT_PATH;
+            else if (specialToken == CURRENT_PATH && buffer.length() == 0)
+               specialToken = REVERSE_PATH;
+            else
+               buffer.append(ch);
+         }
+         else
+         {
+            buffer.append(ch);
+         }
       }
-      return tokens;
+
+      // add last token
+      if (specialToken != null)
+         list.add(specialToken);
+      else if (buffer.length() > 0)
+         list.add(buffer.toString());
+
+      return list.toArray(new String[list.size()]);
    }
    
    /**
@@ -161,7 +194,7 @@ public class PathTokenizer
     */
    public static boolean isCurrentToken(String token)
    {
-      return CURRENT_PATH.equals(token);
+      return CURRENT_PATH == token;
    }
 
    /**
@@ -172,6 +205,6 @@ public class PathTokenizer
     */
    public static boolean isReverseToken(String token)
    {
-      return REVERSE_PATH.equals(token);
+      return REVERSE_PATH == token;
    }
 }
