@@ -70,8 +70,9 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());
       suite.addTest(SundryVFSUnitTestCase.suite());
-      // options / policy
+      // options / policy / path
       suite.addTest(PathQueryTestCase.suite());
+      suite.addTest(PathTokensTestCase.suite());
       // unpack
       suite.addTest(UnpackTestCase.suite());
 

@@ -121,6 +121,8 @@ public class PathTokenizer
                specialToken = CURRENT_PATH;
             else if (specialToken == CURRENT_PATH && buffer.length() == 0)
                specialToken = REVERSE_PATH;
+            else if (specialToken != null && buffer.length() == 0)
+               throw new IllegalArgumentException("Illegal token in path: " + path);
             else
                buffer.append(ch);
          }
