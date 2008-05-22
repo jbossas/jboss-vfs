@@ -68,6 +68,11 @@ public class PathTokensTestCase extends AbstractVFSTest
       testPath("/..somemorepath/");
       testPath("..somemorepath/");
       testPath("/..somemorepath");
-      testPath("..somemorepath");  
+      testPath("..somemorepath");
+      testPath("path//morepath");
+      testPath("//morepath");
+      // we need 3 '/', since by default we always remove the last one
+      testPath("///"); 
+      testPath("morepath///");
    }
 }
