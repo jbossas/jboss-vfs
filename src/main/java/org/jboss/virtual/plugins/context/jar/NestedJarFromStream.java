@@ -157,8 +157,15 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
          String url = toURI().toASCIIString() + "!/" + wrapper.getName();
          URL jecURL = new URL(url);
          VFSContext context = parent.getVFSContext();
-         byte[] contents = wrapper.getExtra();
-         return new JarEntryContents(context, parent, wrapper.getEntry(), entryName, toURL(), jecURL, contents);
+         if (wrapper.isDirectory())
+         {
+            return new SynthenticDirEntryHandler(context, parent, entryName, System.currentTimeMillis(), jecURL);  
+         }
+         else
+         {
+            byte[] contents = wrapper.getExtra();
+            return new JarEntryContents(context, parent, wrapper.getEntry(), entryName, toURL(), jecURL, contents);
+         }
       }
       catch (Throwable t)
       {
