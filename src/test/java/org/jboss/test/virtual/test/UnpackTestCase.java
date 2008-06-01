@@ -119,7 +119,8 @@ public class UnpackTestCase extends AbstractVFSTest
       assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level2.zip");
-      assertEquals(replacement, child);
+      //assertEquals(replacement, child);
+      assertEquals(replacement.toURI(), child.toURI());
 
       VirtualFile textTwo = replacement.findChild("test2.txt");
       testText(textTwo);
@@ -140,16 +141,19 @@ public class UnpackTestCase extends AbstractVFSTest
       assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level3.zip");
-      assertEquals(replacement, child);
+      //assertEquals(replacement, child);
+      assertEquals(replacement.toURI(), child.toURI());
 
       VirtualFile textThree = replacement.findChild("test3.txt");
       testText(textThree);
    }
 
-   protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws IOException
+   protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws Exception
    {
       assertEquals(original.getName(), replacement.getName());
-      assertEquals(original.getPathName(), replacement.getPathName());
+      // when mounting via DelegatingHandler, getPathName changes because VFSContext changes
+      //assertEquals(original.getPathName(), replacement.getPathName());
+      
       // it's a directory
       assertEquals(0, replacement.getSize());
       assertEquals(original.exists(), replacement.exists());

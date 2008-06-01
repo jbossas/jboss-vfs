@@ -68,6 +68,14 @@ public interface VFSContext
    VirtualFileHandler getRoot() throws IOException;
 
    /**
+    * Return the peer representing the root of this context within another context.
+    * Used when mounting contexts within other contexts
+    *
+    * @return the root peer
+    */
+   VirtualFileHandler getRootPeer();
+
+   /**
     * Get the context option settings
     * 
     * @return a map of the context options

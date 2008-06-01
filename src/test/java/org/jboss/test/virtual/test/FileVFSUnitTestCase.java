@@ -864,7 +864,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertEquals("pathName", vfsPath, tmpVF.getPathName());
       assertEquals("lastModified", lastModified, tmpVF.getLastModified());
       assertEquals("size", size, tmpVF.getSize());
-      assertEquals("url", url, tmpVF.toURL());
+      assertEquals("url", url.getPath(), tmpVF.toURL().getPath());
       // TODO: these should pass
       //assertEquals("isFile", true, tmpVF.isFile());
       //assertEquals("isDirectory", false, tmpVF.isDirectory());
@@ -885,7 +885,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertEquals("pathName", vfsPath, tmpVF2.getPathName());
       assertEquals("lastModified", lastModified, tmpVF2.getLastModified());
       assertEquals("size", size, tmpVF2.getSize());
-      assertEquals("url", url, tmpVF2.toURL());
+      assertEquals("url", url.getPath(), tmpVF2.toURL().getPath());
       // TODO: these should pass
       //assertEquals("isFile", true, tmpVF2.isFile());
       //assertEquals("isDirectory", false, tmpVF2.isDirectory());
@@ -1052,7 +1052,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertTrue("jar1URL path ends in unpacked-outer.jar/jar1.jar!/",
             jar1URL.getPath().endsWith("unpacked-outer.jar/jar1.jar"));
       VirtualFile jar1 = outerJar.findChild("jar1.jar");
-      assertEquals(jar1URL, jar1.toURL());
+      assertEquals(jar1URL.getPath(), jar1.toURL().getPath());
 
       VirtualFile packedJar = vfs.findChild("jar1.jar");
       jar1URL = packedJar.findChild("org/jboss/test/vfs/support").toURL();
@@ -1081,7 +1081,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertTrue("jar1URI path ends in unpacked-outer.jar/jar1.jar!/",
             jar1URI.getPath().endsWith("unpacked-outer.jar/jar1.jar"));
       VirtualFile jar1 = outerJar.findChild("jar1.jar");
-      assertEquals(jar1URI, jar1.toURI());
+      assertEquals(jar1URI.getPath(), jar1.toURI().getPath());
 
       VirtualFile packedJar = vfs.findChild("jar1.jar");
       jar1URI = packedJar.findChild("org/jboss/test/vfs/support").toURI();
@@ -1244,7 +1244,7 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertNotNull("tstjar != null", tstjar);
       URI uri = tstjar.toURI();
       URI expectedURI = new URI("vfs"+rootURL.toString()+"/path%20with%20spaces/tst.jar");
-      assertEquals(uri, expectedURI);
+      assertEquals(uri.getPath(), expectedURI.getPath());
    }
 
    public static void main(String[] args) throws Exception

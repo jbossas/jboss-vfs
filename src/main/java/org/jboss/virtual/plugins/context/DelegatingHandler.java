@@ -50,6 +50,18 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    private VirtualFileHandler delegate;
 
    /**
+    * Create a DelegatingHandler without a delegate - which will have to be set afterwards
+    *
+    * @param context - the context for the parent
+    * @param parent - the parent of the delegate in this VFS
+    * @param name - the name of the delegate in this VFS
+    */
+   public DelegatingHandler(VFSContext context, VirtualFileHandler parent, String name)
+   {
+      this(context, parent, name, null);
+   }
+
+   /**
     * Create a DelegatingHandler
     * 
     * @param context - the context for the parent
@@ -60,9 +72,19 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    public DelegatingHandler(VFSContext context, VirtualFileHandler parent, String name, VirtualFileHandler delegate)
    {
       super(context, parent, name);
-      if (delegate == null)
-         throw new IllegalArgumentException("Null delegate");
+      //if (delegate == null)
+      //   throw new IllegalArgumentException("Null delegate");
       this.delegate = delegate;
+   }
+
+   public void setDelegate(VirtualFileHandler handler)
+   {
+      this.delegate = handler;
+   }
+
+   public VirtualFileHandler getDelegate()
+   {
+      return delegate;
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
@@ -118,5 +140,37 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
       delegate.replaceChild(original, replacement);
+   }
+
+   public URL toVfsUrl() throws MalformedURLException, URISyntaxException
+   {
+      return delegate.toVfsUrl();
+   }
+
+   public int hashCode()
+   {
+      if (delegate != null)
+         return delegate.hashCode();
+
+      return super.hashCode();
+   }
+
+   public boolean equals(Object o)
+   {
+      if (o == this)
+         return true;
+      
+      if (o instanceof DelegatingHandler)
+      {
+         DelegatingHandler handler = (DelegatingHandler) o;
+         if (delegate != null)
+            return delegate.equals(handler.delegate);
+         else if (handler.delegate != null)
+            return false;   // one is null
+         else
+            return true;    // both are null
+      }
+
+      return false;
    }
 }

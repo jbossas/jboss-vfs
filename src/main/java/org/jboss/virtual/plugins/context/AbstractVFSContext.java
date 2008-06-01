@@ -59,6 +59,9 @@ public abstract class AbstractVFSContext implements VFSContext
    /** Options associated with the root URL */
    private Map<String, String> rootOptions;
 
+   /** Root's peer within another context */
+   private VirtualFileHandler rootPeer;
+
    /**
     * Create a new AbstractVFSContext.
     * 
@@ -98,6 +101,16 @@ public abstract class AbstractVFSContext implements VFSContext
       return rootURI;
    }
 
+   public void setRootPeer(VirtualFileHandler handler)
+   {
+      this.rootPeer = handler;
+   }
+
+   public VirtualFileHandler getRootPeer()
+   {
+      return rootPeer;
+   }
+
    protected void addOption(String key, String value)
    {
       rootOptions.put(key, value);
@@ -122,6 +135,35 @@ public abstract class AbstractVFSContext implements VFSContext
       if (path == null)
          throw new IllegalArgumentException("Null path");
       return parent.getChild(path);
+   }
+
+   public URL getChildURL(VirtualFileHandler parent, String name) throws IOException
+   {
+      StringBuilder urlStr = new StringBuilder(256);
+      URI rootUri = getRootURI();
+      urlStr.append(rootUri.getScheme())
+              .append(":").append(rootUri.getPath());
+      if(parent != null)
+      {
+         String pPathName = null;
+         if(parent instanceof AbstractVirtualFileHandler)
+            pPathName = ((AbstractVirtualFileHandler)parent).getLocalPathName();
+         else
+            pPathName = parent.getPathName();
+
+         if (urlStr.charAt( urlStr.length()-1) != '/')
+            urlStr.append("/");
+
+         if(pPathName.length() != 0)
+            urlStr.append(pPathName);
+
+         if (urlStr.charAt( urlStr.length()-1) != '/')
+            urlStr.append("/");
+
+         urlStr.append(name);
+      }
+
+      return new URL(urlStr.toString());
    }
 
    public void visit(VirtualFileHandler handler, VirtualFileHandlerVisitor visitor) throws IOException
@@ -204,7 +246,10 @@ public abstract class AbstractVFSContext implements VFSContext
          {
             try
             {
-               visit(child, visitor, false, leavesOnly, ignoreErrors, includeHidden, recurseFilter);
+               if (handler instanceof DelegatingHandler)
+                  child.getVFSContext().visit(child, visitor);
+               else
+                  visit(child, visitor, false, leavesOnly, ignoreErrors, includeHidden, recurseFilter);
             }
             catch (StackOverflowError e)
             {

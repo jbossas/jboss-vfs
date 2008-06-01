@@ -27,26 +27,51 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
 
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.plugins.context.jar.JarHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.logging.Logger;
 
 /**
  * FileSystemContext.
+ *
+ * Jar archives are processed through {@link org.jboss.virtual.plugins.context.zip.ZipEntryContext}.
+ *
+ * To switch back to {@link org.jboss.virtual.plugins.context.jar.JarHandler}
+ * set a system property <em>jboss.vfs.forceVfsJar=true</em> 
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
 public class FileSystemContext extends AbstractVFSContext
 {
+
+   private static final Logger log = Logger.getLogger(ZipEntryContext.class);
+
+   /** true if forcing fallback to vfsjar from default vfszip */
+   private static boolean forceVfsJar;
+
+   static
+   {
+      forceVfsJar = AccessController.doPrivileged(new CheckForceVfsJar());
+
+      if (forceVfsJar)
+         log.warn("VFS forced fallback to vfsjar is enabled.");
+   }
+
    /** The root file */
    private final VirtualFileHandler root;
    
@@ -188,18 +213,45 @@ public class FileSystemContext extends AbstractVFSContext
       String name = file.getName();
       if (file.isFile() && JarUtils.isArchive(name))
       {
-         try
+         if (forceVfsJar)
          {
             return new JarHandler(this, parent, file, file.toURL(), name);
          }
-         catch (IOException e)
+         else
          {
-            log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
+            try
+            {
+               DelegatingHandler delegator = mountZipFS(parent, name, file);
+               return delegator;
+            }
+            catch (Exception e)
+            {
+               IOException ex = new IOException("Exception while trying to handle file (" + name + ") through ZipEntryContext: ");
+               ex.initCause(e);
+               throw ex;
+            }
          }
       }
       return createVirtualFileHandler(parent, file, getFileURI(file));
    }
 
+   protected DelegatingHandler mountZipFS(VirtualFileHandler parent, String name, File file) throws IOException, URISyntaxException
+   {
+      DelegatingHandler delegator = new DelegatingHandler(this, parent, name);
+      URL fileUrl = file.toURL();
+      URL delegatorUrl = fileUrl;
+
+      if (parent != null)
+         delegatorUrl = getChildURL(parent, name);
+
+      ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl);
+
+      VirtualFileHandler handler = ctx.getRoot();
+      delegator.setDelegate(handler);
+
+      return delegator;
+   }
+   
    /**
     * Create a new virtual file handler
     * 
@@ -274,4 +326,14 @@ public class FileSystemContext extends AbstractVFSContext
          rootFile.close();
       super.finalize();
    }
+
+   private static class CheckForceVfsJar implements PrivilegedAction<Boolean>
+   {
+      public Boolean run()
+      {
+         String forceString = System.getProperty(VFSUtils.FORCE_VFS_JAR_KEY, "false");
+         return Boolean.valueOf(forceString);
+      }
+   }
+
 }

@@ -46,9 +46,11 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.id.GUID;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.AbstractJarHandler;
 import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
+import org.jboss.virtual.plugins.context.zip.ZipEntryHandler;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -76,6 +78,17 @@ public class VFSUtils
    public static final String FORCE_COPY_KEY = "jboss.vfs.forceCopy";
    public static final String USE_COPY_QUERY = "useCopyJarHandler";
 
+   /**
+    * Key used to force fallback from vfszip (default) to vfsjar
+    */
+   public static final String FORCE_VFS_JAR_KEY = "jboss.vfs.forceVfsJar";
+
+   /**
+    * Key used to turn off reaper mode in vfszip - forcing synchronous (slower) handling of files
+    */
+   public static final String FORCE_NO_REAPER_KEY = "jboss.vfs.forceNoReaper";
+   public static final String NO_REAPER_QUERY = "noReaper";
+
    private static File tempDir;
 
    private static class GetTempDir implements PrivilegedAction<File>
@@ -87,7 +100,7 @@ public class VFSUtils
       }
    }
 
-   private synchronized static File getTempDirectory()
+   public synchronized static File getTempDirectory()
    {
       if (tempDir == null)
       {
@@ -494,7 +507,12 @@ public class VFSUtils
 
       VirtualFileHandler handler = file.getHandler();
       // already unpacked
-      if (handler instanceof NestedJarHandler || handler instanceof AbstractJarHandler == false)
+      VirtualFileHandler unwrapped = handler;
+      if (unwrapped instanceof DelegatingHandler)
+         unwrapped = ((DelegatingHandler) unwrapped).getDelegate();
+
+      if (unwrapped instanceof ZipEntryHandler == false
+              && (unwrapped instanceof NestedJarHandler || unwrapped instanceof AbstractJarHandler == false))
       {
          if (log.isTraceEnabled())
             log.trace("Should already be unpacked: " + file);

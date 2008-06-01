@@ -109,6 +109,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.context = context;
       this.parent = parent;
       this.name = VFSUtils.fixName(name);
+      this.vfsPath = null; // nullify possible invalid vfsPath initializations when running with debugger
    }
 
    /**
@@ -200,6 +201,29 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.vfsPath = path;
    }
 
+   public String getLocalPathName()
+   {
+      try
+      {
+         VirtualFileHandler handler = getVFSContext().getRoot();
+         String rootPathName = handler.getPathName();
+         String pathName = getPathName();
+         int len = rootPathName.length();
+         if (len == 0)
+            return pathName;
+         else if (rootPathName.length() < pathName.length())
+            return pathName.substring(rootPathName.length() + 1);
+         else
+            return "";
+      }
+      catch (IOException ex)
+      {
+         log.warn("Failed to compose local path name: context: " + getVFSContext() + ", name: " + getName(), ex);
+      }
+
+      return getPathName();
+   }
+
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
       return toURI().toURL();
@@ -238,6 +262,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    private boolean initPath(StringBuilder pathName)
    {
+      if (context.getRootPeer() != null)
+         if (initPeerPath(pathName))
+            return true;
+
       if (parent != null)
       {
          if (parent instanceof AbstractVirtualFileHandler)
@@ -255,7 +283,56 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       }
       return false;
    }
-   
+
+
+   private boolean initPeerPath(StringBuilder pathName)
+   {
+      VirtualFileHandler grandParent = null;
+
+      if (parent != null)
+      {
+         try
+         {
+            grandParent = parent.getParent();
+         }
+         catch(IOException ex)
+         {
+            // if we throw exception here we'll most likely cause an infinite recursion
+            log.warn("AbstractVirtualFileHandler.initPath failed: ctx: " + context
+                    + ", parent: " + parent + " name: " + name, ex);
+         }
+      }
+
+      VirtualFileHandler peer = context.getRootPeer();
+
+
+      if (grandParent == null)
+      {
+         // bypass parent and delegate straight to peer
+
+         if (peer instanceof AbstractVirtualFileHandler)
+         {
+            AbstractVirtualFileHandler handler = (AbstractVirtualFileHandler) peer;
+            if (handler.initPath(pathName) && parent != null)
+               pathName.append('/');
+         }
+         else
+         {
+            pathName.append(peer.getPathName());
+         }
+
+         if (parent != null)
+         {
+            // if it's a root node we skip adding '/' and a name
+            pathName.append(getName());
+         }
+
+         return true;
+      }
+
+      return false;
+   }
+
    public VirtualFile getVirtualFile()
    {
       checkClosed();

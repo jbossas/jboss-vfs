@@ -41,6 +41,7 @@ import org.jboss.logging.Logger;
 import org.jboss.virtual.plugins.context.file.FileSystemContextFactory;
 import org.jboss.virtual.plugins.context.jar.JarContextFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
+import org.jboss.virtual.plugins.context.zip.ZipEntryContextFactory;
 import org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory;
 import org.jboss.util.file.ArchiveBrowser;
 
@@ -250,6 +251,9 @@ public class VFSContextFactoryLocator
       if (factoryByProtocol.containsKey("vfsmemory") == false)
          registerFactory(MemoryContextFactory.getInstance());
 
+      if (factoryByProtocol.containsKey("vfszip") == false)
+         registerFactory(ZipEntryContextFactory.getInstance());
+      
       initialized = true;
    }
    
