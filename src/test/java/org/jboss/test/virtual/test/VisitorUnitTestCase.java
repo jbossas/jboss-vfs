@@ -47,7 +47,7 @@ public class VisitorUnitTestCase extends AbstractMockVFSTest
 
    public static Test suite()
    {
-      return new TestSuite(VisitorUnitTestCase.class);
+      return suite(VisitorUnitTestCase.class);
    }
    
    public void testDefaultVisitSimple() throws Exception
