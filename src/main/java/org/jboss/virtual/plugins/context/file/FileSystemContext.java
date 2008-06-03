@@ -221,8 +221,7 @@ public class FileSystemContext extends AbstractVFSContext
          {
             try
             {
-               DelegatingHandler delegator = mountZipFS(parent, name, file);
-               return delegator;
+               return mountZipFS(parent, name, file);
             }
             catch (Exception e)
             {
@@ -235,6 +234,16 @@ public class FileSystemContext extends AbstractVFSContext
       return createVirtualFileHandler(parent, file, getFileURI(file));
    }
 
+   /**
+    * Create zip file system.
+    *
+    * @param parent the parent
+    * @param name the name
+    * @param file the file
+    * @return new zip fs delegating handler
+    * @throws IOException for any error
+    * @throws URISyntaxException for any URI syntax error
+    */
    protected DelegatingHandler mountZipFS(VirtualFileHandler parent, String name, File file) throws IOException, URISyntaxException
    {
       DelegatingHandler delegator = new DelegatingHandler(this, parent, name);
@@ -335,5 +344,4 @@ public class FileSystemContext extends AbstractVFSContext
          return Boolean.valueOf(forceString);
       }
    }
-
 }
