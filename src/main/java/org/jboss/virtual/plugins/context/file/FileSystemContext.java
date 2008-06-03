@@ -215,7 +215,14 @@ public class FileSystemContext extends AbstractVFSContext
       {
          if (forceVfsJar)
          {
-            return new JarHandler(this, parent, file, file.toURL(), name);
+            try
+            {
+               return new JarHandler(this, parent, file, file.toURL(), name);
+            }
+            catch(IOException e)
+            {
+               log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
+            }
          }
          else
          {
@@ -225,9 +232,7 @@ public class FileSystemContext extends AbstractVFSContext
             }
             catch (Exception e)
             {
-               IOException ex = new IOException("Exception while trying to handle file (" + name + ") through ZipEntryContext: ");
-               ex.initCause(e);
-               throw ex;
+               log.debug("IGNORING: Exception while trying to handle file (" + name + ") as a jar through ZipEntryContext: ", e);
             }
          }
       }

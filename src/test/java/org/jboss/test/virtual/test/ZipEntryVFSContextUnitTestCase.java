@@ -26,7 +26,9 @@ import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -138,4 +140,41 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
 
       assertFalse("context.getRoot().exists()", context.getRoot().exists());
    }
+
+   /**
+    * Test for proper handling when file appears to be an archive but
+    * trying to handle it produces an exception. Proper behaviour
+    * is to ignore exception and treat the file as non-archive.
+    *
+    * @throws Exception
+    */
+   public void testNotAnArchive() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/");
+      FileSystemContext ctx = new FileSystemContext(url);
+
+      // check that vfszip is active
+      VirtualFileHandler handler = ctx.getRoot().getChild("archive.jar");
+      assertTrue("is vfszip", "vfszip".equals(handler.toURL().getProtocol()));
+      assertFalse("is leaf", handler.isLeaf());
+
+      handler = ctx.getRoot().getChild("notanarchive.jar");
+      assertTrue("is leaf", handler.isLeaf());
+   }
+
+   /**
+    * Handler representing a directory must return a zero leangth stream
+    *
+    * @throws Exception
+    */
+   public void testDirectoryZipEntryOpenStream() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/complex.jar");
+      ZipEntryContext ctx = new ZipEntryContext(url);
+
+      VirtualFileHandler sub = ctx.getRoot().getChild("subfolder");
+      InputStream is = sub.openStream();
+      assertTrue("input stream closed", is.read() == -1);
+   }
+
 }

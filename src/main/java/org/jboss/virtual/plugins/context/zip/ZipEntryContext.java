@@ -30,6 +30,7 @@ import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -607,7 +608,9 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null handler");
 
       checkIfModified();
-      EntryInfo ei = entries.get(handler.getLocalPathName());
+
+      String localPathName = handler.getLocalPathName();
+      EntryInfo ei = entries.get(localPathName);
 
       if (ei == null)
       {
@@ -626,7 +629,10 @@ public class ZipEntryContext extends AbstractVFSContext
 
       if(ei.entry == null)
       {
-         return zipSource.getRootAsStream();
+         if ("".equals(localPathName))  // root
+            return zipSource.getRootAsStream();
+         else                           // directory
+            return new ByteArrayInputStream(new byte[0]);
       }
       
       return zipSource.openStream(ei.entry);
