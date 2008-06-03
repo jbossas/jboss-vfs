@@ -21,20 +21,19 @@
 */
 package org.jboss.test.virtual.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
-import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+
+import junit.framework.Test;
+import org.jboss.virtual.VFS;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
+import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * ZipEntryVFSContextUnitTestCase.
@@ -53,7 +52,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    {
       VFS.init();
       System.out.println("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
-      return new TestSuite(ZipEntryVFSContextUnitTestCase.class);
+      return suite(ZipEntryVFSContextUnitTestCase.class);
    }
 
    protected VFSContext getVFSContext(String name) throws Exception
@@ -62,8 +61,6 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       url = JarUtils.createJarURL(url);
       return new ZipEntryContext(url);
    }
-
-
 
    /**
     * Analog to the same test in {@link JARVFSContextUnitTestCase}
@@ -88,7 +85,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    /**
     * Analog to the same test in {@link JARVFSContextUnitTestCase}
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testPathIsEmptryForJarEntryAsRoot() throws Exception
    {
@@ -110,7 +107,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    /**
     * Test detection of underlying jar file removal through exists()
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testRootExists() throws Exception
    {
@@ -146,7 +143,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
     * trying to handle it produces an exception. Proper behaviour
     * is to ignore exception and treat the file as non-archive.
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testNotAnArchive() throws Exception
    {
@@ -165,7 +162,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    /**
     * Handler representing a directory must return a zero leangth stream
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testDirectoryZipEntryOpenStream() throws Exception
    {
@@ -176,5 +173,4 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       InputStream is = sub.openStream();
       assertTrue("input stream closed", is.read() == -1);
    }
-
 }

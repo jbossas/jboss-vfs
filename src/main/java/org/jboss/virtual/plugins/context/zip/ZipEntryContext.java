@@ -21,14 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.logging.Logger;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.plugins.context.AbstractVFSContext;
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.plugins.context.DelegatingHandler;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -53,6 +45,14 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
+
+import org.jboss.logging.Logger;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.plugins.context.AbstractVFSContext;
+import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -83,7 +83,6 @@ import java.util.zip.ZipEntry;
 
 public class ZipEntryContext extends AbstractVFSContext
 {
-
    private static final Logger log = Logger.getLogger(ZipEntryContext.class);
 
    /** Global setting for nested archive processing mode: copy or no-copy (default) */

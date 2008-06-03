@@ -21,20 +21,12 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.net.URL;
+
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.spi.VFSContext;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.jar.*;
 
 /**
  * ZipEntryHandlerUnitTestCase.
@@ -51,7 +43,7 @@ public class ZipEntryHandlerUnitTestCase extends JARVirtualFileHandlerUnitTestCa
 
    public static Test suite()
    {
-      return new TestSuite(ZipEntryHandlerUnitTestCase.class);
+      return suite(ZipEntryHandlerUnitTestCase.class);
    }
 
    protected VFSContext getVFSContext(String name) throws Exception
@@ -60,5 +52,4 @@ public class ZipEntryHandlerUnitTestCase extends JARVirtualFileHandlerUnitTestCa
       url = JarUtils.createJarURL(url);
       return new ZipEntryContext(url);
    }
-
 }
