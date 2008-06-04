@@ -576,6 +576,23 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
       }
    }
 
+   public void testIsNested() throws Exception
+   {
+      VFSContext context = getVFSContext("complex");
+      VirtualFileHandler root = context.getRoot();
+      assertFalse(root.isNested());
+      VirtualFileHandler subfolder = context.getChild(root, "subfolder");
+      assertIsNested(subfolder);
+      VirtualFileHandler subchild = subfolder.getChild("subchild");
+      assertIsNested(subchild);
+      VirtualFileHandler subsubfolder = subfolder.getChild("subsubfolder");
+      assertIsNested(subsubfolder);
+      VirtualFileHandler subsubchild = subsubfolder.getChild("subsubchild");
+      assertIsNested(subsubchild);
+   }
+
+   protected abstract void assertIsNested(VirtualFileHandler handler) throws Exception;
+
    protected void checkVirtualFile(VirtualFileHandler handler) throws Exception
    {
       VirtualFile file = handler.getVirtualFile();

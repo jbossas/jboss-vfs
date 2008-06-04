@@ -98,7 +98,6 @@ public class ZipEntryContext extends AbstractVFSContext
          log.info("VFS force nested jars copy-mode is enabled.");
    }
 
-
    /** Abstracted access to zip archive - either ZipFileWrapper or ZipStreamWrapper */
    private ZipWrapper zipSource;
 
@@ -111,13 +110,12 @@ public class ZipEntryContext extends AbstractVFSContext
    /** Registry of everything that zipSource contains */
    private ConcurrentHashMap<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>();
 
-
    /**
     * Create a new ZipEntryContext
     *
     * @param rootURL - file or jar:file url
-    * @throws URISyntaxException
-    * @throws IOException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    public ZipEntryContext(URL rootURL) throws URISyntaxException, IOException
    {
@@ -129,8 +127,8 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param rootURL - file or jar:file url
     * @param autoClean - true if file represented by rootURL should be deleted after this context is closed
-    * @throws URISyntaxException
-    * @throws java.io.IOException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    public ZipEntryContext(URL rootURL, boolean autoClean) throws URISyntaxException, IOException
    {
@@ -145,8 +143,8 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param rootURL - url representing this context within another context
     * @param peer - file handler in another context through which this context is being mounted
     * @param localRootUrl - file or jar:file url
-    * @throws URISyntaxException
-    * @throws java.io.IOException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    public ZipEntryContext(URL rootURL, VirtualFileHandler peer, URL localRootUrl) throws URISyntaxException, IOException
    {
@@ -160,8 +158,8 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param peer - file handler in another context through which this context is being mounted
     * @param localRootUrl - file or jar:file url
     * @param autoClean - true if file represented by localRootURL should be deleted after this context is closed
-    * @throws URISyntaxException
-    * @throws IOException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    public ZipEntryContext(URL rootURL, VirtualFileHandler peer, URL localRootUrl, boolean autoClean) throws URISyntaxException, IOException
    {
@@ -177,8 +175,8 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param peer - file handler in another context through which this context is being mounted
     * @param zipWrapper - abstracted zip archive source
     * @param autoClean - true if file represented by localRootURL should be deleted after this context is closed
-    * @throws URISyntaxException
-    * @throws IOException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    public ZipEntryContext(URL rootURL, VirtualFileHandler peer, ZipWrapper zipWrapper, boolean autoClean) throws URISyntaxException, IOException
    {
@@ -190,11 +188,11 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Extra initialization that couldn't fit inside constructors
     *
-    * @param localRootURL
-    * @param peer
-    * @param zipWrapper
-    * @throws IOException
-    * @throws URISyntaxException
+    * @param localRootURL the local url
+    * @param peer the peer
+    * @param zipWrapper zip wrapper
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    private void init(URL localRootURL, VirtualFileHandler peer, ZipWrapper zipWrapper) throws IOException, URISyntaxException
    {
@@ -258,12 +256,11 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Iterate through zip archive entries, compose a tree structure of archive's content
     *
-    * @throws IOException
-    * @throws URISyntaxException
+    * @throws URISyntaxException for any URI error
+    * @throws java.io.IOException for any error
     */
    private synchronized void initEntries() throws IOException, URISyntaxException
    {
-
       // we're using a two phase approach - we first select the relevant ones
       // then we order these by name and only then we process them
       // this way we ensure that parent entries are processed before child entries
@@ -349,18 +346,17 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          zipSource.release();
       }
-
    }
 
    /**
     * Mount ZipEntryContext created around extracted nested archive
     *
-    * @param parent
-    * @param name
-    * @param file
-    * @return
-    * @throws IOException
-    * @throws URISyntaxException
+    * @param parent the parent
+    * @param name the name
+    * @param file the file
+    * @return mounted delegate
+    * @throws IOException for any error
+    * @throws URISyntaxException for any URI syntax error
     */
    protected DelegatingHandler mountZipFile(VirtualFileHandler parent, String name, File file) throws IOException, URISyntaxException
    {
@@ -381,12 +377,12 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Mount ZipEntryContext created around ZipStreamWrapper
     *
-    * @param parent
-    * @param name
-    * @param zipStream
-    * @return
-    * @throws IOException
-    * @throws URISyntaxException
+    * @param parent the parent
+    * @param name the name
+    * @param zipStream the zip stream
+    * @return mounted delegate
+    * @throws IOException for any error
+    * @throws URISyntaxException for any URI syntax error
     */
    protected DelegatingHandler mountZipStream(VirtualFileHandler parent, String name, InputStream zipStream) throws IOException, URISyntaxException
    {
@@ -408,9 +404,9 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Zip archives sometimes don't contain directory entries - only leaf entries
     *
-    * @param parentPath
-    * @return
-    * @throws IOException
+    * @param parentPath the parent path
+    * @return entry info
+    * @throws IOException for any error
     */
    private EntryInfo makeDummyParent(String parentPath) throws IOException
    {
@@ -431,8 +427,8 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Initialize rootEntryPath and return archive file path
     *
-    * @param localRootUrl
-    * @return
+    * @param localRootUrl local root url
+    * @return file path
     */
    private String initRootAndPath(URL localRootUrl)
    {
@@ -601,6 +597,66 @@ public class ZipEntryContext extends AbstractVFSContext
       return !ei.entry.isDirectory();
    }
 
+   /**
+    * Is archive.
+    *
+    * @param handler the handler
+    * @return true if archive
+    */
+   static boolean isArchive(VirtualFileHandler handler)
+   {
+      if (handler instanceof ZipEntryHandler && "".equals(handler.getLocalPathName()))
+      {
+         return true;
+      }
+
+      if (handler instanceof DelegatingHandler && ((DelegatingHandler) handler).getDelegate() instanceof ZipEntryHandler)
+      {
+         return true;
+      }
+
+      return false;
+   }
+
+   /**
+    * Get parent.
+    *
+    * @param handler the handler to check
+    * @return parent handler
+    * @throws IOException for any error
+    */
+   static VirtualFileHandler getParent(VirtualFileHandler handler) throws IOException
+   {
+      VirtualFileHandler parent = handler.getParent();
+      if (parent == null)
+      {
+         VirtualFileHandler peer = handler.getVFSContext().getRootPeer();
+         if (peer != null)
+            parent = peer.getParent();
+      }
+      return parent;
+   }
+
+   /**
+    * Is nested.
+    *
+    * @param handler the handler
+    * @return true if nested
+    * @throws IOException for any error
+    */
+   static boolean isNested(VirtualFileHandler handler) throws IOException
+   {
+      VirtualFileHandler parent = getParent(handler);
+      while (parent != null)
+      {
+         if(isArchive(parent))
+            return true;
+
+         parent = getParent(parent);
+      }
+      return false;
+   }
+
    public InputStream openStream(ZipEntryHandler handler) throws IOException
    {
       if (handler == null)
@@ -613,7 +669,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       if (ei == null)
       {
-         String uriStr = "";
+         String uriStr;
          try
          {
             uriStr = handler.toURI().toString();
@@ -623,7 +679,6 @@ public class ZipEntryContext extends AbstractVFSContext
             throw new RuntimeException("ASSERTION ERROR - uri generation failed for ZipEntryHandler: " + handler, ex);
          }
          throw new FileNotFoundException(uriStr);
-
       }
 
       if(ei.entry == null)
@@ -652,8 +707,6 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new RuntimeException("Parent does not exist: " + parent);
    }
 
-
-
    protected void finalize()
    {
       try
@@ -666,7 +719,6 @@ public class ZipEntryContext extends AbstractVFSContext
          log.debug("IGNORING: Failed to close zip source: " + zipSource, ignored);
       }
    }
-
 
    public void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
    {
@@ -681,8 +733,7 @@ public class ZipEntryContext extends AbstractVFSContext
          }
          else
          {
-            DelegatingHandler delegator = new DelegatingHandler(this, parent, original.getName(), replacement);
-            newOne = delegator;
+            newOne = new DelegatingHandler(this, parent, original.getName(), replacement);
          }
 
          synchronized(this)
@@ -700,7 +751,6 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new RuntimeException("Parent does not exist: " + parent);
       }
    }
-
 
    /**
     *  Internal data structure holding meta information of a virtual file in this context
@@ -775,20 +825,16 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
-
-
    //
    //   Helper methods
    //
 
-
-
    /**
     * Copy input stream to output stream and close them both
     *
-    * @param is
-    * @param os
-    * @throws IOException
+    * @param is input stream
+    * @param os output stream
+    * @throws IOException for any error
     */
    static void copyStreamAndClose(InputStream is, OutputStream os) throws IOException
    {
@@ -820,9 +866,9 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Make sure url protocol is <em>vfszip</em>
     *
-    * @param rootURL
-    * @return
-    * @throws MalformedURLException
+    * @param rootURL the root url
+    * @return fixed url
+    * @throws MalformedURLException for any error
     */
    private static URL fixUrl(URL rootURL) throws MalformedURLException
    {
@@ -841,8 +887,8 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Break to path + name
     *
-    * @param pathName
-    * @return
+    * @param pathName the path name
+    * @return path tokens
     */
    public static String [] splitParentChild(String pathName)
    {
@@ -875,12 +921,11 @@ public class ZipEntryContext extends AbstractVFSContext
       return ret;
    }
 
-
    /**
     * Temporary files naming scheme
     *
-    * @param name
-    * @return
+    * @param name the name
+    * @return random name
     */
    private static String getTempFileName(String name)
    {
@@ -893,7 +938,7 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Use VFS's temp directory and make 'vfs-nested' sub-directory inside it for our purposes
     *
-    * @return
+    * @return temp dir
     */
    private static String getTempDir()
    {
@@ -919,9 +964,7 @@ public class ZipEntryContext extends AbstractVFSContext
       catch(Exception ignored)
       {
       }
-
    }
-
 
    private static class CheckForceCopy implements PrivilegedAction<Boolean>
    {

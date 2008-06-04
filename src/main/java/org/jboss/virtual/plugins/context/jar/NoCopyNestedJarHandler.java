@@ -113,6 +113,11 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       return getEntry().getSize();
    }
 
+   public boolean isNested() throws IOException
+   {
+      return true;
+   }
+
    @Override
    public InputStream openStream() throws IOException
    {

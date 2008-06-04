@@ -122,6 +122,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate.isHidden();
    }
 
+   public boolean isNested() throws IOException
+   {
+      return delegate.isNested();
+   }
+
    public InputStream openStream() throws IOException
    {
       return delegate.openStream();

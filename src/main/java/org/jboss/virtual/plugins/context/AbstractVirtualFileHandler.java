@@ -212,7 +212,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (len == 0)
             return pathName;
          else if (rootPathName.length() < pathName.length())
-            return pathName.substring(rootPathName.length() + 1);
+            return pathName.substring(len + 1);
          else
             return "";
       }

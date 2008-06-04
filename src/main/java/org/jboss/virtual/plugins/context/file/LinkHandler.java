@@ -98,6 +98,11 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
       {
          return false;
       }
+
+      public boolean isNested() throws IOException
+      {
+         return false;
+      }
    }
 
    /**
@@ -184,6 +189,11 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
    }
 
    public boolean isLeaf()
+   {
+      return false;
+   }
+
+   public boolean isNested() throws IOException
    {
       return false;
    }

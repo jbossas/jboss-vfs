@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * FileVirtualFileHandlerUnitTestCase.
@@ -77,5 +78,11 @@ public class FileVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandl
    {
       File file = getRealFile(name, path);
       return file.length();
+   }
+
+   protected void assertIsNested(VirtualFileHandler handler) throws Exception
+   {
+      assertNotNull(handler);
+      assertFalse(handler.isNested());
    }
 }

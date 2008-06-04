@@ -46,11 +46,9 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.id.GUID;
-import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.plugins.context.file.FileHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.plugins.context.jar.AbstractJarHandler;
-import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
-import org.jboss.virtual.plugins.context.zip.ZipEntryHandler;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -491,7 +489,7 @@ public class VFSUtils
    }
 
    /**
-    * Unpack the artifact under file param.
+    * Unpack the nested artifact under file param.
     *
     * @param file the file to unpack
     * @return unpacked file
@@ -500,22 +498,52 @@ public class VFSUtils
     */
    public static VirtualFile unpack(VirtualFile file) throws IOException, URISyntaxException
    {
+      return createTemp(file, true);
+   }
+
+   /**
+    * Force explode.
+    * Explode archives or nested entries.
+    *
+    * @param file the file to explode
+    * @return exploded file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile explode(VirtualFile file) throws IOException, URISyntaxException
+   {
+      return createTemp(file, false);
+   }
+
+   /**
+    * Create temp.
+    *
+    * @param file the file to unpack/explode
+    * @param force should we force the creation
+    * @return temp file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   private static VirtualFile createTemp(VirtualFile file, boolean force) throws IOException, URISyntaxException
+   {
       if (file == null)
          throw new IllegalArgumentException("Null file");
       if (file.isLeaf())
          return file;
 
       VirtualFileHandler handler = file.getHandler();
-      // already unpacked
       VirtualFileHandler unwrapped = handler;
-      if (unwrapped instanceof DelegatingHandler)
-         unwrapped = ((DelegatingHandler) unwrapped).getDelegate();
+      if (handler instanceof DelegatingHandler)
+         unwrapped = ((DelegatingHandler)handler).getDelegate();
 
-      if (unwrapped instanceof ZipEntryHandler == false
-              && (unwrapped instanceof NestedJarHandler || unwrapped instanceof AbstractJarHandler == false))
+      boolean ignoreTempCreation = false;
+      if (force)
+         ignoreTempCreation = (unwrapped.isNested() == false);
+
+      if (ignoreTempCreation || unwrapped instanceof FileHandler)
       {
          if (log.isTraceEnabled())
-            log.trace("Should already be unpacked: " + file);
+            log.trace("Should already be unpacked/exploded: " + file);
          return file;
       }
 
@@ -616,5 +644,18 @@ public class VFSUtils
          {
          }
       }
+   }
+
+   /**
+    * Is file handle nested.
+    *
+    * @param file the file handle to check
+    * @return true if file/dir is nested otherwise false
+    * @throws IOException for any error
+    */
+   public static boolean isNestedFile(VirtualFile file) throws IOException
+   {
+      VirtualFileHandler handler = file.getHandler();
+      return handler.isNested();
    }
 }
