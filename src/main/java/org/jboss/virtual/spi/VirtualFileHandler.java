@@ -56,6 +56,14 @@ public interface VirtualFileHandler extends Serializable
    String getPathName();
 
    /**
+    * Get the VFS local path name.
+    * Relative to root.
+    *
+    * @return the VFS local path name
+    */
+   String getLocalPathName();
+
+   /**
     * Get a VFS-based URL
     *
     * @return the url
@@ -201,4 +209,12 @@ public interface VirtualFileHandler extends Serializable
     * @param replacement the replacement
     */
    void replaceChild(VirtualFileHandler original, VirtualFileHandler replacement);
+
+   /**
+    * Are we nested in some archive.
+    *
+    * @return true if this is archive entry
+    * @throws IOException for any error
+    */
+   boolean isNested() throws IOException;
 }

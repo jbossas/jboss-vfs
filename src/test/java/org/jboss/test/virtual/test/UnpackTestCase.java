@@ -21,11 +21,10 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.net.URL;
-import java.io.InputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
+import java.net.URL;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -91,7 +90,7 @@ public class UnpackTestCase extends AbstractVFSTest
       VirtualFile replacement;
 
       original = vfs.findChild("level1.zip");
-      replacement = VFSUtils.unpack(original);
+      replacement = VFSUtils.explode(original);
       assertReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level1.zip");

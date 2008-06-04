@@ -132,6 +132,11 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       return false;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return true;
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       checkClosed();

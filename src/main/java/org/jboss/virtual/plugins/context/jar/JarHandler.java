@@ -86,4 +86,9 @@ public class JarHandler extends AbstractStructuredJarHandler<Object>
          throw e;
       }
    }
+
+   public boolean isNested() throws IOException
+   {
+      return false;
+   }
 }

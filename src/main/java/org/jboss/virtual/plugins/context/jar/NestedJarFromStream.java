@@ -200,6 +200,11 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
       return lastModified;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return true;
+   }
+
    // Stream accessor
    public InputStream openStream() throws IOException
    {

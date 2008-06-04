@@ -68,7 +68,10 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
    
    /** Is a hidden */
    private boolean hidden;
-   
+
+   /** Is nested */
+   private boolean nested;
+
    /** The stream */
    private byte[] stream;
    
@@ -233,6 +236,16 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
    public void setHidden(boolean hidden)
    {
       this.hidden = hidden;
+   }
+
+   public boolean isNested() throws IOException
+   {
+      return nested;
+   }
+
+   public void setNested(boolean nested)
+   {
+      this.nested = nested;
    }
 
    /**

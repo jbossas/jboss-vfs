@@ -137,6 +137,11 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
       return false;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return true;
+   }
+
    @Override
    public InputStream openStream() throws IOException
    {
