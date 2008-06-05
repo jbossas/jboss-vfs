@@ -96,7 +96,8 @@ public class ZipFileLockReaper
          timer = new Timer("ZipFile Lock Reaper", true);
          timer.schedule(new ReaperTimerTask(), TIMER_PERIOD, TIMER_PERIOD);
       }
-      log.debug("Registered: " + w);
+      if (log.isTraceEnabled())
+         log.trace("Registered: " + w);
    }
 
    /**
@@ -109,7 +110,8 @@ public class ZipFileLockReaper
       monitored.remove(w);
       monitoredCount--;
       lastUsed = System.currentTimeMillis();
-      log.debug("Unregistered: " + w);
+      if (log.isTraceEnabled())
+         log.trace("Unregistered: " + w);
    }
 
    /** Timer task that does the actual reaping */
@@ -117,7 +119,10 @@ public class ZipFileLockReaper
    {
       public void run()
       {
-         log.debug("Timer called");
+         boolean trace = log.isTraceEnabled();
+
+         if (trace)
+            log.trace("Timer called");
 
          long now = System.currentTimeMillis();
          synchronized (ZipFileLockReaper.this)
@@ -128,7 +133,8 @@ public class ZipFileLockReaper
                {
                   timer.cancel();
                   timer = null;
-                  log.debug("Cancelled the timer");
+                  if (trace)
+                     log.trace("Cancelled the timer");
                }
                return;
             }
@@ -157,7 +163,8 @@ public class ZipFileLockReaper
                try
                {
                   w.closeZipFile();
-                  log.debug("Asynchronously closed an unused ZipFile: " + w);
+                  if (log.isTraceEnabled())
+                     log.trace("Asynchronously closed an unused ZipFile: " + w);
                }
                catch(Exception ignored)
                {
