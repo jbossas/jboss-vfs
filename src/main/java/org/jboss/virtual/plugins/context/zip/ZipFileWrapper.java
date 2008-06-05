@@ -21,9 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.logging.Logger;
-import org.jboss.virtual.VFSUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +33,8 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.jboss.logging.Logger;
+import org.jboss.virtual.VFSUtils;
 
 /**
  * ZipFileWrapper - for abstracted access to zip files on disk
@@ -45,11 +44,9 @@ import java.util.zip.ZipFile;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 class ZipFileWrapper extends ZipWrapper
 {
    private static final Logger log = Logger.getLogger(ZipFileWrapper.class);
-
 
    private static boolean forceNoReaper;
 
@@ -76,13 +73,11 @@ class ZipFileWrapper extends ZipWrapper
    // used for debugging stream leaks
    //ConcurrentLinkedQueue<ZipEntryInputStream> streams = new ConcurrentLinkedQueue<ZipEntryInputStream>();
 
-
    ZipFileWrapper(File archive, boolean autoClean, boolean noReaperOverride)
    {
       this.noReaperOverride = noReaperOverride;
       init(archive, autoClean);
    }
-
 
    ZipFileWrapper(URI rootPathURI, boolean autoClean, boolean noReaperOverride)
    {
@@ -97,8 +92,8 @@ class ZipFileWrapper extends ZipWrapper
    /**
     * Extra initialization that didn't fit in constructors
     *
-    * @param archive
-    * @param autoClean
+    * @param archive the archive file
+    * @param autoClean auto clean flag
     */
    private void init(File archive, boolean autoClean)
    {
@@ -169,12 +164,10 @@ class ZipFileWrapper extends ZipWrapper
       return zis;
    }
 
-
    InputStream getRootAsStream() throws FileNotFoundException
    {
       return new FileInputStream(file);
    }
-
 
    synchronized void acquire() throws IOException
    {
@@ -219,7 +212,6 @@ class ZipFileWrapper extends ZipWrapper
    {
       return super.toString() + " - " + file.getAbsolutePath();
    }
-
 
    private static class CheckNoReaper implements PrivilegedAction<Boolean>
    {
