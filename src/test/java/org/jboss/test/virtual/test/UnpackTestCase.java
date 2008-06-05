@@ -91,10 +91,7 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip");
       replacement = VFSUtils.explode(original);
-      assertReplacement(original, replacement);
-      VirtualFile parent = original.getParent();
-      VirtualFile child = parent.findChild("level1.zip");
-      assertEquals(replacement, child);
+      assertExplodedReplacement(original, replacement);
 
       VirtualFile textOne = replacement.findChild("test1.txt");
       testText(textOne);
@@ -115,7 +112,7 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip/level2.zip");
       replacement = VFSUtils.unpack(original);
-      assertReplacement(original, replacement);
+      assertUnpackedReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level2.zip");
       //assertEquals(replacement, child);
@@ -137,7 +134,7 @@ public class UnpackTestCase extends AbstractVFSTest
 
       original = vfs.findChild("level1.zip/level2.zip/level3.zip");
       replacement = VFSUtils.unpack(original);
-      assertReplacement(original, replacement);
+      assertUnpackedReplacement(original, replacement);
       VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level3.zip");
       //assertEquals(replacement, child);
@@ -145,6 +142,18 @@ public class UnpackTestCase extends AbstractVFSTest
 
       VirtualFile textThree = replacement.findChild("test3.txt");
       testText(textThree);
+   }
+
+   protected void assertUnpackedReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   {
+      assertReplacement(original, replacement);
+      assertEquals(original.getParent(), replacement.getParent());
+   }
+
+   protected void assertExplodedReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   {
+      assertReplacement(original, replacement);
+      assertNull(replacement.getParent());
    }
 
    protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws Exception
@@ -158,7 +167,6 @@ public class UnpackTestCase extends AbstractVFSTest
       assertEquals(original.exists(), replacement.exists());
       assertEquals(original.isLeaf(), replacement.isLeaf());
       assertEquals(original.isHidden(), replacement.isHidden());
-      assertEquals(original.getParent(), replacement.getParent());
    }
 
    protected void testText(VirtualFile file) throws Exception

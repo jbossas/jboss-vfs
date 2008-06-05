@@ -554,7 +554,7 @@ public class VFSUtils
       FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
       VirtualFileHandler parent = handler.getParent();
-      if (parent != null)
+      if (parent != null && force)
          parent.replaceChild(handler, newHandler);
 
       return newHandler.getVirtualFile();
