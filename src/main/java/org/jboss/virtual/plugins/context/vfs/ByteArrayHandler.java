@@ -35,7 +35,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * comment
+ * ByteArrayHandler.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
@@ -87,6 +87,11 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
    }
 
    public boolean isHidden() throws IOException
+   {
+      return false;
+   }
+
+   public boolean isNested() throws IOException
    {
       return false;
    }

@@ -21,17 +21,12 @@
 */
 package org.jboss.virtual;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,12 +40,10 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
-import org.jboss.util.id.GUID;
-import org.jboss.virtual.plugins.context.DelegatingHandler;
-import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.plugins.context.jar.AbstractJarHandler;
-import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
-import org.jboss.virtual.plugins.context.zip.ZipEntryHandler;
+import org.jboss.virtual.plugins.copy.CopyMechanism;
+import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
+import org.jboss.virtual.plugins.copy.TempCopyMechanism;
+import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -59,6 +52,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * VFS Utilities
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class VFSUtils
@@ -88,27 +82,6 @@ public class VFSUtils
     */
    public static final String FORCE_NO_REAPER_KEY = "jboss.vfs.forceNoReaper";
    public static final String NO_REAPER_QUERY = "noReaper";
-
-   private static File tempDir;
-
-   private static class GetTempDir implements PrivilegedAction<File>
-   {
-      public File run()
-      {
-         String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
-         return new File(System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")));
-      }
-   }
-
-   public synchronized static File getTempDirectory()
-   {
-      if (tempDir == null)
-      {
-         tempDir = AccessController.doPrivileged(new GetTempDir());
-         log.info("VFS temp dir: " + tempDir);
-      }
-      return tempDir;
-   }
 
    /**
     * Get the paths string for a collection of virtual files
@@ -491,7 +464,7 @@ public class VFSUtils
    }
 
    /**
-    * Unpack the artifact under file param.
+    * Unpack the nested artifact under file param.
     *
     * @param file the file to unpack
     * @return unpacked file
@@ -500,121 +473,65 @@ public class VFSUtils
     */
    public static VirtualFile unpack(VirtualFile file) throws IOException, URISyntaxException
    {
+      return copy(file, UnpackCopyMechanism.INSTANCE);
+   }
+
+   /**
+    * Force explode.
+    * Explode archives or nested entries.
+    *
+    * @param file the file to explode
+    * @return exploded file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile explode(VirtualFile file) throws IOException, URISyntaxException
+   {
+      return copy(file, ExplodedCopyMechanism.INSTANCE);
+   }
+
+   /**
+    * Create temp.
+    *
+    * @param file the file to temp
+    * @return temp file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile temp(VirtualFile file) throws IOException, URISyntaxException
+   {
+      return copy(file, TempCopyMechanism.INSTANCE);
+   }
+
+   /**
+    * Create temp.
+    *
+    * @param file the file to unpack/explode
+    * @param mechanism the copy mechanism
+    * @return temp file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   protected static VirtualFile copy(VirtualFile file, CopyMechanism mechanism) throws IOException, URISyntaxException
+   {
       if (file == null)
          throw new IllegalArgumentException("Null file");
-      if (file.isLeaf())
-         return file;
+      if (mechanism == null)
+         throw new IllegalArgumentException("Null copy mechanism");
 
+      return mechanism.copy(file, file.getHandler());
+   }
+
+   /**
+    * Is file handle nested.
+    *
+    * @param file the file handle to check
+    * @return true if file/dir is nested otherwise false
+    * @throws IOException for any error
+    */
+   public static boolean isNestedFile(VirtualFile file) throws IOException
+   {
       VirtualFileHandler handler = file.getHandler();
-      // already unpacked
-      VirtualFileHandler unwrapped = handler;
-      if (unwrapped instanceof DelegatingHandler)
-         unwrapped = ((DelegatingHandler) unwrapped).getDelegate();
-
-      if (unwrapped instanceof ZipEntryHandler == false
-              && (unwrapped instanceof NestedJarHandler || unwrapped instanceof AbstractJarHandler == false))
-      {
-         if (log.isTraceEnabled())
-            log.trace("Should already be unpacked: " + file);
-         return file;
-      }
-
-      File guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
-      File unpacked = createTempDirectory(guidDir, file.getName());
-
-      unpack(handler, unpacked, false);
-      FileSystemContext fileSystemContext = new FileSystemContext(unpacked);
-      VirtualFileHandler newHandler = fileSystemContext.getRoot();
-      VirtualFileHandler parent = handler.getParent();
-      if (parent != null)
-         parent.replaceChild(handler, newHandler);
-
-      return newHandler.getVirtualFile();
-   }
-
-   /**
-    * Create the temp directory.
-    *
-    * @param parent the parent
-    * @param name the dir name
-    * @return new directory
-    */
-   private static File createTempDirectory(File parent, String name)
-   {
-      File file = new File(parent, name);
-      if (file.mkdir() == false)
-         throw new IllegalArgumentException("Cannot create directory: " + file);
-      file.deleteOnExit();
-      return file;
-   }
-
-   /**
-    * Unpack the root into file.
-    * Repeat this on the root's children.
-    *
-    * @param root the root
-    * @param file the file
-    * @param writeRoot do we write root
-    * @throws IOException for any error
-    */
-   private static void unpack(VirtualFileHandler root, File file, boolean writeRoot) throws IOException
-   {
-      // should we write trhe root
-      if (writeRoot)
-         rewrite(root, file);
-
-      List<VirtualFileHandler> children = root.getChildren(true);
-      if (children != null && children.isEmpty() == false)
-      {
-         for (VirtualFileHandler handler : children)
-         {
-            File next = new File(file, handler.getName());
-            if (handler.isLeaf() == false && next.mkdir() == false)
-               throw new IllegalArgumentException("Problems creating new directory: " + next);
-            next.deleteOnExit();
-
-            unpack(handler, next, handler.isLeaf());
-         }
-      }
-   }
-
-   /**
-    * Rewrite contents of handler into file.
-    *
-    * @param handler the handler
-    * @param file the file
-    * @throws IOException for any error
-    */
-   private static void rewrite(VirtualFileHandler handler, File file) throws IOException
-   {
-      OutputStream out = new FileOutputStream(file);
-      InputStream in = handler.openStream();
-      try
-      {
-         byte[] bytes = new byte[1024];
-         while (in.available() > 0)
-         {
-            int length = in.read(bytes);
-            if (length > 0)
-               out.write(bytes, 0, length);
-         }
-      }
-      finally
-      {
-         try
-         {
-            in.close();
-         }
-         catch (IOException ignored)
-         {
-         }
-         try
-         {
-            out.close();
-         }
-         catch (IOException ignored)
-         {
-         }
-      }
+      return handler.isNested();
    }
 }

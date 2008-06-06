@@ -136,6 +136,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return getFile().isHidden();
    }
 
+   public boolean isNested() throws IOException
+   {
+      return false;
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       File parent = getFile();

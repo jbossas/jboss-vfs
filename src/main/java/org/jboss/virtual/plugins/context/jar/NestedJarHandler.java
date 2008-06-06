@@ -169,6 +169,11 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       return getEntry().getSize();
    }
 
+   public boolean isNested() throws IOException
+   {
+      return false;
+   }
+
    /**
     * Overriden to return the raw tmp jar file stream 
     */

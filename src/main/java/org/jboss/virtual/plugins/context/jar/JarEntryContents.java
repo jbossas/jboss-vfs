@@ -112,6 +112,11 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       return false;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return true;
+   }
+
    byte[] getContents()
    {
       return contents;
@@ -240,9 +245,16 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
-      entryChildren.remove(original);
-      entryChildren.add(replacement);
-      entryMap.put(original.getName(), replacement);
+      if (isJar)
+      {
+         njar.internalReplaceChild(original, replacement);
+      }
+      else
+      {
+         entryChildren.remove(original);
+         entryChildren.add(replacement);
+         entryMap.put(original.getName(), replacement);
+      }
    }
 
    public String toString()

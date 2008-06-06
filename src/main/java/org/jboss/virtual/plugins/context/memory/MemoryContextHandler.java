@@ -148,6 +148,11 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return cachedLastModified;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return false;
+   }
+
    @Override
    public InputStream openStream() throws IOException
    {

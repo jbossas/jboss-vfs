@@ -21,12 +21,13 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.logging.Logger;
-
 import java.util.Iterator;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.jboss.logging.Logger;
 
 /**
  * A monitoring object that closes ZipFiles when they haven't been used for a while
@@ -34,7 +35,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 public class ZipFileLockReaper
 {
    private static final Logger log = Logger.getLogger(ZipFileLockReaper.class);
@@ -55,7 +55,7 @@ public class ZipFileLockReaper
    private static ZipFileLockReaper singleton;
 
    /** A list of monitored ZipFileWrappers */
-   private ConcurrentLinkedQueue monitored = new ConcurrentLinkedQueue();
+   private Queue<ZipFileWrapper> monitored = new ConcurrentLinkedQueue<ZipFileWrapper>();
 
    /** The number of monitored ZipFileWrappers */
    private int monitoredCount = 0;
@@ -66,13 +66,11 @@ public class ZipFileLockReaper
    /** Timestamp of last unregister() call */
    private long lastUsed;
 
-
    /**
     * Private constructor - to force retrieval through {@link #getInstance()}
     */
    private ZipFileLockReaper()
    {
-
    }
 
    /** Factory method to be used to retrieve reference to ZipFileLockReaper */
@@ -84,8 +82,11 @@ public class ZipFileLockReaper
       return singleton;
    }
 
-
-   /** Register a ZipFileWrapper instance with this reaper */
+   /**
+    * Register a ZipFileWrapper instance with this reaper
+    *
+    * @param w wrapper to register
+    */
    public synchronized void register(ZipFileWrapper w)
    {
       monitored.add(w);
@@ -95,26 +96,33 @@ public class ZipFileLockReaper
          timer = new Timer("ZipFile Lock Reaper", true);
          timer.schedule(new ReaperTimerTask(), TIMER_PERIOD, TIMER_PERIOD);
       }
-      log.debug("Registered: " + w);
+      if (log.isTraceEnabled())
+         log.trace("Registered: " + w);
    }
 
-   /** Unregister a ZipFileWrapper instance from this reaper */
+   /**
+    * Unregister a ZipFileWrapper instance from this reaper
+    *
+    * @param w wrapper to unregister
+    */
    public synchronized void unregister(ZipFileWrapper w)
    {
       monitored.remove(w);
       monitoredCount--;
       lastUsed = System.currentTimeMillis();
-      log.debug("Unregistered: " + w);
+      if (log.isTraceEnabled())
+         log.trace("Unregistered: " + w);
    }
-
-
 
    /** Timer task that does the actual reaping */
    class ReaperTimerTask extends TimerTask
    {
       public void run()
       {
-         log.debug("Timer called");
+         boolean trace = log.isTraceEnabled();
+
+         if (trace)
+            log.trace("Timer called");
 
          long now = System.currentTimeMillis();
          synchronized (ZipFileLockReaper.this)
@@ -125,7 +133,8 @@ public class ZipFileLockReaper
                {
                   timer.cancel();
                   timer = null;
-                  log.debug("Cancelled the timer");
+                  if (trace)
+                     log.trace("Cancelled the timer");
                }
                return;
             }
@@ -154,7 +163,8 @@ public class ZipFileLockReaper
                try
                {
                   w.closeZipFile();
-                  log.debug("Asynchronously closed an unused ZipFile: " + w);
+                  if (log.isTraceEnabled())
+                     log.trace("Asynchronously closed an unused ZipFile: " + w);
                }
                catch(Exception ignored)
                {
@@ -164,5 +174,4 @@ public class ZipFileLockReaper
          }
       }
    }
-
 }

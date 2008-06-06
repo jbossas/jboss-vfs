@@ -120,6 +120,11 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       return false;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return false;
+   }
+
    public InputStream openStream() throws IOException
    {
       throw new RuntimeException("Cannot open stream");

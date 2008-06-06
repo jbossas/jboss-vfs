@@ -19,51 +19,30 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.virtual.test;
+package org.jboss.virtual.plugins.copy;
 
-import junit.framework.Test;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * Unpack tests.
- *
+ * Copy mechanism to be used in VFSUtils.
+ * 
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackTestCase extends CopyTest
+public interface CopyMechanism
 {
-   public UnpackTestCase(String s)
-   {
-      super(s);
-   }
-
-   public static Test suite()
-   {
-      return suite(UnpackTestCase.class);
-   }
-
-   protected VirtualFile modify(VirtualFile file) throws Exception
-   {
-      return VFSUtils.unpack(file);
-   }
-
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertUnpackedReplacement(original, replacement);
-   }
-
-   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
-   {
-      assertEquals(originalParent, replacementParent);
-   }
+   /**
+    * Copy handler.
+    * If already modified, return handler's file.
+    *
+    * @param file the original file
+    * @param handler the handler to copy
+    * @return handler's copy
+    * @throws IOException for any error
+    * @throws URISyntaxException for any URI syntax error
+    */
+   VirtualFile copy(VirtualFile file, VirtualFileHandler handler) throws IOException, URISyntaxException;
 }

@@ -21,21 +21,18 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Handler representing an individual file (ZipEntry) within ZipEntryContext
@@ -43,13 +40,10 @@ import java.util.List;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 public class ZipEntryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
-
    /** The url */
    private final URL url;
-
 
    /**
     * Create a new ZipEntryHandler.
@@ -58,6 +52,7 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
     * @param parent  parent within the same context
     * @param name    name of this file within context
     * @param isLeaf  true if this file should have a URL not ending with '/', false otherwise
+    * @throws IOException for any error
     */
    public ZipEntryHandler(ZipEntryContext context, AbstractVirtualFileHandler parent, String name, boolean isLeaf) throws IOException
    {
@@ -118,6 +113,11 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       return false;
    }
 
+   public boolean isNested() throws IOException
+   {
+      return ZipEntryContext.isNested(this);
+   }
+
    public InputStream openStream() throws IOException
    {
       checkClosed();
@@ -127,14 +127,12 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       return getZipEntryContext().getChildren(this, ignoreErrors);
-
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return structuredFindChild(path);
    }
-
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
@@ -153,6 +151,4 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
    {
       return ((ZipEntryContext) getVFSContext());
    }
-
-
 }
