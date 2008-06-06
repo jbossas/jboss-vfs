@@ -77,6 +77,8 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(PathTokensTestCase.suite());
       // unpack
       suite.addTest(UnpackTestCase.suite());
+      suite.addTest(ExplodeTestCase.suite());
+      suite.addTest(TempTestCase.suite());
       // visitor
       suite.addTest(VisitorUnitTestCase.suite());
 

@@ -52,6 +52,7 @@ import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -942,7 +943,7 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private static String getTempDir()
    {
-      File dir = new File(VFSUtils.getTempDirectory(), "vfs-nested.tmp");
+      File dir = new File(AbstractCopyMechanism.getTempDirectory(), "vfs-nested.tmp");
       return dir.toString();
    }
 

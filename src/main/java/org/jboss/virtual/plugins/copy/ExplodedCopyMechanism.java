@@ -19,51 +19,34 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.virtual.test;
+package org.jboss.virtual.plugins.copy;
 
-import junit.framework.Test;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VFSUtils;
+import java.io.IOException;
+
+import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.plugins.context.file.FileHandler;
 
 /**
- * Unpack tests.
+ * Explode any archive into temp dir.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackTestCase extends CopyTest
+public class ExplodedCopyMechanism extends AbstractCopyMechanism
 {
-   public UnpackTestCase(String s)
+   public static final ExplodedCopyMechanism INSTANCE = new ExplodedCopyMechanism();
+
+   protected String getType()
    {
-      super(s);
+      return "exploded";
    }
 
-   public static Test suite()
+   protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
    {
-      return suite(UnpackTestCase.class);
+      return handler instanceof FileHandler || handler.isLeaf();
    }
 
-   protected VirtualFile modify(VirtualFile file) throws Exception
+   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
    {
-      return VFSUtils.unpack(file);
-   }
-
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertUnpackedReplacement(original, replacement);
-   }
-
-   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
-   {
-      assertEquals(originalParent, replacementParent);
+      return false;
    }
 }

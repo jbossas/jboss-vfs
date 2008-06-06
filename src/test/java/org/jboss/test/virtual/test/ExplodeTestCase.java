@@ -30,40 +30,25 @@ import org.jboss.virtual.VFSUtils;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackTestCase extends CopyTest
+public class ExplodeTestCase extends DetachedCopyTest
 {
-   public UnpackTestCase(String s)
+   public ExplodeTestCase(String s)
    {
       super(s);
    }
 
    public static Test suite()
    {
-      return suite(UnpackTestCase.class);
+      return suite(ExplodeTestCase.class);
    }
 
    protected VirtualFile modify(VirtualFile file) throws Exception
    {
-      return VFSUtils.unpack(file);
+      return VFSUtils.explode(file);
    }
 
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   protected boolean isSame(VirtualFile original) throws Exception
    {
-      assertSame(original, replacement);
-   }
-
-   protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertUnpackedReplacement(original, replacement);
-   }
-
-   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
-   {
-      assertEquals(originalParent, replacementParent);
+      return original.isLeaf();
    }
 }

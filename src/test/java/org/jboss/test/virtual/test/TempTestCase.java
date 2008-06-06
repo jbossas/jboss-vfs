@@ -30,40 +30,27 @@ import org.jboss.virtual.VFSUtils;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackTestCase extends CopyTest
+public class TempTestCase extends DetachedCopyTest
 {
-   public UnpackTestCase(String s)
+   public TempTestCase(String s)
    {
       super(s);
    }
 
    public static Test suite()
    {
-      return suite(UnpackTestCase.class);
+      return suite(TempTestCase.class);
    }
 
    protected VirtualFile modify(VirtualFile file) throws Exception
    {
-      return VFSUtils.unpack(file);
+      return VFSUtils.temp(file);
    }
 
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   protected boolean isSame(VirtualFile original) throws Exception
    {
-      assertSame(original, replacement);
-   }
-
-   protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertSame(original, replacement);
-   }
-
-   protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
-   {
-      assertUnpackedReplacement(original, replacement);
-   }
-
-   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
-   {
-      assertEquals(originalParent, replacementParent);
+      // should almost never be same
+      // except if file was already nested jar copy
+      return false;
    }
 }

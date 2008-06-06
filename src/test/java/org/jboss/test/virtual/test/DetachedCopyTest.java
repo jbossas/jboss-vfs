@@ -21,49 +21,47 @@
 */
 package org.jboss.test.virtual.test;
 
-import junit.framework.Test;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VFSUtils;
 
 /**
- * Unpack tests.
+ * Detached tests - no parent re-wiring.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackTestCase extends CopyTest
+public abstract class DetachedCopyTest extends CopyTest
 {
-   public UnpackTestCase(String s)
+   public DetachedCopyTest(String s)
    {
       super(s);
    }
 
-   public static Test suite()
-   {
-      return suite(UnpackTestCase.class);
-   }
-
-   protected VirtualFile modify(VirtualFile file) throws Exception
-   {
-      return VFSUtils.unpack(file);
-   }
+   protected abstract boolean isSame(VirtualFile original) throws Exception;
 
    protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
    {
-      assertSame(original, replacement);
+      if (isSame(original))
+         assertSame(original, replacement);
+      else
+         assertReplacement(original, replacement);
    }
 
    protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
    {
-      assertSame(original, replacement);
+      assertExplodedReplacement(original, replacement);
    }
 
    protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
    {
-      assertUnpackedReplacement(original, replacement);
+      assertExplodedReplacement(original, replacement);
    }
 
    protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
    {
-      assertEquals(originalParent, replacementParent);
+      assertNull(replacementParent);
+   }
+
+   protected void assertOnURI(VirtualFile original, VirtualFile replacement) throws Exception
+   {
+      assertReplacement(original, replacement);
    }
 }

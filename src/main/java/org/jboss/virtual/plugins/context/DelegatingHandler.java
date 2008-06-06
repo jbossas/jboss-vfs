@@ -72,8 +72,6 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    public DelegatingHandler(VFSContext context, VirtualFileHandler parent, String name, VirtualFileHandler delegate)
    {
       super(context, parent, name);
-      //if (delegate == null)
-      //   throw new IllegalArgumentException("Null delegate");
       this.delegate = delegate;
    }
 
@@ -84,72 +82,83 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
 
    public VirtualFileHandler getDelegate()
    {
+      if (delegate == null)
+         throw new IllegalArgumentException("Null delegate");
       return delegate;
+   }
+
+   public VirtualFileHandler getParent() throws IOException
+   {
+      VirtualFileHandler parent = getDelegate().getParent();
+      if (parent != null)
+         return parent;
+
+      return super.getParent();
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return delegate.getChild(path);
+      return getDelegate().getChild(path);
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      return delegate.getChildren(ignoreErrors);
+      return getDelegate().getChildren(ignoreErrors);
    }
 
    public long getLastModified() throws IOException
    {
-      return delegate.getLastModified();
+      return getDelegate().getLastModified();
    }
 
    public long getSize() throws IOException
    {
-      return delegate.getSize();
+      return getDelegate().getSize();
    }
 
    public boolean isLeaf() throws IOException
    {
-      return delegate.isLeaf();
+      return getDelegate().isLeaf();
    }
 
    public boolean exists() throws IOException
    {
-      return delegate.exists();
+      return getDelegate().exists();
    }
 
    public boolean isHidden() throws IOException
    {
-      return delegate.isHidden();
+      return getDelegate().isHidden();
    }
 
    public boolean isNested() throws IOException
    {
-      return delegate.isNested();
+      return getDelegate().isNested();
    }
 
    public InputStream openStream() throws IOException
    {
-      return delegate.openStream();
+      return getDelegate().openStream();
    }
 
    public URI toURI() throws URISyntaxException
    {
-      return delegate.toURI();
+      return getDelegate().toURI();
    }
 
    public URL toURL() throws URISyntaxException, MalformedURLException
    {
-      return delegate.toURL();
+      return getDelegate().toURL();
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
-      delegate.replaceChild(original, replacement);
+      getDelegate().replaceChild(original, replacement);
    }
 
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
-      return delegate.toVfsUrl();
+      return getDelegate().toVfsUrl();
    }
 
    public int hashCode()
