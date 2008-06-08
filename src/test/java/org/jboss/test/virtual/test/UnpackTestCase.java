@@ -47,7 +47,7 @@ public class UnpackTestCase extends CopyTest
       return VFSUtils.unpack(file);
    }
 
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement, boolean exploded) throws Exception
    {
       assertSame(original, replacement);
    }

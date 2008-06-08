@@ -26,6 +26,7 @@ import java.io.File;
 
 import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
 import org.jboss.virtual.plugins.context.jar.JarHandler;
+import org.jboss.virtual.plugins.context.zip.ZipEntryHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -50,13 +51,21 @@ public class TempCopyMechanism extends AbstractCopyMechanism
    protected File copy(File guidDir, VirtualFileHandler handler) throws IOException
    {
       // leave top level archives or leaves in one piece
-      if (handler instanceof JarHandler || handler.isLeaf())
+      boolean directRewrite = handler.isLeaf();
+      if (directRewrite == false)
+      {
+         VirtualFileHandler unwrapped = unwrap(handler);
+         directRewrite = unwrapped instanceof JarHandler || (unwrapped instanceof ZipEntryHandler && unwrapped.isNested() == false);
+      }
+
+      if (directRewrite)
       {
          File temp = new File(guidDir, handler.getName());
          temp.deleteOnExit();
          rewrite(handler, temp);
          return temp;
       }
+
       return super.copy(guidDir, handler);
    }
 

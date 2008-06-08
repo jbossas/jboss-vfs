@@ -47,6 +47,11 @@ public class TempTestCase extends DetachedCopyTest
       return VFSUtils.temp(file);
    }
 
+   protected boolean isExploded() throws Exception
+   {
+      return false;
+   }
+
    protected boolean isSame(VirtualFile original) throws Exception
    {
       // should almost never be same

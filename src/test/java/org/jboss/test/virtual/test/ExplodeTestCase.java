@@ -47,6 +47,11 @@ public class ExplodeTestCase extends DetachedCopyTest
       return VFSUtils.explode(file);
    }
 
+   protected boolean isExploded() throws Exception
+   {
+      return true;
+   }
+
    protected boolean isSame(VirtualFile original) throws Exception
    {
       return original.isLeaf();

@@ -44,24 +44,24 @@ public abstract class CopyTest extends AbstractVFSTest
 
    protected abstract VirtualFile modify(VirtualFile file) throws Exception;
 
-   protected void assertNoReplacement(VFS vfs, String name) throws Throwable
+   protected void assertNoReplacement(VFS vfs, String name, boolean unpacked) throws Throwable
    {
       VirtualFile original = vfs.findChild(name);
       VirtualFile replacement = modify(original);
-      assertNoReplacement(original, replacement);
+      assertNoReplacement(original, replacement, unpacked);
    }
 
-   protected abstract void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception;
+   protected abstract void assertNoReplacement(VirtualFile original, VirtualFile replacement, boolean unpacked) throws Exception;
 
    public void testNoReplacement() throws Throwable
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
 
-      assertNoReplacement(vfs, "unpacked-outer.jar");
-      assertNoReplacement(vfs, "jar1-filesonly.jar");
-      assertNoReplacement(vfs, "jar1-filesonly.mf");
-      assertNoReplacement(vfs, "unpacked-with-metadata.jar/META-INF");
+      assertNoReplacement(vfs, "unpacked-outer.jar", true);
+      assertNoReplacement(vfs, "jar1-filesonly.jar", false);
+      assertNoReplacement(vfs, "jar1-filesonly.mf", false);
+      assertNoReplacement(vfs, "unpacked-with-metadata.jar/META-INF", true);
    }
 
    public void testCopyOuter() throws Throwable
@@ -170,15 +170,20 @@ public abstract class CopyTest extends AbstractVFSTest
 
    protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws Exception
    {
+      assertReplacement(original, replacement, true);
+   }
+
+   protected void assertReplacement(VirtualFile original, VirtualFile replacement, boolean exploded) throws Exception
+   {
       assertEquals(original.getName(), replacement.getName());
       // when mounting via DelegatingHandler, getPathName changes because VFSContext changes
       //assertEquals(original.getPathName(), replacement.getPathName());
 
       // it's a directory
-      if (replacement.isLeaf())
-         assertEquals(original.getSize(), replacement.getSize());
-      else
+      if (exploded)
          assertEquals(0, replacement.getSize());
+      else
+         assertEquals(original.getSize(), replacement.getSize());
       assertEquals(original.exists(), replacement.exists());
       assertEquals(original.isLeaf(), replacement.isLeaf());
       assertEquals(original.isHidden(), replacement.isHidden());

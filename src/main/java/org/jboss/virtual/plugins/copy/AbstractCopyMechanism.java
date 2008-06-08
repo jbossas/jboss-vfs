@@ -100,12 +100,22 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
     */
    protected abstract boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException;
 
+   /**
+    * Unwrap the handler from possible delegate handler.
+    *
+    * @param handler the handler to unwrap
+    * @return unwrapped handler
+    */
+   protected VirtualFileHandler unwrap(VirtualFileHandler handler)
+   {
+      if (handler instanceof DelegatingHandler)
+         handler = ((DelegatingHandler)handler).getDelegate();
+      return handler;
+   }
+
    public VirtualFile copy(VirtualFile file, VirtualFileHandler handler) throws IOException, URISyntaxException
    {
-      VirtualFileHandler unwrapped = handler;
-      if (handler instanceof DelegatingHandler)
-         unwrapped = ((DelegatingHandler)handler).getDelegate();
-
+      VirtualFileHandler unwrapped = unwrap(handler);
       // check modification on unwrapped
       if (isAlreadyModified(unwrapped))
       {

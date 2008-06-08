@@ -35,19 +35,22 @@ public abstract class DetachedCopyTest extends CopyTest
       super(s);
    }
 
+   protected abstract boolean isExploded() throws Exception;
+
    protected abstract boolean isSame(VirtualFile original) throws Exception;
 
-   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement) throws Exception
+   protected void assertNoReplacement(VirtualFile original, VirtualFile replacement, boolean unpacked) throws Exception
    {
       if (isSame(original))
          assertSame(original, replacement);
       else
-         assertReplacement(original, replacement);
+         assertReplacement(original, replacement, unpacked || isExploded());
    }
 
    protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
    {
-      assertExplodedReplacement(original, replacement);
+      assertReplacement(original, replacement, isExploded());
+      assertNull(replacement.getParent());
    }
 
    protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception
