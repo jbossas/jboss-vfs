@@ -37,6 +37,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * JARVFSContextUnitTestCase.
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
@@ -66,6 +67,13 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return new FileSystemContext(url);
    }
 
+   /**
+    * Create vfs context from url.
+    *
+    * @param url the url
+    * @return new vfs context
+    * @throws Exception for any error
+    */
    protected VFSContext createVSFContext(URL url) throws Exception
    {
       if (url.toExternalForm().startsWith("jar") == false)
@@ -81,7 +89,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
    /**
     * Was having problems with a jar entry as root of VFS.
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testJarEntryAsRoot() throws Exception
    {
@@ -102,7 +110,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
     * Was having problems with a jar entry as root of VFS.
     * A JarEntry that is the root of the VFS should have a VFS Path of ""
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testPathIsEmptryForJarEntryAsRoot() throws Exception
    {
