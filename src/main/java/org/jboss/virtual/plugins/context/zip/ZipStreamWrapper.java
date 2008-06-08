@@ -114,7 +114,6 @@ class ZipStreamWrapper extends ZipWrapper
       return new ZipStreamEnumeration(new ZipInputStream(new ByteArrayInputStream(zipBytes)));
    }
 
-
    void close()
    {
       zipBytes = null;
@@ -125,9 +124,10 @@ class ZipStreamWrapper extends ZipWrapper
       return super.toString() + " - " + name;
    }
 
-
-
-   class ZipStreamEnumeration implements Enumeration
+   /**
+    * Zip stream enumeration.
+    */
+   class ZipStreamEnumeration implements Enumeration<ZipEntry>
    {
       private ZipInputStream zis;
 
@@ -144,9 +144,9 @@ class ZipStreamWrapper extends ZipWrapper
          return entry != null;
       }
 
-      public Object nextElement()
+      public ZipEntry nextElement()
       {
-         Object ret = entry;
+         ZipEntry ret = entry;
          try
          {
             entry = zis.getNextEntry();
@@ -159,5 +159,4 @@ class ZipStreamWrapper extends ZipWrapper
          return ret;
       }
    }
-
 }
