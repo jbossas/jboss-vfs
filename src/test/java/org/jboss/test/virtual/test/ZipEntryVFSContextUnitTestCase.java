@@ -160,7 +160,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    }
 
    /**
-    * Handler representing a directory must return a zero leangth stream
+    * Handler representing a directory must return a zero length stream
     *
     * @throws Exception for any error
     */
@@ -172,5 +172,22 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       VirtualFileHandler sub = ctx.getRoot().getChild("subfolder");
       InputStream is = sub.openStream();
       assertTrue("input stream closed", is.read() == -1);
+   }
+
+   /**
+    * There was a problem with noCopy inner jars returning empty streams
+    *
+    * @throws Exception for any error
+    */
+   public void testInnerJarFileEntryOpenStream() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/nested.jar");
+      ZipEntryContext ctx = new ZipEntryContext(url);
+
+      VirtualFileHandler nested = ctx.getRoot().getChild("complex.jar");
+      VirtualFileHandler target = nested.getChild("META-INF/MANIFEST.MF");
+
+      InputStream is = target.openStream();
+      assertFalse("input stream closed", is.read() == -1);
    }
 }

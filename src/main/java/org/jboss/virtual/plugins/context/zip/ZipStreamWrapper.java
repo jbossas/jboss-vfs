@@ -97,7 +97,7 @@ class ZipStreamWrapper extends ZipWrapper
 
 
       // then read it
-      return new SizeLimitedInputStream(zis, (int) entry.getSize());
+      return new SizeLimitedInputStream(zis, (int) ent.getSize());
    }
 
    InputStream getRootAsStream() throws FileNotFoundException
