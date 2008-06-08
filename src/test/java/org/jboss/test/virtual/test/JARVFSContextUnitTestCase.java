@@ -21,6 +21,7 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import junit.framework.Test;
@@ -30,6 +31,7 @@ import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * JARVFSContextUnitTestCase.
@@ -64,6 +66,13 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return new FileSystemContext(url);
    }
 
+   protected VFSContext createVSFContext(URL url) throws Exception
+   {
+      if (url.toExternalForm().startsWith("jar") == false)
+         url = JarUtils.createJarURL(url);
+      return new JarContext(url);
+   }
+
    protected String getSuffix()
    {
       return ".jar";
@@ -79,13 +88,13 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       URL url = getResource("/vfs/context/jar/simple.jar");
       URL entry = new URL("jar:" + url.toString() + "!/child");
       //entry.openStream().close();
-      JarContext context = new JarContext(entry);
+      VFSContext context = createVSFContext(entry);
       assertEquals("child", context.getRoot().getName());
 
       url = getResource("/vfs/test/outer.jar");
       entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
       //entry.openStream().close();
-      context = new JarContext(entry);
+      context = createVSFContext(entry);
       assertEquals("jar2.jar", context.getRoot().getName());
    }
 
@@ -100,16 +109,48 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       URL url = getResource("/vfs/context/jar/simple.jar");
       URL entry = new URL("jar:" + url.toString() + "!/child");
       //entry.openStream().close();
-      JarContext context = new JarContext(entry);
+      VFSContext context = createVSFContext(entry);
       assertEquals("child", context.getRoot().getName());
       assertEquals("", context.getRoot().getPathName());
 
       url = getResource("/vfs/test/outer.jar");
       entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
       //entry.openStream().close();
-      context = new JarContext(entry);
+      context = createVSFContext(entry);
       assertEquals("jar2.jar", context.getRoot().getName());
       assertEquals("", context.getRoot().getPathName());
    }
 
+
+   /**
+    * Handler representing a directory must return a zero length stream
+    *
+    * @throws Exception for any error
+    */
+   public void testDirectoryZipEntryOpenStream() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/complex.jar");
+      VFSContext ctx = createVSFContext(url);
+
+      VirtualFileHandler sub = ctx.getRoot().getChild("subfolder");
+      InputStream is = sub.openStream();
+      assertTrue("input stream closed", is.read() == -1);
+   }
+
+   /**
+    * There was a problem with noCopy inner jars returning empty streams
+    *
+    * @throws Exception for any error
+    */
+   public void testInnerJarFileEntryOpenStream() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/nested.jar");
+      VFSContext ctx = createVSFContext(url);
+
+      VirtualFileHandler nested = ctx.getRoot().getChild("complex.jar");
+      VirtualFileHandler target = nested.getChild("META-INF/MANIFEST.MF");
+
+      InputStream is = target.openStream();
+      assertFalse("input stream closed", is.read() == -1);
+   }
 }

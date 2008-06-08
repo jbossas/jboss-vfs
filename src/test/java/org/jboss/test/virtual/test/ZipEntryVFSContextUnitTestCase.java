@@ -62,46 +62,9 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       return new ZipEntryContext(url);
    }
 
-   /**
-    * Analog to the same test in {@link JARVFSContextUnitTestCase}
-    *
-    * @throws Exception
-    */
-   public void testJarEntryAsRoot() throws Exception
+   protected VFSContext createVSFContext(URL url) throws Exception
    {
-      URL url = getResource("/vfs/context/jar/simple.jar");
-      URL entry = new URL("jar:" + url.toString() + "!/child");
-      //entry.openStream().close();
-      ZipEntryContext context = new ZipEntryContext(entry);
-      assertEquals("child", context.getRoot().getName());
-
-      url = getResource("/vfs/test/outer.jar");
-      entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
-      //entry.openStream().close();
-      context = new ZipEntryContext(entry);
-      assertEquals("jar2.jar", context.getRoot().getName());
-   }
-
-   /**
-    * Analog to the same test in {@link JARVFSContextUnitTestCase}
-    *
-    * @throws Exception for any error
-    */
-   public void testPathIsEmptryForJarEntryAsRoot() throws Exception
-   {
-      URL url = getResource("/vfs/context/jar/simple.jar");
-      URL entry = new URL("jar:" + url.toString() + "!/child");
-      //entry.openStream().close();
-      ZipEntryContext context = new ZipEntryContext(entry);
-      assertEquals("child", context.getRoot().getName());
-      assertEquals("", context.getRoot().getPathName());
-
-      url = getResource("/vfs/test/outer.jar");
-      entry = new URL("jar:" + url.toString() + "!/jar2.jar ");
-      //entry.openStream().close();
-      context = new ZipEntryContext(entry);
-      assertEquals("jar2.jar", context.getRoot().getName());
-      assertEquals("", context.getRoot().getPathName());
+      return new ZipEntryContext(url);
    }
 
    /**
@@ -157,37 +120,5 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
 
       handler = ctx.getRoot().getChild("notanarchive.jar");
       assertTrue("is leaf", handler.isLeaf());
-   }
-
-   /**
-    * Handler representing a directory must return a zero length stream
-    *
-    * @throws Exception for any error
-    */
-   public void testDirectoryZipEntryOpenStream() throws Exception
-   {
-      URL url = getResource("/vfs/context/jar/complex.jar");
-      ZipEntryContext ctx = new ZipEntryContext(url);
-
-      VirtualFileHandler sub = ctx.getRoot().getChild("subfolder");
-      InputStream is = sub.openStream();
-      assertTrue("input stream closed", is.read() == -1);
-   }
-
-   /**
-    * There was a problem with noCopy inner jars returning empty streams
-    *
-    * @throws Exception for any error
-    */
-   public void testInnerJarFileEntryOpenStream() throws Exception
-   {
-      URL url = getResource("/vfs/context/jar/nested.jar");
-      ZipEntryContext ctx = new ZipEntryContext(url);
-
-      VirtualFileHandler nested = ctx.getRoot().getChild("complex.jar");
-      VirtualFileHandler target = nested.getChild("META-INF/MANIFEST.MF");
-
-      InputStream is = target.openStream();
-      assertFalse("input stream closed", is.read() == -1);
    }
 }
