@@ -26,9 +26,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.util.collection.SoftValueHashMap;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
@@ -36,11 +36,13 @@ import org.jboss.virtual.VirtualFile;
  * Implements basic URLConnection for a VirtualFile
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class VirtualFileURLConnection extends URLConnection
 {
-   public static Map<URL, VFS> urlCache = Collections.synchronizedMap(new HashMap<URL, VFS>());
+   @SuppressWarnings("unchecked")
+   public static Map<URL, VFS> urlCache = Collections.<URL, VFS>synchronizedMap(new SoftValueHashMap());
 
    protected VirtualFile file;
    protected URL vfsurl;
@@ -68,7 +70,8 @@ public class VirtualFileURLConnection extends URLConnection
       return getVirtualFile();
    }
 
-   public static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
+   @SuppressWarnings("deprecation")
+   protected static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
       VFS vfs = urlCache.get(vfsurl);
       if (vfs == null)
@@ -90,17 +93,18 @@ public class VirtualFileURLConnection extends URLConnection
       return vfs.findChild(relativePath);
    }
 
-   public static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
+   @SuppressWarnings("deprecation")
+   protected static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
       VFS vfs = VFS.getVFS(vfsurl);
       return vfs.findChild(relativePath);
    }
 
-   public synchronized VirtualFile getVirtualFile() throws IOException
+   protected synchronized VirtualFile getVirtualFile() throws IOException
    {
       if (file == null)
       {
-         if (this.getUseCaches())
+         if (getUseCaches())
          {
             file = resolveCachedVirtualFile(vfsurl, relativePath);
          }

@@ -19,38 +19,28 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.protocol.vfsmemory;
+package org.jboss.virtual.protocol.zip;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
 
-import org.jboss.virtual.MemoryFileFactory;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.protocol.AbstractZipHandler;
 
 /**
- * URLStreamHandler for VFS
+ * Zip url handler.
  *
- * @author <a href="bill@jboss.com">Bill Burke</a>
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
- * @version $Revision: 1.1 $
+ * In case someone is stripping vfs off
+ * and just ends with zip protocol.
+ * (like I did in EJB3) ;-)
+ *
+ * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class Handler extends URLStreamHandler
+public class Handler extends AbstractZipHandler
 {
    protected URLConnection openConnection(URL url) throws IOException
    {
-      String host = url.getHost();
-      VFS vfs = MemoryFileFactory.find(host);
-      if (vfs == null)
-         throw new IOException("VFS does not exist: " + url);
-
-      VirtualFile vf = vfs.getChild(url.getPath());
-      if (vf == null)
-         throw new IOException("VFS does not exist: " + url);
-
-      return new VirtualFileURLConnection(url, vf);
+      url = new URL("vfs" + url.toExternalForm());
+      return super.openConnection(url);
    }
 }

@@ -39,18 +39,17 @@ import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
  */
 public class Handler extends URLStreamHandler
 {
-   protected URLConnection openConnection(URL u) throws IOException
+   protected URLConnection openConnection(URL url) throws IOException
    {
-      String host = u.getHost();
+      String host = url.getHost();
       AssembledDirectory directory = AssembledContextFactory.getInstance().find(host);
       if (directory == null)
-         throw new IOException("vfs does not exist: " + u.toString());
+         throw new IOException("vfs does not exist: " + url);
 
-      VirtualFile vf = directory.findChild(u.getPath());
+      VirtualFile vf = directory.getChild(url.getPath());
       if (vf == null)
-         throw new IOException("vfs does not exist: " + u.toString());
+         throw new IOException("vfs does not exist: " + url);
 
-      return new VirtualFileURLConnection(u, vf);
+      return new VirtualFileURLConnection(url, vf);
    }
-
 }

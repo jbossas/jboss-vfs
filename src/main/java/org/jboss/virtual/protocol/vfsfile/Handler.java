@@ -37,9 +37,9 @@ import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
  */
 public class Handler extends URLStreamHandler
 {
-   protected URLConnection openConnection(URL u) throws IOException
+   protected URLConnection openConnection(URL url) throws IOException
    {
-      String file = u.toString().substring(8); // strip out vfsfile:
+      String file = url.toString().substring(8); // strip out vfsfile:
       URL vfsurl = null;
       String relative;
       File fp = new File(file);
@@ -67,8 +67,8 @@ public class Handler extends URLStreamHandler
       }
 
       if (vfsurl == null)
-         throw new IOException("vfsfile does not exist: " + u.toString());
+         throw new IOException("VFS file does not exist: " + url);
 
-      return new VirtualFileURLConnection(u, vfsurl, relative);
+      return new VirtualFileURLConnection(url, vfsurl, relative);
    }
 }
