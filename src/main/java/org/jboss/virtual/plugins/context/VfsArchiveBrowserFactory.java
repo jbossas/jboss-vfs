@@ -27,7 +27,6 @@ import java.util.Iterator;
 
 import org.jboss.util.file.ArchiveBrowser;
 import org.jboss.util.file.ArchiveBrowserFactory;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
@@ -40,13 +39,13 @@ import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
  */
 public class VfsArchiveBrowserFactory implements ArchiveBrowserFactory
 {
+   @SuppressWarnings("deprecation")
    public Iterator create(URL url, ArchiveBrowser.Filter filter)
    {
       try
       {
          VirtualFileURLConnection conn = (VirtualFileURLConnection)url.openConnection();
-         VirtualFile vf = conn.getVirtualFile();
-         return new VfsArchiveBrowser(filter, vf);
+         return new VfsArchiveBrowser(filter, conn.getContent());
       }
       catch (IOException e)
       {               

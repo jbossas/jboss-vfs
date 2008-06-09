@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
@@ -77,7 +76,7 @@ public class ClassPathIterator
       else if( protocol.startsWith("vfs") )
       {
          VirtualFileURLConnection conn = (VirtualFileURLConnection)url.openConnection();
-         vf = conn.getVirtualFile();
+         vf = conn.getContent();
          rootLength = vf.getPathName().length() + 1;
          vfIter = new VirtualFileIterator(vf);
       }

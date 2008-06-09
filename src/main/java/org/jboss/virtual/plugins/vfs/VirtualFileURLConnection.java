@@ -65,7 +65,7 @@ public class VirtualFileURLConnection extends URLConnection
    {
    }
 
-   public Object getContent() throws IOException
+   public VirtualFile getContent() throws IOException
    {
       return getVirtualFile();
    }
@@ -100,6 +100,12 @@ public class VirtualFileURLConnection extends URLConnection
       return vfs.findChild(relativePath);
    }
 
+   /**
+    * Get the virtual file.
+    *
+    * @return the underlying virtual file
+    * @throws IOException for any error
+    */
    protected synchronized VirtualFile getVirtualFile() throws IOException
    {
       if (file == null)
