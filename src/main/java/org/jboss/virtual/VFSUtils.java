@@ -534,4 +534,31 @@ public class VFSUtils
       VirtualFileHandler handler = file.getHandler();
       return handler.isNested();
    }
+
+   /**
+    * Get spec compatilbe url from virtual file.
+    *
+    * @param file the virtual file
+    * @return spec compatible url
+    * @throws IOException for any error
+    * @throws URISyntaxException for any uri syntax error
+    */
+   public static URL getCompatibleURL(VirtualFile file) throws IOException, URISyntaxException
+   {
+      URL url = file.toURL();
+      // is not nested, so direct VFS URL is not an option
+      if (isNestedFile(file) == false)
+      {
+         String urlString = url.toExternalForm();
+         if (urlString.startsWith("vfs"))
+         {
+            // treat vfszip as file
+            if (urlString.startsWith("vfszip"))
+               url = new URL("file" + urlString.substring(6));
+            else
+               url = new URL(urlString.substring(3)); // (vfs)file and (vfs)jar are ok
+         }
+      }
+      return url;
+   }
 }
