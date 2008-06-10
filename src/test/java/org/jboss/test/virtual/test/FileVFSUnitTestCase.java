@@ -50,6 +50,7 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.NestedJarFromStream;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter;
 import org.jboss.virtual.spi.LinkInfo;
@@ -1437,5 +1438,51 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertTrue(tmp+".delete()", tmp.delete());
       assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
       assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
+
+   /**
+    * Test for <em>caseSensitive=true</em>
+    *
+    * If this test passes on unixes, it doesn't mean much, because there it should pass without
+    * case sensitivity turned on as well.
+    *
+    * If it passes on windows, it means the functionality works as expected.
+    *
+    * @throws Exception for any error
+    */
+   public void testCaseSensitive() throws Exception
+   {
+      URL rootURL = getResource("/vfs");
+
+      FileSystemContext ctx = new FileSystemContext(new URL(rootURL.toString() + "?caseSensitive=true"));
+      VirtualFileHandler root = ctx.getRoot();
+
+      String path = "context/file/simple/child";
+      VirtualFileHandler child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child != null);
+
+      path = "context/file/simple/CHILD";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child == null);
+
+      path = "context/jar/archive.jar";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child != null);
+
+      path = "context/JAR/archive.jar";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child == null);
+
+      path = "context/jar/archive.JAR";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child == null);
+
+      path = "context/jar/archive.jar/child";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child != null);
+
+      path = "context/jar/archive.jar/CHILD";
+      child = root.getChild(path);
+      assertTrue("getChild('" + path + "')", child == null);
    }
 }

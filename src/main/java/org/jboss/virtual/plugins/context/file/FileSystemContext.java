@@ -49,7 +49,14 @@ import org.jboss.logging.Logger;
  * Jar archives are processed through {@link org.jboss.virtual.plugins.context.zip.ZipEntryContext}.
  *
  * To switch back to {@link org.jboss.virtual.plugins.context.jar.JarHandler}
- * set a system property <em>jboss.vfs.forceVfsJar=true</em> 
+ * set a system property <em>jboss.vfs.forceVfsJar=true</em>
+ *
+ * Explicit case sensitive path checking can be turned on by adding an option parameter
+ * <em>?caseSensitive=true<em> to context URL. This may be desired when native filesystem is not
+ * case sensitive (i.e. if running on Windows).
+ *
+ * Case sesitivity can be turned on for all context URLs by setting system property
+ * <em>jboss.vfs.forceCaseSensitive=true</em>.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
@@ -64,12 +71,20 @@ public class FileSystemContext extends AbstractVFSContext
    /** true if forcing fallback to vfsjar from default vfszip */
    private static boolean forceVfsJar;
 
+   /** true if case sensitivity should be enforced */
+   private static boolean forceCaseSensitive;
+
    static
    {
       forceVfsJar = AccessController.doPrivileged(new CheckForceVfsJar());
 
       if (forceVfsJar)
          log.warn("VFS forced fallback to vfsjar is enabled.");
+
+      forceCaseSensitive = AccessController.doPrivileged(new CheckForceCaseSensitive());
+
+      if (forceCaseSensitive)
+         log.debug("VFS forced case sensitivity is enabled.");
    }
 
    /** The root file */
@@ -213,6 +228,9 @@ public class FileSystemContext extends AbstractVFSContext
       String name = file.getName();
       if (file.isFile() && JarUtils.isArchive(name))
       {
+         if (exists(file) == false)
+            return null;
+
          if (forceVfsJar)
          {
             try
@@ -313,7 +331,7 @@ public class FileSystemContext extends AbstractVFSContext
             }
          }
       }
-      else if (file.exists() == false && parent != null)
+      else if (exists(file) == false && parent != null)
       {
          // See if we can resolve this to a link in the parent
          List<VirtualFileHandler> children = parent.getChildren(true);
@@ -326,13 +344,48 @@ public class FileSystemContext extends AbstractVFSContext
             }
          }
       }
-      else if (file.exists())
+      else if (exists(file))
       {
          handler = new FileHandler(this, parent, file, uri);
       }
       return handler;
    }
-   
+
+   /**
+    * Tests if file exists taking case sensitivity into account - if it's enabled
+    *
+    * @param file file to check
+    * @return true if file exists
+    * @throws IOException
+    */
+   protected boolean exists(File file) throws IOException
+   {
+      // if force case sensitive is enabled - extra check is required
+      boolean isCaseSensitive = forceCaseSensitive;
+      if (isCaseSensitive == false)
+      {
+         String flag = getOptions().get(VFSUtils.CASE_SENSITIVE_QUERY);
+         isCaseSensitive = Boolean.valueOf(flag);
+      }
+
+      if (isCaseSensitive && file.getCanonicalFile().getName().equals(file.getName()) == false)
+         return false;
+
+      return file.exists();
+   }
+
+   /**
+    * Is forceCaseSensitive enabled
+    *
+    * Only relevant for native filesystems
+    * that are not case sensitive
+    *
+    * @return true if case sensitivity is enabled
+    */
+   public boolean isForcedCaseSensitive() {
+      return forceCaseSensitive;
+   }
+
    @Override
    protected void finalize() throws Throwable
    {
@@ -346,6 +399,15 @@ public class FileSystemContext extends AbstractVFSContext
       public Boolean run()
       {
          String forceString = System.getProperty(VFSUtils.FORCE_VFS_JAR_KEY, "false");
+         return Boolean.valueOf(forceString);
+      }
+   }
+
+   private static class CheckForceCaseSensitive implements PrivilegedAction<Boolean>
+   {
+      public Boolean run()
+      {
+         String forceString = System.getProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, "false");
          return Boolean.valueOf(forceString);
       }
    }

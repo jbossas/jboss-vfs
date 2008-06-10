@@ -84,6 +84,12 @@ public class VFSUtils
    public static final String NO_REAPER_QUERY = "noReaper";
 
    /**
+    * Key used to force case sensitive path checking in vfsfile
+    */
+   public static final String FORCE_CASE_SENSITIVE_KEY = "jboss.vfs.forceCaseSensitive";
+   public static final String CASE_SENSITIVE_QUERY = "caseSensitive";
+
+   /**
     * Get the paths string for a collection of virtual files
     * 
     * @param paths the paths
@@ -533,32 +539,5 @@ public class VFSUtils
    {
       VirtualFileHandler handler = file.getHandler();
       return handler.isNested();
-   }
-
-   /**
-    * Get spec compatilbe url from virtual file.
-    *
-    * @param file the virtual file
-    * @return spec compatible url
-    * @throws IOException for any error
-    * @throws URISyntaxException for any uri syntax error
-    */
-   public static URL getCompatibleURL(VirtualFile file) throws IOException, URISyntaxException
-   {
-      URL url = file.toURL();
-      // is not nested, so direct VFS URL is not an option
-      if (isNestedFile(file) == false)
-      {
-         String urlString = url.toExternalForm();
-         if (urlString.startsWith("vfs"))
-         {
-            // treat vfszip as file
-            if (urlString.startsWith("vfszip"))
-               url = new URL("file" + urlString.substring(6));
-            else
-               url = new URL(urlString.substring(3)); // (vfs)file and (vfs)jar are ok
-         }
-      }
-      return url;
    }
 }
