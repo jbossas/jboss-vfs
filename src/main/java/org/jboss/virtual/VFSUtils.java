@@ -29,7 +29,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +39,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
+import org.jboss.util.collection.CollectionsFactory;
 import org.jboss.virtual.plugins.copy.CopyMechanism;
 import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
 import org.jboss.virtual.plugins.copy.TempCopyMechanism;
@@ -50,7 +50,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * VFS Utilities
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
@@ -91,13 +91,16 @@ public class VFSUtils
 
    /**
     * Get the paths string for a collection of virtual files
-    * 
+    *
     * @param paths the paths
     * @return the string
     * @throws IllegalArgumentException for null paths
     */
    public static String getPathsString(Collection<VirtualFile> paths)
    {
+      if (paths == null)
+         throw new IllegalArgumentException("Null paths");
+
       StringBuilder buffer = new StringBuilder();
       boolean first = true;
       for (VirtualFile path : paths)
@@ -110,16 +113,16 @@ public class VFSUtils
             first = false;
          buffer.append(path.getPathName());
       }
-      
+
       if (first == true)
          buffer.append("<empty>");
-      
+
       return buffer.toString();
    }
-   
+
    /**
     * Add manifest paths
-    * 
+    *
     * @param file the file
     * @param paths the paths to add to
     * @throws IOException if there is an error reading the manifest or the
@@ -133,21 +136,21 @@ public class VFSUtils
          throw new IllegalArgumentException("Null file");
       if (paths == null)
          throw new IllegalArgumentException("Null paths");
-      
+
       Manifest manifest = getManifest(file);
       if (manifest == null)
          return;
 
       Attributes mainAttributes = manifest.getMainAttributes();
       String classPath = mainAttributes.getValue(Attributes.Name.CLASS_PATH);
-      
+
       if (classPath == null)
       {
          if (log.isTraceEnabled())
             log.trace("Manifest has no Class-Path for " + file.getPathName());
          return;
       }
-      
+
       VirtualFile parent = file.getParent();
       if (parent == null)
          throw new IllegalStateException(file + " has no parent.");
@@ -205,7 +208,7 @@ public class VFSUtils
    /**
     * Get a manifest from a virtual file,
     * assuming the virtual file is the root of an archive
-    * 
+    *
     * @param archive the root the archive
     * @return the manifest or null if not found
     * @throws IOException if there is an error reading the manifest or the
@@ -216,13 +219,9 @@ public class VFSUtils
    {
       if (archive == null)
          throw new IllegalArgumentException("Null archive");
-      
-      VirtualFile manifest;
-      try
-      {
-         manifest = archive.findChild(JarFile.MANIFEST_NAME);
-      }
-      catch (IOException ignored)
+
+      VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
+      if (manifest == null)
       {
          if (log.isTraceEnabled())
             log.trace("Can't find manifest for " + archive.getPathName());
@@ -240,6 +239,9 @@ public class VFSUtils
     */
    public static Manifest readManifest(VirtualFile manifest) throws IOException
    {
+      if (manifest == null)
+         throw new IllegalArgumentException("Null manifest file");
+
       InputStream stream = manifest.openStream();
       try
       {
@@ -268,13 +270,16 @@ public class VFSUtils
      */
     public static Manifest getManifest(VFS archive) throws IOException
     {
+       if (archive == null)
+         throw new IllegalArgumentException("Null vfs archive");
+
        VirtualFile root = archive.getRoot();
        return getManifest(root);
     }
-   
+
    /**
     * Fix a name (removes any trailing slash)
-    * 
+    *
     * @param name the name to fix
     * @return the fixed name
     * @throws IllegalArgumentException for a null name
@@ -283,7 +288,7 @@ public class VFSUtils
    {
       if (name == null)
          throw new IllegalArgumentException("Null name");
-      
+
       int length = name.length();
       if (length <= 1)
          return name;
@@ -300,10 +305,13 @@ public class VFSUtils
     */
    public static String getName(URI uri)
    {
+      if (uri == null)
+         throw new IllegalArgumentException("Null uri");
+
       String name = uri.getPath();
       if( name != null )
       {
-         // TODO: Not correct for certain uris like jar:...!/ 
+         // TODO: Not correct for certain uris like jar:...!/
          int lastSlash = name.lastIndexOf('/');
          if( lastSlash > 0 )
             name = name.substring(lastSlash+1);
@@ -313,17 +321,17 @@ public class VFSUtils
 
    /**
     * Take a URL.getQuery string and parse it into name=value pairs
-    * 
+    *
     * @param query Possibly empty/null url query string
     * @return String[] for the name/value pairs in the query. May be empty but never null.
     */
    public static Map<String, String> parseURLQuery(String query)
    {
-	   Map<String, String> pairsMap = new HashMap<String, String>();
-      if( query != null )
+	   Map<String, String> pairsMap = CollectionsFactory.createLazyMap();
+      if(query != null)
       {
    	   StringTokenizer tokenizer = new StringTokenizer(query, "=&");
-   	   while( tokenizer.hasMoreTokens() )
+   	   while(tokenizer.hasMoreTokens())
    	   {
    		   String name = tokenizer.nextToken();
    		   String value = tokenizer.nextToken();
@@ -340,16 +348,19 @@ public class VFSUtils
     */
    public static boolean isLink(String name)
    {
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
+
       return name.indexOf(VFS_LINK_PREFIX) >= 0;
    }
 
    /**
     * Read the link information from the stream based on the type as determined
     * from the name suffix.
-    * 
+    *
     * @param is - input stream to the link file contents
     * @param name - the name of the virtual file representing the link
-    * @param props the propertes 
+    * @param props the propertes
     * @return a list of the links read from the stream
     * @throws IOException on failure to read/parse the stream
     * @throws URISyntaxException for an error parsing a URI
@@ -357,26 +368,38 @@ public class VFSUtils
    public static List<LinkInfo> readLinkInfo(InputStream is, String name, Properties props)
       throws IOException, URISyntaxException
    {
-      List<LinkInfo> info = new ArrayList<LinkInfo>();
-      if( name.endsWith(".properties") )
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
+
+      if(name.endsWith(".properties"))
+      {
+         List<LinkInfo> info = new ArrayList<LinkInfo>();
          parseLinkProperties(is, info, props);
+         return info;
+      }
       else
-         throw new UnsupportedEncodingException("Unknown link format: "+name);
-      return info;
+         throw new UnsupportedEncodingException("Unknown link format: " + name);
    }
 
    /**
     * Parse a properties link file
-    * 
+    *
     * @param is - input stream to the link file contents
     * @param info the link infos
-    * @param props the propertes 
+    * @param props the propertes
     * @throws IOException on failure to read/parse the stream
     * @throws URISyntaxException for an error parsing a URI
     */
    public static void parseLinkProperties(InputStream is, List<LinkInfo> info, Properties props)
       throws IOException, URISyntaxException
    {
+      if (is == null)
+         throw new IllegalArgumentException("Null input stream");
+      if (info == null)
+         throw new IllegalArgumentException("Null info");
+      if (props == null)
+         throw new IllegalArgumentException("Null properties");
+
       props.load(is);
       // Iterate over the property tuples
       for(int n = 0; ; n ++)
@@ -399,13 +422,16 @@ public class VFSUtils
 
    /**
     * Deal with urls that may include spaces.
-    * 
+    *
     * @param url the url
     * @return uri the uri
     * @throws URISyntaxException for any error
     */
    public static URI toURI(URL url) throws URISyntaxException
    {
+      if (url == null)
+         throw new IllegalArgumentException("Null url");
+
       String urispec = url.toExternalForm();
       // Escape any spaces
       urispec = urispec.replaceAll(" ", "%20");
@@ -537,7 +563,43 @@ public class VFSUtils
     */
    public static boolean isNestedFile(VirtualFile file) throws IOException
    {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+
       VirtualFileHandler handler = file.getHandler();
       return handler.isNested();
+   }
+
+   /**
+    * Get spec compatilbe url from virtual file.
+    *
+    * @param file the virtual file
+    * @return spec compatible url
+    * @throws IOException for any error
+    * @throws URISyntaxException for any uri syntax error
+    */
+   public static URL getCompatibleURL(VirtualFile file) throws IOException, URISyntaxException
+   {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+
+      URL url = file.toURL();
+      if (url == null)
+         throw new IllegalArgumentException("Null url: " + file);
+
+      // is not nested, so direct VFS URL is not an option
+      if (isNestedFile(file) == false)
+      {
+         String urlString = url.toExternalForm();
+         if (urlString.startsWith("vfs"))
+         {
+            // treat vfszip as file
+            if (urlString.startsWith("vfszip"))
+               url = new URL("file" + urlString.substring(6));
+            else
+               url = new URL(urlString.substring(3)); // (vfs)file and (vfs)jar are ok
+         }
+      }
+      return url;
    }
 }
