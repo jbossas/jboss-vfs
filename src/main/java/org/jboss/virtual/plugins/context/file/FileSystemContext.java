@@ -356,7 +356,7 @@ public class FileSystemContext extends AbstractVFSContext
     *
     * @param file file to check
     * @return true if file exists
-    * @throws IOException
+    * @throws IOException for any error
     */
    protected boolean exists(File file) throws IOException
    {
