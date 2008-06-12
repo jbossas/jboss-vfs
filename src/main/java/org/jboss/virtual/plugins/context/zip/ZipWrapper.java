@@ -33,10 +33,8 @@ import java.util.Enumeration;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 abstract class ZipWrapper
 {
-
    /** last known modifyTime of the zip source */
    protected long lastModified;
 
@@ -50,10 +48,10 @@ abstract class ZipWrapper
    /** number of streams currently open on this wrapper */
    private int refCount = 0;
 
-
-
    /**
-    * Returns true if underlying source's lastModified time has changed since previous call
+    * Returns true if underlying source's lastModified time has changed since previous call.
+    *
+    * @return true if modified, false othwewise
     */
    boolean hasBeenModified()
    {
@@ -92,7 +90,6 @@ abstract class ZipWrapper
       refCount++;
       lastUsed = System.currentTimeMillis();
    }
-
 
    synchronized void release()
    {

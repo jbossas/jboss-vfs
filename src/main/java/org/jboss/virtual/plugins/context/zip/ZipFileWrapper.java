@@ -56,7 +56,6 @@ class ZipFileWrapper extends ZipWrapper
 
       if (forceNoReaper)
          log.info("VFS forced no-reaper-mode is enabled.");
-
    }
 
    private File file;
@@ -83,7 +82,7 @@ class ZipFileWrapper extends ZipWrapper
    {
       this.noReaperOverride = noReaperOverride;
       File rootFile = new File(rootPathURI);
-      if(!rootFile.isFile())
+      if(rootFile.isFile() == false)
          throw new RuntimeException("File not found: " + rootFile);
 
       init(rootFile, autoClean);

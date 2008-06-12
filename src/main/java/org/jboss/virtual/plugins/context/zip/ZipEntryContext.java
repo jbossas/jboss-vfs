@@ -266,12 +266,11 @@ public class ZipEntryContext extends AbstractVFSContext
       // then we order these by name and only then we process them
       // this way we ensure that parent entries are processed before child entries
 
-      HashMap<String, ZipEntry> relevant = new HashMap<String, ZipEntry>();
+      Map<String, ZipEntry> relevant = new HashMap<String, ZipEntry>();
       zipSource.acquire();
       try
       {
          Enumeration<? extends ZipEntry> zipEntries = zipSource.entries();
-
          // zoom-in on entries under rootEntryPath - ignoring the rest
          while(zipEntries.hasMoreElements())
          {
@@ -282,8 +281,7 @@ public class ZipEntryContext extends AbstractVFSContext
             }
          }
 
-         TreeMap<String, ZipEntry> orderedRelevant = new TreeMap<String, ZipEntry>(relevant);
-
+         Map<String, ZipEntry> orderedRelevant = new TreeMap<String, ZipEntry>(relevant);
          for(Map.Entry<String, ZipEntry> entry : orderedRelevant.entrySet())
          {
             ZipEntry ent = entry.getValue();
@@ -340,7 +338,6 @@ public class ZipEntryContext extends AbstractVFSContext
                ZipEntryHandler wrapper = new ZipEntryHandler(this, parent, name, ent.isDirectory() == false);
                entries.put(wrapper.getLocalPathName(), new EntryInfo(wrapper, ent));
             }
-
          }
       }
       finally
