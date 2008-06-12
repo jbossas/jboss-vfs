@@ -410,21 +410,21 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       checkClosed();
 
       // Parse the path
-      String[] tokens = PathTokenizer.getTokens(path);
-      if (tokens == null || tokens.length == 0)
+      List<String> tokens = PathTokenizer.getTokens(path);
+      if (tokens == null || tokens.size() == 0)
          return this;
 
       // Go through each context starting from ours
       // check the parents are not leaves.
       VirtualFileHandler current = this;
-      for (int i = 0; i < tokens.length; ++i)
+      for (int i = 0; i < tokens.size(); ++i)
       {
          if (current == null || current.isLeaf())
             return null;
 
-         if (PathTokenizer.isCurrentToken(tokens[i]) == false)
+         if (PathTokenizer.isCurrentToken(tokens.get(i)) == false)
          {
-            if (PathTokenizer.isReverseToken(tokens[i]))
+            if (PathTokenizer.isReverseToken(tokens.get(i)))
             {
                VirtualFileHandler parent = current.getParent();
                if (parent == null) // TODO - still IOE or null?
@@ -435,7 +435,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
             else if (current instanceof StructuredVirtualFileHandler)
             {
                StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-               current = structured.createChildHandler(tokens[i]);
+               current = structured.createChildHandler(tokens.get(i));
             }
             else
             {

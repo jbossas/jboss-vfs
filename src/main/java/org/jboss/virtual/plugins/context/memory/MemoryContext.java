@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
@@ -76,8 +77,8 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
    {
       try
       {
-         String[] tokens = PathTokenizer.getTokens(url.getPath());
-         if (tokens == null || tokens.length == 0)
+         List<String> tokens = PathTokenizer.getTokens(url.getPath());
+         if (tokens == null || tokens.size() == 0)
          {
             return null;
          }
@@ -86,16 +87,16 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
          String protocolAndHost = url.getProtocol() + "://" + url.getHost();
          StringBuffer path = new StringBuffer(protocolAndHost);
          MemoryContextHandler current = root;
-         for (int i = 0 ; i < tokens.length ; i++)
+         for (int i = 0 ; i < tokens.size() ; i++)
          {
             path.append("/");
-            path.append(tokens[i]);
+            path.append(tokens.get(i));
             
             if (!definitelyNew)
             {
                try
                {
-                  MemoryContextHandler child = current.getDirectChild(tokens[i]);
+                  MemoryContextHandler child = current.getDirectChild(tokens.get(i));
                   if (child != null)
                   {
                      current = child;
@@ -113,7 +114,7 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
             {
                throw new IllegalStateException("Cannot add a child to " + current + " it already has contents");
             }
-            current = new MemoryContextHandler(this, current, localUrl, tokens[i]); 
+            current = new MemoryContextHandler(this, current, localUrl, tokens.get(i)); 
          }
          
          current.setContents(contents);

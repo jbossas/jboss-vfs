@@ -217,7 +217,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
            throws IOException
    {
       VirtualFileHandler parent = this;
-      String[] paths = PathTokenizer.getTokens(parentName);
+      List<String> paths = PathTokenizer.getTokens(parentName);
       StringBuilder pathName = new StringBuilder();
       for (String path : paths)
       {

@@ -133,16 +133,16 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
             linkName = VFSUtils.getName(link.getLinkTarget());
          if( linkName != null )
          {
-            String[] paths = PathTokenizer.getTokens(linkName);
+            List<String> paths = PathTokenizer.getTokens(linkName);
             int n = 0;
             VirtualFileHandler linkParent = this;
             String atom;
             // Look for an existing parent
             VirtualFileHandler previous;
-            for(; n < paths.length-1; n ++)
+            for(; n < paths.size()-1; n ++)
             {
                previous = linkParent;
-               atom = paths[n];
+               atom = paths.get(n);
                linkParent = previous.getChild(atom);
                if (linkParent == null)
                {
@@ -151,9 +151,9 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
                }
             }
             // Create any missing parents
-            for(; n < paths.length-1; n ++)
+            for(; n < paths.size()-1; n ++)
             {
-               atom = paths[n];
+               atom = paths.get(n);
                URL polURL = new URL(linkParent.toURI().toURL(), atom);
                ParentOfLink pol = new ParentOfLink(this.getVFSContext(), linkParent, polURL, atom);
                if( linkParent == this )
@@ -173,7 +173,7 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
             }
                
             // Create the link handler
-            atom = paths[n];
+            atom = paths.get(n);
             VirtualFileHandler linkHandler = createLinkHandler(linkParent, atom, link.getLinkTarget());
             if( linkParent == this )
             {

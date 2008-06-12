@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * PathTokenizer.
  * 
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 @SuppressWarnings({"StringEquality"})
@@ -57,7 +57,7 @@ public class PathTokenizer
     * @return the remaining path
     * @throws IllegalArgumentException for null tokens or i is out of range
     */
-   protected static String getRemainingPath(String[] tokens, int i, int end)
+   protected static String getRemainingPath(List<String> tokens, int i, int end)
    {
       if (tokens == null)
          throw new IllegalArgumentException("Null tokens");
@@ -65,15 +65,15 @@ public class PathTokenizer
          throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (end-1));
 
       if (i == end-1)
-         return tokens[end-1];
+         return tokens.get(end-1);
 
       StringBuilder buffer = new StringBuilder();
       for (; i < end-1; ++i)
       {
-         buffer.append(tokens[i]);
+         buffer.append(tokens.get(i));
          buffer.append("/");
       }
-      buffer.append(tokens[end-1]);
+      buffer.append(tokens.get(end-1));
       return buffer.toString();
    }
 
@@ -84,7 +84,7 @@ public class PathTokenizer
     * @return the tokens or null if the path is empty
     * @throws IllegalArgumentException if the path is null, it is empty or it is a relative path
     */
-   public static String[] getTokens(String path)
+   public static List<String> getTokens(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
@@ -142,7 +142,7 @@ public class PathTokenizer
       else if (buffer.length() > 0)
          list.add(buffer.toString());
 
-      return list.toArray(new String[list.size()]);
+      return list;
    }
    
    /**
@@ -153,12 +153,12 @@ public class PathTokenizer
     * @return the remaining path
     * @throws IllegalArgumentException for null tokens or i is out of range
     */
-   public static String getRemainingPath(String[] tokens, int i)
+   public static String getRemainingPath(List<String> tokens, int i)
    {
       if (tokens == null)
          throw new IllegalArgumentException("Null tokens");
 
-      return getRemainingPath(tokens, i, tokens.length);
+      return getRemainingPath(tokens, i, tokens.size());
    }
 
    /**
@@ -170,21 +170,21 @@ public class PathTokenizer
     */
    public static String applySpecialPaths(String path) throws IOException
    {
-      String[] tokens = getTokens(path);
+      List<String> tokens = getTokens(path);
       if (tokens == null)
          return null;
 
       int i = 0;
-      for(int j = 0; j < tokens.length; j++)
+      for(int j = 0; j < tokens.size(); j++)
       {
-         String token = tokens[j];
+         String token = tokens.get(j);
 
          if (isCurrentToken(token))
             continue;
          else if (isReverseToken(token))
             i--;
          else
-            tokens[i++] = token;
+            tokens.set(i++, token);
 
          if (i < 0)
             throw new IOException("Using reverse path on top path: " + path);
