@@ -87,34 +87,34 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
          String protocolAndHost = url.getProtocol() + "://" + url.getHost();
          StringBuffer path = new StringBuffer(protocolAndHost);
          MemoryContextHandler current = root;
-         for (int i = 0 ; i < tokens.size() ; i++)
+         for (String token : tokens)
          {
             path.append("/");
-            path.append(tokens.get(i));
-            
-            if (!definitelyNew)
+            path.append(token);
+
+            if (definitelyNew == false)
             {
                try
                {
-                  MemoryContextHandler child = current.getDirectChild(tokens.get(i));
+                  MemoryContextHandler child = current.getDirectChild(token);
                   if (child != null)
                   {
                      current = child;
                      continue;
                   }
                }
-               catch(Exception ignore)
+               catch (Exception ignore)
                {
                }
                definitelyNew = true;
-            }   
-            
+            }
+
             URL localUrl = new URL(path.toString());
             if (current.getContents() != null)
             {
                throw new IllegalStateException("Cannot add a child to " + current + " it already has contents");
             }
-            current = new MemoryContextHandler(this, current, localUrl, tokens.get(i)); 
+            current = new MemoryContextHandler(this, current, localUrl, token);
          }
          
          current.setContents(contents);
