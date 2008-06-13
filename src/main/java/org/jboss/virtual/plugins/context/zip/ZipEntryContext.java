@@ -300,6 +300,7 @@ public class ZipEntryContext extends AbstractVFSContext
       ZipEntryContext.copyStreamAndClose(is, baos);
       ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
+      // first we need to find best/longest name
       ZipInputStream zis = new ZipInputStream(bais);
       ZipEntry entry;
       String longestNameMatch = null;
@@ -328,6 +329,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (longestNameMatch == null)
          throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
 
+      // do recursion on relative
       bais.reset();
       zis = new ZipInputStream(bais);
       while((entry = zis.getNextEntry()) != null)

@@ -33,7 +33,6 @@ import java.io.IOException;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 public class SizeLimitedInputStream extends InputStream
 {
 
