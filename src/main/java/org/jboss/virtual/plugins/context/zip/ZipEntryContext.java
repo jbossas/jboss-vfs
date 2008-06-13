@@ -23,7 +23,9 @@ package org.jboss.virtual.plugins.context.zip;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,6 +47,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -234,15 +237,21 @@ public class ZipEntryContext extends AbstractVFSContext
       initEntries();
    }
 
+   /**
+    * Create zip source.
+    *
+    * @param rootPath the root path
+    * @return zip entry wrapper
+    * @throws IOException for any error
+    */
    protected ZipWrapper createZipSource(String rootPath) throws IOException
    {
       File file = null;
-      String relative;
+      String relative = null;
       File fp = new File(rootPath);
       if (fp.exists())
       {
          file = fp;
-         relative = "";
       }
       else
       {
@@ -265,10 +274,63 @@ public class ZipEntryContext extends AbstractVFSContext
       if (file == null)
          throw new IOException("VFS file does not exist: " + rootPath);
 
-      // TODO - use relative to create the right context
+      if (relative != null)
+      {
+         return findEntry(new FileInputStream(file), relative);
+      }
+      else
+      {
+         boolean noReaper = Boolean.valueOf(getOptions().get(VFSUtils.NO_REAPER_QUERY));
+         return new ZipFileWrapper(file, autoClean, noReaper);
+      }
+   }
 
-      String noReaper = getOptions().get(VFSUtils.NO_REAPER_QUERY);
-      return new ZipFileWrapper(file, autoClean, Boolean.valueOf(noReaper));
+   protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
+   {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ZipEntryContext.copyStreamAndClose(is, baos);
+      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+      ZipInputStream zis = new ZipInputStream(bais);
+      ZipEntry entry;
+      String longestNameMatch = null;
+      while((entry = zis.getNextEntry()) != null)
+      {
+         String entryName = entry.getName();
+         if (relative.startsWith(entryName))
+         {
+            if (entryName.equals(relative))
+            {
+               InputStream stream = new SizeLimitedInputStream(zis, entry.getSize());
+               if (JarUtils.isArchive(entryName))
+               {
+                  return new ZipStreamWrapper(stream, entryName, System.currentTimeMillis());
+               }
+               else
+                  return new ZipEntryWrapper(stream, entryName, System.currentTimeMillis());
+            }
+
+            if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
+            {
+               longestNameMatch = entryName;
+            }
+         }
+      }
+      if (longestNameMatch == null)
+         throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
+
+      bais.reset();
+      zis = new ZipInputStream(bais);
+      while((entry = zis.getNextEntry()) != null)
+      {
+         String entryName = entry.getName();
+         if (entryName.equals(longestNameMatch))
+         {
+            relative = relative.substring(longestNameMatch.length() + 1);
+            return findEntry(new SizeLimitedInputStream(zis, entry.getSize()), relative);
+         }
+      }
+      throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
    }
 
    /**

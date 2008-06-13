@@ -39,9 +39,9 @@ public class SizeLimitedInputStream extends InputStream
 
 	private InputStream in;
 
-   private int togo;
+   private long togo;
 
-	public SizeLimitedInputStream(InputStream ins, int size)
+	public SizeLimitedInputStream(InputStream ins, long size)
    {
 		this.in = ins;
 		this.togo = size;
@@ -68,9 +68,10 @@ public class SizeLimitedInputStream extends InputStream
    {
 		int rc = -1;
 
-		if (togo > 0)
+      if (togo > 0)
       {
-			rc = togo < len ? togo : len;
+         int ltogo = (int)togo;
+         rc = ltogo < len ? ltogo : len;
 			rc = in.read(buf, offs, rc);
 			if (rc != -1)
             togo -= rc;

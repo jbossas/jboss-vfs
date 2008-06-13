@@ -58,7 +58,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    /**
     * Test reading the contents of nested jar entries.
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testInnerJarFile() throws Exception
    {
@@ -124,7 +124,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    /**
     * JBVFS-17 test
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testInnerJarFilesOnlyFileSerialization() throws Exception
    {

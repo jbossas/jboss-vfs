@@ -22,6 +22,7 @@
 package org.jboss.test.virtual.test;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 
 import junit.framework.Test;
@@ -190,11 +191,22 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
    {
       URL url = getResource("/vfs/test/nested/" + getNestedName() + ".jar");
       String urlString = url.toExternalForm();
-      URL vfsURL = new URL(getProtocol() + urlString.substring(4) + "/complex.jar");
+      testInnerEntryOverURL(urlString, "/complex.jar", false);
+      // test children
+      testInnerEntryOverURL(urlString, "/complex.jar/child", false);
+      testInnerEntryOverURL(urlString, "/complex.jar/subfolder/subchild", false);
+      // test folder
+      testInnerEntryOverURL(urlString, "/complex.jar/subfolder", true);
+      testInnerEntryOverURL(urlString, "/complex.jar/subfolder/subsubfolder", true);
+   }
+
+   protected void testInnerEntryOverURL(String urlString, String entry, boolean result) throws IOException
+   {
+      URL vfsURL = new URL(getProtocol() + urlString.substring(4) + entry);
       InputStream is = vfsURL.openStream();
       try
       {
-         assertFalse("cannot read input stream", is.read() == -1);
+         assertEquals("cannot read input stream", result, is.read() == -1);
       }
       finally
       {
