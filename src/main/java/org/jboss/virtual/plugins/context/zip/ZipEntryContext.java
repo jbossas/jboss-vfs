@@ -312,12 +312,13 @@ public class ZipEntryContext extends AbstractVFSContext
             if (entryName.equals(relative))
             {
                InputStream stream = new SizeLimitedInputStream(zis, entry.getSize());
-               if (JarUtils.isArchive(entryName))
+               // directories and non archives
+               if (entry.isDirectory() || JarUtils.isArchive(entryName) == false)
                {
-                  return new ZipStreamWrapper(stream, entryName, System.currentTimeMillis());
+                  return new ZipEntryWrapper(stream, entryName, System.currentTimeMillis());
                }
                else
-                  return new ZipEntryWrapper(stream, entryName, System.currentTimeMillis());
+                  return new ZipStreamWrapper(stream, entryName, System.currentTimeMillis());
             }
 
             if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
