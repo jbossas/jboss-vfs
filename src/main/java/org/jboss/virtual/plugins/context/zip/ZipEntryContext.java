@@ -294,7 +294,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return zip wrapper instance
     * @throws IOException for any error
     */
-   protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
+   protected static ZipWrapper findEntry(InputStream is, String relative) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ZipEntryContext.copyStreamAndClose(is, baos);
