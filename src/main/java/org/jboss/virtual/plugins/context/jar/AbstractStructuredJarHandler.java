@@ -71,7 +71,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
    {
       forceCopy = AccessController.doPrivileged(new CheckForceCopy());
       if (forceCopy)
-         log.info("VFS force CopyNestedJarHandler is enabled.");
+         log.info("VFS force copy (NestedJarHandler) is enabled.");
    }
 
    /**

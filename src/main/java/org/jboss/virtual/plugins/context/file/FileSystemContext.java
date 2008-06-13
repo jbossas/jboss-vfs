@@ -78,7 +78,7 @@ public class FileSystemContext extends AbstractVFSContext
       forceVfsJar = AccessController.doPrivileged(new CheckForceVfsJar());
 
       if (forceVfsJar)
-         log.warn("VFS forced fallback to vfsjar is enabled.");
+         log.info("VFS forced fallback to vfsjar is enabled.");
 
       forceCaseSensitive = AccessController.doPrivileged(new CheckForceCaseSensitive());
 
