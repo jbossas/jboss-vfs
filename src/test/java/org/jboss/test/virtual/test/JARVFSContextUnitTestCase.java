@@ -129,6 +129,16 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       assertEquals("", context.getRoot().getPathName());
    }
 
+   protected static void safeClose(InputStream is)
+   {
+      try
+      {
+         is.close();
+      }
+      catch (Throwable ignore)
+      {
+      }
+   }
 
    /**
     * Handler representing a directory must return a zero length stream
@@ -142,7 +152,14 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
 
       VirtualFileHandler sub = ctx.getRoot().getChild("subfolder");
       InputStream is = sub.openStream();
-      assertTrue("input stream closed", is.read() == -1);
+      try
+      {
+         assertTrue("input stream closed", is.read() == -1);
+      }
+      finally
+      {
+         safeClose(is);
+      }
    }
 
    /**
@@ -159,7 +176,14 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       VirtualFileHandler target = nested.getChild("META-INF/MANIFEST.MF");
 
       InputStream is = target.openStream();
-      assertFalse("input stream closed", is.read() == -1);
+      try
+      {
+         assertFalse("input stream closed", is.read() == -1);
+      }
+      finally
+      {
+         safeClose(is);
+      }
    }
 
    public void testInnerJarOverURL() throws Exception
@@ -168,7 +192,14 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       String urlString = url.toExternalForm();
       URL vfsURL = new URL(getProtocol() + urlString.substring(4) + "/complex.jar");
       InputStream is = vfsURL.openStream();
-      assertNotNull(is);
+      try
+      {
+         assertFalse("cannot read input stream", is.read() == -1);
+      }
+      finally
+      {
+         safeClose(is);
+      }
    }
 
    // we need to make sure this doesn't get touched before
