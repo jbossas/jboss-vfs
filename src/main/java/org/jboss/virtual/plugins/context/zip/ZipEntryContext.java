@@ -81,7 +81,6 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 public class ZipEntryContext extends AbstractVFSContext
 {
    private static final Logger log = Logger.getLogger(ZipEntryContext.class);
@@ -953,9 +952,11 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          File tmpDir = new File(getTempDir());
          File [] files = tmpDir.listFiles();
-         for (File file: files)
+         if (files == null)
+            throw new IOException("Error listing files: " + tmpDir.getCanonicalPath());
+         for (File file : files)
          {
-            if (!file.isDirectory() && !file.isHidden())
+            if (file.isDirectory() == false && file.isHidden() == false)
                file.delete();
          }
       }
