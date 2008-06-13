@@ -952,12 +952,13 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          File tmpDir = new File(getTempDir());
          File [] files = tmpDir.listFiles();
-         if (files == null)
-            throw new IOException("Error listing files: " + tmpDir.getCanonicalPath());
-         for (File file : files)
-         {
-            if (file.isDirectory() == false && file.isHidden() == false)
-               file.delete();
+         if (files != null && files.length > 0)
+         {            
+            for (File file : files)
+            {
+               if (file.isDirectory() == false && file.isHidden() == false)
+                  file.delete();
+            }
          }
       }
       catch(Exception ignored)
