@@ -32,57 +32,25 @@ import java.util.zip.ZipInputStream;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-class ZipStreamWrapper extends ZipWrapper
+class ZipStreamWrapper extends ZipBytesWrapper
 {
-   /** Raw zip archive loaded in memory */
-   private byte [] zipBytes;
-
-   /** Name */
-   private String name;
-
    /**
     * ZipStreamWrapper is not aware of actual zip source so it can not detect
     * if it's been modified, like ZipFileWrapper does.
     *
-    * @param zipStream
+    * @param zipStream the current zip stream
+    * @param name the name
     * @param lastModified passed by zip stream provider - constant value
-    * @throws IOException
+    * @throws IOException for any error
     */
    ZipStreamWrapper(InputStream zipStream, String name, long lastModified) throws IOException
    {
-      // read the contents into memory buffer
-      ByteArrayOutputStream bout = new ByteArrayOutputStream();
-      ZipEntryContext.copyStreamAndClose(zipStream, bout);
-      zipBytes = bout.toByteArray();
-
-      // TODO - delegate file meta info operations to parent?
-      this.name = name;
-      this.lastModified = lastModified;
-   }
-
-   boolean exists()
-   {
-      return true;
-   }
-
-   long getLastModified()
-   {
-      return lastModified;
-   }
-
-   String getName()
-   {
-      return name;
-   }
-
-   long getSize()
-   {
-      return zipBytes.length;
+      super(zipStream, name, lastModified);
    }
 
    InputStream openStream(ZipEntry ent) throws IOException
    {
-      ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes));
+      ZipInputStream zis = new ZipInputStream(getRootAsStream());
 
       // first find the entry
       ZipEntry entry = zis.getNextEntry();
@@ -93,35 +61,15 @@ class ZipStreamWrapper extends ZipWrapper
          entry = zis.getNextEntry();
       }
       if(entry == null)
-         throw new IOException("Failed to find nested jar entry: " + ent.getName() + " in zip stream: " + this.name);
-
+         throw new IOException("Failed to find nested jar entry: " + ent.getName() + " in zip stream: " + toString());
 
       // then read it
-      return new SizeLimitedInputStream(zis, (int) ent.getSize());
-   }
-
-   InputStream getRootAsStream() throws FileNotFoundException
-   {
-      return new ByteArrayInputStream(zipBytes);
-   }
-
-   void acquire() throws IOException
-   {
+      return new SizeLimitedInputStream(zis, ent.getSize());
    }
 
    Enumeration<? extends ZipEntry> entries() throws IOException
    {
-      return new ZipStreamEnumeration(new ZipInputStream(new ByteArrayInputStream(zipBytes)));
-   }
-
-   void close()
-   {
-      zipBytes = null;
-   }
-
-   public String toString()
-   {
-      return super.toString() + " - " + name;
+      return new ZipStreamEnumeration(new ZipInputStream(getRootAsStream()));
    }
 
    /**

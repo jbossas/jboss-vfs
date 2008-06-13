@@ -21,19 +21,24 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
 
 /**
- * ZipEntryWrapper - for abstracted access to in-memory entry
+ * ZipBytesWrapper - for abstracted access to in-memory bytes entry
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
-class ZipEntryWrapper extends ZipBytesWrapper
+abstract class ZipBytesWrapper extends ZipWrapper
 {
-   private static final EmptyEnumeration emptyEnumeration = new EmptyEnumeration();
+   /** Raw zip archive loaded in memory */
+   private byte [] zipBytes;
+
+   /** Name */
+   private String name;
 
    /**
     * ZipStreamWrapper is not aware of actual zip source so it can not detect
@@ -42,36 +47,56 @@ class ZipEntryWrapper extends ZipBytesWrapper
     * @param zipStream the current zip input stream
     * @param name the name
     * @param lastModified passed by zip stream provider - constant value
-    * @throws java.io.IOException for any error
+    * @throws IOException for any error
     */
-   ZipEntryWrapper(InputStream zipStream, String name, long lastModified) throws IOException
+   ZipBytesWrapper(InputStream zipStream, String name, long lastModified) throws IOException
    {
-      super(zipStream, name, lastModified);
+      // read the contents into memory buffer
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      ZipEntryContext.copyStreamAndClose(zipStream, bout);
+      zipBytes = bout.toByteArray();
+
+      // TODO - delegate file meta info operations to parent?
+      this.name = name;
+      this.lastModified = lastModified;
    }
 
-   InputStream openStream(ZipEntry ent) throws IOException
+   boolean exists()
    {
-      return getRootAsStream();
+      return true;
    }
 
-   Enumeration<? extends ZipEntry> entries() throws IOException
+   long getLastModified()
    {
-      return emptyEnumeration;
+      return lastModified;
    }
 
-   /**
-    * Zip stream enumeration.
-    */
-   private static class EmptyEnumeration implements Enumeration<ZipEntry>
+   String getName()
    {
-      public boolean hasMoreElements()
-      {
-         return false;
-      }
+      return name;
+   }
 
-      public ZipEntry nextElement()
-      {
-         return null;
-      }
+   long getSize()
+   {
+      return zipBytes.length;
+   }
+
+   InputStream getRootAsStream() throws FileNotFoundException
+   {
+      return new ByteArrayInputStream(zipBytes);
+   }
+
+   void acquire() throws IOException
+   {
+   }
+
+   void close()
+   {
+      zipBytes = null;
+   }
+
+   public String toString()
+   {
+      return super.toString() + " - " + name;
    }
 }
