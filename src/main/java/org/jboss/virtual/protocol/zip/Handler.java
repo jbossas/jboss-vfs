@@ -21,11 +21,7 @@
 */
 package org.jboss.virtual.protocol.zip;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.jboss.virtual.protocol.AbstractZipHandler;
+import org.jboss.virtual.protocol.AbstractVFSHandler;
 
 /**
  * Zip url handler.
@@ -36,11 +32,6 @@ import org.jboss.virtual.protocol.AbstractZipHandler;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class Handler extends AbstractZipHandler
+public class Handler extends AbstractVFSHandler
 {
-   protected URLConnection openConnection(URL url) throws IOException
-   {
-      url = new URL("vfs" + url.toExternalForm());
-      return super.openConnection(url);
-   }
 }

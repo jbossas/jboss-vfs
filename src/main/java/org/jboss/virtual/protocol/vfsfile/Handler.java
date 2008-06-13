@@ -21,54 +21,15 @@
 */
 package org.jboss.virtual.protocol.vfsfile;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.protocol.AbstractVFSHandler;
 
 /**
  * URLStreamHandler for VFS
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class Handler extends URLStreamHandler
+public class Handler extends AbstractVFSHandler
 {
-   protected URLConnection openConnection(URL url) throws IOException
-   {
-      String file = url.toString().substring(8); // strip out vfsfile:
-      URL vfsurl = null;
-      String relative;
-      File fp = new File(file);
-      if (fp.exists())
-      {
-         vfsurl = fp.getParentFile().toURL();
-         relative = fp.getName();
-      }
-      else
-      {
-         File curr = fp;
-         relative = fp.getName();
-         while ((curr = curr.getParentFile()) != null)
-         {
-            if (curr.exists())
-            {
-               vfsurl = curr.toURL();
-               break;
-            }
-            else
-            {
-               relative = curr.getName() + "/" + relative;
-            }
-         }
-      }
-
-      if (vfsurl == null)
-         throw new IOException("VFS file does not exist: " + url);
-
-      return new VirtualFileURLConnection(url, vfsurl, relative);
-   }
 }

@@ -26,8 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.virtual.plugins.context.AbstractContextFactory;
 import org.jboss.virtual.spi.VFSContext;
@@ -40,9 +38,6 @@ import org.jboss.virtual.spi.VFSContext;
  */
 public class ZipEntryContextFactory extends AbstractContextFactory
 {
-   /** registry of all ZipEntryContext instances */
-   private static Map<String, ZipEntryContext> ctxCache = new ConcurrentHashMap<String, ZipEntryContext>();
-
    /** singleton */
    private static ZipEntryContextFactory instance = new ZipEntryContextFactory();
 
@@ -62,32 +57,12 @@ public class ZipEntryContextFactory extends AbstractContextFactory
    /**
     * Find a best matching existing ZipEntryContext, or create a new one if none matches.
     *
-    * @param rootURL
-    * @return
-    * @throws IOException
+    * @param rootURL the root url
+    * @return new zip context
+    * @throws IOException for any error
     */
    public VFSContext getVFS(URL rootURL) throws IOException
    {
-      String key = rootURL.toString();
-      int cutPos = key.indexOf(":/");
-      key = key.substring(cutPos+1);
-
-      String longestMatchingKey = null;
-      ZipEntryContext longestMatchingCtx = null;
-      for(Map.Entry<String, ZipEntryContext> ent : ctxCache.entrySet())
-      {
-         if(key.startsWith(ent.getKey()))
-         {
-            if(longestMatchingCtx == null || ent.getKey().length() > longestMatchingKey.length())
-            {
-               longestMatchingKey = ent.getKey();
-               longestMatchingCtx = ent.getValue();
-            }
-         }
-      }
-      if(longestMatchingCtx != null)
-         return longestMatchingCtx;
-
       try
       {
          return new ZipEntryContext(rootURL);
@@ -103,15 +78,5 @@ public class ZipEntryContextFactory extends AbstractContextFactory
    public static ZipEntryContextFactory getInstance()
    {
       return instance;
-   }
-
-   public static void registerContext(ZipEntryContext ctx)
-   {
-      String key = ctx.getRootURI().toString();
-      int cutPos = key.indexOf(":/");
-      key = key.substring(cutPos+1);
-      if("".equals(key))
-         throw new RuntimeException("Derived key for ZipEntryContext registration is empty: " + ctx.getRootURI());
-      ctxCache.put(key, ctx);
    }
 }

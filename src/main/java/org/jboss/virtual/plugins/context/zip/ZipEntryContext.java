@@ -108,7 +108,7 @@ public class ZipEntryContext extends AbstractVFSContext
    private boolean autoClean = false;
 
    /** Registry of everything that zipSource contains */
-   private ConcurrentHashMap<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>();
+   private Map<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>();
 
    /**
     * Create a new ZipEntryContext
@@ -203,9 +203,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
          // initialize rootEntryPath and get archive file path
          String rootPath = initRootAndPath(localRootURL);
-
-         String noReaper = getOptions().get(VFSUtils.NO_REAPER_QUERY);
-         zipSource = new ZipFileWrapper(VFSUtils.toURI(new URL(rootPath)), autoClean, Boolean.valueOf(noReaper));
+         zipSource = createZipSource(rootPath);
       }
       else
       {
@@ -234,7 +232,43 @@ public class ZipEntryContext extends AbstractVFSContext
       entries.put("", new EntryInfo(new ZipEntryHandler(this, null, name, true), null));
 
       initEntries();
-      ZipEntryContextFactory.registerContext(this);
+   }
+
+   protected ZipWrapper createZipSource(String rootPath) throws IOException
+   {
+      File file = null;
+      String relative;
+      File fp = new File(rootPath);
+      if (fp.exists())
+      {
+         file = fp;
+         relative = "";
+      }
+      else
+      {
+         File curr = fp;
+         relative = fp.getName();
+         while ((curr = curr.getParentFile()) != null)
+         {
+            if (curr.exists())
+            {
+               file = curr;
+               break;
+            }
+            else
+            {
+               relative = curr.getName() + "/" + relative;
+            }
+         }
+      }
+
+      if (file == null)
+         throw new IOException("VFS file does not exist: " + rootPath);
+
+      // TODO - use relative to create the right context
+
+      String noReaper = getOptions().get(VFSUtils.NO_REAPER_QUERY);
+      return new ZipFileWrapper(file, autoClean, Boolean.valueOf(noReaper));
    }
 
    /**
@@ -442,14 +476,14 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // find where url protocol ends - i.e. jar:file:/ ...
       pos= zipPath.indexOf(":/");
-      filePath = zipPath.substring(pos+1);
+      filePath = zipPath.substring(pos + 2);
 
       // cut out url query part if present
       int queryStart = filePath.indexOf("?");
       if (queryStart != -1)
          filePath = filePath.substring(0, queryStart);
-       
-      return "file:" + filePath;
+
+      return filePath;
    }
 
    /**
