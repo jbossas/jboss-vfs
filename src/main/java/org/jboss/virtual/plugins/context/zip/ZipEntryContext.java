@@ -285,6 +285,15 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+   /**
+    * Find exact entry.
+    * Use recursion on relative path.
+    *
+    * @param is the input stream
+    * @param relative relative path
+    * @return zip wrapper instance
+    * @throws IOException for any error
+    */
    protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
