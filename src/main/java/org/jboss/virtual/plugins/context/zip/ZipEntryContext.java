@@ -196,7 +196,6 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private void init(URL localRootURL, VirtualFileHandler peer, ZipWrapper zipWrapper) throws IOException, URISyntaxException
    {
-
       if (zipWrapper == null)
       {
          if (localRootURL == null)
@@ -709,7 +708,8 @@ public class ZipEntryContext extends AbstractVFSContext
       try
       {
          super.finalize();
-         zipSource.close();
+         if (zipSource != null)
+            zipSource.close();
       }
       catch (Throwable ignored)
       {

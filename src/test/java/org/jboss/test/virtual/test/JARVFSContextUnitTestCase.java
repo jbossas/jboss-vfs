@@ -161,4 +161,24 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       InputStream is = target.openStream();
       assertFalse("input stream closed", is.read() == -1);
    }
+
+   public void testInnerJarOverURL() throws Exception
+   {
+      URL url = getResource("/vfs/test/nested/" + getNestedName() + ".jar");
+      String urlString = url.toExternalForm();
+      URL vfsURL = new URL(getProtocol() + urlString.substring(4) + "/complex.jar");
+      InputStream is = vfsURL.openStream();
+      assertNotNull(is);
+   }
+
+   // we need to make sure this doesn't get touched before
+   protected String getNestedName()
+   {
+      return "nested";
+   }
+
+   protected String getProtocol()
+   {
+      return "vfsfile";
+   }
 }

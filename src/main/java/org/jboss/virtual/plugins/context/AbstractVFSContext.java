@@ -145,9 +145,9 @@ public abstract class AbstractVFSContext implements VFSContext
               .append(":").append(rootUri.getPath());
       if(parent != null)
       {
-         String pPathName = null;
+         String pPathName;
          if(parent instanceof AbstractVirtualFileHandler)
-            pPathName = ((AbstractVirtualFileHandler)parent).getLocalPathName();
+            pPathName = parent.getLocalPathName();
          else
             pPathName = parent.getPathName();
 

@@ -65,7 +65,6 @@ import org.jboss.logging.Logger;
  */
 public class FileSystemContext extends AbstractVFSContext
 {
-
    private static final Logger log = Logger.getLogger(ZipEntryContext.class);
 
    /** true if forcing fallback to vfsjar from default vfszip */

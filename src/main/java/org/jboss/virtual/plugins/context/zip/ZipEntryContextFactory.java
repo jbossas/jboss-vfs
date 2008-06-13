@@ -21,9 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.virtual.plugins.context.AbstractContextFactory;
-import org.jboss.virtual.spi.VFSContext;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,13 +29,15 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.virtual.plugins.context.AbstractContextFactory;
+import org.jboss.virtual.spi.VFSContext;
+
 /**
  * ContextFactory that keeps track of ZipEntryContexts
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.0 $
  */
-
 public class ZipEntryContextFactory extends AbstractContextFactory
 {
    /** registry of all ZipEntryContext instances */
@@ -75,7 +74,6 @@ public class ZipEntryContextFactory extends AbstractContextFactory
 
       String longestMatchingKey = null;
       ZipEntryContext longestMatchingCtx = null;
-
       for(Map.Entry<String, ZipEntryContext> ent : ctxCache.entrySet())
       {
          if(key.startsWith(ent.getKey()))
@@ -87,17 +85,12 @@ public class ZipEntryContextFactory extends AbstractContextFactory
             }
          }
       }
-
-      ZipEntryContext ctx = null;
       if(longestMatchingCtx != null)
-         ctx = longestMatchingCtx;
-
-      if(ctx != null)
-         return ctx;
+         return longestMatchingCtx;
 
       try
       {
-         ctx = new ZipEntryContext(rootURL);
+         return new ZipEntryContext(rootURL);
       }
       catch(URISyntaxException ex)
       {
@@ -105,11 +98,6 @@ public class ZipEntryContextFactory extends AbstractContextFactory
          e.initCause(ex);
          throw e;
       }
-
-      // ZipEntryContext registers newly created context with this factory
-      // by calling registerContext() which puts a newly created context into ctxCache
-      
-      return ctx;
    }
 
    public static ZipEntryContextFactory getInstance()
