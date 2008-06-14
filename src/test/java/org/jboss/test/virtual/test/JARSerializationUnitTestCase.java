@@ -202,6 +202,9 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       testText(textThree);
       textThree = two.findChild("level3.zip/test3.txt");
       testText(textThree);
+
+      textThree = serializeDeserialize(textThree, VirtualFile.class);
+      testText(textThree);
    }
 
    protected void testText(VirtualFile file) throws Exception

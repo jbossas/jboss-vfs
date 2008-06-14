@@ -198,6 +198,10 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       // test folder
       testInnerEntryOverURL(urlString, "/complex.jar/subfolder", true);
       testInnerEntryOverURL(urlString, "/complex.jar/subfolder/subsubfolder", true);
+      // 3 level zips
+      url = getResource("/vfs/test/level1.zip");
+      urlString = url.toExternalForm();
+      testInnerEntryOverURL(urlString, "/level2.zip/level3.zip/test3.txt", false);
    }
 
    protected void testInnerEntryOverURL(String urlString, String entry, boolean result) throws IOException

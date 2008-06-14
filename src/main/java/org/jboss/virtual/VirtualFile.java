@@ -33,11 +33,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.util.collection.WeakSet;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.util.collection.WeakSet;
 
 /**
  * A virtual file as seen by the user
@@ -54,10 +54,10 @@ public class VirtualFile implements Serializable
    private final VirtualFileHandler handler;
 
    /** Whether we are closed */
-   private AtomicBoolean closed = new AtomicBoolean(false);
+   private final AtomicBoolean closed = new AtomicBoolean(false);
 
    /** The open streams */
-   private transient final Set<InputStream> streams = Collections.synchronizedSet(new WeakSet());
+   private transient Set<InputStream> streams;
 
    /**
     * Create a new VirtualFile.
@@ -214,8 +214,26 @@ public class VirtualFile implements Serializable
    public InputStream openStream() throws IOException
    {
       InputStream result = getHandler().openStream();
+      checkStreams();
       streams.add(result);
       return result;
+   }
+
+   /**
+    * Check if streams set exist.
+    */
+   protected void checkStreams()
+   {
+      if (streams == null)
+      {
+         synchronized (closed)
+         {
+            // double null check, so that possible
+            // waiting threads don't override streams
+            if (streams == null)
+               streams = Collections.synchronizedSet(new WeakSet());
+         }
+      }
    }
 
    /**
@@ -223,6 +241,9 @@ public class VirtualFile implements Serializable
     */
    public void closeStreams()
    {
+      if (streams == null)
+         return;
+
       // Close the streams
       for (InputStream stream : streams)
       {

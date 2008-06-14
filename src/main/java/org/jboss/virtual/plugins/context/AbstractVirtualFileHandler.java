@@ -422,9 +422,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          if (current == null || current.isLeaf())
             return null;
 
-         if (PathTokenizer.isCurrentToken(tokens.get(i)) == false)
+         String token = tokens.get(i);
+         if (PathTokenizer.isCurrentToken(token) == false)
          {
-            if (PathTokenizer.isReverseToken(tokens.get(i)))
+            if (PathTokenizer.isReverseToken(token))
             {
                VirtualFileHandler parent = current.getParent();
                if (parent == null) // TODO - still IOE or null?
@@ -435,7 +436,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
             else if (current instanceof StructuredVirtualFileHandler)
             {
                StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-               current = structured.createChildHandler(tokens.get(i));
+               current = structured.createChildHandler(token);
             }
             else
             {
