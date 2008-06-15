@@ -36,12 +36,23 @@ import java.io.InputStream;
 
 public class ZipEntryInputStream extends InputStream
 {
+   /** Underlying input stream */
    private InputStream delegate;
 
+   /** Underlying zip source */
    private ZipFileWrapper zipWrapper;
 
+   /** Is stream closed */
    private boolean closed;
 
+   /**
+    * ZipEntryInputStream constructor.
+    *
+    * @param zipWrapper underlying zip source
+    * @param is underlying input stream
+    * @throws IOException for any error
+    * @throws IllegalArgumentException if insput stream is null
+    */
    ZipEntryInputStream(ZipFileWrapper zipWrapper, InputStream is) throws IOException
    {
       if (is == null)
@@ -51,6 +62,9 @@ public class ZipEntryInputStream extends InputStream
       delegate = is;
    }
 
+   /**
+    * Close this stream and release zipWrapper
+    */
    private void streamClosed(boolean doClose)
    {
       if (closed == false && doClose)
@@ -60,6 +74,13 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * Read one byte.
+    *
+    * @return whatever the underlying input stream returns
+    * @throws IOException for any error
+    * @see java.io.InputStream#read
+    */
    public int read() throws IOException
    {
       int rc = -1;
@@ -74,6 +95,15 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * Read a buffer of bytes.
+    *
+    * @param buf read buffer
+    * @return whatever the underlying input stream returns
+    *
+    * @throws IOException for any error
+    * @see java.io.InputStream#read(byte[])
+    */
    public int read(byte buf[]) throws IOException
    {
       int rc = -1;
@@ -88,6 +118,16 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * Read a buffer of bytes.
+    *
+    * @param buf read buffer
+    * @param off position within buffer to start reading at
+    * @param len maximum bytes to read
+    * @return whatever the underlying input stream returns
+    * @throws IOException for any error
+    * @see java.io.InputStream#read(byte[],int,int)
+    */
    public int read(byte buf[], int off, int len) throws IOException
    {
       int rc = -1;
@@ -102,6 +142,9 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * @see java.io.InputStream#reset
+    */
    public synchronized void reset() throws IOException
    {
       boolean ok = false;
@@ -116,6 +159,9 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * @see java.io.InputStream#mark
+    */
    public synchronized void mark(int readlimit)
    {
       boolean ok = false;
@@ -130,6 +176,9 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * @see java.io.InputStream#available
+    */
    public int available() throws IOException
    {
       boolean ok = false;
@@ -145,6 +194,9 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * @see java.io.InputStream#skip
+    */
    public long skip(long n) throws IOException
    {
       boolean ok = false;
@@ -160,12 +212,20 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * Close this stream and release zipWrapper
+    *
+    * @see java.io.InputStream#close
+    */
    public void close() throws IOException
    {
       streamClosed(true);
       super.close();
    }
 
+   /**
+    * Properly release held resources
+    */
    protected void finalize()
    {
       try
@@ -177,9 +237,13 @@ public class ZipEntryInputStream extends InputStream
       }
    }
 
+   /**
+    * isClosed.
+    *
+    * @return returns true if closed
+    */
    boolean isClosed()
    {
       return closed;
    }
-
 }

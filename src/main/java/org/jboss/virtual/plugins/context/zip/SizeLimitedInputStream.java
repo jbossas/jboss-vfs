@@ -35,18 +35,31 @@ import java.io.IOException;
  */
 public class SizeLimitedInputStream extends InputStream
 {
-
+   /** Underlying input stream */
 	private InputStream in;
 
+   /** Number of bytes to read before size limit is reached */
    private long togo;
 
-	public SizeLimitedInputStream(InputStream ins, long size)
+   /**
+    * SizeLimitedInputStream constructor
+    *
+    * @param ins underlying input stream
+    * @param size number of bytes after which EOF will occur
+    */
+   public SizeLimitedInputStream(InputStream ins, long size)
    {
 		this.in = ins;
 		this.togo = size;
 	}
 
-	public int read() throws IOException
+   /**
+    * Read one byte
+    *
+    * @return -1 if stream has reached its size limit, otherwise whatever the underlying input stream returns
+    * @throws IOException for any error
+    */
+   public int read() throws IOException
    {
 		int b = -1;
 		if (togo > 0)
@@ -58,12 +71,28 @@ public class SizeLimitedInputStream extends InputStream
 		return b;
 	}
 
-	public int read(byte [] buf) throws IOException
+   /**
+    * Read a buffer of bytes
+    *
+    * @param buf read buffer
+    * @return -1 if stream has reached its size limit, otherwise whatever the underlying input stream returns
+    * @throws IOException for any error
+    */
+   public int read(byte [] buf) throws IOException
    {
 		return read(buf, 0, buf.length);
 	}
 
-	public int read(byte [] buf, int offs, int len) throws IOException
+   /**
+    * Read a buffer of bytes
+    *
+    * @param buf read buffer
+    * @param offs offset within buffer to be a start point
+    * @param len number of bytes to read
+    * @return -1 if stream has reached its size limit, otherwise whatever the underlying input stream returns
+    * @throws IOException for any error
+    */
+   public int read(byte [] buf, int offs, int len) throws IOException
    {
 		int rc = -1;
 
@@ -79,7 +108,12 @@ public class SizeLimitedInputStream extends InputStream
 		return rc;
 	}
 
-	public void close() throws IOException
+   /**
+    * Close the underlying input stream
+    *
+    * @throws IOException for any error
+    */
+   public void close() throws IOException
    {
 		in.close();
 	}

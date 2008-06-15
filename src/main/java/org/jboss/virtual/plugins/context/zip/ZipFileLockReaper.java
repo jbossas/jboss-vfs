@@ -37,6 +37,7 @@ import org.jboss.logging.Logger;
  */
 public class ZipFileLockReaper
 {
+   /** Logger */
    private static final Logger log = Logger.getLogger(ZipFileLockReaper.class);
 
    /**

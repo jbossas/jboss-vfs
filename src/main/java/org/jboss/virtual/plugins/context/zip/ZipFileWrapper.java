@@ -46,8 +46,10 @@ import org.jboss.virtual.VFSUtils;
  */
 class ZipFileWrapper extends ZipWrapper
 {
+   /** Logger */
    private static final Logger log = Logger.getLogger(ZipFileWrapper.class);
 
+   /** Is forceNoReaper enabled */
    private static boolean forceNoReaper;
 
    static
@@ -58,12 +60,13 @@ class ZipFileWrapper extends ZipWrapper
          log.info("VFS forced no-reaper-mode is enabled.");
    }
 
+   /** Underlying zip archive file */
    private File file;
 
-   /** zip inflater wrapped around file */
+   /** Zip inflater wrapped around file */
    private ZipFile zipFile;
 
-   /** true for extracted nested jars that we want removed when this wrapper is closed */
+   /** autoClean flag - true for extracted nested jars that we want removed when this wrapper is closed */
    private boolean autoClean;
 
    /** true if noReaper mode is forced on a per-instance basis */
@@ -72,12 +75,26 @@ class ZipFileWrapper extends ZipWrapper
    // used for debugging stream leaks
    //ConcurrentLinkedQueue<ZipEntryInputStream> streams = new ConcurrentLinkedQueue<ZipEntryInputStream>();
 
+   /**
+    * ZipFileWrapper
+    *
+    * @param archive file to the archive
+    * @param autoClean  should archive be deleted after use
+    * @param noReaperOverride flag to specify if reaper be used or not
+    */
    ZipFileWrapper(File archive, boolean autoClean, boolean noReaperOverride)
    {
       this.noReaperOverride = noReaperOverride;
       init(archive, autoClean);
    }
 
+   /**
+    * ZipFileWrapper
+    *
+    * @param rootPathURI URI to the archive - will be passed to File constructor as-is
+    * @param autoClean  should archive be deleted after use
+    * @param noReaperOverride flag to specify if reaper be used or not
+    */
    ZipFileWrapper(URI rootPathURI, boolean autoClean, boolean noReaperOverride)
    {
       this.noReaperOverride = noReaperOverride;
@@ -89,7 +106,7 @@ class ZipFileWrapper extends ZipWrapper
    }
 
    /**
-    * Extra initialization that didn't fit in constructors
+    * Extra initialization in addition to what's in constructors
     *
     * @param archive the archive file
     * @param autoClean auto clean flag
@@ -103,26 +120,52 @@ class ZipFileWrapper extends ZipWrapper
          file.deleteOnExit();
    }
 
+   /**
+    * Check if archive exists
+    *
+    * @return true if file exists on disk
+    */
    boolean exists()
    {
       return file.isFile();
    }
 
+   /**
+    * Get lastModified for the archive
+    *
+    * @return lastModified timestamp of the file on disk
+    */
    long getLastModified()
    {
       return file.lastModified();
    }
 
+   /**
+    * Get the name of the archive
+    *
+    * @return name of the file on disk
+    */
    String getName()
    {
       return file.getName();
    }
 
+   /**
+    * Get the size of the archive
+    *
+    * @return size of the file on disk
+    */
    long getSize()
    {
       return file.length();
    }
 
+   /**
+    * Open a <tt>ZipFile</tt> if none currently exists. If reaper mode is active, apply for monitoring.
+    *
+    * @return a ZipFile
+    * @throws IOException for any error
+    */
    private ZipFile ensureZipFile() throws IOException
    {
       if (zipFile == null)
@@ -135,6 +178,11 @@ class ZipFileWrapper extends ZipWrapper
       return zipFile;
    }
 
+   /**
+    * Close a <tt>ZipFile</tt> if currently open. If reaper mode is active, unregister from monitoring
+    *
+    * @throws IOException for any error
+    */
    synchronized void closeZipFile() throws IOException
    {
       if (zipFile != null && getReferenceCount() <= 0)
@@ -147,6 +195,13 @@ class ZipFileWrapper extends ZipWrapper
       }
    }
 
+   /**
+    * Get the contents of the given <tt>ZipEntry</tt> as stream
+    *
+    * @param ent a zip entry
+    * @return an InputStream that locks the file for as long as it's open
+    * @throws IOException for any error
+    */
    synchronized InputStream openStream(ZipEntry ent) throws IOException
    {
       ensureZipFile();
@@ -163,17 +218,31 @@ class ZipFileWrapper extends ZipWrapper
       return zis;
    }
 
+   /**
+    * Get raw bytes of this archive in its compressed form
+    *
+    * @return an InputStream
+    * @throws FileNotFoundException if archive doesn't exist
+    */
    InputStream getRootAsStream() throws FileNotFoundException
    {
       return new FileInputStream(file);
    }
 
+   /**
+    * Increment usage count by one and ensure <tt>ZipFile</tt> is open.
+    *
+    * @throws IOException
+    */
    synchronized void acquire() throws IOException
    {
       ensureZipFile();
       incrementRef();
    }
 
+   /**
+    * Decrement usage count by one
+    */
    synchronized void release() {
       super.release();
       if (forceNoReaper || noReaperOverride)
@@ -187,11 +256,17 @@ class ZipFileWrapper extends ZipWrapper
          }
    }
 
+   /**
+    * Enumerate contents of zip archive
+    */
    synchronized Enumeration<? extends ZipEntry> entries() throws IOException
    {
       return ensureZipFile().entries();
    }
 
+   /**
+    * Close the archive, perform autoclean if requested
+    */
    void close()
    {
       try
@@ -207,11 +282,19 @@ class ZipFileWrapper extends ZipWrapper
          file.delete();
    }
 
+   /**
+    * toString
+    *
+    * @return String description of this archive
+    */
    public String toString()
    {
       return super.toString() + " - " + file.getAbsolutePath();
    }
 
+   /**
+    * PriviligedAction used to read a system property
+    */
    private static class CheckNoReaper implements PrivilegedAction<Boolean>
    {
       public Boolean run()

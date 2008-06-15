@@ -70,6 +70,11 @@ abstract class ZipWrapper
       return false;
    }
 
+   /**
+    * get lastUsed timestamp
+    *
+    * @return
+    */
    long getLastUsed()
    {
       return lastUsed;
@@ -85,12 +90,18 @@ abstract class ZipWrapper
       return refCount;
    }
 
+   /**
+    * Increment usage count by one
+    */
    void incrementRef()
    {
       refCount++;
       lastUsed = System.currentTimeMillis();
    }
 
+   /**
+    * Decrement usage count by one
+    */
    synchronized void release()
    {
       refCount--;
@@ -100,21 +111,68 @@ abstract class ZipWrapper
       }
    }
 
+   /**
+    * Acquire lock.
+    *
+    * @throws IOException for any error
+    */
    abstract void acquire() throws IOException;
 
+   /**
+    * Get lastModified of this archive
+    *
+    * @return lastModified timestamp
+    */
    abstract long getLastModified();
 
+   /**
+    * Get the name of this archive
+    *
+    * @return name
+    */
    abstract String getName();
 
+   /**
+    * Check if archive exists
+    *
+    * @return true if archive exists
+    */
    abstract boolean exists();
 
+   /**
+    * Get the size of the archive
+    *
+    * @return size in bytes
+    */
    abstract long getSize();
-   
+
+   /**
+    * Enumerate contents of this archive
+    *
+    * @return enumeration of ZipEntries
+    * @throws IOException for any error
+    */
    abstract Enumeration<? extends ZipEntry> entries() throws IOException;
 
+   /**
+    * Get the contents of a given entry as stream
+    *
+    * @param ent zip entry
+    * @return InputStream with entry's contents
+    * @throws IOException for any error
+    */
    abstract InputStream openStream(ZipEntry ent) throws IOException;
 
+   /**
+    * Get raw bytes of this archive in its compressed form
+    *
+    * @return InputStream containing raw archive
+    * @throws FileNotFoundException if archive doesn't exist
+    */
    abstract InputStream getRootAsStream() throws FileNotFoundException;
 
+   /**
+    * Close this archive
+    */
    abstract void close();
 }

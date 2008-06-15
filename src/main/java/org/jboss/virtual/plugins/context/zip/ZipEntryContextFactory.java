@@ -49,13 +49,16 @@ public class ZipEntryContextFactory extends AbstractContextFactory
       super("zip", "vfszip");  // "jar", "vfsjar",  
    }
 
+   /**
+    * Get a <tt>VFSContext</tt> for a given <tt>URL</tt>
+    */
    public VFSContext getVFS(URI rootURI) throws IOException
    {
       return getVFS(rootURI.toURL());
    }
 
    /**
-    * Find a best matching existing ZipEntryContext, or create a new one if none matches.
+    * Create a new <tt>ZipEntryContext</tt>.
     *
     * @param rootURL the root url
     * @return new zip context
@@ -75,6 +78,9 @@ public class ZipEntryContextFactory extends AbstractContextFactory
       }
    }
 
+   /**
+    * Get a reference to <tt>ZipEntryContextFactory</tt>.
+    */
    public static ZipEntryContextFactory getInstance()
    {
       return instance;

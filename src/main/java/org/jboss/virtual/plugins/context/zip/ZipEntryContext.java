@@ -90,6 +90,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryContext extends AbstractVFSContext
 {
+   /** Logger */
    private static final Logger log = Logger.getLogger(ZipEntryContext.class);
 
    /** Global setting for nested archive processing mode: copy or no-copy (default) */
@@ -193,7 +194,7 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    * Extra initialization that couldn't fit inside constructors
+    * Extra initialization in addition to what's inside constructors
     *
     * @param localRootURL the local url
     * @param peer the peer
@@ -590,11 +591,24 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+   /**
+    * Returns this context's root
+    *
+    * @return root handler
+    * @throws IOException for any error
+    */
    public VirtualFileHandler getRoot() throws IOException
    {
       return entries.get("").handler;
    }
 
+   /**
+    * Find a child with a given name and a given parent
+    *
+    * @param parent parent handler
+    * @param name  name of the child
+    * @return child handler or null if not found
+    */
    public VirtualFileHandler getChild(ZipEntryHandler parent, String name)
    {
       if (parent == null)
@@ -615,6 +629,14 @@ public class ZipEntryContext extends AbstractVFSContext
       return null;
    }
 
+   /**
+    * Returns a list of children for a given parent
+    *
+    * @param parent parent handler
+    * @param ignoreErrors true if errors should be silently ignored
+    * @return list of handlers representing children of the given parent
+    * @throws IOException for any error
+    */
    public List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException
    {
       if (parent == null)
@@ -636,6 +658,12 @@ public class ZipEntryContext extends AbstractVFSContext
       return Collections.emptyList();
    }
 
+   /**
+    * Returns lastModified timestamp for a given handler
+    *
+    * @param handler a handler
+    * @return lastModified timestamp
+    */
    public long getLastModified(ZipEntryHandler handler)
    {
       if (handler == null)
@@ -653,6 +681,12 @@ public class ZipEntryContext extends AbstractVFSContext
       return ei.entry.getTime();
    }
 
+   /**
+    * Returns the size for a given handler
+    *
+    * @param handler a handler
+    * @return size in bytes
+    */
    public long getSize(ZipEntryHandler handler)
    {
       if (handler == null)
@@ -675,6 +709,12 @@ public class ZipEntryContext extends AbstractVFSContext
       return ei.entry.getSize();
    }
 
+   /**
+    * Returns true if entry exists for a given handler
+    *
+    * @param handler a handler
+    * @return true if entry exists
+    */
    public boolean exists(ZipEntryHandler handler)
    {
       if (handler == null)
@@ -692,6 +732,12 @@ public class ZipEntryContext extends AbstractVFSContext
       return true;
    }
 
+   /**
+    * Returns true if handler represents a non-directory entry
+    *
+    * @param handler a handler
+    * @return true if not a directory
+    */
    public boolean isLeaf(ZipEntryHandler handler)
    {
       if (handler == null)
@@ -765,6 +811,13 @@ public class ZipEntryContext extends AbstractVFSContext
       return false;
    }
 
+   /**
+    * Contents of the file represented by a given handler
+    *
+    * @param handler a handler
+    * @return InputStream with entry's content
+    * @throws IOException for any error
+    */
    public InputStream openStream(ZipEntryHandler handler) throws IOException
    {
       if (handler == null)
@@ -800,6 +853,12 @@ public class ZipEntryContext extends AbstractVFSContext
       return zipSource.openStream(ei.entry);
    }
 
+   /**
+    * Add a child to a given parent
+    *
+    * @param parent a parent
+    * @param child a child
+    */
    public void addChild(AbstractVirtualFileHandler parent, AbstractVirtualFileHandler child)
    {
       if (parent == null)
@@ -815,6 +874,9 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new RuntimeException("Parent does not exist: " + parent);
    }
 
+   /**
+    * Properly release held resources
+    */
    protected void finalize()
    {
       try
@@ -829,6 +891,13 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+   /**
+    * Replace a current child of the given parent with another one
+    *
+    * @param parent a parent
+    * @param original current child
+    * @param replacement new child
+    */
    public void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
    {
       EntryInfo parentEntry = entries.get(parent.getLocalPathName());
@@ -866,16 +935,32 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    static class EntryInfo
    {
+      /** a handler */
       private AbstractVirtualFileHandler handler;
+
+      /** a <tt>ZipEntry</tt> */
       private ZipEntry entry;
+
+      /** a list of children */
       private List<AbstractVirtualFileHandler> children;
 
+      /**
+       * EntryInfo constructor
+       *
+       * @param handler a handler
+       * @param entry an entry
+       */
       EntryInfo(AbstractVirtualFileHandler handler, ZipEntry entry)
       {
          this.handler = handler;
          this.entry = entry;
       }
 
+      /**
+       * Get children.
+       *
+       * @return returns a list of children for this handler (by copy)
+       */
       public synchronized List<VirtualFileHandler> getChildren()
       {
          if (children == null)
@@ -884,6 +969,12 @@ public class ZipEntryContext extends AbstractVFSContext
          return new LinkedList<VirtualFileHandler>(children);
       }
 
+      /**
+       * Replace a child.
+       *
+       * @param original existing child
+       * @param replacement new child
+       */
       public synchronized void replaceChild(AbstractVirtualFileHandler original, AbstractVirtualFileHandler replacement)
       {
          if (children != null)
@@ -903,12 +994,20 @@ public class ZipEntryContext extends AbstractVFSContext
          }
       }
 
+      /**
+       * Clear the list of children
+       */
       public synchronized void clearChildren()
       {
          if (children != null)
             children.clear();
       }
 
+      /**
+       * Add a child. If a child with the same name exists already, first remove it.
+       *
+       * @param child a child
+       */
       public synchronized void add(AbstractVirtualFileHandler child)
       {
          if (children == null)
@@ -1045,7 +1144,7 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    * Use VFS's temp directory and make 'vfs-nested' sub-directory inside it for our purposes
+    * Use VFS's temp directory and make 'vfs-nested.tmp' sub-directory inside it for our purposes
     *
     * @return temp dir
     */
@@ -1056,7 +1155,7 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    * Delete first-level files only, don't drill down
+    * Delete the contents of a temporary directory. Delete first-level files only, don't drill down.
     */
    private static void deleteTmpDirContents()
    {
@@ -1078,6 +1177,9 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+   /**
+    * <tt>PriviligedAction</tt> class for checking a system property
+    */
    private static class CheckForceCopy implements PrivilegedAction<Boolean>
    {
       public Boolean run()

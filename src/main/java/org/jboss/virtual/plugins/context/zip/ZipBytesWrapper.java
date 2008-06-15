@@ -34,14 +34,14 @@ import java.io.InputStream;
  */
 abstract class ZipBytesWrapper extends ZipWrapper
 {
-   /** Raw zip archive loaded in memory */
+   /** Zip archive loaded in memory */
    private byte [] zipBytes;
 
    /** Name */
    private String name;
 
    /**
-    * ZipStreamWrapper is not aware of actual zip source so it can not detect
+    * ZipBytesWrapper is not aware of actual zip source so it can not detect
     * if it's been modified, like ZipFileWrapper does.
     *
     * @param zipStream the current zip input stream
@@ -61,40 +61,78 @@ abstract class ZipBytesWrapper extends ZipWrapper
       this.lastModified = lastModified;
    }
 
+   /**
+    * Returns true if archive exists
+    *
+    * @return always true
+    */
    boolean exists()
    {
       return true;
    }
 
+   /**
+    * Returns lastModified of this archive
+    *
+    * @return constant lastModified
+    */
    long getLastModified()
    {
       return lastModified;
    }
 
+   /**
+    * Returns the name of this archive
+    *
+    * @return name
+    */
    String getName()
    {
       return name;
    }
 
+   /**
+    * Returns the size of this archive
+    *
+    * @return uncompressed size of this archive
+    */
    long getSize()
    {
       return zipBytes.length;
    }
 
+   /**
+    * Returns raw bytes that represent this archive in its compressed form
+    *
+    * @return compressed bytes of this archive - as <tt>InputStream<tt>
+    * @throws FileNotFoundException for any error
+    */
    InputStream getRootAsStream() throws FileNotFoundException
    {
       return new ByteArrayInputStream(zipBytes);
    }
 
-   void acquire() throws IOException
+   /**
+    * Acquire lock. No-op in this implementation
+    */
+   void acquire()
    {
    }
 
+   /**
+    * Close this wrapper - release memory buffer that stores
+    * raw bytes of the archive in its compressed form
+    */
    void close()
    {
       zipBytes = null;
    }
 
+   /**
+    * String description of this archive
+    *
+    * @return string description of this archive
+    */
    public String toString()
    {
       return super.toString() + " - " + name;
