@@ -66,11 +66,15 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * Nested archives are processed through this same class.
  * By default nested archives are cached in memory and mounted as new
- * instances of <tt>ZipEntryContext</tt> with <tt>ZipStremWrapper</tt> as a source.
+ * instances of <tt>ZipEntryContext</tt> with <tt>ZipStreamWrapper</tt> as a source.
  * If system property <em>jboss.vfs.forceCopy=true</em> is specified,
  * or URL query parameter <em>forceCopy=true</em> is present,
  * nested archives are extracted into a temp directory before being
  * mounted as new instances of <tt>ZipEntryContext</tt>.
+ *
+ * In-memory nested archives may consume a lot of memory. To reduce memory footprint
+ * at the expense of performance, system property <em>jboss.vfs.optimizeForMemory=true<em>
+ * can be set.
  *
  * This context implementation has two modes of releasing file locks.
  * <em>Asynchronous</em> mode is the default one since it is better performant.

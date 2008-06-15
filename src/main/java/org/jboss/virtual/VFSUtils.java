@@ -90,6 +90,11 @@ public class VFSUtils
    public static final String CASE_SENSITIVE_QUERY = "caseSensitive";
 
    /**
+    * Key used to turn on memory optimizations - less cache use at the expense of performance
+    */
+   public static final String OPTIMIZE_FOR_MEMORY_KEY = "jboss.vfs.optimizeForMemory";
+
+   /**
     * Get the paths string for a collection of virtual files
     *
     * @param paths the paths

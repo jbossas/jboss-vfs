@@ -21,10 +21,19 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import org.jboss.virtual.VFSUtils;
+import org.jboss.logging.Logger;
+
 import java.io.*;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 /**
  * ZipStreamWrapper - for abstracted access to in-memory zip file
@@ -34,6 +43,26 @@ import java.util.zip.ZipInputStream;
  */
 class ZipStreamWrapper extends ZipBytesWrapper
 {
+   /** Logger */
+   private static final Logger log = Logger.getLogger(ZipStreamWrapper.class);
+
+   /** Is optimizeForMemory turned on */
+   private static boolean optimizeForMemory;
+
+   static
+   {
+      optimizeForMemory = AccessController.doPrivileged(new CheckOptimizeForMemory());
+
+      if (optimizeForMemory)
+         log.info("VFS optimizeForMemory is enabled.");
+   }
+
+   /** zip archive - as individual inflated in-memory files */
+   private Map<String, InMemoryFile> inMemoryFiles = new LinkedHashMap<String, InMemoryFile>();
+
+   /** size of the zip file composed back from inMemoryFiles */
+   private int size;
+
    /**
     * ZipStreamWrapper is not aware of actual zip source so it can not detect
     * if it's been modified, like ZipFileWrapper does.
@@ -46,65 +75,157 @@ class ZipStreamWrapper extends ZipBytesWrapper
    ZipStreamWrapper(InputStream zipStream, String name, long lastModified) throws IOException
    {
       super(zipStream, name, lastModified);
+
+      ZipInputStream zis = new ZipInputStream(super.getRootAsStream());
+      ZipEntry ent = zis.getNextEntry();
+      while (ent != null)
+      {
+         byte [] fileBytes;
+         if (ent.isDirectory() == false)
+         {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            copyStream(zis, baos);
+            fileBytes = baos.toByteArray();
+            ent.setSize(fileBytes.length);
+         }
+         else
+         {
+            fileBytes = new byte[0];
+         }
+
+         inMemoryFiles.put(ent.getName(), new InMemoryFile(ent, fileBytes));
+         ent = zis.getNextEntry();
+      }
+
+      if (optimizeForMemory) {
+         initZipSize();
+
+         // we don't need memory buffer any more
+         super.close();
+      }
    }
 
    InputStream openStream(ZipEntry ent) throws IOException
    {
-      ZipInputStream zis = new ZipInputStream(getRootAsStream());
+      InMemoryFile memFile = inMemoryFiles.get(ent.getName());
 
-      // first find the entry
-      ZipEntry entry = zis.getNextEntry();
-      while(entry != null)
-      {
-         if(entry.getName().equals(ent.getName()))
-            break;
-         entry = zis.getNextEntry();
-      }
-      if(entry == null)
-         throw new IOException("Failed to find nested jar entry: " + ent.getName() + " in zip stream: " + toString());
+      if (memFile == null)
+         throw new FileNotFoundException("Failed to find nested jar entry: " + ent.getName() + " in zip stream: " + toString());
 
-      // then read it
-      return new SizeLimitedInputStream(zis, ent.getSize());
+      return new ByteArrayInputStream(memFile.fileBytes);
    }
 
    Enumeration<? extends ZipEntry> entries() throws IOException
    {
-      return new ZipStreamEnumeration(new ZipInputStream(getRootAsStream()));
+      return new ZipStreamEnumeration();
    }
 
-   /**
-    * Zip stream enumeration.
-    */
+   InputStream getRootAsStream() throws FileNotFoundException
+   {
+      if (optimizeForMemory)
+      {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         try
+         {
+            recomposeZip(baos);
+            return new ByteArrayInputStream(baos.toByteArray());
+         }
+         catch (IOException ex)
+         {
+            FileNotFoundException e = new FileNotFoundException("Failed to recompose inflated nested archive " + getName());
+            e.initCause(ex);
+            throw e;
+         }
+      }
+      else
+      {
+         return super.getRootAsStream();
+      }
+   }
+
+   long getSize()
+   {
+      if (optimizeForMemory)
+         return size;
+      else
+         return super.getSize();
+   }
+
+   void close() {
+      inMemoryFiles = null;
+      super.close();
+   }
+
+   private void initZipSize() throws IOException {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      recomposeZip(baos);
+      this.size = baos.size();
+   }
+
+   private void recomposeZip(ByteArrayOutputStream baos) throws IOException
+   {
+      ZipOutputStream zout = new ZipOutputStream(baos);
+      zout.setMethod(ZipOutputStream.STORED);
+
+      Iterator<InMemoryFile> it = inMemoryFiles.values().iterator();
+      while(it.hasNext())
+      {
+         InMemoryFile memFile = it.next();
+         zout.putNextEntry(memFile.entry);
+         zout.write(memFile.fileBytes);
+      }
+      zout.close();
+   }
+
+   private static void copyStream(InputStream is, OutputStream os) throws IOException
+   {
+      byte [] buff = new byte[4096];
+      int rc = is.read(buff);
+      while (rc != -1)
+      {
+         os.write(buff, 0, rc);
+         rc = is.read(buff);
+      }
+   }
+
+   static class InMemoryFile
+   {
+      ZipEntry entry;
+      byte [] fileBytes;
+
+      public InMemoryFile(ZipEntry entry, byte[] fileBytes)
+      {
+         this.entry = entry;
+         this.fileBytes = fileBytes;
+      }
+   }
+
    class ZipStreamEnumeration implements Enumeration<ZipEntry>
    {
-      private ZipInputStream zis;
+      private Iterator<InMemoryFile> it;
 
-      private ZipEntry entry;
-
-      ZipStreamEnumeration(ZipInputStream zis) throws IOException
+      ZipStreamEnumeration()
       {
-         this.zis = zis;
-         entry = zis.getNextEntry();
+         it = inMemoryFiles.values().iterator();
       }
 
       public boolean hasMoreElements()
       {
-         return entry != null;
+         return it.hasNext();
       }
 
       public ZipEntry nextElement()
       {
-         ZipEntry ret = entry;
-         try
-         {
-            entry = zis.getNextEntry();
-         }
-         catch (IOException ex)
-         {
-            throw new RuntimeException("Failed to retrieve next entry from zip stream", ex);
-         }
+         return it.next().entry;
+      }
+   }
 
-         return ret;
+   private static class CheckOptimizeForMemory implements PrivilegedAction<Boolean>
+   {
+      public Boolean run()
+      {
+         String forceString = System.getProperty(VFSUtils.OPTIMIZE_FOR_MEMORY_KEY, "false");
+         return Boolean.valueOf(forceString);
       }
    }
 }
