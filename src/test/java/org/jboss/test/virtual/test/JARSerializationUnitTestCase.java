@@ -207,6 +207,16 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       testText(textThree);
    }
 
+   public void test2ndLevelRead() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/level1.zip");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile file = vfs.findChild("level2.zip");
+      file = serializeDeserialize(file, VirtualFile.class);
+      VirtualFile text = file.findChild("test2.txt");
+      testText(text);
+   }
+
    protected void testText(VirtualFile file) throws Exception
    {
       InputStream in = file.openStream();
