@@ -555,7 +555,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // find where url protocol ends - i.e. jar:file:/ ...
       pos= zipPath.indexOf(":/");
-      filePath = zipPath.substring(pos + 2);
+      filePath = zipPath.substring(pos + 1);
 
       // cut out url query part if present
       int queryStart = filePath.indexOf("?");
