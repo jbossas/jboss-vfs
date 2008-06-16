@@ -158,7 +158,10 @@ public class VFSUtils
 
       VirtualFile parent = file.getParent();
       if (parent == null)
-         throw new IllegalStateException(file + " has no parent.");
+      {
+         log.debug(file + " has no parent.");
+         return;
+      }
 
       URL parentURL;
       URL vfsRootURL;
@@ -171,10 +174,13 @@ public class VFSUtils
       }
       catch(URISyntaxException e)
       {
-         IOException ioe = new IOException("Failed to get parent URL for " + file);
-         ioe.initCause(e);
-         throw ioe;
+         log.debug("Failed to get parent URL for " + file + ", reason=" + e);
+         return;
       }
+
+      String parentPath = parentURL.toString();
+      if(parentPath.endsWith("/") == false)
+         parentPath += "/";
 
       StringTokenizer tokenizer = new StringTokenizer(classPath);
       while (tokenizer.hasMoreTokens())
@@ -182,14 +188,13 @@ public class VFSUtils
          String path = tokenizer.nextToken();
          try
          {
-            String parentPath = parentURL.toString();
-            if(parentPath.endsWith("/") == false)
-               parentPath += "/";
             URL libURL = new URL(parentPath + path);
             String libPath = libURL.getPath();
-            // TODO, this occurs for inner jars. Doubtful that such a mf cp is valid
-            if( rootPathLength > libPath.length() )
-               throw new IOException("Invalid rootPath: "+vfsRootURL+", libPath: "+libPath);
+            if(rootPathLength > libPath.length())
+            {
+               log.debug("Invalid rootPath: " + vfsRootURL + ", libPath: " + libPath);
+               continue;
+            }
 
             String vfsLibPath = libPath.substring(rootPathLength);
             VirtualFile vf = file.getVFS().getChild(vfsLibPath);
