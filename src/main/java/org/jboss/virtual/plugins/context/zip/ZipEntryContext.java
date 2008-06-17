@@ -316,14 +316,13 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             if (entryName.equals(relative))
             {
-               InputStream stream = new SizeLimitedInputStream(zis, entry.getSize());
                // directories and non archives
                if (entry.isDirectory() || JarUtils.isArchive(entryName) == false)
                {
-                  return new ZipEntryWrapper(stream, entryName, System.currentTimeMillis());
+                  return new ZipEntryWrapper(zis, entryName, System.currentTimeMillis());
                }
                else
-                  return new ZipStreamWrapper(stream, entryName, System.currentTimeMillis());
+                  return new ZipStreamWrapper(zis, entryName, System.currentTimeMillis());
             }
 
             if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
@@ -344,7 +343,7 @@ public class ZipEntryContext extends AbstractVFSContext
          if (entryName.equals(longestNameMatch))
          {
             relative = relative.substring(longestNameMatch.length() + 1);
-            return findEntry(new SizeLimitedInputStream(zis, entry.getSize()), relative);
+            return findEntry(zis, relative);
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
