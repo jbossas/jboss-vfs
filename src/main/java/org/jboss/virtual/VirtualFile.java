@@ -406,8 +406,7 @@ public class VirtualFile implements Serializable
       if (child == null)
       {
          List<VirtualFileHandler> children = handler.getChildren(true);
-         throw new IOException("Child not found " + path + " for " + handler
-               +", available children: "+children);
+         throw new IOException("Child not found " + path + " for " + handler + ", available children: " + children);
       }
       return child.getVirtualFile();
    }
