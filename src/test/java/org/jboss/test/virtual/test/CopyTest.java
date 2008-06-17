@@ -179,10 +179,8 @@ public abstract class CopyTest extends AbstractVFSTest
       // when mounting via DelegatingHandler, getPathName changes because VFSContext changes
       //assertEquals(original.getPathName(), replacement.getPathName());
 
-      // it's a directory
-      if (exploded)
-         assertEquals(0, replacement.getSize());
-      else
+      // Only check the non-directory file sizes
+      if (exploded == false)
          assertEquals(original.getSize(), replacement.getSize());
       assertEquals(original.exists(), replacement.exists());
       assertEquals(original.isLeaf(), replacement.isLeaf());
