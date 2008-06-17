@@ -22,6 +22,7 @@
 package org.jboss.test.virtual.test;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -39,6 +40,7 @@ import org.jboss.virtual.VirtualFile;
  * @author Scott.Stark@jboss.org
  * @version $Revision: 72234 $
  */
+@SuppressWarnings("deprecation")
 public class JARSerializationUnitTestCase extends AbstractVFSTest
 {
    public JARSerializationUnitTestCase(String name)
@@ -60,6 +62,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
     * Test reading the contents of nested jar entries.
     * @throws Exception for any error
     */
+/*
    public void testInnerJarFile() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
@@ -122,7 +125,8 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       jar1DSMF.close();
    }
 
-   /**
+   */
+/**
     * JBVFS-17 test
     * @throws Exception for any error
     */
@@ -216,31 +220,53 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       VirtualFile text = file.findChild("test2.txt");
       testText(text);
    }
-   public void test2ndLevelRead2() throws Exception
+
+   public void testEarsInnerJarChild() throws Exception
    {
       URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
+      VirtualFile child = file.findChild("MarshallTest.xml");
+      String text = getText(child);
+      assertNotNull(text);
+      assertTrue(text.length() > 0);
+      // serialize
       file = serializeDeserialize(file, VirtualFile.class);
-      VirtualFile text = file.findChild("MarshallTest.xml ");
-      testText(text);
+      child = file.findChild("MarshallTest.xml");
+      text = getText(child);
+      assertNotNull(text);
+      assertTrue(text.length() > 0);
    }
 
-   protected void testText(VirtualFile file) throws Exception
+   protected String getText(VirtualFile file) throws Exception
    {
       InputStream in = file.openStream();
       try
       {
          BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+         StringBuilder buffer = new StringBuilder();
          String line;
          while ((line = reader.readLine()) != null)
          {
-            assertEquals("Some test.", line);
+            buffer.append(line);
          }
+         return buffer.toString();
       }
       finally
       {
-         in.close();
+         try
+         {
+            in.close();
+         }
+         catch (IOException ignore)
+         {
+         }
       }
+   }
+
+   protected void testText(VirtualFile file) throws Exception
+   {
+      String text = getText(file);
+      assertEquals("Some test.", text);
    }
 }
