@@ -115,6 +115,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
     */
    public void testPathIsEmptryForJarEntryAsRoot() throws Exception
    {
+      VFS.init();
       URL url = getResource("/vfs/context/jar/simple.jar");
       URL entry = new URL("jar:" + url.toString() + "!/child");
       //entry.openStream().close();

@@ -404,7 +404,11 @@ public class VirtualFile implements Serializable
 
       VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
       if (child == null)
-         throw new IOException("Child not found " + path + " for " + handler);
+      {
+         List<VirtualFileHandler> children = handler.getChildren(true);
+         throw new IOException("Child not found " + path + " for " + handler
+               +", available children: "+children);
+      }
       return child.getVirtualFile();
    }
 

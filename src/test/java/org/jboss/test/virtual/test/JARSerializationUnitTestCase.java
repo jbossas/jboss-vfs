@@ -216,6 +216,15 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       VirtualFile text = file.findChild("test2.txt");
       testText(text);
    }
+   public void test2ndLevelRead2() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
+      file = serializeDeserialize(file, VirtualFile.class);
+      VirtualFile text = file.findChild("MarshallTest.xml ");
+      testText(text);
+   }
 
    protected void testText(VirtualFile file) throws Exception
    {
