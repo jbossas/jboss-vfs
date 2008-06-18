@@ -198,6 +198,20 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       }
    }
 
+   public void testSpecialTokensOnLeaf() throws Exception
+   {
+      VFSContext context = getVFSContext("complex");
+      VirtualFileHandler root = context.getRoot();
+      VirtualFileHandler leaf = root.getChild("child");
+      assertTrue(leaf.isLeaf());
+      assertNotNull(leaf.getChild(".."));
+      assertNotNull(leaf.getChild("."));
+      leaf = root.getChild("subfolder/subchild");
+      assertTrue(leaf.isLeaf());
+      assertNotNull(leaf.getChild(".."));
+      assertNotNull(leaf.getChild("."));
+   }
+
    public void testSimpleReversePath() throws Exception
    {
       checkSpecialPath("simple" + getSuffix() + "/../complex" + getSuffix() + "/subfolder/subsubfolder/../subchild", "subchild");
