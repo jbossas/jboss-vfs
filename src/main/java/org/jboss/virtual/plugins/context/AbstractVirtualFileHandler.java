@@ -58,7 +58,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /** serialVersionUID */
    private static final long serialVersionUID = 1L;
    /** The class serial fields */
-   private static final ObjectStreamField[] serialPersistentFields = {
+   private static final ObjectStreamField[] serialPersistentFields =
+   {
       new ObjectStreamField("rootURI", URI.class),
       new ObjectStreamField("parent", VirtualFileHandler.class),
       new ObjectStreamField("name", String.class),
