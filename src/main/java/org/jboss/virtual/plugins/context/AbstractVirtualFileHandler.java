@@ -430,30 +430,37 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       VirtualFileHandler current = this;
       for (int i = 0; i < tokens.size(); ++i)
       {
-         if (current == null || current.isLeaf())
+         if (current == null)
             return null;
 
          String token = tokens.get(i);
-         if (PathTokenizer.isCurrentToken(token) == false)
+         if (PathTokenizer.isCurrentToken(token))
+            continue;
+
+         if (PathTokenizer.isReverseToken(token))
          {
-            if (PathTokenizer.isReverseToken(token))
-            {
-               VirtualFileHandler parent = current.getParent();
-               if (parent == null) // TODO - still IOE or null?
-                  throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
-               else
-                  current = parent;
-            }
-            else if (current instanceof StructuredVirtualFileHandler)
-            {
-               StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler) current;
-               current = structured.createChildHandler(token);
-            }
+            VirtualFileHandler parent = current.getParent();
+            if (parent == null) // TODO - still IOE or null?
+               throw new IOException("Using reverse path on top file handler: " + current + ", " + path);
             else
-            {
-               String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
-               return current.getChild(remainingPath);
-            }
+               current = parent;
+
+            continue;
+         }
+
+         if (current.isLeaf())
+         {
+            return null;
+         }
+         else if (current instanceof StructuredVirtualFileHandler)
+         {
+            StructuredVirtualFileHandler structured = (StructuredVirtualFileHandler)current;
+            current = structured.createChildHandler(token);
+         }
+         else
+         {
+            String remainingPath = PathTokenizer.getRemainingPath(tokens, i);
+            return current.getChild(remainingPath);
          }
       }
 
