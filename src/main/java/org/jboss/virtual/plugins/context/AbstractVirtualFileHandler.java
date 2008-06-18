@@ -65,26 +65,36 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       new ObjectStreamField("vfsUrl", URL.class)
    };
 
-   /** The VFS context
+   /**
+    * The VFS context
+    *
     * @serialField rootURI URI the VFS context rootURI
     */
    private VFSContext context;
    
-   /** The parent
+   /**
+    * The parent
+    *
     * @serialField parent VirtualFileHandler the virtual file parent
     */
    private VirtualFileHandler parent;
 
-   /** The name
+   /**
+    * The name
+    *
     * @serialField name String the virtual file name
     */
    private String name;
 
+   /**
+    * The vfs URL
+    *
+    * @serialField vfsUrl the vfs based url
+    */
+   private URL vfsUrl;
+
    /** The vfsPath */
    private transient String vfsPath;
-
-   /** The vfs URL */
-   private URL vfsUrl;
 
    /** The reference count */
    private transient AtomicInteger references = new AtomicInteger(0);
@@ -562,7 +572,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       throws IOException
    {
       PutField fields = out.putFields();
-      fields.put("rootURI", this.getVFSContext().getRootURI());
+      fields.put("rootURI", getVFSContext().getRootURI());
       fields.put("parent", parent);
       fields.put("name", name);
       fields.put("vfsUrl", vfsUrl);
