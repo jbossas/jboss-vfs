@@ -181,8 +181,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             {
                handler = context.createVirtualFileHandler(this, file);
             }
-            result.add(handler);
-            newCache.put(file.getName(), handler);
+            if (handler != null)
+            {
+               result.add(handler);
+               newCache.put(file.getName(), handler);
+            }
          }
          catch (IOException e)
          {
@@ -212,7 +215,8 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       {
          FileSystemContext context = getVFSContext();
          handler = context.createVirtualFileHandler(this, child);
-         childCache.put(name, handler);
+         if (handler != null)
+            childCache.put(name, handler);
       }
       return handler;
    }
