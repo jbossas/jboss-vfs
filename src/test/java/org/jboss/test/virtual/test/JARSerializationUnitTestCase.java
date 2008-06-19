@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.test.virtual.support.VirtualFileAdaptor;
 
 /**
  * Tests of no copy nested jars
@@ -236,6 +237,18 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       text = getText(child);
       assertNotNull(text);
       assertTrue(text.length() > 0);
+   }
+
+   public void testVirtualFileAdaptor() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
+      VirtualFileAdaptor adaptor = new VirtualFileAdaptor(file);
+      // serialize
+      adaptor = serializeDeserialize(adaptor, VirtualFileAdaptor.class);
+      VirtualFileAdaptor child = adaptor.findChild("MarshallTest.xml");
+      assertNotNull(child);
    }
 
    protected String getText(VirtualFile file) throws Exception
