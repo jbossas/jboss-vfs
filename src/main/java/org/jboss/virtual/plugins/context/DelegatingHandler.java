@@ -99,6 +99,8 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
+      if ("".equals(path))
+         return this;
       return getDelegate().getChild(path);
    }
 
