@@ -244,7 +244,8 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
-      VirtualFileAdaptor adaptor = new VirtualFileAdaptor(file);
+      VirtualFile same = file.findChild("");
+      VirtualFileAdaptor adaptor = new VirtualFileAdaptor(same);
       // serialize
       adaptor = serializeDeserialize(adaptor, VirtualFileAdaptor.class);
       VirtualFileAdaptor child = adaptor.findChild("MarshallTest.xml");

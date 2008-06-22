@@ -21,13 +21,14 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
@@ -217,6 +218,16 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       {
          safeClose(is);
       }
+   }
+
+   @SuppressWarnings("deprecation")
+   public void testEqualsOnEmptyPath() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
+      VirtualFile same = file.findChild("");
+      assertEquals(file, same);
    }
 
    // we need to make sure this doesn't get touched before
