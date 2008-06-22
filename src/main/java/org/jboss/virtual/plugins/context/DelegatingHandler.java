@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
+import org.jboss.util.JBossObject;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -173,18 +174,17 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    {
       if (o == this)
          return true;
-      
-      if (o instanceof DelegatingHandler)
+
+      if (o instanceof VirtualFileHandler == false)
+         return false;
+
+      VirtualFileHandler vfh = (VirtualFileHandler)o;
+      if (vfh instanceof DelegatingHandler)
       {
          DelegatingHandler handler = (DelegatingHandler) o;
-         if (delegate != null)
-            return delegate.equals(handler.delegate);
-         else if (handler.delegate != null)
-            return false;   // one is null
-         else
-            return true;    // both are null
+         vfh = handler.getDelegate();
       }
 
-      return false;
+      return JBossObject.equals(delegate, vfh);
    }
 }
