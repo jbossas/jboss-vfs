@@ -26,13 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import junit.framework.Test;
+import org.jboss.test.virtual.support.VirtualFileAdaptor;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.test.virtual.support.VirtualFileAdaptor;
 
 /**
  * Tests of no copy nested jars
@@ -304,8 +305,18 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    {
       VirtualFileAdaptor adaptor = new VirtualFileAdaptor(file);
       adaptor = serializeDeserialize(adaptor, VirtualFileAdaptor.class);
-      VirtualFileAdaptor child = adaptor.findChild(pathName);
-      assertNotNull(child);
+      VirtualFileAdaptor vfaChild = adaptor.findChild(pathName);
+      assertNotNull(vfaChild);
+      List<VirtualFile> children = file.getChildren();
+      if (children != null)
+      {
+         for (VirtualFile child : children)
+         {
+            adaptor = new VirtualFileAdaptor(child);
+            adaptor = serializeDeserialize(adaptor, VirtualFileAdaptor.class);
+            assertNotNull(adaptor.findChild("..")); // should find parent
+         }
+      }
    }
 
    protected String getText(VirtualFile file) throws Exception
