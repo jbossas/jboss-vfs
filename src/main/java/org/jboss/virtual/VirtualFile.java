@@ -222,6 +222,7 @@ public class VirtualFile implements Serializable
    /**
     * Check if streams set exist.
     */
+   @SuppressWarnings("unchecked")
    protected void checkStreams()
    {
       if (streams == null)
