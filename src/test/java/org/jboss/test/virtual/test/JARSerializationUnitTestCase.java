@@ -63,7 +63,6 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
     * Test reading the contents of nested jar entries.
     * @throws Exception for any error
     */
-/*
    public void testInnerJarFile() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
@@ -126,11 +125,6 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       jar1DSMF.close();
    }
 
-   */
-/**
-    * JBVFS-17 test
-    * @throws Exception for any error
-    */
    public void testInnerJarFilesOnlyFileSerialization() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
@@ -245,10 +239,72 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
       VirtualFile same = file.findChild("");
-      VirtualFileAdaptor adaptor = new VirtualFileAdaptor(same);
       // serialize
+      testVirtualFileAdaptor(same, "MarshallTest.xml");
+   }
+
+   public void testDeepVFAMechanism() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile one = vfs.findChild("level1.zip");
+      testVirtualFileAdaptor(one, "test1.txt");
+      VirtualFile textOne = one.findChild("test1.txt");
+      testVirtualFileAdaptor(textOne, "../level2.zip");
+      VirtualFile two = one.findChild("level2.zip");
+      testVirtualFileAdaptor(two, "test2.txt");
+      VirtualFile textTwo = two.findChild("test2.txt");
+      testVirtualFileAdaptor(textTwo, "../level3.zip");
+      VirtualFile three = two.findChild("level3.zip");
+      testVirtualFileAdaptor(three, "test3.txt");
+      VirtualFile textThree = three.findChild("test3.txt");
+      testVirtualFileAdaptor(textThree, "../test3.txt");
+
+      three = serializeDeserialize(three, VirtualFile.class);
+      testVirtualFileAdaptor(three, "test3.txt");
+      textThree = three.findChild("test3.txt");
+      testVirtualFileAdaptor(textThree, "../text3.txt");
+
+      two = serializeDeserialize(two, VirtualFile.class);
+      testVirtualFileAdaptor(two, "test2.txt");
+      textTwo = two.findChild("test2.txt");
+      testVirtualFileAdaptor(textTwo, "../level3.zip");
+      three = two.findChild("level3.zip");
+      testVirtualFileAdaptor(three, "test3.txt");
+      textThree = two.findChild("level3.zip/test3.txt");
+      testVirtualFileAdaptor(textThree, "../test3.txt");
+      textThree = three.findChild("test3.txt");
+      testVirtualFileAdaptor(textThree, ".././test3.txt");
+
+      one = serializeDeserialize(one, VirtualFile.class);
+      testVirtualFileAdaptor(one, "test1.txt");
+      textOne = one.findChild("test1.txt");
+      testVirtualFileAdaptor(textOne, "../level2.zip");
+      two = one.findChild("level2.zip");
+      testVirtualFileAdaptor(two, "test2.txt");
+      textTwo = one.findChild("level2.zip/test2.txt");
+      testVirtualFileAdaptor(textTwo, "../level3.zip");
+      textTwo = two.findChild("test2.txt");
+      testVirtualFileAdaptor(textTwo, "../level3.zip");
+      three = one.findChild("level2.zip/level3.zip");
+      testVirtualFileAdaptor(three, "test3.txt");
+      textThree = three.findChild("test3.txt");
+      testVirtualFileAdaptor(textThree, "..");
+      textThree = one.findChild("level2.zip/level3.zip/test3.txt");
+      testVirtualFileAdaptor(textThree, "..");
+      three = two.findChild("level3.zip");
+      testVirtualFileAdaptor(three, "test3.txt");
+      textThree = three.findChild("test3.txt");
+      testVirtualFileAdaptor(textThree, "../..");
+      textThree = two.findChild("level3.zip/test3.txt");
+      testVirtualFileAdaptor(textThree, "../..");
+   }
+
+   protected void testVirtualFileAdaptor(VirtualFile file, String pathName) throws Exception
+   {
+      VirtualFileAdaptor adaptor = new VirtualFileAdaptor(file);
       adaptor = serializeDeserialize(adaptor, VirtualFileAdaptor.class);
-      VirtualFileAdaptor child = adaptor.findChild("MarshallTest.xml");
+      VirtualFileAdaptor child = adaptor.findChild(pathName);
       assertNotNull(child);
    }
 

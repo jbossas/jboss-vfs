@@ -399,9 +399,6 @@ public class VirtualFile implements Serializable
          throw new IllegalArgumentException("Null path");
 
       VirtualFileHandler handler = getHandler();      
-      if (handler.isLeaf())
-         throw new IllegalStateException("File cannot contain children: " + this);
-
       VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
       if (child == null)
       {
