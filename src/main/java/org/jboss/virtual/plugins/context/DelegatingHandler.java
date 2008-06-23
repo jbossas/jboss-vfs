@@ -88,20 +88,13 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate;
    }
 
-   public VirtualFileHandler getParent() throws IOException
-   {
-      VirtualFileHandler parent = getDelegate().getParent();
-      if (parent != null)
-         return parent;
-
-      return super.getParent();
-   }
-
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      if ("".equals(path))
+      VirtualFileHandler child = getDelegate().getChild(path);
+      if (getDelegate().equals(child))
          return this;
-      return getDelegate().getChild(path);
+      else
+         return child;
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException

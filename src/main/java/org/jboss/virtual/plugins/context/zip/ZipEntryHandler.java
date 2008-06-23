@@ -88,16 +88,19 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
 
    public long getLastModified() throws IOException
    {
+      checkClosed();
       return getZipEntryContext().getLastModified(this);
    }
 
    public long getSize() throws IOException
    {
+      checkClosed();
       return getZipEntryContext().getSize(this);
    }
 
    public boolean exists() throws IOException
    {
+      checkClosed();
       return getZipEntryContext().exists(this);
    }
 
@@ -126,11 +129,13 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
+      checkClosed();
       return getZipEntryContext().getChildren(this, ignoreErrors);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
+      checkClosed();
       return structuredFindChild(path);
    }
 
@@ -149,6 +154,6 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
 
    private ZipEntryContext getZipEntryContext()
    {
-      return ((ZipEntryContext) getVFSContext());
+      return ((ZipEntryContext) getLocalVFSContext());
    }
 }

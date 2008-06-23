@@ -264,7 +264,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       three = serializeDeserialize(three, VirtualFile.class);
       testVirtualFileAdaptor(three, "test3.txt");
       textThree = three.findChild("test3.txt");
-      testVirtualFileAdaptor(textThree, "../text3.txt");
+      testVirtualFileAdaptor(textThree, "../test3.txt");
 
       two = serializeDeserialize(two, VirtualFile.class);
       testVirtualFileAdaptor(two, "test2.txt");

@@ -49,6 +49,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
@@ -191,6 +192,11 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return name;
    }
 
+   /**
+    * Get a pathName relative to most outer context (contexts can be mounted one within other)
+    *
+    * @return  pathName
+    */
    public String getPathName()
    {
       if (vfsPath == null)
@@ -212,11 +218,16 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.vfsPath = path;
    }
 
+   /**
+    * Get a pathName relative to local context
+    *
+    * @return pathName
+    */
    public String getLocalPathName()
    {
       try
       {
-         VirtualFileHandler handler = getVFSContext().getRoot();
+         VirtualFileHandler handler = getLocalVFSContext().getRoot();
          String rootPathName = handler.getPathName();
          String pathName = getPathName();
          int len = rootPathName.length();
@@ -229,7 +240,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       }
       catch (IOException ex)
       {
-         log.warn("Failed to compose local path name: context: " + getVFSContext() + ", name: " + getName(), ex);
+         log.warn("Failed to compose local path name: context: " + getLocalVFSContext() + ", name: " + getName(), ex);
       }
 
       return getPathName();
@@ -350,16 +361,56 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       increment();
       return new VirtualFile(this);
    }
-   
+
+   /**
+    * Get this handler's parent.
+    * If this handler represents a root of the context mounted within another context
+    * a parent from the outer context will be returned.
+    *
+    * @return parent handler
+    * @throws IOException for any error
+    */
    public VirtualFileHandler getParent() throws IOException
    {
       checkClosed();
+      if (parent == null)
+      {
+         if (context instanceof AbstractVFSContext)
+         {
+            AbstractVFSContext avfs = (AbstractVFSContext) context;
+            VirtualFileHandler peer = avfs.getRootPeer();
+            if (peer != null)
+               return peer.getParent();
+         }
+      }
       return parent;
    }
-   
+
+   /**
+    * Get this handler's most outer context (contexts can be mounted one within other).
+    *
+    * @return context
+    */
    public VFSContext getVFSContext()
    {
       checkClosed();
+      if (context instanceof AbstractVFSContext)
+      {
+         AbstractVFSContext avfs = (AbstractVFSContext) context;
+         VirtualFileHandler peer = avfs.getRootPeer();
+         if (peer != null)
+            return peer.getVFSContext();
+      }
+      return context;
+   }
+
+   /**
+    * Get this handler's local context
+    *
+    * @return context
+    */
+   public VFSContext getLocalVFSContext()
+   {
       return context;
    }
 
@@ -391,7 +442,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    protected void checkClosed() throws IllegalStateException 
    {
       if (references.get() < 0)
-         throw new IllegalStateException("Closed " + this);
+         throw new IllegalStateException("Closed " + toStringLocal());
    }
    
    public void close() 
@@ -524,12 +575,25 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       buffer.append('@');
       buffer.append(System.identityHashCode(this));
       buffer.append("[path=").append(getPathName());
+      buffer.append(" context=").append(getVFSContext().getRootURI());
+      buffer.append(" real=").append(safeToURLString());
+      buffer.append(']');
+      return buffer.toString();
+   }
+
+   public String toStringLocal()
+   {
+      StringBuilder buffer = new StringBuilder();
+      buffer.append(getClass().getSimpleName());
+      buffer.append('@');
+      buffer.append(System.identityHashCode(this));
+      buffer.append("[path=").append(getLocalPathName());
       buffer.append(" context=").append(context.getRootURI());
       buffer.append(" real=").append(safeToURLString());
       buffer.append(']');
       return buffer.toString();
    }
-   
+
    @Override
    public int hashCode()
    {
@@ -580,7 +644,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       throws IOException
    {
       PutField fields = out.putFields();
-      fields.put("rootURI", getVFSContext().getRootURI());
+      fields.put("rootURI", getLocalVFSContext().getRootURI());
       fields.put("parent", parent);
       fields.put("name", name);
       fields.put("vfsUrl", vfsUrl);
