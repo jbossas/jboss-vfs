@@ -29,7 +29,7 @@
   </organization>
 
   <properties>
-    <version.jboss.common.core>2.2.5.GA</version.jboss.common.core>
+    <version.jboss.common.core>2.2.7.GA</version.jboss.common.core>
     <version.jboss.logging>2.0.5.GA</version.jboss.logging>
     <version.jboss.test>1.1.0.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
