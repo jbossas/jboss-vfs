@@ -80,6 +80,7 @@
           <forkMode>always</forkMode> <!-- required to correctly run the PojoServer tests -->
           <useSystemClassLoader>true</useSystemClassLoader>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <testFailureIgnore>true</testFailureIgnore>
         </configuration>
       </plugin>
       <plugin>
