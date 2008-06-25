@@ -25,6 +25,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.jboss.virtual.VFSUtils;
 
@@ -32,12 +34,98 @@ import org.jboss.virtual.VFSUtils;
  * Flag holder.
  * 
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
+ * @authos <a href="mailto:strukelj@parsek.net">Marko Strukelj</a>
  */
 public class OptionsAwareURI
 {
-   private static final String Copy = VFSUtils.USE_COPY_QUERY + "=true";
+   public static final String Copy = VFSUtils.USE_COPY_QUERY + "=true";
+   public static final String NoReaper = VFSUtils.NO_REAPER_QUERY + "=true";
 
-   private static ThreadLocal<Boolean> flag = new InheritableThreadLocal<Boolean>()
+   private static ThreadLocal<Boolean> flagCopy = new OAInheritableThreadLocal();
+   private static ThreadLocal<Boolean> flagNoReaper = new OAInheritableThreadLocal();
+
+   public static void set(String name)
+   {
+      if (Copy.equals(name))
+         flagCopy.set(Boolean.TRUE);
+      else if (NoReaper.equals(name))
+         flagNoReaper.set(Boolean.TRUE);
+      else
+         throw new IllegalArgumentException(name);
+   }
+
+   public static boolean get(String name)
+   {
+      if (Copy.equals(name))
+         return flagCopy.get();
+      else if (NoReaper.equals(name))
+         return flagNoReaper.get();
+      else
+         throw new IllegalArgumentException(name);
+   }
+
+   public static void clear(String name)
+   {
+      if (Copy.equals(name))
+         flagCopy.set(Boolean.FALSE);
+      else if (NoReaper.equals(name))
+         flagNoReaper.set(Boolean.FALSE);
+      else
+         throw new IllegalArgumentException(name);
+   }
+
+   public static URL toURL(URL url) throws IOException
+   {
+      LinkedList params = new LinkedList();
+
+      if (get(Copy))
+         params.add(Copy);
+      if (get(NoReaper))
+         params.add(NoReaper);
+
+      if (params.size() == 0)
+         return url;
+
+      StringBuilder sb = new StringBuilder(url.toExternalForm());
+
+      // if options are set on URL we overwrite them
+      int qpos = sb.indexOf("?");
+      if (qpos > 0)
+         sb.setLength(qpos);
+
+      Iterator it = params.iterator();
+      for (int i=0; it.hasNext(); i++)
+      {
+         if (i == 0)
+            sb.append("?");
+         else
+            sb.append("&");
+
+         sb.append(it.next());
+      }
+
+      return new URL(sb.toString());
+   }
+
+   public static URI toURI(URI uri) throws IOException
+   {
+      try
+      {
+         return toURL(uri.toURL()).toURI();
+      }
+      catch (URISyntaxException e)
+      {
+         throw new IOException(e.getReason());
+      }
+   }
+
+   public String toString()
+   {
+      return "flagCopy=" + get(Copy) + ", flagNoReaper=" + get(NoReaper);
+   }
+
+
+   static class OAInheritableThreadLocal extends InheritableThreadLocal<Boolean>
    {
       protected Boolean initialValue()
       {
@@ -49,52 +137,5 @@ public class OptionsAwareURI
          Boolean value = get();
          return String.valueOf(value);
       }
-   };
-
-   public static void set()
-   {
-      flag.set(Boolean.TRUE);
-   }
-
-   public static boolean get()
-   {
-      return flag.get();
-   }
-
-   public static void clear()
-   {
-      flag.set(Boolean.FALSE);
-   }
-
-   public static URL toURL(URL url) throws IOException
-   {
-      if (get())
-      {
-         return new URL(url.toExternalForm() + "?" + Copy);
-      }
-      else
-         return url;
-   }
-
-   public static URI toURI(URI uri) throws IOException
-   {
-      if (get())
-      {
-         try
-         {
-            return new URI(uri.getScheme(), uri.getUserInfo(), uri.getPath(), Copy, uri.getFragment());
-         }
-         catch (URISyntaxException e)
-         {
-            throw new IOException(e.getReason());
-         }
-      }
-      else
-         return uri;
-   }
-
-   public String toString()
-   {
-      return "flag=" + get();
    }
 }

@@ -45,6 +45,7 @@ public abstract class AbstractVFSTest extends BaseTestCase
    private static final VFSContextFactory jarFactory = new JarOAContextFactory();
 
    private boolean forceCopy;
+   private boolean forceNoReaper;
 
    public AbstractVFSTest(String name)
    {
@@ -57,6 +58,13 @@ public abstract class AbstractVFSTest extends BaseTestCase
       this.forceCopy = forceCopy;
    }
 
+   public AbstractVFSTest(String name, boolean forceCopy, boolean forceNoReaper)
+   {
+      super(name);
+      this.forceCopy = forceCopy;
+      this.forceNoReaper = forceNoReaper;
+   }
+
    protected void setUp() throws Exception
    {
       super.setUp();
@@ -66,9 +74,10 @@ public abstract class AbstractVFSTest extends BaseTestCase
 
       getLog().info("Force copy: " + forceCopy);
       if (forceCopy)
-      {
-         OptionsAwareURI.set();
-      }
+         OptionsAwareURI.set(OptionsAwareURI.Copy);
+
+      if (forceNoReaper)
+         OptionsAwareURI.set(OptionsAwareURI.NoReaper);
    }
 
    protected void tearDown() throws Exception
@@ -77,9 +86,10 @@ public abstract class AbstractVFSTest extends BaseTestCase
       VFSContextFactoryLocator.unregisterFactory(fileFactory);
 
       if (forceCopy)
-      {
-         OptionsAwareURI.clear();
-      }
+         OptionsAwareURI.clear(OptionsAwareURI.Copy);
+
+      if (forceNoReaper)
+         OptionsAwareURI.clear(OptionsAwareURI.NoReaper);
 
       super.tearDown();
    }
