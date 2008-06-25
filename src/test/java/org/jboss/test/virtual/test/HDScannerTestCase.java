@@ -55,6 +55,8 @@ public class HDScannerTestCase extends OSAwareVFSTest
    public void testDeleteWhileScanning()
       throws Exception
    {
+      System.setProperty("jboss.vfs.forceNoReaper", "true");
+      
       // Create a root in the system tmp dir
       File root = File.createTempFile("testDeleteWhileScanning", ".root");
       root.delete();
