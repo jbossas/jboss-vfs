@@ -475,6 +475,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (parent != null)
          delegatorUrl = getChildURL(parent, name);
 
+      delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl, true);
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
@@ -502,6 +503,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (parent != null)
          delegatorUrl = getChildURL(parent, name);
 
+      delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, wrapper, false);
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);

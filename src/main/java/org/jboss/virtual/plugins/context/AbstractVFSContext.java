@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -119,6 +120,32 @@ public abstract class AbstractVFSContext implements VFSContext
    public Map<String, String> getOptions()
    {
       return rootOptions;
+   }
+
+   /**
+    * Helper method to set options on an URL
+    *
+    * @param url  url to set options on
+    * @return url with query parameters
+    * @throws java.net.MalformedURLException if url manipulation fails
+    */
+   protected URL setOptionsToURL(URL url) throws MalformedURLException
+   {
+      if (rootOptions.size() == 0)
+         return url;
+
+      StringBuilder sb = new StringBuilder(url.toString());
+      sb.append("?");
+      int i = 0;
+      for (Map.Entry<String, String> ent : rootOptions.entrySet())
+      {
+         if (i > 0)
+            sb.append("&");
+         sb.append(ent.getKey()).append("=").append(ent.getValue());
+         i++;
+      }
+      
+      return new URL(sb.toString());
    }
 
    public List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException

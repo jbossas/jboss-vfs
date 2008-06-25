@@ -275,6 +275,7 @@ public class FileSystemContext extends AbstractVFSContext
       if (parent != null)
          delegatorUrl = getChildURL(parent, name);
 
+      delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl);
 
       VirtualFileHandler handler = ctx.getRoot();
@@ -282,7 +283,7 @@ public class FileSystemContext extends AbstractVFSContext
 
       return delegator;
    }
-   
+
    /**
     * Create a new virtual file handler
     * 
