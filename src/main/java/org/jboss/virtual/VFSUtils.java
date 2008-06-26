@@ -478,17 +478,43 @@ public class VFSUtils
    }
 
    /**
+    * Enable option.
+    *
+    * @param file the file
+    * @param optionName option name
+    */
+   protected static void enableOption(VirtualFile file, String optionName)
+   {
+      Map<String, String> options = getOptions(file);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + file);
+
+      options.put(optionName, Boolean.TRUE.toString());
+   }
+
+   /**
+    * Disable option.
+    *
+    * @param file the file
+    * @param optionName option name
+    */
+   protected static void disableOption(VirtualFile file, String optionName)
+   {
+      Map<String, String> options = getOptions(file);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + file);
+
+      options.remove(optionName);
+   }
+
+   /**
     * Enable copy for file param.
     *
     * @param file the file
     */
    public static void enableCopy(VirtualFile file)
    {
-      Map<String, String> options = getOptions(file);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot enable copy on null options: " + file);
-
-      options.put(USE_COPY_QUERY, Boolean.TRUE.toString());
+      enableOption(file, USE_COPY_QUERY);
    }
 
    /**
@@ -498,11 +524,47 @@ public class VFSUtils
     */
    public static void disableCopy(VirtualFile file)
    {
-      Map<String, String> options = getOptions(file);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot disable copy on null options: " + file);
+      disableOption(file, USE_COPY_QUERY);
+   }
 
-      options.remove(USE_COPY_QUERY);
+   /**
+    * Enable repaer for file param.
+    *
+    * @param file the file
+    */
+   public static void enableNoReaper(VirtualFile file)
+   {
+      enableOption(file, NO_REAPER_QUERY);
+   }
+
+   /**
+    * Disable reaper for file param.
+    *
+    * @param file the file
+    */
+   public static void disableNoReaper(VirtualFile file)
+   {
+      disableOption(file, NO_REAPER_QUERY);
+   }
+
+   /**
+    * Enable case sensitive for file param.
+    *
+    * @param file the file
+    */
+   public static void enableCaseSensitive(VirtualFile file)
+   {
+      enableOption(file, CASE_SENSITIVE_QUERY);
+   }
+
+   /**
+    * Disable case sensitive for file param.
+    *
+    * @param file the file
+    */
+   public static void disableCaseSensitive(VirtualFile file)
+   {
+      disableOption(file, CASE_SENSITIVE_QUERY);
    }
 
    /**
