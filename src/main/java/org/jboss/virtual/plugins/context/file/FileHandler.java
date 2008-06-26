@@ -72,6 +72,8 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       if (file.exists() == false)
          throw new FileNotFoundException("File does not exist: " + file.getCanonicalPath());
       setVfsUrl(new URL("vfs" + url));
+      // do cache here - on the file
+      cachedLastModified = getLastModified();
    }
    /**
     * Create a new FileHandler
@@ -90,7 +92,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
 
    protected void initCacheLastModified()
    {
-      cachedLastModified = getLastModified();
+      // ignore that url.openConnection.lastModified
    }
 
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
