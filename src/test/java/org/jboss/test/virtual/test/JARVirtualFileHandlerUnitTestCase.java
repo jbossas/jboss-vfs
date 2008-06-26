@@ -120,4 +120,19 @@ public class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandle
       assertNotNull(handler);
       assertTrue(handler.toString(), handler.isNested());
    }
+
+   protected void modifyChild(VirtualFileHandler child, String name, String path) throws Exception
+   {
+      // noop atm
+   }
+
+   protected void checkHasBeenModified(VirtualFileHandler handler) throws Exception
+   {
+      // noop atm
+   }
+
+   protected void unmodifyChild(VirtualFileHandler child, String name, String path) throws Exception
+   {
+      // noop atm
+   }
 }

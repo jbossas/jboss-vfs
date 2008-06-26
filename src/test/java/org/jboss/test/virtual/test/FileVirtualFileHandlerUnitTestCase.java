@@ -22,11 +22,13 @@
 package org.jboss.test.virtual.test;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -84,5 +86,34 @@ public class FileVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandl
    {
       assertNotNull(handler);
       assertFalse(handler.isNested());
+   }
+
+   protected void modifyChild(VirtualFileHandler child, String name, String path) throws Exception
+   {
+      FileOutputStream out = new FileOutputStream(getRealFile(name, path));
+      try
+      {
+         out.write((UUID.randomUUID() + "\n").getBytes());
+      }
+      finally
+      {
+         try
+         {
+            out.close();
+         }
+         catch (IOException ignored)
+         {
+         }
+      }
+   }
+
+   protected void checkHasBeenModified(VirtualFileHandler handler) throws Exception
+   {
+      assertTrue(handler.hasBeenModified());
+   }
+
+   protected void unmodifyChild(VirtualFileHandler child, String name, String path) throws Exception
+   {
+      // no need to unmodify
    }
 }

@@ -593,6 +593,30 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
 
    protected abstract void assertIsNested(VirtualFileHandler handler) throws Exception;
 
+   public void testHasBeenModified() throws Exception
+   {
+      VFSContext context = getVFSContext("simple");
+      VirtualFileHandler root = context.getRoot();
+      assertFalse(root.hasBeenModified());
+      VirtualFileHandler child = root.getChild("tomodify");
+      assertFalse(child.hasBeenModified());
+      modifyChild(child, "simple", "tomodify");
+      try
+      {
+         checkHasBeenModified(child);
+      }
+      finally
+      {
+         unmodifyChild(child, "simple", "tomodify");
+      }
+   }
+
+   protected abstract void modifyChild(VirtualFileHandler child, String name, String path) throws Exception;
+
+   protected abstract void checkHasBeenModified(VirtualFileHandler handler) throws Exception;
+
+   protected abstract void unmodifyChild(VirtualFileHandler child, String name, String path) throws Exception;
+
    protected void checkVirtualFile(VirtualFileHandler handler) throws Exception
    {
       VirtualFile file = handler.getVirtualFile();
