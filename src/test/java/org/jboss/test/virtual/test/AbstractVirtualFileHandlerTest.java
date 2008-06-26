@@ -599,15 +599,18 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
       VirtualFileHandler root = context.getRoot();
       assertFalse(root.hasBeenModified());
       VirtualFileHandler child = root.getChild("tomodify");
-      assertFalse(child.hasBeenModified());
-      modifyChild(child, "simple", "tomodify");
-      try
+      if (child != null)
       {
-         checkHasBeenModified(child);
-      }
-      finally
-      {
-         unmodifyChild(child, "simple", "tomodify");
+         assertFalse(child.hasBeenModified());
+         modifyChild(child, "simple", "tomodify");
+         try
+         {
+            checkHasBeenModified(child);
+         }
+         finally
+         {
+            unmodifyChild(child, "simple", "tomodify");
+         }
       }
    }
 
