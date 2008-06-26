@@ -88,6 +88,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       this(context, parent, file, uri.toURL());
    }
 
+   protected void initCacheLastModified()
+   {
+      cachedLastModified = getLastModified();
+   }
+
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
    {
       if (getVfsUrl() == null)
