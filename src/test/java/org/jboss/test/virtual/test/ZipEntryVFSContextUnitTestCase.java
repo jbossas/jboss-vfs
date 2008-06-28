@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Map;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -44,8 +43,6 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
 {
-   private Map ctxCacheMap;
-
    public ZipEntryVFSContextUnitTestCase(String name)
    {
       super(name);
@@ -57,25 +54,6 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       System.out.println("java.protocol.handler.pkgs: " + System.getProperty("java.protocol.handler.pkgs"));
       return suite(ZipEntryVFSContextUnitTestCase.class);
    }
-
-/*
-   protected void setUp() throws Exception
-   {
-      super.setUp();
-
-      SecurityManager sm = System.getSecurityManager();
-      System.setSecurityManager(null);
-      try
-      {
-         Field field = ZipEntryContextFactory.class.getDeclaredField("ctxCache");
-         ctxCacheMap = (Map)field.get(ZipEntryContextFactory.getInstance());
-      }
-      finally
-      {
-         System.setSecurityManager(sm);
-      }
-   }
-*/
 
    protected VFSContext getVFSContext(String name) throws Exception
    {

@@ -312,12 +312,16 @@ public class ZipEntryContext extends AbstractVFSContext
       while((entry = zis.getNextEntry()) != null)
       {
          String entryName = entry.getName();
-         if (relative.startsWith(entryName))
+         String match = entryName;
+         if (entry.isDirectory())
+            match = match.substring(0, match.length() - 1);
+
+         if (relative.startsWith(match))
          {
-            if (entryName.equals(relative))
+            if (match.equals(relative))
             {
                // directories and non archives
-               if (entry.isDirectory() || JarUtils.isArchive(entryName) == false)
+               if (entry.isDirectory() || JarUtils.isArchive(match) == false)
                {
                   return new ZipEntryWrapper(zis, entryName, System.currentTimeMillis());
                }
@@ -327,7 +331,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
             if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
             {
-               longestNameMatch = entryName;
+               longestNameMatch = entryName; // keep entry name
             }
          }
       }
