@@ -21,6 +21,7 @@
  */
 package org.jboss.test.virtual.test;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
@@ -64,5 +65,31 @@ public class CustomTestCase extends AbstractVFSTest
       List<String> resources = visitor.getResources();
       assertNotNull(resources);
       assertTrue("Resources empty", resources.size() > 0);
+      for (String path : resources)
+      {
+         VirtualFile clazz = file.getChild(path);
+         assertNotNull(clazz);
+         assertTrue(isClass(clazz));
+      }
+   }
+
+   protected boolean isClass(VirtualFile file) throws Exception
+   {
+      InputStream is = file.openStream();
+      try
+      {
+         int read = is.read();
+         String cafebabe = "";
+         while(read >= 0 && cafebabe.length() < 8)
+         {
+            cafebabe += Integer.toHexString(read);
+            read = is.read();
+         }
+         return "CAFEBABE".equalsIgnoreCase(cafebabe);
+      }
+      finally
+      {
+         is.close();
+      }
    }
 }

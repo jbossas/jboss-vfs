@@ -55,7 +55,13 @@ class ZipDirWrapper extends ZipBytesWrapper
 
    InputStream openStream(ZipEntry ent) throws IOException
    {
-      return getRootAsStream();
+      zisCopy.reset();
+      // TODO - optimize this
+      ZipInputStream zis = new ZipInputStream(zisCopy);
+      ZipEntry entry = zis.getNextEntry();
+      while (entry != null && entry.getName().equals(ent.getName()) == false)
+         entry = zis.getNextEntry();
+      return zis;
    }
 
    Enumeration<? extends ZipEntry> entries() throws IOException
