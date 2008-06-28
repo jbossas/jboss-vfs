@@ -22,8 +22,10 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
+import java.util.List;
 
 import junit.framework.Test;
+import org.jboss.test.virtual.support.PatternVirtualFileVisitor;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
@@ -54,8 +56,13 @@ public class CustomTestCase extends AbstractVFSTest
       URL url = getResource("/vfs/test/spring-ear.ear");
       String urlString = url.toExternalForm();
       int p = urlString.indexOf(":/");
-      url = new URL("vfszip" + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring/");
+      url = new URL("vfszip" + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring");
       VirtualFile file = VFS.getRoot(url);
       assertNotNull(file);
+      PatternVirtualFileVisitor visitor = new PatternVirtualFileVisitor();
+      file.visit(visitor);
+      List<String> resources = visitor.getResources();
+      assertNotNull(resources);
+      assertTrue("Resources empty", resources.size() > 0);
    }
 }

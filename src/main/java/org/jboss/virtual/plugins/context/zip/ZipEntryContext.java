@@ -320,11 +320,10 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             if (match.equals(relative))
             {
-               // directories and non archives
-               if (entry.isDirectory() || JarUtils.isArchive(match) == false)
-               {
+               if (entry.isDirectory())
+                  return new ZipDirWrapper(zis, entryName, System.currentTimeMillis(), bais);
+               else if (JarUtils.isArchive(match) == false)
                   return new ZipEntryWrapper(zis, entryName, System.currentTimeMillis());
-               }
                else
                   return new ZipStreamWrapper(zis, entryName, System.currentTimeMillis());
             }
