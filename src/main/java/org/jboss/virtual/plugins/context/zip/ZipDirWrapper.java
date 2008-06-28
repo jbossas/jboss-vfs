@@ -88,6 +88,7 @@ class ZipDirWrapper extends ZipBytesWrapper
          }
          catch (IOException e)
          {
+            log.warn("Error retrieving entries for entry " + getName() + ", cause: " + e);
             return false;
          }
       }

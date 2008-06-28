@@ -65,11 +65,38 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
       initCacheLastModified();
    }
 
+   /**
+    * Open connection.
+    *
+    * @return  url's connection
+    * @throws IOException for any error
+    */
+   protected URLConnection openConnection() throws IOException
+   {
+      return openConnection(url);
+   }
+
+   /**
+    * Open connection.
+    * Set use cacheable to false,
+    * due to locking on Windows.
+    *
+    * @param url the url to open
+    * @return  url's connection
+    * @throws IOException for any error
+    */
+   protected static URLConnection openConnection(URL url) throws IOException
+   {
+      URLConnection conn = url.openConnection();
+      conn.setUseCaches(false);
+      return conn;
+   }
+
    protected void initCacheLastModified()
    {
       try
       {
-         this.cachedLastModified = url.openConnection().getLastModified();
+         this.cachedLastModified = openConnection().getLastModified();
       }
       catch (IOException e)
       {
@@ -95,14 +122,14 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
    public long getLastModified() throws IOException
    {
       checkClosed();
-      URLConnection c = url.openConnection();
+      URLConnection c = openConnection();
       return c.getLastModified();
    }
 
    public long getSize() throws IOException
    {
       checkClosed();
-      URLConnection c = url.openConnection();
+      URLConnection c = openConnection();
       return c.getContentLength();
    }
 
@@ -115,7 +142,7 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
     */
    public boolean exists() throws IOException
    {
-      URLConnection c = url.openConnection();
+      URLConnection c = openConnection();
       return c.getLastModified() != 0;
    }
 
@@ -128,7 +155,8 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
    public InputStream openStream() throws IOException
    {
       checkClosed();
-      return url.openStream();
+      URLConnection conn = openConnection();
+      return conn.getInputStream();
    }
 
    public URI toURI() throws URISyntaxException

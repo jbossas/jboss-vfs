@@ -21,11 +21,13 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.util.zip.ZipEntry;
 import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+
+import org.jboss.logging.Logger;
 
 /**
  * ZipWrapper represents abstracted access to zip archive
@@ -35,6 +37,9 @@ import java.util.Enumeration;
  */
 abstract class ZipWrapper
 {
+   /** the log */
+   protected static final Logger log = Logger.getLogger(ZipWrapper.class);
+
    /** last known modifyTime of the zip source */
    protected long lastModified;
 

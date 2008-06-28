@@ -161,7 +161,7 @@ public abstract class AbstractJarHandler extends AbstractURLHandler
    {
       try
       {
-         URLConnection connection = url.openConnection();
+         URLConnection connection = openConnection(url);
          JarURLConnection jarConnection;
          if (connection instanceof JarURLConnection)
          {
@@ -171,9 +171,8 @@ public abstract class AbstractJarHandler extends AbstractURLHandler
          {
             // try wrapping it in jar:
             URL jarUrl = new URL("jar:" + url + "!/");
-            jarConnection = (JarURLConnection)jarUrl.openConnection();
+            jarConnection = (JarURLConnection)openConnection(jarUrl);
          }
-         jarConnection.setUseCaches(false);
          return jarConnection.getJarFile();
       }
       catch (IOException original)
@@ -206,7 +205,7 @@ public abstract class AbstractJarHandler extends AbstractURLHandler
       }
       else
       {
-         URLConnection conn = jarURL.openConnection();
+         URLConnection conn = openConnection(jarURL);
          if (conn instanceof JarURLConnection)
          {
             JarURLConnection jconn = (JarURLConnection) conn;

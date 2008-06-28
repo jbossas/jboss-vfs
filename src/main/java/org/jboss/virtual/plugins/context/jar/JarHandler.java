@@ -53,7 +53,7 @@ public class JarHandler extends AbstractStructuredJarHandler<Object>
     */
    public JarHandler(VFSContext context, VirtualFileHandler parent, URL url, String name) throws IOException
    {
-      super(context, parent, url, ((JarURLConnection) url.openConnection()).getJarFile(), null, name);
+      super(context, parent, url, ((JarURLConnection)openConnection(url)).getJarFile(), null, name);
       setVfsUrl(new URL("vfs" + url));
 
       try
