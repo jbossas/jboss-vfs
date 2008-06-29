@@ -105,6 +105,11 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       return structuredFindChild(path);
    }
 
+   public boolean removeChild(String name) throws IOException
+   {
+      return entryMap.remove(name) != null;
+   }
+
    @Override
    public boolean exists() throws IOException
    {

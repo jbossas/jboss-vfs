@@ -97,6 +97,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
          return child;
    }
 
+   public boolean removeChild(String path) throws IOException
+   {
+      throw new IOException("This method should never get called!");
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       return getDelegate().getChildren(ignoreErrors);
@@ -130,6 +135,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    public boolean isNested() throws IOException
    {
       return getDelegate().isNested();
+   }
+
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      return getDelegate().delete(gracePeriod);
    }
 
    public InputStream openStream() throws IOException

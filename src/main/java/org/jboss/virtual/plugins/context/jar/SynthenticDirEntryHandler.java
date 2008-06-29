@@ -142,6 +142,11 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
       return true;
    }
 
+   public boolean delete(int gracePeriod)
+   {
+      return false;
+   }
+
    @Override
    public InputStream openStream() throws IOException
    {
@@ -183,6 +188,11 @@ public class SynthenticDirEntryHandler extends AbstractURLHandler
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return structuredFindChild(path);
+   }
+
+   public boolean removeChild(String name) throws IOException
+   {
+      return false;
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)

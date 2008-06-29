@@ -460,6 +460,34 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    }
 
    /**
+    * Delete the file represented by this handler.
+    *
+    * File deletion is comprised of two parts:
+    *
+    * <ol>
+    * <li>physical file deletion - performed by this method or its override</li>
+    * <li>removal of any child references from the parent - performed by {@link #removeChild(String)} of the parent</li>
+    * </ol>
+    *
+    * This method doesn't do any physical file removal because it has no concept of underlying physical file.
+    * An implementation that does physical file removal should override this method and call super.delete() at the end.
+    *
+    * @param gracePeriod max time to wait for any locks
+    * @return true if file was deleted, false otherwise
+    * @throws IOException if an error occurs
+    */
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      VirtualFileHandler parent = getParent();
+      if (parent != null)
+      {
+         return parent.removeChild(getName());
+      }
+
+      return false;
+   }
+
+   /**
     * Structured implementation of get child
     *
     * @param path the path

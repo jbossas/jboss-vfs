@@ -173,6 +173,11 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
       return null;
    }
 
+   public boolean removeChild(String path)
+   {
+      return false;
+   }
+
    /**
     * Find the handler.
     * TODO: synchronization on lazy entryMap creation
@@ -209,6 +214,11 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
    public boolean isLeaf()
    {
       return isJar == false && getEntry().isDirectory() == false;
+   }
+
+   public boolean delete(int gracePeriod)
+   {
+      return false;
    }
 
    // Stream accessor

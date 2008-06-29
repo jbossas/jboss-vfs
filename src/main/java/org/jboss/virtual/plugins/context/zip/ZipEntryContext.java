@@ -678,6 +678,15 @@ public class ZipEntryContext extends AbstractVFSContext
       return Collections.emptyList();
    }
 
+   public boolean delete(ZipEntryHandler handler, int gracePeriod) throws IOException
+   {
+      if (getRoot().equals(handler))
+      {
+         return zipSource.delete(gracePeriod);
+      }
+      return false;
+   }
+
    /**
     * Returns lastModified timestamp for a given handler
     *

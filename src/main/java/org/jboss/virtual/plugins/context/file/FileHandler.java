@@ -148,6 +148,46 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return false;
    }
 
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      File f = getFile();
+
+      boolean exists = f.exists();
+      if (exists == false)
+         return false;
+
+      if (f.delete() == false)
+      {
+         long endOfGrace = System.currentTimeMillis() + gracePeriod;
+         while(System.currentTimeMillis() < endOfGrace)
+         {
+            boolean done = f.delete();
+            if (done)
+            {
+               childCache.remove(f.getName());
+               return true;
+            }
+
+            if (f.isDirectory())
+               return false;
+
+            try
+            {
+               Thread.sleep(100);
+            }
+            catch (InterruptedException e)
+            {
+               throw new IOException("Interrupted: ", e);
+            }
+         }
+         return false;
+      }
+      else
+      {
+         return true;
+      }
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       File parent = getFile();
@@ -231,6 +271,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return structuredFindChild(path);
+   }
+
+   public boolean removeChild(String name) throws IOException
+   {
+      return childCache.remove(name) != null;
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)

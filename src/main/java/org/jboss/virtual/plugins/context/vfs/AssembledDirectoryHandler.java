@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +79,29 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       childrenMap.put(handler.getName(), handler);
       lastModified = System.currentTimeMillis();
       return handler;
+   }
+
+   /**
+    * This method removes a specified child from its list of children map
+    *
+    * @param name child name
+    * @return true if child was removed, false otherwise
+    */
+   public boolean removeChild(String name)
+   {
+      Iterator<VirtualFileHandler> it = children.iterator();
+      while (it.hasNext())
+      {
+         VirtualFileHandler child = it.next();
+         if (child.getName().equals(name))
+         {
+            it.remove();
+            childrenMap.remove(name);
+            lastModified = System.currentTimeMillis();
+            return true;
+         }
+      }
+      return false;
    }
 
    public VirtualFileHandler findChild(String name)

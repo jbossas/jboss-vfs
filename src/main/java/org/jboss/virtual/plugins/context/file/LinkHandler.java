@@ -89,6 +89,11 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
          return structuredFindChild(path);
       }
 
+      public boolean removeChild(String name) throws IOException
+      {
+         return children.remove(name) != null;
+      }
+
       public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
       {
          return null;
@@ -211,6 +216,11 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return structuredFindChild(path);
+   }
+
+   public boolean removeChild(String name) throws IOException
+   {
+      return linkTargets.remove(name) != null;
    }
 
    @Override

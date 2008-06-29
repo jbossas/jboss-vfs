@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.util.UnexpectedThrowable;
@@ -74,10 +75,13 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
 
    /** The stream */
    private byte[] stream;
-   
+
    /** When to throw an IOException */
    private String ioException = "";
-   
+
+   /** Delete succeeds */
+   private boolean doDelete = true;
+
    /**
     * Create a root mock uri
     * 
@@ -158,6 +162,24 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
       if (children.contains(child) == false)
          children.add(child);
       leaf = false;
+   }
+
+   public boolean removeChild(String path) throws IOException
+   {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+
+      Iterator<VirtualFileHandler> it = children.iterator();
+      while (it.hasNext())
+      {
+         VirtualFileHandler handler = it.next();
+         if (path.equals(handler.getName()))
+         {
+            it.remove();
+            return true;
+         }
+      }
+      return false;
    }
 
    public long getLastModified() throws IOException
@@ -246,6 +268,13 @@ public abstract class AbstractMockVirtualFileHandler extends AbstractVirtualFile
    public void setNested(boolean nested)
    {
       this.nested = nested;
+   }
+
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      checkClosed();
+      throwIOException("delete");
+      return doDelete;
    }
 
    /**

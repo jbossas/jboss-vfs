@@ -128,6 +128,12 @@ abstract class ZipBytesWrapper extends ZipWrapper
       zipBytes = null;
    }
 
+   boolean delete(int gracePeriod) throws IOException
+   {
+      close();
+      return true;
+   }
+
    /**
     * String description of this archive
     *

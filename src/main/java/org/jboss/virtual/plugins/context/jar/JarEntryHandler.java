@@ -171,6 +171,16 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       return structuredFindChild(path);
    }
 
+   public boolean removeChild(String path) throws IOException
+   {
+      return false;
+   }
+
+   public boolean delete(String path)
+   {
+      return false;
+   }
+
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
       entryChildren.remove(original);

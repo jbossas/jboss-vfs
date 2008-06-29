@@ -135,9 +135,19 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
       return njar.getChild(path);
    }
 
+   public boolean removeChild(String name) throws IOException
+   {
+      return false;
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       return njar.getChildren(ignoreErrors);
+   }
+
+   public boolean delete(int gracePeriod)
+   {
+      return false;
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)

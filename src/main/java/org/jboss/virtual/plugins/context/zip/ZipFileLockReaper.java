@@ -26,6 +26,7 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.IOException;
 
 import org.jboss.logging.Logger;
 
@@ -113,6 +114,19 @@ public class ZipFileLockReaper
       lastUsed = System.currentTimeMillis();
       if (log.isTraceEnabled())
          log.trace("Unregistered: " + w);
+   }
+
+   public void deleteFile(ZipFileWrapper zipFileWrapper) throws IOException
+   {
+      synchronized (ZipFileLockReaper.this)
+      {
+         Iterator it = monitored.iterator();
+         while (it.hasNext())
+         {
+            ZipFileWrapper w = (ZipFileWrapper) it.next();
+            w.deleteFile(zipFileWrapper);
+         }
+      }
    }
 
    /** Timer task that does the actual reaping */

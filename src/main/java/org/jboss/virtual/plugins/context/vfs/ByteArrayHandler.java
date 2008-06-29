@@ -110,4 +110,9 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
    {
       throw new IOException("File cannot have children");
    }
+
+   public boolean removeChild(String name)
+   {
+      return false;
+   }
 }

@@ -66,7 +66,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author adrian@jboss.org
  * @version $Revision: 55523 $
  */
-public class FileVFSUnitTestCase extends OSAwareVFSTest
+public class FileVFSUnitTestCase extends AbstractVFSTest
 {
    public FileVFSUnitTestCase(String name)
    {
@@ -1351,9 +1351,9 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
-      assertTrue("tmp.delete()", tmp.delete() || isWindowsOS());
-      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists() && isWindowsOS() == false);
-      assertTrue(tmpRoot+".delete()", tmpRoot.delete() || isWindowsOS());
+      assertTrue("tmp.delete()", tmpVF.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
    }
 
    /**
@@ -1408,9 +1408,9 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       VirtualFile tmpVF = vfs.findChild(tmpJar.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
       assertTrue(tmpVF.getPathName()+".size() > 0", tmpVF.getSize() > 0);
-      assertTrue("tmp.delete()", tmpJar.delete() || isWindowsOS());
-      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists() && isWindowsOS() == false);
-      assertTrue(tmpRoot+".delete()", tmpRoot.delete() || isWindowsOS());
+      assertTrue("tmp.delete()", tmpVF.delete());
+      assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
+      assertTrue(tmpRoot+".delete()", tmpRoot.delete());
    }
 
    /**
@@ -1438,6 +1438,52 @@ public class FileVFSUnitTestCase extends OSAwareVFSTest
       assertTrue(tmp+".delete()", tmp.delete());
       assertFalse(tmpVF.getPathName()+".exists()", tmpVF.exists());
       assertTrue(tmpRoot+".delete()", tmpRoot.delete());
+   }
+
+   /**
+    * Test VirtualFile.delete() for file based urls
+    *
+    * @throws Exception
+    */
+   public void testFileDelete() throws Exception
+   {
+      File tmpRoot = File.createTempFile("vfs", ".root");
+      VFS vfs = VFS.getVFS(tmpRoot.toURL());
+
+      // non-existent directory - exists() not
+      tmpRoot.delete();
+      assertFalse(tmpRoot + ".exits() == false", vfs.getRoot().exists());
+
+      // existing directory - exists(), delete()
+      tmpRoot.mkdir();
+      assertTrue(tmpRoot + ".exits()", vfs.getRoot().exists());
+      assertTrue(tmpRoot + ".delete()", vfs.getRoot().delete());
+      tmpRoot.mkdir();
+
+      // non-empty directory - delete() not
+      File tmp = File.createTempFile("testFileDelete", ".jar", tmpRoot);
+      assertFalse(tmpRoot + ".delete() == false", vfs.getRoot().delete());
+
+      // children() exist
+      List<VirtualFile> children = vfs.getChildren();
+      assertTrue(tmpRoot + ".getChildren().size() == 1", children.size() == 1);
+
+      // specific child exists(), delete(), exists() not
+      VirtualFile tmpVF = vfs.getChild(tmp.getName());
+      assertTrue(tmp + ".exists()", tmpVF.exists());
+      assertTrue(tmp + ".delete()", tmpVF.delete());
+      assertFalse(tmp + ".exists() == false", tmpVF.exists());
+
+      // children() don't exist
+      children = vfs.getChildren();
+      assertTrue(tmpRoot + ".getChildren().size() == 0", children.size() == 0);
+
+      // getChild() returns null
+      tmpVF = vfs.getChild(tmp.getName());
+      assertNull(tmpRoot + ".getChild('" + tmp.getName() + "') == null", tmpVF);
+
+      // directory delete()
+      assertTrue(tmpRoot + ".delete()", vfs.getRoot().delete());
    }
 
    /**

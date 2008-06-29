@@ -123,6 +123,11 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
       return super.getChild(path);
    }
 
+   public boolean removeChild(String name) throws IOException
+   {
+      return false;
+   }
+
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       init();
@@ -203,6 +208,11 @@ public class NestedJarFromStream extends AbstractStructuredJarHandler<byte[]>
    public boolean isNested() throws IOException
    {
       return true;
+   }
+
+   public boolean delete(int gracePeriod)
+   {
+      return false;
    }
 
    // Stream accessor

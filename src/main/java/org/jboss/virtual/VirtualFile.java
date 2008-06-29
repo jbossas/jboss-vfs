@@ -275,6 +275,30 @@ public class VirtualFile implements Serializable
    }
 
    /**
+    * Delete this virtual file
+    *
+    * @return true if file was deleted
+    * @throws IOException if an error occurs
+    */
+   public boolean delete() throws IOException
+   {
+      // gracePeriod of 2 seconds
+      return getHandler().delete(2000);
+   }
+
+   /**
+    * Delete this virtual file
+    *
+    * @param gracePeriod max time to wait for any locks (in milliseconds)
+    * @return true if file was deleted
+    * @throws IOException if an error occurs
+    */
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      return getHandler().delete(gracePeriod);
+   }
+
+   /**
     * Get the VFS instance for this virtual file
     *
     * @return the VFS

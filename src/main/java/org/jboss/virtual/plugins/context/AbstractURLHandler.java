@@ -23,6 +23,7 @@ package org.jboss.virtual.plugins.context;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -96,14 +97,36 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
    {
       try
       {
-         this.cachedLastModified = openConnection().getLastModified();
+         URLConnection c = openConnection();
+         try
+         {
+            this.cachedLastModified = c.getLastModified();
+         }
+         finally
+         {
+            closeConnection(c);
+         }
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
    }
-   
+
+   private void closeConnection(URLConnection c)
+   {
+      try
+      {
+         if (c instanceof JarURLConnection == false)
+            c.getInputStream().close();
+      }
+      catch (Exception ex)
+      {
+         if (log.isDebugEnabled())
+            log.debug("IGNORING: Exception while closing connection", ex);
+      }
+   }
+
    /**
     * Get the url
     * 
@@ -123,14 +146,28 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
    {
       checkClosed();
       URLConnection c = openConnection();
-      return c.getLastModified();
+      try
+      {
+         return c.getLastModified();
+      }
+      finally
+      {
+         closeConnection(c);
+      }
    }
 
    public long getSize() throws IOException
    {
       checkClosed();
       URLConnection c = openConnection();
-      return c.getContentLength();
+      try
+      {
+         return c.getContentLength();
+      }
+      finally
+      {
+         closeConnection(c);
+      }
    }
 
    /**
@@ -143,7 +180,14 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
    public boolean exists() throws IOException
    {
       URLConnection c = openConnection();
-      return c.getLastModified() != 0;
+      try
+      {
+         return c.getLastModified() != 0;
+      }
+      finally
+      {
+         closeConnection(c);
+      }
    }
 
    public boolean isHidden() throws IOException

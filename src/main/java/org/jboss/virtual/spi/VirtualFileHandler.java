@@ -182,6 +182,16 @@ public interface VirtualFileHandler extends Serializable
    VirtualFileHandler getChild(String path) throws IOException;
 
    /**
+    * Remove a child
+    *
+    * @param name child name
+    * @return true if child was removed, false otherwise
+    * @throws IllegalStateException if closed
+    * @throws IOException if an error occurs
+    */
+   boolean removeChild(String name) throws IOException;
+
+   /**
     * Get the VFSContext this file belongs to
     * 
     * @return the context
@@ -217,4 +227,13 @@ public interface VirtualFileHandler extends Serializable
     * @throws IOException for any error
     */
    boolean isNested() throws IOException;
+
+   /**
+    *  Delete a file represented by this handler
+    *
+    *  @param gracePeriod max time to wait for locks (in milliseconds)
+    *  @return boolean true if file was deleted, false otherwise
+    *  @throws IOException for any error
+    */
+   public boolean delete(int gracePeriod) throws IOException;
 }

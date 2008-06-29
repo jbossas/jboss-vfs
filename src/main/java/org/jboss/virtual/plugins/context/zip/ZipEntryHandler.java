@@ -139,6 +139,21 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       return structuredFindChild(path);
    }
 
+   public boolean removeChild(String name) throws IOException
+   {
+      return false;
+   }
+
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      checkClosed();
+      boolean deleted = getZipEntryContext().delete(this, gracePeriod);
+      if (deleted)
+         super.delete(gracePeriod);
+
+      return deleted;
+   }
+
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
       return getZipEntryContext().getChild(this, name);

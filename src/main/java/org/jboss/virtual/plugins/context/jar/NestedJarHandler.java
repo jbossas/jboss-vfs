@@ -183,6 +183,16 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       return new FileInputStream(temp);
    }
 
+   public boolean removeChild(String name) throws IOException
+   {
+      return false;
+   }
+
+   public boolean delete(int gracePeriod)
+   {
+      return false;
+   }
+
    /**
     * Restore the temp file
     *

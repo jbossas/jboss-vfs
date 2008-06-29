@@ -87,6 +87,18 @@ public class JarHandler extends AbstractStructuredJarHandler<Object>
       }
    }
 
+   public boolean removeChild(String path) throws IOException
+   {
+      return false;
+   }
+
+   public boolean delete(int gracePeriod) throws IOException
+   {
+      getJar().close();
+      File jarFile = new File(getJar().getName());      
+      return jarFile.delete();
+   }
+
    public boolean isNested() throws IOException
    {
       return false;

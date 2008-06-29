@@ -180,4 +180,14 @@ abstract class ZipWrapper
     * Close this archive
     */
    abstract void close();
+
+   /**
+    * Delete this archive
+    *
+    * @param gracePeriod maximum time to wait for any locks
+    * @return true if file was deleted, false otherwise
+    * @throws IOException for any error
+    */
+   abstract boolean delete(int gracePeriod) throws IOException;
+   
 }
