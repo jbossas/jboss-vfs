@@ -221,7 +221,13 @@ public class ZipEntryContext extends AbstractVFSContext
       setRootPeer(peer);
 
       String name = getRootURI().toString();
-      int toPos = name.length();
+
+      // cut off query string
+      int toPos = name.lastIndexOf("?");
+      if (toPos != -1)
+         name = name.substring(0, toPos);
+
+      toPos = name.length();
 
       // cut off any ending slash
       if(name.length() != 0 && name.charAt(name.length()-1) == '/')
@@ -299,7 +305,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return zip wrapper instance
     * @throws IOException for any error
     */
-   protected static ZipWrapper findEntry(InputStream is, String relative) throws IOException
+   protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ZipEntryContext.copyStreamAndClose(is, baos);
@@ -321,11 +327,18 @@ public class ZipEntryContext extends AbstractVFSContext
             if (match.equals(relative))
             {
                if (entry.isDirectory())
+               {
+                  this.rootEntryPath = relative;
                   return new ZipDirWrapper(zis, entryName, System.currentTimeMillis(), bais);
+               }
                else if (JarUtils.isArchive(match) == false)
+               {
                   return new ZipEntryWrapper(zis, entryName, System.currentTimeMillis());
+               }
                else
+               {
                   return new ZipStreamWrapper(zis, entryName, System.currentTimeMillis());
+               }
             }
 
             if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
@@ -404,10 +417,13 @@ public class ZipEntryContext extends AbstractVFSContext
             String parentPath = split[0];
             String name = split[1];
 
-            EntryInfo ei = entries.get(parentPath);
-            if(ei == null)
-               ei = makeDummyParent(parentPath);
-
+            EntryInfo ei = null;
+            if ("".equals(name) == false)
+            {
+               ei = entries.get(parentPath);
+               if(ei == null)
+                  ei = makeDummyParent(parentPath);
+            }
             AbstractVirtualFileHandler parent = ei != null ? ei.handler : null;
 
             if(ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
@@ -1104,6 +1120,9 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    public static String [] splitParentChild(String pathName)
    {
+      if (pathName.startsWith("/"))
+         pathName = pathName.substring(1);
+      
       if(pathName.length() == 0)
          return new String [] {null, pathName};
 
