@@ -37,16 +37,16 @@ import org.jboss.virtual.VirtualFile;
  *
  * @author Ales.Justin@jboss.org
  */
-public class JAREntryTestCase extends OSAwareVFSTest
+public class JAREntryTestCase extends AbstractVFSTest
 {
    public JAREntryTestCase(String name)
    {
-      super(name);
+      super(name, false, false);
    }
 
    protected JAREntryTestCase(String name, boolean forceCopy)
    {
-      super(name, forceCopy);
+      super(name, forceCopy, false);
    }
 
    public static Test suite()
@@ -78,6 +78,9 @@ public class JAREntryTestCase extends OSAwareVFSTest
       List<VirtualFile> children = metainf.getChildren();
       assertEquals(1, children.size());
 
+      // delete zipFile before recreating it otherwise you get a corrupt entries iterator on linux
+      assertTrue(root.delete());
+      
       fos = new FileOutputStream(tmp);
       jos = new JarOutputStream(fos, mf);
       try

@@ -39,17 +39,17 @@ import org.jboss.virtual.VirtualFile;
  * @author Scott.Stark@jboss.org
  * @version $Revision:$
  */
-public class HDScannerTestCase extends OSAwareVFSTest
+public class HDScannerTestCase extends AbstractVFSTest
 {
 
    public HDScannerTestCase(String name, boolean forceCopy)
    {
-      super(name, forceCopy, true);
+      super(name, forceCopy, false);
    }
 
    public HDScannerTestCase(String name)
    {
-      super(name, true, true);
+      super(name, true, false);
    }
 
    public void testDeleteWhileScanning()
@@ -87,7 +87,8 @@ public class HDScannerTestCase extends OSAwareVFSTest
          archive.setLastModified(System.currentTimeMillis());
       }
       getLog().info("Trying to remove: "+archive.getAbsolutePath());
-      assertTrue(archive.delete());
+      assertTrue(archiveVF.delete());
+      assertFalse(archiveVF.exists());
       getLog().info("Deleted deployed archive");
       scanner.stop();
    }

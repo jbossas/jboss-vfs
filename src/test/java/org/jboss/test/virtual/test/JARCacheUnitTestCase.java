@@ -39,16 +39,16 @@ import org.jboss.virtual.VirtualFile;
  * @author <a href="mailto:carlo.dewolf@jboss.com">Carlo de Wolf</a>
  * @version $Revision$
  */
-public class JARCacheUnitTestCase extends OSAwareVFSTest
+public class JARCacheUnitTestCase extends AbstractVFSTest
 {
    public JARCacheUnitTestCase(String name)
    {
-      super(name);
+      super(name, false, false);
    }
 
    protected JARCacheUnitTestCase(String name, boolean forceCopy)
    {
-      super(name, forceCopy);
+      super(name, forceCopy, false);
    }
 
    public static Test suite()
@@ -69,20 +69,19 @@ public class JARCacheUnitTestCase extends OSAwareVFSTest
          out.flush();
          out.close();
       }
-      
+
       // Verify it via VFS
       File root = new File(".");
+      VirtualFile vf = VFS.getVirtualFile(root.toURL(), "test.jar");
       {
-         VirtualFile vf = VFS.getVirtualFile(root.toURL(), "test.jar");
-//         System.err.println("lastModified = " + vf.getLastModified());
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
          Manifest manifest = new Manifest(manifestFile.openStream());
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("v1", actual);
       }
       
-      // If we don't delete, VFS will give ZIP errors (related issue?)
-      assertTrue("test file deleted: " + testFile, testFile.delete() || isWindowsOS());
+      // If we don't delete, we get a corrupt zip entries iterator on linux
+      assertTrue("test file deleted: " + testFile, vf.delete());
       
       // Create a new test.jar with manifest v2
       {
@@ -104,11 +103,15 @@ public class JARCacheUnitTestCase extends OSAwareVFSTest
       
       // Verify the manifest the VFS way
       {
-         VirtualFile vf = VFS.getVirtualFile(root.toURL(), "test.jar");
-         // Note that the modification date has not changed according to VFS
-//         System.err.println("lastModified = " + vf.getLastModified());
-//         System.err.println("modified = " + vf.hasBeenModified());
-       
+         VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
+         Manifest manifest = new Manifest(manifestFile.openStream());
+         String actual = manifest.getMainAttributes().getValue("test");
+         assertEquals("VFS found the wrong manifest", "v2", actual);
+      }
+
+      // Verify again - through new context
+      {
+         vf = VFS.getVirtualFile(root.toURL(), "test.jar");
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
          Manifest manifest = new Manifest(manifestFile.openStream());
          String actual = manifest.getMainAttributes().getValue("test");

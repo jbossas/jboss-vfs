@@ -89,15 +89,11 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       }
       os.close();
 
-      // use noReaper so that the underlying file is not locked
-      // when we try to delete it
-      String jarUrl = tmpJar.toURL().toString() + "?noReaper=true";
-      ZipEntryContext context = new ZipEntryContext(new URL(jarUrl));
+      ZipEntryContext context = new ZipEntryContext(tmpJar.toURL());
       assertTrue("context.getRoot().exists()", context.getRoot().exists());
 
-      boolean isDeleted = tmpJar.delete();
+      boolean isDeleted = context.getRoot().delete(1000);
       assertTrue("delete tmp file: " + tmpJar, isDeleted);
-
       assertFalse("context.getRoot().exists()", context.getRoot().exists());
    }
 

@@ -37,7 +37,7 @@ import junit.framework.Test;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
-public class URLExistsUnitTestCase extends OSAwareVFSTest
+public class URLExistsUnitTestCase extends AbstractVFSTest
 {
    public URLExistsUnitTestCase(String name)
    {
@@ -70,7 +70,7 @@ public class URLExistsUnitTestCase extends OSAwareVFSTest
       {
          in.close();
       }
-      assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete() || isWindowsOS());
+      assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete());
       conn = tmpURL.openConnection();
       lastModified = conn.getLastModified();
       System.out.println("lastModified after delete, "+lastModified);
@@ -94,14 +94,28 @@ public class URLExistsUnitTestCase extends OSAwareVFSTest
 
       URL tmpURL = new URL("jar:"+tmp.toURL()+"!/");
       URLConnection conn = tmpURL.openConnection();
+      conn.setUseCaches(false);
+
       long lastModified = conn.getLastModified();
+
+      // the following ugly block of code is
+      // the only known way to force jar file lock release on Windows
+      // and it's not even 100% reliable
+      conn = null;
+      tmpURL = null;
+      System.gc();
+      Thread.sleep(500);
+      System.gc();
+
       System.out.println("lastModified, "+lastModified);
       assertNotSame("lastModified", 0, lastModified);
-      assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete() || isWindowsOS());
+      assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete());
+
+      tmpURL = new URL("jar:"+tmp.toURL()+"!/");
       conn = tmpURL.openConnection();
       lastModified = conn.getLastModified();
       System.out.println("lastModified after delete, "+lastModified);
       // TODO - fix back
-      assertTrue("lastModified", 0 == lastModified || isWindowsOS());
+      assertTrue("lastModified", 0 == lastModified);
    }
 }
