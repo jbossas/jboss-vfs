@@ -301,6 +301,18 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       testVirtualFileAdaptor(textThree, "../..");
    }
 
+   // TODO - fix this
+   public void testNestedDir() throws Exception
+   {
+      URL url = getResource("/vfs/test/spring-ear.ear");
+      String urlString = url.toExternalForm();
+      int p = urlString.indexOf(":/");
+      url = new URL("vfszip" + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring");
+      VirtualFile file = VFS.getRoot(url);
+      assertNotNull("No beans dir", file.getChild("beans"));
+      testVirtualFileAdaptor(file, "beans");
+   }
+
    protected void testVirtualFileAdaptor(VirtualFile file, String pathName) throws Exception
    {
       VirtualFileAdaptor adaptor = new VirtualFileAdaptor(file);
