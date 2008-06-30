@@ -188,9 +188,12 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       return false;
    }
 
-   public boolean delete(int gracePeriod)
+   public boolean delete(int gracePeriod) throws IOException
    {
-      return false;
+      boolean deleted = temp.delete();
+      if (deleted)
+         return super.delete(gracePeriod);
+      return deleted;
    }
 
    /**

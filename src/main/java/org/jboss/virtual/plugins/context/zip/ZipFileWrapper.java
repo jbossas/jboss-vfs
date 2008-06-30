@@ -318,7 +318,9 @@ class ZipFileWrapper extends ZipWrapper
          }
          catch (InterruptedException e)
          {
-            throw new IOException("Interrupted: ", e);
+            IOException ioe = new IOException("Interrupted: " + e);
+            ioe.initCause(e);
+            throw ioe;
          }
       }
       while(System.currentTimeMillis() < endOfGrace);

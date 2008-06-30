@@ -480,9 +480,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    {
       VirtualFileHandler parent = getParent();
       if (parent != null)
-      {
          return parent.removeChild(getName());
-      }
 
       return false;
    }

@@ -177,7 +177,9 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             }
             catch (InterruptedException e)
             {
-               throw new IOException("Interrupted: ", e);
+               IOException ioe = new IOException("Interrupted: " + e);
+               ioe.initCause(e);
+               throw ioe;
             }
          }
          return false;
