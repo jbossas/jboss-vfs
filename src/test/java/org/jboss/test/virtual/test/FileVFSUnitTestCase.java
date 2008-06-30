@@ -1460,10 +1460,16 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertTrue(tmpRoot + ".delete()", vfs.getRoot().delete());
       tmpRoot.mkdir();
 
-      // non-empty directory - delete() not
-      File tmp = File.createTempFile("testFileDelete", ".jar", tmpRoot);
-      assertFalse(tmpRoot + ".delete() == false", vfs.getRoot().delete());
+      // non-empty directory - delete()
+      File tmp = new File(tmpRoot, "testFileDelete.jar");
+      assertTrue(tmp.mkdir());
+      File tmp2 = File.createTempFile("testFileDelete2", ".jar", tmp);
+      assertTrue(tmp2.exists());
+      VirtualFile tmpDeletable = VFS.getRoot(tmp.toURI());
+      assertTrue(tmpRoot + ".delete() == false", tmpDeletable.delete());
 
+      // create child to vfs
+      assertTrue(tmp.mkdir());
       // children() exist
       List<VirtualFile> children = vfs.getChildren();
       assertTrue(tmpRoot + ".getChildren().size() == 1", children.size() == 1);

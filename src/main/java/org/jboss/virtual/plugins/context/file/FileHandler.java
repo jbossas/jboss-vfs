@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.util.file.Files;
 import org.jboss.virtual.plugins.context.AbstractURLHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -127,6 +128,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return getFile().lastModified();
    }
 
+   public boolean exists() throws IOException
+   {
+      return getFile().exists();
+   }
+
    @Override
    public long getSize()
    {
@@ -156,21 +162,18 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       if (exists == false)
          return false;
 
-      if (f.delete() == false)
+      if (Files.delete(f) == false)
       {
          long endOfGrace = System.currentTimeMillis() + gracePeriod;
          while(System.currentTimeMillis() < endOfGrace)
          {
-            boolean done = f.delete();
+            boolean done = Files.delete(f);
             if (done)
             {
                childCache.remove(f.getName());
                return true;
             }
-
-            if (f.isDirectory())
-               return false;
-
+            
             try
             {
                Thread.sleep(100);
