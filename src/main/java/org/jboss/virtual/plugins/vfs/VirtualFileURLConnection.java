@@ -70,6 +70,35 @@ public class VirtualFileURLConnection extends URLConnection
       return getVirtualFile();
    }
 
+   public int getContentLength()
+   {
+      try
+      {
+         return (int)getVirtualFile().getSize();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public long getLastModified()
+   {
+      try
+      {
+         return getVirtualFile().getLastModified();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public InputStream getInputStream() throws IOException
+   {
+      return getVirtualFile().openStream();
+   }
+
    @SuppressWarnings("deprecation")
    protected static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
@@ -120,10 +149,5 @@ public class VirtualFileURLConnection extends URLConnection
          }
       }
       return file;
-   }
-
-   public InputStream getInputStream() throws IOException
-   {
-      return getVirtualFile().openStream();
    }
 }
