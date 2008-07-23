@@ -45,6 +45,9 @@ import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
  */
 public class AssembledDirectory extends VirtualFile
 {
+   /** No jars file filter */
+   private static final VirtualFileFilter noJars = new SuffixesExcludeFilter(JarUtils.getSuffixes());
+   /** The directory */
    private AssembledDirectoryHandler directory;
 
    public AssembledDirectory(AssembledDirectoryHandler handler)
@@ -66,6 +69,17 @@ public class AssembledDirectory extends VirtualFile
    {
       AssembledContext context = new AssembledContext(name, rootName);
       return context.getRoot().getVirtualFile();
+   }
+
+   /**
+    * Add files recursively from root, using the filter.
+    *
+    * @param root the root
+    * @throws IOException for any error
+    */
+   public void addPath(VirtualFile root) throws IOException
+   {
+      addPath(root, noJars);
    }
 
    /**
@@ -268,7 +282,6 @@ public class AssembledDirectory extends VirtualFile
 
          VisitorAttributes va = new VisitorAttributes();
          va.setLeavesOnly(true);
-         SuffixesExcludeFilter noJars = new SuffixesExcludeFilter(JarUtils.getSuffixes());
          va.setRecurseFilter(noJars);
 
          VirtualFileFilter filter = new VirtualFileFilter()
