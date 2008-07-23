@@ -72,7 +72,7 @@ public class AssembledDirectory extends VirtualFile
    }
 
    /**
-    * Add files recursively from root, using the filter.
+    * Add files recursively from root, using the no jars filter.
     *
     * @param root the root
     * @throws IOException for any error
