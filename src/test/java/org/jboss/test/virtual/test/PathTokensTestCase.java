@@ -22,6 +22,7 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
+import java.io.IOException;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -44,13 +45,23 @@ public class PathTokensTestCase extends AbstractVFSTest
       return suite(PathTokensTestCase.class);
    }
 
-   protected void testPath(String path) throws Throwable
+   protected VirtualFile testPath(String path) throws IOException
+   {
+      URL url = getResource("/vfs");
+      VirtualFile vf = VFS.getRoot(url);
+      return vf.getChild(path);
+   }
+
+   protected void testValidPath(String path) throws Throwable
+   {
+      assertNotNull(testPath(path));      
+   }
+
+   protected void testBrokenPath(String path) throws Throwable
    {
       try
       {
-         URL url = getResource("/vfs");
-         VirtualFile vf = VFS.getRoot(url);
-         vf.getChild(path);
+         testPath(path);
          fail("Should not be here");
       }
       catch (Throwable t)
@@ -61,18 +72,30 @@ public class PathTokensTestCase extends AbstractVFSTest
 
    public void testSpecialTokens() throws Throwable
    {
-      testPath("/.../");
-      testPath(".../");
-      testPath("/...");
-      testPath("...");
-      testPath("/..somemorepath/");
-      testPath("..somemorepath/");
-      testPath("/..somemorepath");
-      testPath("..somemorepath");
-      testPath("path//morepath");
-      testPath("//morepath");
-      // we need 3 '/', since by default we always remove the last one
-      testPath("///"); 
-      testPath("morepath///");
+      testBrokenPath("/.../");
+      testBrokenPath(".../");
+      testBrokenPath("/...");
+      testBrokenPath("...");
+      testBrokenPath("/..somemorepath/");
+      testBrokenPath("..somemorepath/");
+      testBrokenPath("/..somemorepath");
+      testBrokenPath("..somemorepath");
+      }
+
+   public void testRepeatedSlashes() throws Throwable
+   {
+      testValidPath("/");
+      testValidPath("//");
+      testValidPath("///");
+      testValidPath("////");
+      testValidPath("//context");
+      testValidPath("//context//");
+      testValidPath("context//file");
+      testValidPath("context///file");
+      testValidPath("//context//file");
+      testValidPath("//context///file");
+      testValidPath("//context////file");
+      testValidPath("//context///jar//");
+      testValidPath("//context///jar///");
    }
 }

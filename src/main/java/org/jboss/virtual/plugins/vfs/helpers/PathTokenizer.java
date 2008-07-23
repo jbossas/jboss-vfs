@@ -103,7 +103,7 @@ public class PathTokenizer
             if (index > 0)
             {
                if (buffer.length() == 0 && specialToken == null)
-                  throw new IllegalArgumentException("A path element is empty: " + path);
+                  continue;
 
                if (specialToken != null)
                   list.add(specialToken);
