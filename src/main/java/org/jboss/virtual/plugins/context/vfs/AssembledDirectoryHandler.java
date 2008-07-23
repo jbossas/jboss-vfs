@@ -56,6 +56,8 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    {
       super(context, parent, name);
       String path = getPathName();
+      if (path.startsWith("/") == false)
+         path = "/" + path;
       if (path.endsWith("/") == false)
          path += "/";
       setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));

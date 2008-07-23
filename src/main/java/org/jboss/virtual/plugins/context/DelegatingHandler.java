@@ -88,6 +88,19 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate;
    }
 
+   /**
+    * Set the vfs url.
+    *
+    * @param vfsUrl the vfs url
+    */
+   protected void setVfsUrl(URL vfsUrl)
+   {
+      if (delegate instanceof AbstractVirtualFileHandler)
+      {
+         ((AbstractVirtualFileHandler)delegate).setVfsUrl(vfsUrl);
+      }
+   }
+
    public VirtualFileHandler getChild(String path) throws IOException
    {
       VirtualFileHandler child = getDelegate().getChild(path);

@@ -32,8 +32,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * The assembled file handler.
  *
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 @Assembled
@@ -42,7 +42,12 @@ public class AssembledFileHandler extends DelegatingHandler
    public AssembledFileHandler(VFSContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
    {
       super(context, parent, name, delegate);
-      setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));
+      String path = getPathName();
+      if (path.startsWith("/") == false)
+         path = "/" + path;
+      if (path.endsWith("/") == false)
+         path += "/";
+      setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException

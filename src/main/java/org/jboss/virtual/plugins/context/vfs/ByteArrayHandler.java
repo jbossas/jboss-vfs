@@ -52,7 +52,12 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
       super(context, parent, name);
       this.bytes = bytes;
       lastModified = System.currentTimeMillis();
-      setVfsUrl(new URL("vfs", context.getName(), -1, getPathName(), new AssembledUrlStreamHandler(context)));
+      String path = getPathName();
+      if (path.startsWith("/") == false)
+         path = "/" + path;
+      if (path.endsWith("/") == false)
+         path += "/";
+      setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
    @Override

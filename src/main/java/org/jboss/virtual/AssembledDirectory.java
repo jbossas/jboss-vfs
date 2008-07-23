@@ -105,7 +105,7 @@ public class AssembledDirectory extends VirtualFile
     *
     * @param clazz the class
     */
-   public void addClass(Class clazz)
+   public void addClass(Class<?> clazz)
    {
       if (clazz == null)
          throw new IllegalArgumentException("Null clazz");
@@ -200,7 +200,7 @@ public class AssembledDirectory extends VirtualFile
     * @param includes the includes
     * @param excludes the excludes
     */
-   public void addResources(Class baseResource, String[] includes, String[] excludes)
+   public void addResources(Class<?> baseResource, String[] includes, String[] excludes)
    {
       if (baseResource == null)
          throw new IllegalArgumentException("Null base resource");
@@ -246,6 +246,7 @@ public class AssembledDirectory extends VirtualFile
     * @param excludes the excludes
     * @param loader the loader
     */
+   // TODO - optimize this
    public void addResources(String baseResource, final String[] includes, final String[] excludes, ClassLoader loader)
    {
       if (baseResource == null)
