@@ -23,10 +23,12 @@ package org.jboss.virtual;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.context.vfs.AssembledContext;
 import org.jboss.virtual.plugins.context.vfs.AssembledDirectoryHandler;
 import org.jboss.virtual.plugins.context.vfs.AssembledFileHandler;
 import org.jboss.virtual.plugins.context.vfs.ByteArrayHandler;
@@ -52,6 +54,49 @@ public class AssembledDirectory extends VirtualFile
    }
 
    /**
+    * Create assembled directory.
+    *
+    * @param name context's name
+    * @param rootName root name
+    * @return new assembled directory instance
+    * @throws IOException for any IO error
+    * @throws URISyntaxException for any URI error
+    */
+   public static AssembledDirectory createAssembledDirectory(String name, String rootName) throws IOException, URISyntaxException
+   {
+      AssembledContext context = new AssembledContext(name, rootName);
+      return context.getRoot().getVirtualFile();
+   }
+
+   /**
+    * Add files recursively from root, using the filter.
+    *
+    * @param root the root
+    * @param recurseFilter the recurse filter
+    * @throws IOException for any error
+    */
+   public void addPath(VirtualFile root, VirtualFileFilter recurseFilter) throws IOException
+   {
+      final VisitorAttributes va = new VisitorAttributes();
+      va.setLeavesOnly(true);
+      va.setRecurseFilter(recurseFilter);
+
+      VirtualFileVisitor visitor = new VirtualFileVisitor()
+      {
+         public VisitorAttributes getAttributes()
+         {
+            return va;
+         }
+
+         public void visit(VirtualFile virtualFile)
+         {
+           mkdirs(virtualFile.getPathName()).addChild(virtualFile);
+         }
+      };
+      root.visit(visitor);
+   }
+
+   /**
     * Find the underlying .class file representing this class and create it within this directory, along with
     * its packages.
     *
@@ -64,6 +109,7 @@ public class AssembledDirectory extends VirtualFile
    {
       if (clazz == null)
          throw new IllegalArgumentException("Null clazz");
+
       addClass(clazz.getName(), clazz.getClassLoader());
    }
 
@@ -74,7 +120,7 @@ public class AssembledDirectory extends VirtualFile
     * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
     * and an entry in the acme directory would be the .class file.
     *
-    * @param className
+    * @param className the class name
     */
    public void addClass(String className)
    {
@@ -88,7 +134,7 @@ public class AssembledDirectory extends VirtualFile
     * So, if you added com.acme.Customer class, then a directory structure com/acme would be created
     * and an entry in the acme directory would be the .class file.
     *
-    * @param className
+    * @param className the class name
     * @param loader ClassLoader to look for class resource
     */
    public void addClass(String className, ClassLoader loader)
@@ -137,7 +183,7 @@ public class AssembledDirectory extends VirtualFile
          }
          dir = next;
       }
-      return (AssembledDirectory) dir.getVirtualFile();
+      return dir.getVirtualFile();
    }
 
    /**
@@ -181,6 +227,7 @@ public class AssembledDirectory extends VirtualFile
    {
       if (baseResource == null)
          throw new IllegalArgumentException("Null base resource");
+
       addResources(baseResource, includes, excludes, Thread.currentThread().getContextClassLoader());   
    }
 
@@ -225,7 +272,6 @@ public class AssembledDirectory extends VirtualFile
 
          VirtualFileFilter filter = new VirtualFileFilter()
          {
-
             public boolean accepts(VirtualFile file)
             {
                boolean matched = false;
@@ -250,7 +296,6 @@ public class AssembledDirectory extends VirtualFile
                }
                return true;
             }
-
          };
 
          FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, va);
@@ -302,7 +347,7 @@ public class AssembledDirectory extends VirtualFile
       String[] paths = path.split("/");
       String[] expressions = expression.split("/");
 
-      int x = 0, p = 0;
+      int x = 0, p;
       Pattern pattern = getPattern(expressions[0]);
 
       for (p = 0; p < paths.length && x < expressions.length; p++)
@@ -419,6 +464,7 @@ public class AssembledDirectory extends VirtualFile
          throw new IllegalArgumentException("Null resource");
       if (loader == null)
          throw new IllegalArgumentException("Null loader");
+
       URL url = loader.getResource(resource);
       if (url == null)
          throw new RuntimeException("Could not find resource: " + resource);

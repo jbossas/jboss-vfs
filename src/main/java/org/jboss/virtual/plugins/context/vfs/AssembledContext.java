@@ -21,25 +21,25 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
-import org.jboss.virtual.plugins.context.AbstractVFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
-import java.net.URISyntaxException;
-import java.net.URI;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.jboss.virtual.plugins.context.AbstractVFSContext;
 
 /**
  * AssembledContext.
  *
  * @author Scott.Stark@jboss.org
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class AssembledContext extends AbstractVFSContext
 {
    private String name;
    /** The root file */
-   private final VirtualFileHandler root;
+   private final AssembledDirectoryHandler root;
 
    public AssembledContext(String name, String rootName) throws IOException, URISyntaxException
    {
@@ -48,7 +48,7 @@ public class AssembledContext extends AbstractVFSContext
       root = new AssembledDirectoryHandler(this, null, rootName);
    }
 
-   public VirtualFileHandler getRoot() throws IOException
+   public AssembledDirectoryHandler getRoot() throws IOException
    {
       return root;
    }

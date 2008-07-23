@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
@@ -165,7 +164,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
    }
 
    @Override
-   public VirtualFile getVirtualFile()
+   public AssembledDirectory getVirtualFile()
    {
       checkClosed();
       increment();
