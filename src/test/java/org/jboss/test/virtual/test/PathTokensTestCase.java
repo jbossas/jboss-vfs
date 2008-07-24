@@ -21,8 +21,8 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.net.URL;
 import java.io.IOException;
+import java.net.URL;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -47,14 +47,19 @@ public class PathTokensTestCase extends AbstractVFSTest
 
    protected VirtualFile testPath(String path) throws IOException
    {
-      URL url = getResource("/vfs");
+      return testPath("/vfs", path);
+   }
+
+   protected VirtualFile testPath(String context, String path) throws IOException
+   {
+      URL url = getResource(context);
       VirtualFile vf = VFS.getRoot(url);
       return vf.getChild(path);
    }
 
    protected void testValidPath(String path) throws Throwable
    {
-      assertNotNull(testPath(path));      
+      assertNotNull("No such path: " + path, testPath(path));
    }
 
    protected void testBrokenPath(String path) throws Throwable
