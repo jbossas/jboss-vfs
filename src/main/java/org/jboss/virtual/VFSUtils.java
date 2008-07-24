@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +60,10 @@ public class VFSUtils
 {
    /** The log */
    private static final Logger log = Logger.getLogger(VFSUtils.class);
+
+   /** The default encoding */
+   private static final String DEFAULT_ENCODING = "UTF-8";
+
    /** The link */
    public static final String VFS_LINK_PREFIX = ".vfslink";
    /** The link name */
@@ -304,7 +309,38 @@ public class VFSUtils
          return name;
       if (name.charAt(length-1) == '/')
          return name.substring(0, length-1);
+
       return name;
+   }
+
+   /**
+    * Decode the path with UTF-8 encoding..
+    *
+    * @param path the path to decode
+    * @return decoded path
+    */
+   public static String decode(String path)
+   {
+      return decode(path, DEFAULT_ENCODING);
+   }
+
+   /**
+    * Decode the path.
+    *
+    * @param path the path to decode
+    * @param encoding the encodeing
+    * @return decoded path
+    */
+   public static String decode(String path, String encoding)
+   {
+      try
+      {
+         return URLDecoder.decode(path, encoding);
+      }
+      catch (UnsupportedEncodingException e)
+      {
+         throw new IllegalArgumentException("Cannot decode: " + path + " [" + encoding + "]", e);
+      }
    }
 
    /**
