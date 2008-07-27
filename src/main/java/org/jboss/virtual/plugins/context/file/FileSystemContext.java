@@ -195,7 +195,8 @@ public class FileSystemContext extends AbstractVFSContext
       super(rootURI);
       root = createVirtualFileHandler(null, file);
       if (root == null)
-         throw new IllegalArgumentException("Null root, rootURI: " + rootURI + ", file: " + file);
+         throw new java.io.FileNotFoundException((file == null ? "null" : file.getName())
+                 + " doesn't exist. (rootURI: " + rootURI + ", file: " + file + ")");
 
       rootFile = root.getVirtualFile();
    }
