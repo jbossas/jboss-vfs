@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLStreamHandler;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -64,7 +65,7 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
 
    protected URLConnection openConnection(URL url) throws IOException
    {
-      String file = url.toExternalForm().substring(getProtocolNameLength() + 1); // strip out vfs protocol + :
+      String file = URLDecoder.decode(url.toExternalForm(), "UTF-8").substring(getProtocolNameLength() + 1); // strip out vfs protocol + :
       URL vfsurl = null;
       String relative;
       File fp = new File(file);

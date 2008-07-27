@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -478,10 +479,31 @@ public class VFSUtils
       if (url == null)
          throw new IllegalArgumentException("Null url");
 
-      String urispec = url.toExternalForm();
-      // Escape any spaces
-      urispec = urispec.replaceAll(" ", "%20");
-      return new URI(urispec);
+      try
+      {
+         return url.toURI();
+      }
+      catch (URISyntaxException e)
+      {
+         String urispec = url.toExternalForm();
+         // Escape percent sign and spaces
+         urispec = urispec.replaceAll("%", "%25");
+         urispec = urispec.replaceAll(" ", "%20");
+         return new URI(urispec);
+      }
+   }
+
+   /**
+    * Ensure the url is convertible to URI by encoding spaces and percent characters if necessary
+    *
+    * @param url to be sanitized
+    * @return sanitized URL
+    * @throws URISyntaxException if URI conversion can't be fixed
+    * @throws MalformedURLException if an error occurs
+    */
+   public static URL sanitizeURL(URL url) throws URISyntaxException, MalformedURLException
+   {
+      return toURI(url).toURL();
    }
 
    /**

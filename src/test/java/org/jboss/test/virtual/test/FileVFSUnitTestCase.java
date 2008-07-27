@@ -1246,6 +1246,18 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       URI uri = tstjar.toURI();
       URI expectedURI = new URI("vfs"+rootURL.toString()+"/path%20with%20spaces/tst.jar");
       assertEquals(uri.getPath(), expectedURI.getPath());
+
+      InputStream is = uri.toURL().openStream();
+      is.close();
+
+      tstjar = vfs.findChild("path with spaces/tst%20nospace.jar");
+      assertNotNull("tstjar != null", tstjar);
+      uri = tstjar.toURI();
+      expectedURI = new URI("vfs"+rootURL.toString()+"/path%20with%20spaces/tst%2520nospace.jar");
+      assertEquals(uri.getPath(), expectedURI.getPath());
+
+      is = uri.toURL().openStream();
+      is.close();
    }
 
    public static void main(String[] args) throws Exception
