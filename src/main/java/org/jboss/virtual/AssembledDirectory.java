@@ -260,7 +260,6 @@ public class AssembledDirectory extends VirtualFile
     * @param excludes the excludes
     * @param loader the loader
     */
-   // TODO - optimize this
    public void addResources(String baseResource, final String[] includes, final String[] excludes, ClassLoader loader)
    {
       if (baseResource == null)
