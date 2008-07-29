@@ -732,4 +732,37 @@ public class VFSUtils
       }
       return url;
    }
+
+   /**
+    * Get spec compatilbe uri from virtual file.
+    *
+    * @param file the virtual file
+    * @return spec compatible uri
+    * @throws IOException for any error
+    * @throws URISyntaxException for any uri syntax error
+    */
+   public static URI getCompatibleURI(VirtualFile file) throws IOException, URISyntaxException
+   {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+
+      URI uri = file.toURI();
+      if (uri == null)
+         throw new IllegalArgumentException("Null uri: " + file);
+
+      // is not nested, so direct VFS URL is not an option
+      if (isNestedFile(file) == false)
+      {
+         String uriString = uri.toString();
+         if (uriString.startsWith("vfs"))
+         {
+            // treat vfszip as file
+            if (uriString.startsWith("vfszip"))
+               uri = new URI("file" + uriString.substring(6));
+            else
+               uri = new URI(uriString.substring(3)); // (vfs)file and (vfs)jar are ok
+         }
+      }
+      return uri;
+   }
 }
