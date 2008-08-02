@@ -21,6 +21,8 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import org.jboss.virtual.VFSUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -53,7 +55,7 @@ abstract class ZipBytesWrapper extends ZipWrapper
    {
       // read the contents into memory buffer
       ByteArrayOutputStream bout = new ByteArrayOutputStream();
-      ZipEntryContext.copyStreamAndClose(zipStream, bout);
+      VFSUtils.copyStreamAndClose(zipStream, bout);
       zipBytes = bout.toByteArray();
 
       // TODO - delegate file meta info operations to parent?

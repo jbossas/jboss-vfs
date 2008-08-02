@@ -308,7 +308,7 @@ public class ZipEntryContext extends AbstractVFSContext
    protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ZipEntryContext.copyStreamAndClose(is, baos);
+      VFSUtils.copyStreamAndClose(is, baos);
       ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
       // first we need to find best/longest name
@@ -448,7 +448,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
                   InputStream is = zipSource.openStream(ent);
                   OutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
-                  copyStreamAndClose(is, os);
+                  VFSUtils.copyStreamAndClose(is, os);
 
                   // mount another instance of ZipEntryContext
                   delegator = mountZipFile(parent, name, dest);
@@ -1062,43 +1062,12 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+
+
    //
    //   Helper methods
    //
 
-   /**
-    * Copy input stream to output stream and close them both
-    *
-    * @param is input stream
-    * @param os output stream
-    * @throws IOException for any error
-    */
-   static void copyStreamAndClose(InputStream is, OutputStream os) throws IOException
-   {
-      try
-      {
-         byte [] buff = new byte[65536];
-         int count = is.read(buff);
-         while(count != -1)
-         {
-            os.write(buff, 0, count);
-            count = is.read(buff);
-         }
-      }
-      finally
-      {
-         if(is != null)
-         {
-            try {
-               is.close();
-            }
-            catch(Exception ignored)
-            {
-            }
-         }
-         os.close();
-      }
-   }
 
    /**
     * Make sure url protocol is <em>vfszip</em>

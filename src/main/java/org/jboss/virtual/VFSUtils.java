@@ -23,6 +23,7 @@ package org.jboss.virtual;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -764,5 +765,65 @@ public class VFSUtils
          }
       }
       return uri;
+   }
+
+   /**
+    * Copy input stream to output stream and close them both
+    *
+    * @param is input stream
+    * @param os output stream
+    * @throws IOException for any error
+    */
+   public static void copyStreamAndClose(InputStream is, OutputStream os) throws IOException
+   {
+      try
+      {
+         copyStream(is, os);
+      }
+      finally
+      {
+         if (is != null)
+         {
+            try
+            {
+               is.close();
+            }
+            catch(Exception ignored)
+            {
+            }
+         }
+         if (os != null)
+            os.close();
+      }
+   }
+
+   /**
+    * Copy input stream to output stream without closing streams.
+    * Flushes output stream when done.
+    *
+    * @param is input stream
+    * @param os output stream
+    * @throws IOException for any error
+    */
+   public static void copyStream(InputStream is, OutputStream os) throws IOException
+   {
+      if (is == null)
+         throw new IllegalArgumentException("input stream is null");
+      if (os == null)
+         throw new IllegalArgumentException("output stream is null");
+      try
+      {
+         byte [] buff = new byte[65536];
+         int rc = is.read(buff);
+         while (rc != -1)
+         {
+            os.write(buff, 0, rc);
+            rc = is.read(buff);
+         }
+      }
+      finally
+      {
+         os.flush();
+      }
    }
 }

@@ -89,7 +89,7 @@ class ZipStreamWrapper extends ZipBytesWrapper
          if (ent.isDirectory() == false)
          {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            copyStream(zis, baos);
+            VFSUtils.copyStream(zis, baos);
             fileBytes = baos.toByteArray();
             ent.setSize(fileBytes.length);
          }
@@ -180,17 +180,6 @@ class ZipStreamWrapper extends ZipBytesWrapper
          zout.write(memFile.fileBytes);
       }
       zout.close();
-   }
-
-   private static void copyStream(InputStream is, OutputStream os) throws IOException
-   {
-      byte [] buff = new byte[4096];
-      int rc = is.read(buff);
-      while (rc != -1)
-      {
-         os.write(buff, 0, rc);
-         rc = is.read(buff);
-      }
    }
 
    static class InMemoryFile
