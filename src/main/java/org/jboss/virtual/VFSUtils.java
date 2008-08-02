@@ -67,7 +67,11 @@ public class VFSUtils
    private static final String DEFAULT_ENCODING = "UTF-8";
 
    /** The link */
-   public static final String VFS_LINK_PREFIX = ".vfslink";
+   public static final String VFS_LINK_INFIX = ".vfslink";
+
+   /** The link properties */
+   public static final String VFS_LINK_PROPERTIES_SUFFIX = ".vfslink.properties";
+
    /** The link name */
    public static final String VFS_LINK_NAME = "vfs.link.name";
    /** The link target */
@@ -399,7 +403,7 @@ public class VFSUtils
       if (name == null)
          throw new IllegalArgumentException("Null name");
 
-      return name.indexOf(VFS_LINK_PREFIX) >= 0;
+      return name.indexOf(VFS_LINK_INFIX) >= 0;
    }
 
    /**
@@ -419,7 +423,7 @@ public class VFSUtils
       if (name == null)
          throw new IllegalArgumentException("Null name");
 
-      if(name.endsWith(".properties"))
+      if(name.endsWith(VFS_LINK_PROPERTIES_SUFFIX))
       {
          List<LinkInfo> info = new ArrayList<LinkInfo>();
          parseLinkProperties(is, info, props);

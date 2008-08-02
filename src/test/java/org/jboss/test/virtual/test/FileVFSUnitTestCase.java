@@ -21,12 +21,17 @@
  */
 package org.jboss.test.virtual.test;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,6 +51,7 @@ import junit.framework.TestSuite;
 import org.jboss.test.virtual.support.ClassPathIterator;
 import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.test.virtual.support.MetaDataMatchFilter;
+import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -950,8 +956,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testVfsLinkProperties()
       throws Exception
    {
-      URL linkURL = super.getResource("/vfs/links/war1.vfslink.properties");
-      assertNotNull("vfs/links/war1.vfslink.properties", linkURL);
+      URL linkURL = super.getResource("/vfs/links/test-link.war.vfslink.properties");
+      assertNotNull("vfs/links/test-link.war.vfslink.properties", linkURL);
       // Find resources to use as the WEB-INF/{classes,lib} link targets
       URL classesURL = getClass().getProtectionDomain().getCodeSource().getLocation();
       assertNotNull("classesURL", classesURL);
@@ -996,10 +1002,10 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       System.setProperty("test.lib.url", libURL.toString());
 
       // Root the vfs at the link file parent directory
-      URL linkURL = super.getResource("/vfs/links/war1.vfslink.properties");
+      URL linkURL = super.getResource("/vfs/links/test-link.war.vfslink.properties");
       File linkFile = new File(linkURL.toURI());
       File vfsRoot = linkFile.getParentFile();
-      assertNotNull("vfs/links/war1.vfslink.properties", linkURL);
+      assertNotNull("vfs/links/test-link.war.vfslink.properties", linkURL);
       VFS vfs = VFS.getVFS(vfsRoot.toURI());
 
       // We should find the test-link.war the link represents
@@ -1029,6 +1035,126 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       // Should be able to find archive.jar under lib
       VirtualFile archiveJar = lib.findChild("archive.jar");
       assertEquals("archive.jar", archiveJar.getName());
+   }
+
+   /**
+    * Test configuration change detection on test-link.war link
+    * @throws Exception
+    */
+   public void testWarLinkUpdate()
+      throws Exception
+   {
+      URL classesURL = getClass().getProtectionDomain().getCodeSource().getLocation();
+      assertNotNull("classesURL", classesURL);
+      System.setProperty("test.classes.url", classesURL.toString());
+      URL libURL = super.getResource("/vfs/sundry/jar");
+      assertNotNull("libURL", libURL);
+      System.setProperty("test.lib.url", libURL.toString());
+
+      // Root the vfs at the link file parent directory
+      URL linkURL = super.getResource("/vfs/links/test-link.war.vfslink.properties");
+      File linkFile = new File(linkURL.toURI());
+      assertNotNull("vfs/links/test-link.war.vfslink.properties", linkURL);
+
+      // Setup VFS root in a temp directory
+      File root = File.createTempFile("jboss-vfs-testWarLinkUpdate", ".tmp");
+      root.delete();
+      root.mkdir();
+
+      VFS vfs = VFS.getVFS(root.toURI());
+      VirtualFile link = vfs.getChild("test-link.war");
+      assertNull("test-link.war", link);
+
+      File propsFile = new File(root, "test-link.war.vfslink.properties");
+      VFSUtils.copyStreamAndClose(new FileInputStream(linkFile), new FileOutputStream(propsFile));
+      link = vfs.getChild("test-link.war");
+      assertNotNull("test-link.war", link);
+
+      List<VirtualFile> children = link.getChildren();
+      assertTrue("Wrong number of link children", children.size() == 1);
+      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 2);
+
+      // modify properties file - add more children
+      URL dynamicClassRoot = new URL("vfsmemory", ".vfslink-test", "");
+      MemoryFileFactory.createRoot(dynamicClassRoot);
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintWriter webOut = new PrintWriter(new OutputStreamWriter(baos, "UTF-8"));
+      webOut.println("<?xml version=\"1.0\" ?>");
+      webOut.println("<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\"\n" +
+         "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+         "         xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\"\n" +
+         "         version=\"2.5\">");
+      webOut.println("</web-app>");
+      webOut.close();
+
+      URL webXmlURL = new URL(dynamicClassRoot.toExternalForm() + "/web.xml");
+      MemoryFileFactory.putFile(webXmlURL, baos.toByteArray());
+
+      PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propsFile, true)));
+      out.println("vfs.link.name.2=WEB-INF/web.xml");
+      out.println("vfs.link.target.2=" + webXmlURL.toExternalForm());
+      out.close();
+
+      // You need to get a new reference to LinkHandler - to get up-to-date configuration
+      children = link.getChildren();
+      assertTrue("Wrong number of children", children.size() == 1);
+      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 3);
+
+      // modify properties file - remove all but first
+      BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(propsFile)));
+      baos = new ByteArrayOutputStream();
+      out = new PrintWriter(new OutputStreamWriter(baos));
+      String line = in.readLine();
+      while(line != null)
+      {
+         if (line.indexOf(".0=") != -1)
+            out.println(line);
+         line = in.readLine();
+      }
+      out.close();
+      in.close();
+
+      FileOutputStream fos = new FileOutputStream(propsFile);
+      fos.write(baos.toByteArray());
+      fos.close();
+
+      children = link.getChildren();
+      assertTrue("Wrong number of children", children.size() == 1);
+      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 1);
+
+      // modify properties file - remove all
+      fos = new FileOutputStream(propsFile);
+      fos.write(' ');
+      fos.close();
+
+      assertNotNull(link.getName() + " not null", link);
+      assertTrue(link.getName() + " exists()", link.exists());
+
+      children = link.getChildren();
+      assertTrue("Wrong number of children", children.size() == 0);
+
+      // remove properties file
+      assertTrue(propsFile.getName() + " delete()", propsFile.delete());
+
+      assertFalse(link.getName() + " exists() == false", link.exists());
+      VirtualFile oldLink = link;
+      link = vfs.getChild("test-link.war");
+      assertNull(oldLink.getName() + " is null", link);
+
+      children = vfs.getChildren();
+      assertTrue("Wrong number of children", children.size() == 0);
+
+      // put back .vfslink.properties
+      VFSUtils.copyStreamAndClose(new FileInputStream(linkFile), new FileOutputStream(propsFile));
+
+      assertTrue(oldLink.getName() + " exists()", oldLink.exists());
+      link = vfs.getChild("test-link.war");
+      assertNotNull("test-link.war", link);
+
+      children = link.getChildren();
+      assertTrue("Wrong number of children", children.size() == 1);
+      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 2);
    }
 
   /**

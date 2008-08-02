@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -96,7 +97,7 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
 
       public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
       {
-         return null;
+         return Collections.unmodifiableList(new ArrayList<VirtualFileHandler>(children.values()));
       }
 
       public boolean isLeaf() throws IOException
@@ -148,7 +149,7 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
             {
                previous = linkParent;
                atom = paths.get(n);
-               linkParent = previous.getChild(atom);
+               linkParent = getChildPrivate(previous, atom);
                if (linkParent == null)
                {
                   linkParent = previous;
@@ -193,6 +194,15 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
       }
    }
 
+   private VirtualFileHandler getChildPrivate(VirtualFileHandler parent, String name) throws IOException
+   {
+      // avoid infinite recursion due to LinkHandler delegation during init phase
+      if (parent instanceof LinkHandler)
+         return ((LinkHandler) parent).structuredFindChild(name);
+      else
+         return parent.getChild(name);
+   }
+
    public boolean isLeaf()
    {
       return false;
@@ -205,7 +215,12 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      return new ArrayList<VirtualFileHandler>(linkTargets.values());
+      // LinkHandler delegation: if configuration has changed, delegate to properly configured LinkHandler
+      VirtualFileHandler upToDateHandler = getParent().getChild(getName());
+      if (upToDateHandler != this)
+         return upToDateHandler.getChildren(ignoreErrors);
+      else
+         return new ArrayList<VirtualFileHandler>(linkTargets.values());
    }
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
@@ -215,12 +230,22 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
 
    public VirtualFileHandler getChild(String path) throws IOException
    {
-      return structuredFindChild(path);
+      // LinkHandler delegation: if configuration has changed, delegate to properly configured LinkHandler
+      VirtualFileHandler upToDateHandler = getParent().getChild(getName());
+      if (upToDateHandler != this)
+         return upToDateHandler.getChild(path);
+      else
+         return structuredFindChild(path);
    }
 
    public boolean removeChild(String name) throws IOException
    {
-      return linkTargets.remove(name) != null;
+      // LinkHandler delegation: if configuration has changed, delegate to properly configured LinkHandler
+      VirtualFileHandler upToDateHandler = getParent().getChild(getName());
+      if (upToDateHandler != this)
+         return upToDateHandler.removeChild(name);
+      else
+         return linkTargets.remove(name) != null;
    }
 
    @Override

@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.util.file.Files;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractURLHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -45,6 +46,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
 public class FileHandler extends AbstractURLHandler implements StructuredVirtualFileHandler
@@ -189,6 +191,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       }
       else
       {
+         childCache.remove(f.getName());
          return true;
       }
    }
@@ -276,6 +279,53 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
    public VirtualFileHandler getChild(String path) throws IOException
    {
       return structuredFindChild(path);
+   }
+
+   /**
+    * Find an existing LinkHandler or create a new one.
+    *
+    * @param name a handler name
+    * @return cached or newly created LinkHandler
+    * @throws IOException for any error
+    */
+   LinkHandler getChildLink(String name) throws IOException
+   {
+      VirtualFileHandler handler = childCache.get(name);
+      if (handler == null)
+      {
+         // check if .vfslink.properties file exists for this name
+         File file = new File(getFile(), name + VFSUtils.VFS_LINK_PROPERTIES_SUFFIX);
+         if (file.isFile())
+         {
+            FileSystemContext ctx = getVFSContext();
+            return ctx.createLinkHandler(this, file, name);
+         }
+      }
+      else if (handler instanceof LinkHandler)
+      {
+         LinkHandler link = (LinkHandler) handler;
+         if (link.exists())
+         {
+            // detect any changes in configuration
+            FileSystemContext ctx = getVFSContext();
+            try
+            {
+               return ctx.createLinkHandler(this, new File(link.toURI()), name);
+            }
+            catch (URISyntaxException e)
+            {
+               IOException ex = new IOException("Failed to convert link to URI: " + link);
+               ex.initCause(e);
+               throw ex;
+            }
+         }
+         else
+         {
+            // remove from cache
+            childCache.remove(name);
+         }
+      }
+      return null;
    }
 
    public boolean removeChild(String name) throws IOException

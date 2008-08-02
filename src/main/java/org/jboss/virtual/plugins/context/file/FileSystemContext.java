@@ -306,48 +306,66 @@ public class FileSystemContext extends AbstractVFSContext
       VirtualFileHandler handler = null;
       if( VFSUtils.isLink(file.getName()) )
       {
-         Properties props = new Properties();
-         FileInputStream fis = new FileInputStream(file);
-         try
-         {
-            List<LinkInfo> links = VFSUtils.readLinkInfo(fis, file.getName(), props);
-            String name = props.getProperty(VFSUtils.VFS_LINK_NAME, "link");
-            handler = new LinkHandler(this, parent, uri, name, links);            
-         }
-         catch(URISyntaxException e)
-         {
-            IOException ex = new IOException("Failed to parse link URIs");
-            ex.initCause(e);
-            throw ex;
-         }
-         finally
-         {
-            try
-            {
-               fis.close();
-            }
-            catch(IOException e)
-            {
-               log.debug("Exception closing file input stream: " + fis, e);
-            }
-         }
+         handler = createLinkHandler(parent, file, null);
       }
       else if (exists(file) == false && parent != null)
       {
          // See if we can resolve this to a link in the parent
-         List<VirtualFileHandler> children = parent.getChildren(true);
-         for(VirtualFileHandler vfh : children)
-         {
-            if( vfh.getName().equals(file.getName()) )
-            {
-               handler = vfh;
-               break;
-            }
-         }
+         if (parent instanceof FileHandler)
+            handler = ((FileHandler) parent).getChildLink(file.getName());
       }
       else if (exists(file))
       {
          handler = new FileHandler(this, parent, file, uri);
+      }
+      return handler;
+   }
+
+   /**
+    * Create a new <tt>LinkHandler</tt> from .vfslink.properties file.
+    * A link name is derived from file name by cutting off .vfslink.properties suffix
+    *
+    * @param parent the parent handler
+    * @param file .vfslink.properties file
+    * @param linkNameCondition condition - if not null new LinkHandler will only be created if link name
+    *                            extracted from the file name matches linkNameCondition
+    * @return newly created <tt>LinkHandler</tt>
+    * @throws IOException for any error
+    */
+   LinkHandler createLinkHandler(VirtualFileHandler parent, File file, String linkNameCondition)
+        throws IOException
+   {
+      URI uri = file.toURI();
+      LinkHandler handler = null;
+
+      Properties props = new Properties();
+      FileInputStream fis = new FileInputStream(file);
+      try
+      {
+         List<LinkInfo> links = VFSUtils.readLinkInfo(fis, file.getName(), props);
+         String name = file.getName();
+         name = name.substring(0, name.indexOf(VFSUtils.VFS_LINK_INFIX));
+         if (name.length() == 0 || ".".equals(name) || "..".equals(name))
+            throw new IOException("Invalid link name: " + name + " (generated from file: " + file + ")");
+         if (linkNameCondition == null || linkNameCondition.equals(name))
+            handler = new LinkHandler(this, parent, uri, name, links);
+      }
+      catch(URISyntaxException e)
+      {
+         IOException ex = new IOException("Failed to parse link URIs");
+         ex.initCause(e);
+         throw ex;
+      }
+      finally
+      {
+         try
+         {
+            fis.close();
+         }
+         catch(IOException e)
+         {
+            log.debug("Exception closing file input stream: " + fis, e);
+         }
       }
       return handler;
    }
