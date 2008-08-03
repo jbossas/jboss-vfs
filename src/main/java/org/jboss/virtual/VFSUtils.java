@@ -731,15 +731,7 @@ public class VFSUtils
             }
          }
          if (os != null)
-         {
-            try
-            {
-               os.close();
-            }
-            catch (IOException ignored)
-            {
-            }
-         }
+            os.close();
       }
    }
 
@@ -807,7 +799,7 @@ public class VFSUtils
     * @throws Exception for any error
     * @param <T> exact resource type
     */
-   protected static <T> T getCompatibleResource(VirtualFile file, ResourceCreator<T> creator) throws Exception
+   private static <T> T getCompatibleResource(VirtualFile file, ResourceCreator<T> creator) throws Exception
    {
       if (file == null)
          throw new IllegalArgumentException("Null file");
