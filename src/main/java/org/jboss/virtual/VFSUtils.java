@@ -706,72 +706,6 @@ public class VFSUtils
    }
 
    /**
-    * Get spec compatilbe url from virtual file.
-    *
-    * @param file the virtual file
-    * @return spec compatible url
-    * @throws IOException for any error
-    * @throws URISyntaxException for any uri syntax error
-    */
-   public static URL getCompatibleURL(VirtualFile file) throws IOException, URISyntaxException
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-
-      URL url = file.toURL();
-      if (url == null)
-         throw new IllegalArgumentException("Null url: " + file);
-
-      // is not nested, so direct VFS URL is not an option
-      if (isNestedFile(file) == false)
-      {
-         String urlString = url.toExternalForm();
-         if (urlString.startsWith("vfs"))
-         {
-            // treat vfszip as file
-            if (urlString.startsWith("vfszip"))
-               url = new URL("file" + urlString.substring(6));
-            else
-               url = new URL(urlString.substring(3)); // (vfs)file and (vfs)jar are ok
-         }
-      }
-      return url;
-   }
-
-   /**
-    * Get spec compatilbe uri from virtual file.
-    *
-    * @param file the virtual file
-    * @return spec compatible uri
-    * @throws IOException for any error
-    * @throws URISyntaxException for any uri syntax error
-    */
-   public static URI getCompatibleURI(VirtualFile file) throws IOException, URISyntaxException
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-
-      URI uri = file.toURI();
-      if (uri == null)
-         throw new IllegalArgumentException("Null uri: " + file);
-
-      // is not nested, so direct VFS URL is not an option
-      if (isNestedFile(file) == false)
-      {
-         String uriString = uri.toString();
-         if (uriString.startsWith("vfs"))
-         {
-            // treat vfszip as file
-            if (uriString.startsWith("vfszip"))
-               uri = new URI("file" + uriString.substring(6));
-            else
-               uri = new URI(uriString.substring(3)); // (vfs)file and (vfs)jar are ok
-         }
-      }
-      return uri;
-   }
-
-   /**
     * Copy input stream to output stream and close them both
     *
     * @param is input stream
@@ -792,12 +726,20 @@ public class VFSUtils
             {
                is.close();
             }
-            catch(Exception ignored)
+            catch(IOException ignored)
             {
             }
          }
          if (os != null)
-            os.close();
+         {
+            try
+            {
+               os.close();
+            }
+            catch (IOException ignored)
+            {
+            }
+         }
       }
    }
 
@@ -815,6 +757,7 @@ public class VFSUtils
          throw new IllegalArgumentException("input stream is null");
       if (os == null)
          throw new IllegalArgumentException("output stream is null");
+
       try
       {
          byte [] buff = new byte[65536];
@@ -830,4 +773,132 @@ public class VFSUtils
          os.flush();
       }
    }
+
+   /**
+    * Get spec compatilbe url from virtual file.
+    *
+    * @param file the virtual file
+    * @return spec compatible url
+    * @throws Exception for any error
+    */
+   public static URL getCompatibleURL(VirtualFile file) throws Exception
+   {
+      return getCompatibleResource(file, URL_CREATOR);
+   }
+
+   /**
+    * Get spec compatilbe uri from virtual file.
+    *
+    * @param file the virtual file
+    * @return spec compatible uri
+    * @throws Exception for any error
+    */
+   public static URI getCompatibleURI(VirtualFile file) throws Exception
+   {
+      return getCompatibleResource(file, URI_CREATOR);
+   }
+
+   /**
+    * Create new compatible resource.
+    *
+    * @param file the virtual file
+    * @param creator resoruce creator
+    * @return new resource
+    * @throws Exception for any error
+    * @param <T> exact resource type
+    */
+   protected static <T> T getCompatibleResource(VirtualFile file, ResourceCreator<T> creator) throws Exception
+   {
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+      if (creator == null)
+         throw new IllegalArgumentException("Null creator");
+
+      T resource = creator.getResource(file);
+      if (resource == null)
+         throw new IllegalArgumentException("Null resource: " + file);
+
+      // is not nested, so direct VFS resource is not an option
+      if (isNestedFile(file) == false)
+      {
+         String uriString = creator.getString(resource);
+         if (uriString.startsWith("vfs"))
+         {
+            // treat vfszip as file
+            if (uriString.startsWith("vfszip"))
+               resource = creator.createResource("file" + uriString.substring(6));
+            else
+               resource = creator.createResource(uriString.substring(3)); // (vfs)file and (vfs)jar are ok
+         }
+      }
+      return resource;
+   }
+
+   /**
+    * @param <T> exact resource type
+    */
+   private static interface ResourceCreator<T>
+   {
+      /**
+       * Get resource from virtual file.
+       *
+       * @param file the virtual file
+       * @return resource instance from file
+       * @throws Exception for any error
+       */
+      T getResource(VirtualFile file) throws Exception;
+
+      /**
+       * Get string from resource.
+       *
+       * @param resource the resource
+       * @return resoruce's string representation
+       */
+      String getString(T resource);
+
+      /**
+       * Create new resource.
+       *
+       * @param string the string to create resource from
+       * @return new resoruce instance
+       * @throws Exception for any error
+       */
+      T createResource(String string) throws Exception;
+   }
+
+   private static final ResourceCreator<URL> URL_CREATOR = new ResourceCreator<URL>()
+   {
+      public URL getResource(VirtualFile file) throws Exception
+      {
+         return file.toURL();
+      }
+
+      public String getString(URL resource)
+      {
+         return resource.toExternalForm();
+      }
+
+      public URL createResource(String string) throws Exception
+      {
+         return new URL(string);
+      }
+   };
+
+   private static final ResourceCreator<URI> URI_CREATOR = new ResourceCreator<URI>()
+   {
+      public URI getResource(VirtualFile file) throws Exception
+      {
+         return file.toURI();
+      }
+
+      public String getString(URI resource)
+      {
+         return resource.toString();
+      }
+
+      public URI createResource(String string) throws Exception
+      {
+         return new URI(string);
+      }
+   };
 }
