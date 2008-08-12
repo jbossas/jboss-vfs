@@ -43,7 +43,13 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 public class ZipEntryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
    /** The url */
-   private final URL url;
+   private URL url;
+
+   /** isLeaf */
+   private boolean isLeaf;
+
+   /** has it been initialized yet */
+   transient private boolean initialized;
 
    /**
     * Create a new ZipEntryHandler.
@@ -58,31 +64,40 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
    {
       super(context, parent, name);
 
-      url = context.getChildURL(parent, name);
-
-      String currentUrl = url.toString();
-      int pos = currentUrl.indexOf(":/");
-      StringBuilder vfsUrl = new StringBuilder();
-      vfsUrl.append("vfszip:").append(currentUrl.substring(pos+1));
-      try
-      {
-         if (isLeaf == false && vfsUrl.charAt(vfsUrl.length()-1) != '/')
-            vfsUrl.append("/");
-         setVfsUrl(new URL(vfsUrl.toString()));
-      }
-      catch(MalformedURLException ex)
-      {
-         throw new RuntimeException("ASSERTION ERROR - failed to set vfsUrl: " + vfsUrl, ex );
-      }
-
+      this.isLeaf = isLeaf;
       if(parent != null)
       {
          context.addChild(parent, this);
       }
    }
 
+   private synchronized void init()
+   {
+      if (initialized)
+         return;
+
+      StringBuilder vfsUrl = new StringBuilder();
+      try
+      {
+         url = getZipEntryContext().getChildURL(getParent(), getName());
+         String currentUrl = url.toString();
+         int pos = currentUrl.indexOf(":/");
+         vfsUrl.append("vfszip:").append(currentUrl.substring(pos+1));
+
+         if (isLeaf == false && vfsUrl.charAt(vfsUrl.length()-1) != '/')
+            vfsUrl.append("/");
+         setVfsUrl(new URL(vfsUrl.toString()));
+      }
+      catch(Exception ex)
+      {
+         throw new RuntimeException("ASSERTION ERROR - failed to set vfsUrl: " + vfsUrl, ex );
+      }
+      initialized = true;
+   }
+
    public URI toURI() throws URISyntaxException
    {
+      init();
       return VFSUtils.toURI(url);
    }
 
@@ -170,5 +185,11 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
    private ZipEntryContext getZipEntryContext()
    {
       return ((ZipEntryContext) getLocalVFSContext());
+   }
+
+   public URL toVfsUrl()
+   {
+      init();
+      return super.getVfsUrl();
    }
 }

@@ -21,6 +21,7 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -29,6 +30,7 @@ import java.net.URL;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
@@ -79,15 +81,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
 
       InputStream is = url.openStream();
       OutputStream os = new FileOutputStream(tmpJar);
-
-      byte [] buff = new byte[65536];
-      int count = is.read(buff);
-      while(count != -1)
-      {
-         os.write(buff, 0, count);
-         count = is.read(buff);
-      }
-      os.close();
+      VFSUtils.copyStreamAndClose(is, os);
 
       ZipEntryContext context = new ZipEntryContext(tmpJar.toURL());
       assertTrue("context.getRoot().exists()", context.getRoot().exists());
@@ -109,13 +103,52 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       URL url = getResource("/vfs/context/jar/");
       FileSystemContext ctx = new FileSystemContext(url);
 
-      // check that vfszip is active
+      // we just do basic sanity checks
+
+      // valid archive
+
       VirtualFileHandler handler = ctx.getRoot().getChild("archive.jar");
-      assertTrue("is vfszip", "vfszip".equals(handler.toURL().getProtocol()));
+      //assertTrue("is vfszip", "vfszip".equals(handler.toURL().getProtocol()));
       assertFalse("is leaf", handler.isLeaf());
+      assertTrue("exists", handler.exists());
+      assertNotNull("pathName not null", handler.getPathName());
+      assertNotNull("name not null", handler.getName());
+      assertNotNull("parent not null", handler.getParent());
+      assertTrue("lastModified > 0", handler.getLastModified() > 0);
+      assertTrue("size > 0", handler.getSize() > 0);
+      assertNotNull("VF not null", handler.getVirtualFile());
+      assertFalse("hasBeenModified == false", handler.hasBeenModified());
+      assertFalse("hidden == false", handler.isHidden());
+      assertFalse("nested == false", handler.isNested());
+      assertNotNull("toURI not null", handler.toURI());
+      assertNotNull("toURL not null", handler.toURL());
+      assertNotNull("toVfsUrl not null", handler.toVfsUrl());
+
+      ByteArrayOutputStream memOut = new ByteArrayOutputStream();
+      VFSUtils.copyStreamAndClose(handler.openStream(), memOut);
+      assertTrue("read archive content", memOut.size() == handler.getSize());
+
+      // invalid archive
 
       handler = ctx.getRoot().getChild("notanarchive.jar");
-      assertTrue("is leaf", handler.isLeaf());
+      //assertTrue("is leaf", handler.isLeaf());
+      assertTrue("exists", handler.exists());
+      assertTrue("lastModified > 0", handler.getLastModified() > 0);
+      assertNotNull("pathName not null", handler.getPathName());
+      assertNotNull("name not null", handler.getName());
+      assertNotNull("parent not null", handler.getParent());
+      assertTrue("size > 0", handler.getSize() > 0);
+      assertNotNull("VF not null", handler.getVirtualFile());
+      assertFalse("hasBeenModified == false", handler.hasBeenModified());
+      assertFalse("hidden == false", handler.isHidden());
+      assertFalse("nested == false", handler.isNested());
+      assertNotNull("toURI not null", handler.toURI());
+      assertNotNull("toURL not null", handler.toURL());
+      assertNotNull("toVfsUrl not null", handler.toVfsUrl());
+
+      memOut = new ByteArrayOutputStream();
+      VFSUtils.copyStreamAndClose(handler.openStream(), memOut);
+      assertTrue("read archive content", memOut.size() == handler.getSize());
    }
 
    // we need to make sure this doesn't get touched before

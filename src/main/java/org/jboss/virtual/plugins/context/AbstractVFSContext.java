@@ -164,23 +164,56 @@ public abstract class AbstractVFSContext implements VFSContext
       return parent.getChild(path);
    }
 
+   /**
+    * Construct a URL from a given parent and a name
+    *
+    * @param parent a parent
+    * @param name a name of the child
+    * @return URL corresponding to a child
+    * @throws IOException for any error
+    */
    public URL getChildURL(VirtualFileHandler parent, String name) throws IOException
-   {
-      StringBuilder urlStr = new StringBuilder(256);
+   {      
+      if(parent != null)
+      {
+         VFSContext parentCtx = parent.getVFSContext();
+         if (parentCtx != this)
+         {
+            if (parentCtx instanceof AbstractVFSContext)
+            {
+               return ((AbstractVFSContext) parentCtx).getChildURL(parent, name);
+            }
+            else
+            {
+               StringBuilder urlStr = new StringBuilder(512);
+               try
+               {
+                  urlStr.append(parent.toURI());
+                  if (urlStr.charAt( urlStr.length()-1) != '/')
+                     urlStr.append("/");
+
+                  urlStr.append(name);
+                  return new URL(urlStr.toString());
+               }
+               catch (URISyntaxException e)
+               {
+                  throw new RuntimeException("Failed to create child URL: " + parent + " + " + name, e);
+               }
+            }
+         }
+      }
+
+      StringBuilder urlStr = new StringBuilder(512);
       URI rootUri = getRootURI();
       urlStr.append(rootUri.getScheme())
               .append(":").append(rootUri.getPath());
+
       if(parent != null)
       {
-         String pPathName;
-         if(parent instanceof AbstractVirtualFileHandler)
-            pPathName = parent.getLocalPathName();
-         else
-            pPathName = parent.getPathName();
-
          if (urlStr.charAt( urlStr.length()-1) != '/')
             urlStr.append("/");
 
+         String pPathName = parent.getPathName();         
          if(pPathName.length() != 0)
             urlStr.append(pPathName);
 

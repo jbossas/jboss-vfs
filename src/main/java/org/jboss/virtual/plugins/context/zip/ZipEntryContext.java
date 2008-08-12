@@ -118,6 +118,9 @@ public class ZipEntryContext extends AbstractVFSContext
    /** Registry of everything that zipSource contains */
    private Map<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>();
 
+   /** Have zip entries been navigated yet */
+   private InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
+
    /**
     * Create a new ZipEntryContext
     *
@@ -220,14 +223,9 @@ public class ZipEntryContext extends AbstractVFSContext
       
       setRootPeer(peer);
 
-      String name = getRootURI().toString();
+      String name = getRootURI().getPath().toString();
 
-      // cut off query string
-      int toPos = name.lastIndexOf("?");
-      if (toPos != -1)
-         name = name.substring(0, toPos);
-
-      toPos = name.length();
+      int toPos = name.length();
 
       // cut off any ending slash
       if(name.length() != 0 && name.charAt(name.length()-1) == '/')
@@ -245,7 +243,8 @@ public class ZipEntryContext extends AbstractVFSContext
       // if zip entry exists for rootEntryPath
       entries.put("", new EntryInfo(new ZipEntryHandler(this, null, name, true), null));
 
-      initEntries();
+      // It's lazy init now
+      //initEntries();
    }
 
    /**
@@ -476,6 +475,32 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
+    * Perform initialization only if it hasn't been done yet
+    */
+   private synchronized void ensureEntries()
+   {
+      if (initStatus != InitializationStatus.NOT_INITIALIZED)
+         return;
+
+      try
+      {
+         initStatus = InitializationStatus.INITIALIZING;
+         initEntries();
+         initStatus = InitializationStatus.INITIALIZED;
+      }
+      catch (Exception ex)
+      {
+         RuntimeException e = new RuntimeException("Failed to read zip file: " + zipSource, ex);
+         throw e;
+      }
+      finally
+      {
+         if (initStatus == InitializationStatus.INITIALIZING)
+            initStatus = InitializationStatus.NOT_INITIALIZED;
+      }
+   }
+
+   /**
     * Mount ZipEntryContext created around extracted nested archive
     *
     * @param parent the parent
@@ -586,12 +611,17 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    * If archive has been modified, clear <em>entries</em> and re-initialize
+    * If archive has been modified, clear <em>entries</em> and re-initialize.
+    * If not initialized yet, initialize it.
     */
    private synchronized void checkIfModified()
    {
       // TODO: if zipSource represents a nested archive we should maybe delegate lastModified to its parent
-      if (zipSource.hasBeenModified())
+      if (initStatus == InitializationStatus.NOT_INITIALIZED)
+      {
+         ensureEntries();
+      }
+      else if (initStatus == InitializationStatus.INITIALIZED && zipSource.hasBeenModified())
       {
          EntryInfo rootInfo = entries.get("");
          entries = new ConcurrentHashMap<String, EntryInfo>();
@@ -617,7 +647,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return root handler
     * @throws IOException for any error
     */
-   public VirtualFileHandler getRoot() throws IOException
+   public VirtualFileHandler getRoot()
    {
       return entries.get("").handler;
    }
@@ -635,6 +665,7 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null parent");
 
       checkIfModified();
+
       String pathName = parent.getLocalPathName();
       if("".equals(pathName))
          pathName = name;
@@ -642,7 +673,6 @@ public class ZipEntryContext extends AbstractVFSContext
          pathName = pathName + "/" + name;
 
       EntryInfo ei = entries.get(pathName);
-      
       if(ei != null)
          return ei.handler;
 
@@ -698,7 +728,8 @@ public class ZipEntryContext extends AbstractVFSContext
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
 
-      checkIfModified();
+      if (getRoot().equals(handler) == false)
+         checkIfModified();
       EntryInfo ei = entries.get(handler.getLocalPathName());
       if(ei == null)
          return 0;
@@ -721,19 +752,14 @@ public class ZipEntryContext extends AbstractVFSContext
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
 
-      checkIfModified();
-      String pathName = handler.getLocalPathName();
-      EntryInfo ei = entries.get(pathName);
-      if(ei == null)
-         return 0;
+      if(getRoot().equals(handler))
+         return zipSource.getSize();
 
-      if(ei.entry == null)
-      {
-         if(pathName.length() == 0)
-            return zipSource.getSize();
-         else
-            return 0;
-      }
+      checkIfModified();
+
+      EntryInfo ei = entries.get(handler.getLocalPathName());
+      if(ei == null || ei.entry == null)
+         return 0;
 
       return ei.entry.getSize();
    }
@@ -749,14 +775,13 @@ public class ZipEntryContext extends AbstractVFSContext
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
 
+      if (getRoot().equals(handler))
+         return zipSource.exists();
+
       checkIfModified();
-      String pathName = handler.getLocalPathName();
-      EntryInfo ei = entries.get(pathName);
+      EntryInfo ei = entries.get(handler.getLocalPathName());
       if(ei == null)
          return false;
-
-      if (ei.entry == null && pathName.length() == 0)
-         return zipSource.exists();
 
       return true;
    }
@@ -772,9 +797,11 @@ public class ZipEntryContext extends AbstractVFSContext
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
 
-      checkIfModified();
+      if (getRoot().equals(handler) == false)
+         checkIfModified();
+      
       EntryInfo ei = entries.get(handler.getLocalPathName());
-      if(ei == null || ei.entry == null)
+      if (ei == null || ei.entry == null)
          return false;
 
       return !ei.entry.isDirectory();
@@ -852,10 +879,12 @@ public class ZipEntryContext extends AbstractVFSContext
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
 
+      if (getRoot().equals(handler))
+         return zipSource.getRootAsStream();
+
       checkIfModified();
 
-      String localPathName = handler.getLocalPathName();
-      EntryInfo ei = entries.get(localPathName);
+      EntryInfo ei = entries.get(handler.getLocalPathName());
 
       if (ei == null)
       {
@@ -872,13 +901,8 @@ public class ZipEntryContext extends AbstractVFSContext
       }
 
       if(ei.entry == null)
-      {
-         if ("".equals(localPathName))  // root
-            return zipSource.getRootAsStream();
-         else                           // directory
-            return new ByteArrayInputStream(new byte[0]);
-      }
-      
+         return new ByteArrayInputStream(new byte[0]);
+
       return zipSource.openStream(ei.entry);
    }
 
@@ -929,6 +953,7 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    public void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
    {
+      ensureEntries();
       EntryInfo parentEntry = entries.get(parent.getLocalPathName());
       if (parentEntry != null)
       {
@@ -1188,5 +1213,11 @@ public class ZipEntryContext extends AbstractVFSContext
          String forceString = System.getProperty(VFSUtils.FORCE_COPY_KEY, "false");
          return Boolean.valueOf(forceString);
       }
+   }
+
+   static enum InitializationStatus {
+      NOT_INITIALIZED,
+      INITIALIZING,
+      INITIALIZED
    }
 }
