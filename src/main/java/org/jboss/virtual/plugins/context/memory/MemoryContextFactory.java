@@ -103,10 +103,10 @@ public class MemoryContextFactory implements VFSContextFactory
          MemoryContext ctx = registry.get(rootName);
          if (ctx == null)
          {
-            if (url.getPath() != null && url.getPath().length() > 0)
-            {
-               throw new IllegalArgumentException("Root can not contain '/'");
-            }
+            String urlPath = url.getPath();
+            if (urlPath != null && urlPath.length() > 0)
+               throw new IllegalArgumentException("Root can not contain '/' - " + urlPath);
+
             URL ctxURL = new URL("vfsmemory://" + rootName);
             ctx = new MemoryContext(ctxURL);
             registry.put(rootName, ctx);
