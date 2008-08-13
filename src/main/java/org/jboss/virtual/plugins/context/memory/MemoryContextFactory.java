@@ -125,7 +125,7 @@ public class MemoryContextFactory implements VFSContextFactory
 
    /**
     * Creates a 'directory' within the context determined by the url host part
-    * @param url The url of the directory we want tot create
+    * @param url The url of the directory we want to create
     * @return The created directory
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
     */
@@ -134,16 +134,14 @@ public class MemoryContextFactory implements VFSContextFactory
       String rootName = url.getHost();
       MemoryContext ctx = registry.get(rootName);
       if (ctx == null)
-      {
          throw new IllegalArgumentException("No MemoryContext exists for " + rootName);
-      }
 
       return ctx.createDirectory(url);
    }
    
    /**
     * Creates a 'file' within the context determined by the url host part
-    * @param url The url of the directory we want tot create
+    * @param url The url of the directory we want to create
     * @param contents The contents of the file
     * @return The created file
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
@@ -153,10 +151,8 @@ public class MemoryContextFactory implements VFSContextFactory
       String rootName = url.getHost();
       MemoryContext ctx = registry.get(rootName);
       if (ctx == null)
-      {
-         throw new RuntimeException("No MemoryContext exists for " + rootName);
-      }
-      
+         throw new IllegalArgumentException("No MemoryContext exists for " + rootName);
+
       return ctx.putFile(url, contents);
    }
    
@@ -168,10 +164,9 @@ public class MemoryContextFactory implements VFSContextFactory
     */
    public boolean deleteRoot(URL url)
    {
-      if (url.getPath() != null && url.getPath().length() > 0)
-      {
-         throw new IllegalArgumentException("Root can not contain '/'");
-      }
+      String path = url.getPath();
+      if (path != null && path.length() > 0)
+         throw new IllegalArgumentException("Root can not contain '/' - " + path);
 
       String rootName = url.getHost();
       return (registry.remove(rootName) != null);
@@ -186,16 +181,15 @@ public class MemoryContextFactory implements VFSContextFactory
    {
       try
       {
-         if (url.getPath() == null || url.getPath().length() == 0)
-         {
+         String path = url.getPath();
+         if (path == null || path.length() == 0)
             return deleteRoot(url);
-         }
 
          String rootName = url.getHost();
          MemoryContext ctx = registry.get(rootName);
          if (ctx != null)
          {
-            MemoryContextHandler child = (MemoryContextHandler)ctx.getChild(ctx.getRoot(), url.getPath());
+            MemoryContextHandler child = (MemoryContextHandler)ctx.getChild(ctx.getRoot(), path);
             MemoryContextHandler parent = (MemoryContextHandler)child.getParent();
             return parent.deleteChild(child);
          }
