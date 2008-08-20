@@ -41,7 +41,8 @@ import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * 
+ * Memory vfs tests.
+ *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
@@ -56,6 +57,24 @@ public class MemoryTestCase extends AbstractVFSTest
    public static Test suite()
    {
       return suite(MemoryTestCase.class);
+   }
+
+   public void testRootCreation() throws Exception
+   {
+      URL dynamicClassRoot = new URL("vfsmemory", new GUID().toString(), "");
+      MemoryFileFactory.createRoot(dynamicClassRoot);
+      URL classesURL = new URL(dynamicClassRoot, "classes");
+      VirtualFile classes = MemoryFileFactory.createDirectory(classesURL);
+      URL url = classes.toURL();
+      try
+      {
+         VFS.getRoot(url);
+         fail("Should not be here");
+      }
+      catch (Exception e)
+      {
+         assertInstanceOf(e, IllegalArgumentException.class);
+      }      
    }
 
    public void testSerializable() throws Exception

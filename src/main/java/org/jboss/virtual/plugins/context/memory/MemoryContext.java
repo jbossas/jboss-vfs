@@ -112,7 +112,7 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
             URL localUrl = new URL(path.toString());
             if (current.getContents() != null)
             {
-               throw new IllegalStateException("Cannot add a child to " + current + " it already has contents");
+               throw new IllegalStateException("Cannot add a child to " + current + ", it already has contents");
             }
             current = new MemoryContextHandler(this, current, localUrl, token);
          }
