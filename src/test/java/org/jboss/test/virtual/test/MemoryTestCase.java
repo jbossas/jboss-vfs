@@ -59,7 +59,7 @@ public class MemoryTestCase extends AbstractVFSTest
       return suite(MemoryTestCase.class);
    }
 
-   public void testRootCreation() throws Exception
+   public void testRootCreationBad() throws Exception
    {
       URL dynamicClassRoot = new URL("vfsmemory", new GUID().toString(), "");
       MemoryFileFactory.createRoot(dynamicClassRoot);
@@ -75,6 +75,16 @@ public class MemoryTestCase extends AbstractVFSTest
       {
          assertInstanceOf(e, IllegalArgumentException.class);
       }      
+   }
+
+   public void testRootCreationGood() throws Exception
+   {
+      URL dynamicClassRoot = new URL("vfsmemory", GUID.asString(), "");
+      VirtualFile root = MemoryFileFactory.createRoot(dynamicClassRoot).getRoot();
+      assertEquals(root, VFS.getRoot(dynamicClassRoot));
+      VirtualFile file = MemoryFileFactory.putFile(new URL(dynamicClassRoot + "/classes/somename"), new byte[0]);
+      assertNotNull(file);
+      System.out.println(file.toURL());
    }
 
    public void testSerializable() throws Exception
