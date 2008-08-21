@@ -87,7 +87,19 @@ public class MemoryContextFactory implements VFSContextFactory
       MemoryContext context = registry.get(host);
       return context != null ? context.getVFS() : null;
    }
-   
+
+   /**
+    * Is url valid root url.
+    *
+    * @param url the url to check
+    * @return true if url is root url
+    */
+   protected static boolean isValidRootURL(URL url)
+   {
+      String path = url.getPath();
+      return path == null || path.length() == 0 || "/".equals(path);
+   }
+
    /**
     * Creates a new root MemoryContext, or returns an already exixting one of one already 
     * exists for the name
@@ -99,9 +111,8 @@ public class MemoryContextFactory implements VFSContextFactory
    {
       try
       {
-         String urlPath = url.getPath();
-         if (urlPath != null && urlPath.length() > 0)
-            throw new IllegalArgumentException("Root url cannot contain path - " + urlPath);
+         if (isValidRootURL(url) == false)
+            throw new IllegalArgumentException("Root url cannot contain path - " + url);
 
          String rootName = url.getHost();
          MemoryContext ctx = registry.get(rootName);
@@ -164,9 +175,8 @@ public class MemoryContextFactory implements VFSContextFactory
     */
    public boolean deleteRoot(URL url)
    {
-      String path = url.getPath();
-      if (path != null && path.length() > 0)
-         throw new IllegalArgumentException("Root can not contain '/' - " + path);
+      if (isValidRootURL(url) == false)
+         throw new IllegalArgumentException("Root cannot contain path - " + url);
 
       String rootName = url.getHost();
       return (registry.remove(rootName) != null);
