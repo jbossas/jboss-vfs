@@ -1088,12 +1088,11 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       webOut.println("</web-app>");
       webOut.close();
 
-      URL webXmlURL = new URL(dynamicClassRoot.toExternalForm() + "/web.xml");
-      MemoryFileFactory.putFile(webXmlURL, baos.toByteArray());
+      MemoryFileFactory.putFile(dynamicClassRoot, baos.toByteArray());
 
       PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(propsFile, true)));
       out.println("vfs.link.name.2=WEB-INF/web.xml");
-      out.println("vfs.link.target.2=" + webXmlURL.toExternalForm());
+      out.println("vfs.link.target.2=" + dynamicClassRoot.toExternalForm());
       out.close();
 
       // You need to get a new reference to LinkHandler - to get up-to-date configuration
