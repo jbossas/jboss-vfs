@@ -222,9 +222,7 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       
       setRootPeer(peer);
-
-      String name = getRootURI().getPath().toString();
-
+      String name = getRootURI().getPath();
       int toPos = name.length();
 
       // cut off any ending slash
@@ -490,8 +488,7 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       catch (Exception ex)
       {
-         RuntimeException e = new RuntimeException("Failed to read zip file: " + zipSource, ex);
-         throw e;
+         throw new RuntimeException("Failed to read zip file: " + zipSource, ex);
       }
       finally
       {
@@ -645,7 +642,6 @@ public class ZipEntryContext extends AbstractVFSContext
     * Returns this context's root
     *
     * @return root handler
-    * @throws IOException for any error
     */
    public VirtualFileHandler getRoot()
    {
@@ -780,10 +776,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       checkIfModified();
       EntryInfo ei = entries.get(handler.getLocalPathName());
-      if(ei == null)
-         return false;
-
-      return true;
+      return ei != null;
    }
 
    /**
@@ -804,7 +797,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (ei == null || ei.entry == null)
          return false;
 
-      return !ei.entry.isDirectory();
+      return ei.entry.isDirectory() == false;
    }
 
    /**
@@ -1034,10 +1027,8 @@ public class ZipEntryContext extends AbstractVFSContext
          if (children != null)
          {
             int i = 0;
-            Iterator<AbstractVirtualFileHandler> it = children.iterator();
-            while(it.hasNext())
+            for (AbstractVirtualFileHandler child : children)
             {
-               AbstractVirtualFileHandler child = it.next();
                if (child.getName().equals(original.getName()))
                {
                   children.set(i, replacement);
