@@ -85,6 +85,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(VFSUtilTestCase.suite());
       // custom
       suite.addTest(CustomTestCase.suite());
+      suite.addTest(VFSResourceTestCase.suite());
 
       return suite;
    }
