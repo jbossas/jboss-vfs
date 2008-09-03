@@ -112,6 +112,10 @@ class ZipStreamWrapper extends ZipBytesWrapper
 
    InputStream openStream(ZipEntry ent) throws IOException
    {
+      // JBVFS-57 JarInputStream composition
+      if (ent.isDirectory())
+         return recomposeZipAsInputStream(ent.getName());
+
       InMemoryFile memFile = inMemoryFiles.get(ent.getName());
 
       if (memFile == null)
@@ -128,24 +132,9 @@ class ZipStreamWrapper extends ZipBytesWrapper
    InputStream getRootAsStream() throws FileNotFoundException
    {
       if (optimizeForMemory)
-      {
-         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-         try
-         {
-            recomposeZip(baos);
-            return new ByteArrayInputStream(baos.toByteArray());
-         }
-         catch (IOException ex)
-         {
-            FileNotFoundException e = new FileNotFoundException("Failed to recompose inflated nested archive " + getName());
-            e.initCause(ex);
-            throw e;
-         }
-      }
+         return recomposeZipAsInputStream();
       else
-      {
          return super.getRootAsStream();
-      }
    }
 
    long getSize()
@@ -169,6 +158,11 @@ class ZipStreamWrapper extends ZipBytesWrapper
 
    private void recomposeZip(ByteArrayOutputStream baos) throws IOException
    {
+      recomposeZip(baos, "");
+   }
+
+   private void recomposeZip(ByteArrayOutputStream baos, String path) throws IOException
+   {
       ZipOutputStream zout = new ZipOutputStream(baos);
       zout.setMethod(ZipOutputStream.STORED);
 
@@ -176,10 +170,34 @@ class ZipStreamWrapper extends ZipBytesWrapper
       while(it.hasNext())
       {
          InMemoryFile memFile = it.next();
-         zout.putNextEntry(memFile.entry);
-         zout.write(memFile.fileBytes);
+         if (memFile.entry.getName().startsWith(path))
+         {
+            zout.putNextEntry(memFile.entry);
+            zout.write(memFile.fileBytes);
+         }
       }
       zout.close();
+   }
+
+   private InputStream recomposeZipAsInputStream() throws FileNotFoundException
+   {
+      return recomposeZipAsInputStream("");
+   }
+
+   private InputStream recomposeZipAsInputStream(String path) throws FileNotFoundException
+   {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try
+      {
+         recomposeZip(baos, path);
+         return new ByteArrayInputStream(baos.toByteArray());
+      }
+      catch (IOException ex)
+      {
+         FileNotFoundException e = new FileNotFoundException("Failed to recompose inflated nested archive " + getName());
+         e.initCause(ex);
+         throw e;
+      }
    }
 
    static class InMemoryFile
