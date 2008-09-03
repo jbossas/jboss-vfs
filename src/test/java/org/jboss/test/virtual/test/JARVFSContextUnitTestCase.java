@@ -24,6 +24,8 @@ package org.jboss.test.virtual.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -228,6 +230,23 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       VirtualFile file = vfs.findChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
       VirtualFile same = file.findChild("");
       assertEquals(file, same);
+   }
+
+   public void testWarClassesJarInputStream() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/web_pkg_scope.ear");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile file = vfs.getChild("web_pkg_scope_web.war/WEB-INF/classes/META-INF/persistence.xml");
+      assertNotNull(file);
+      VirtualFile classes = file.getParent().getParent();
+      // Access the classes contents as a jar file
+      URL classesURL = classes.toURL();
+      JarInputStream jis = new JarInputStream( classesURL.openStream() );
+      JarEntry jarEntry = jis.getNextJarEntry();
+      assertNotNull(jarEntry);
+      String name = jarEntry.getName();
+      assertNotNull(name);
+      classes.closeStreams();
    }
 
    // we need to make sure this doesn't get touched before
