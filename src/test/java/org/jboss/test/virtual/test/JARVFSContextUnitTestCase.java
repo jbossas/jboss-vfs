@@ -24,6 +24,8 @@ package org.jboss.test.virtual.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -232,6 +234,36 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       assertEquals(file, same);
    }
 
+   /** All of the following entries should be seen
+jar -tf web_pkg_scope_web.war 
+   106 Wed Sep 03 10:41:36 PDT 2008 META-INF/MANIFEST.MF
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/
+  5074 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/ServletTest.class
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/
+  1160 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/Account.class
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/
+  2935 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/HttpTCKServlet.class
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/util/
+   432 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/util/Data.class
+     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/META-INF/
+   338 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/META-INF/persistence.xml
+  1050 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/web.xml
+   280 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/jboss-web.xml
+    * @throws Exception
+    */
    public void testWarClassesJarInputStream() throws Exception
    {
       URL rootURL = getResource("/vfs/test/web_pkg_scope.ear");
@@ -241,11 +273,45 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       VirtualFile classes = file.getParent().getParent();
       // Access the classes contents as a jar file
       URL classesURL = classes.toURL();
+      String[] entryNames = {
+            "META-INF/MANIFEST.MF",
+            "WEB-INF/",
+            "WEB-INF/classes/",
+            "WEB-INF/classes/com/",
+            "WEB-INF/classes/com/sun/",
+            "WEB-INF/classes/com/sun/ts/",
+            "WEB-INF/classes/com/sun/ts/tests/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/ServletTest.class",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/",
+            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/Account.class",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/common/",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/HttpTCKServlet.class",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/common/util/",
+            "WEB-INF/classes/com/sun/ts/tests/servlet/common/util/Data.class",
+            "WEB-INF/classes/META-INF/",
+            "WEB-INF/classes/META-INF/persistence.xml",
+            "WEB-INF/web.xml",
+            "WEB-INF/jboss-web.xml"
+      };
       JarInputStream jis = new JarInputStream( classesURL.openStream() );
-      JarEntry jarEntry = jis.getNextJarEntry();
-      assertNotNull(jarEntry);
-      String name = jarEntry.getName();
-      assertNotNull(name);
+      HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));
+      int count = 0;
+      JarEntry jarEntry;
+      while((jarEntry = jis.getNextJarEntry()) != null)
+      {
+         String name = jarEntry.getName();
+         missingEntries.remove(name);
+         count ++;
+      }
+      assertEquals("No missing entries: "+missingEntries, 0, missingEntries.size());
       classes.closeStreams();
    }
 
