@@ -29,7 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
@@ -170,10 +169,21 @@ class ZipStreamWrapper extends ZipBytesWrapper
       while(it.hasNext())
       {
          InMemoryFile memFile = it.next();
-         if (memFile.entry.getName().startsWith(path))
+         ZipEntry oldEntry = memFile.entry;
+         if (oldEntry.getName().startsWith(path))
          {
-            zout.putNextEntry(memFile.entry);
-            zout.write(memFile.fileBytes);
+            String newName = oldEntry.getName().substring(path.length());
+            if(newName.length() == 0)
+               continue;
+
+            ZipEntry newEntry = new ZipEntry(newName);
+            newEntry.setComment(oldEntry.getComment());
+            newEntry.setTime(oldEntry.getTime());
+            newEntry.setSize(oldEntry.getSize());
+            newEntry.setCrc(oldEntry.getCrc());
+            zout.putNextEntry(newEntry);
+            if (oldEntry.isDirectory() == false)
+               zout.write(memFile.fileBytes);
          }
       }
       zout.close();

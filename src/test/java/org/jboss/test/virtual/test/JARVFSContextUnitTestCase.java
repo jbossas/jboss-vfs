@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -268,20 +269,23 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
             "web_pkg_scope/servlet/",
             "web_pkg_scope/entity/Account.class",
             "web_pkg_scope/servlet/JpaServlet.class",
-            "META-INF/",
+            // JarInputStream never returns META-INF/ entry - it just skips it
+            // "META-INF/",
             "META-INF/persistence.xml"
       };
       JarInputStream jis = new JarInputStream( classesURL.openStream() );
       HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));
-      int count = 0;
+      Set<String> excess = new HashSet<String>();
       JarEntry jarEntry;
       while((jarEntry = jis.getNextJarEntry()) != null)
       {
          String name = jarEntry.getName();
-         missingEntries.remove(name);
-         count ++;
+         boolean removed = missingEntries.remove(name);
+         if(!removed)
+            excess.add(name);
       }
       assertEquals("No missing entries: "+missingEntries, 0, missingEntries.size());
+      assertEquals("Excess entries: " + excess, 0, excess.size());
       classes.closeStreams();
    }
 
