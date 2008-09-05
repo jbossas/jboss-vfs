@@ -267,7 +267,9 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
             "web_pkg_scope/entity/",
             "web_pkg_scope/servlet/",
             "web_pkg_scope/entity/Account.class",
-            "web_pkg_scope/servlet/JpaServlet.class"
+            "web_pkg_scope/servlet/JpaServlet.class",
+            "META-INF/",
+            "META-INF/persistence.xml"
       };
       JarInputStream jis = new JarInputStream( classesURL.openStream() );
       HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));
