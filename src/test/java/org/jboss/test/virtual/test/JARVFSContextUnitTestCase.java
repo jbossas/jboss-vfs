@@ -235,33 +235,22 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
    }
 
    /** All of the following entries should be seen
-jar -tf web_pkg_scope_web.war 
-   106 Wed Sep 03 10:41:36 PDT 2008 META-INF/MANIFEST.MF
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/
-  5074 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/ServletTest.class
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/
-  1160 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/Account.class
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/
-  2935 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/HttpTCKServlet.class
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/util/
-   432 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/com/sun/ts/tests/servlet/common/util/Data.class
-     0 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/META-INF/
-   338 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/classes/META-INF/persistence.xml
-  1050 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/web.xml
-   280 Wed Sep 03 10:41:36 PDT 2008 WEB-INF/jboss-web.xml
+[551][valkyrie: web_pkg_scope]$ jar -tvf war/target/web_pkg_scope_web.war 
+     0 Fri Sep 05 12:47:30 PDT 2008 META-INF/
+   126 Fri Sep 05 12:47:28 PDT 2008 META-INF/MANIFEST.MF
+     0 Fri Sep 05 12:07:32 PDT 2008 WEB-INF/
+     0 Fri Sep 05 12:07:32 PDT 2008 WEB-INF/classes/
+     0 Fri Sep 05 12:07:32 PDT 2008 WEB-INF/classes/web_pkg_scope/
+     0 Fri Sep 05 12:07:32 PDT 2008 WEB-INF/classes/web_pkg_scope/entity/
+     0 Fri Sep 05 12:07:32 PDT 2008 WEB-INF/classes/web_pkg_scope/servlet/
+   288 Fri Sep 05 12:07:30 PDT 2008 WEB-INF/classes/web_pkg_scope/entity/Account.class
+   299 Fri Sep 05 12:07:30 PDT 2008 WEB-INF/classes/web_pkg_scope/servlet/JpaServlet.class
+  1055 Fri Sep 05 12:25:02 PDT 2008 WEB-INF/web.xml
+     0 Fri Sep 05 12:47:30 PDT 2008 META-INF/maven/
+     0 Fri Sep 05 12:47:30 PDT 2008 META-INF/maven/org.jboss.vfs/
+     0 Fri Sep 05 12:47:30 PDT 2008 META-INF/maven/org.jboss.vfs/web_pkg_scope_web/
+   735 Fri Sep 05 12:47:20 PDT 2008 META-INF/maven/org.jboss.vfs/web_pkg_scope_web/pom.xml
+   122 Fri Sep 05 12:47:28 PDT 2008 META-INF/maven/org.jboss.vfs/web_pkg_scope_web/pom.properties
     * @throws Exception
     */
    public void testWarClassesJarInputStream() throws Exception
@@ -274,32 +263,11 @@ jar -tf web_pkg_scope_web.war
       // Access the classes contents as a jar file
       URL classesURL = classes.toURL();
       String[] entryNames = {
-            "META-INF/MANIFEST.MF",
-            "WEB-INF/",
-            "WEB-INF/classes/",
-            "WEB-INF/classes/com/",
-            "WEB-INF/classes/com/sun/",
-            "WEB-INF/classes/com/sun/ts/",
-            "WEB-INF/classes/com/sun/ts/tests/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/packaging/web/scope/ServletTest.class",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/",
-            "WEB-INF/classes/com/sun/ts/tests/ejb30/persistence/ee/common/Account.class",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/common/",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/common/servlets/HttpTCKServlet.class",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/common/util/",
-            "WEB-INF/classes/com/sun/ts/tests/servlet/common/util/Data.class",
-            "WEB-INF/classes/META-INF/",
-            "WEB-INF/classes/META-INF/persistence.xml",
-            "WEB-INF/web.xml",
-            "WEB-INF/jboss-web.xml"
+            "web_pkg_scope/",
+            "web_pkg_scope/entity/",
+            "web_pkg_scope/servlet/",
+            "web_pkg_scope/entity/Account.class",
+            "web_pkg_scope/servlet/JpaServlet.class"
       };
       JarInputStream jis = new JarInputStream( classesURL.openStream() );
       HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));

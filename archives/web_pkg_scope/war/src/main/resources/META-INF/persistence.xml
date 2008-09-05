@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+    <persistence-unit
+        name="AccountManager"
+        transaction-type="JTA">
+        <description>Persistence Unit Package Tests</description>
+        <jta-data-source>jdbc/DB1</jta-data-source>
+    </persistence-unit>
+</persistence>
