@@ -33,6 +33,7 @@ import java.util.jar.JarInputStream;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarContext;
@@ -256,6 +257,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
     */
    public void testWarClassesJarInputStream() throws Exception
    {
+      System.setProperty(VFSUtils.FORCE_COPY_KEY, "true");
       URL rootURL = getResource("/vfs/test/web_pkg_scope.ear");
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile file = vfs.getChild("web_pkg_scope_web.war/WEB-INF/classes/META-INF/persistence.xml");
