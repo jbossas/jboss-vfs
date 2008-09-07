@@ -26,12 +26,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -204,6 +206,10 @@ class ZipFileWrapper extends ZipWrapper
     */
    synchronized InputStream openStream(ZipEntry ent) throws IOException
    {
+      // JBVFS-57 JarInputStream composition
+      if (ent.isDirectory())
+         return recomposeZipAsInputStream(ent.getName());
+
       ensureZipFile();
       InputStream is = zipFile.getInputStream(ent);
       if (is == null)
@@ -327,6 +333,35 @@ class ZipFileWrapper extends ZipWrapper
 
       file.delete();
       return file.exists() == false;
+   }
+
+   protected synchronized void recomposeZip(OutputStream baos, String path) throws IOException
+   {
+      ZipOutputStream zout = new ZipOutputStream(baos);
+      zout.setMethod(ZipOutputStream.STORED);
+
+      ensureZipFile();
+      Enumeration<? extends ZipEntry> entries = zipFile.entries();
+      while(entries.hasMoreElements())
+      {
+         ZipEntry oldEntry = entries.nextElement();
+         if (oldEntry.getName().startsWith(path))
+         {
+            String newName = oldEntry.getName().substring(path.length());
+            if(newName.length() == 0)
+               continue;
+
+            ZipEntry newEntry = new ZipEntry(newName);
+            newEntry.setComment(oldEntry.getComment());
+            newEntry.setTime(oldEntry.getTime());
+            newEntry.setSize(oldEntry.getSize());
+            newEntry.setCrc(oldEntry.getCrc());
+            zout.putNextEntry(newEntry);
+            if (oldEntry.isDirectory() == false)
+               VFSUtils.copyStream(zipFile.getInputStream(oldEntry), zout);
+         }
+      }
+      zout.close();
    }
 
    /**

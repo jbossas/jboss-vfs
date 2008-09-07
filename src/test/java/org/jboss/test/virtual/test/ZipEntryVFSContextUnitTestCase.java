@@ -151,6 +151,19 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       assertTrue("read archive content", memOut.size() == handler.getSize());
    }
 
+   /**
+    * Handler representing a directory must return a recomposed zip archive
+    * that has requested entry as its root.
+    *
+    * This behavior is new to vfszip. vfsjar returns an empty stream.
+    *
+    * @throws Exception for any error
+    */
+   public void testDirectoryZipEntryOpenStream() throws Exception
+   {
+      doDirectoryZipEntryOpenStream(false);
+   }
+
    // we need to make sure this doesn't get touched before
    protected String getNestedName()
    {

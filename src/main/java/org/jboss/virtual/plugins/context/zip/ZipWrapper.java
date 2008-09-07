@@ -21,9 +21,12 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 
@@ -189,5 +192,38 @@ abstract class ZipWrapper
     * @throws IOException for any error
     */
    abstract boolean delete(int gracePeriod) throws IOException;
-   
+
+   /**
+    * Recompose an input stream as having <em>path</em> entry for its root.
+    * All entries' names have to be shifted accordingly.
+    *
+    * @param path root path
+    * @return InputStream containing a new ZIP archive
+    * @throws FileNotFoundException for any error that prevented recomposition
+    */
+   protected InputStream recomposeZipAsInputStream(String path) throws FileNotFoundException
+   {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try
+      {
+         recomposeZip(baos, path);
+         return new ByteArrayInputStream(baos.toByteArray());
+      }
+      catch (IOException ex)
+      {
+         FileNotFoundException e = new FileNotFoundException("Failed to recompose inflated nested archive " + getName());
+         e.initCause(ex);
+         throw e;
+      }
+   }
+
+   /**
+    * Recompose an input streamas having <em>path</em> entry for its root, and write it to a given OutputStream.
+    * All entries' names have to be shifted accordingly.
+    *
+    * @param os OutputStream that will contain newly create archive
+    * @param path root path
+    * @throws IOException for any error
+    */
+   abstract protected void recomposeZip(OutputStream os, String path) throws IOException;   
 }

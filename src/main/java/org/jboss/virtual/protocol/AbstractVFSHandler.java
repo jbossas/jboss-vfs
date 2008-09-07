@@ -68,6 +68,10 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
       String file = URLDecoder.decode(url.toExternalForm(), "UTF-8").substring(getProtocolNameLength() + 1); // strip out vfs protocol + :
       URL vfsurl = null;
       String relative;
+      String queryStr = url.getQuery();
+      if (queryStr != null)
+         file = file.substring(0, file.lastIndexOf('?'));
+
       File fp = new File(file);
       if (fp.exists())
       {
@@ -94,7 +98,9 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
 
       if (vfsurl == null)
          throw new IOException("VFS file does not exist: " + url);
-
+      if (queryStr != null)
+         vfsurl = new URL(vfsurl + "?" + queryStr);
+      
       return new VirtualFileURLConnection(url, vfsurl, relative);
    }
 }

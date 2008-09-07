@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
@@ -160,7 +161,7 @@ class ZipStreamWrapper extends ZipBytesWrapper
       recomposeZip(baos, "");
    }
 
-   private void recomposeZip(ByteArrayOutputStream baos, String path) throws IOException
+   protected void recomposeZip(OutputStream baos, String path) throws IOException
    {
       ZipOutputStream zout = new ZipOutputStream(baos);
       zout.setMethod(ZipOutputStream.STORED);
@@ -192,22 +193,6 @@ class ZipStreamWrapper extends ZipBytesWrapper
    private InputStream recomposeZipAsInputStream() throws FileNotFoundException
    {
       return recomposeZipAsInputStream("");
-   }
-
-   private InputStream recomposeZipAsInputStream(String path) throws FileNotFoundException
-   {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      try
-      {
-         recomposeZip(baos, path);
-         return new ByteArrayInputStream(baos.toByteArray());
-      }
-      catch (IOException ex)
-      {
-         FileNotFoundException e = new FileNotFoundException("Failed to recompose inflated nested archive " + getName());
-         e.initCause(ex);
-         throw e;
-      }
    }
 
    static class InMemoryFile

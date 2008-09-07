@@ -152,9 +152,18 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
    /**
     * Handler representing a directory must return a zero length stream
     *
+    * This behavior has changed with vfszip - where directory entry within
+    * zip archive when opened as stream returns a recomposed zip archive
+    * that has requested entry as its root
+    *
     * @throws Exception for any error
     */
    public void testDirectoryZipEntryOpenStream() throws Exception
+   {
+      doDirectoryZipEntryOpenStream(true);
+   }
+
+   protected void doDirectoryZipEntryOpenStream(boolean expectEmpty) throws Exception
    {
       URL url = getResource("/vfs/context/jar/complex.jar");
       VFSContext ctx = createVSFContext(url);
@@ -163,7 +172,13 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       InputStream is = sub.openStream();
       try
       {
-         assertTrue("input stream closed", is.read() == -1);
+         // JBVFS-57 JarInputStream composition - recomposes directory as a
+         // jar equivalent to jar:complex.jar!/subfolder
+         // NOT IMPLEMENTED for vfsjar - vfsjar is deprecated
+         if (expectEmpty)
+            assertTrue("input stream should be closed", is.read() == -1);
+         else
+            assertTrue("input stream should not be empty", is.read() != -1);
       }
       finally
       {
@@ -257,14 +272,12 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
     */
    public void testWarClassesJarInputStream() throws Exception
    {
-      System.setProperty(VFSUtils.FORCE_COPY_KEY, "true");
       URL rootURL = getResource("/vfs/test/web_pkg_scope.ear");
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile file = vfs.getChild("web_pkg_scope_web.war/WEB-INF/classes/META-INF/persistence.xml");
       assertNotNull(file);
       VirtualFile classes = file.getParent().getParent();
       // Access the classes contents as a jar file
-      URL classesURL = classes.toURL();
       String[] entryNames = {
             "web_pkg_scope/",
             "web_pkg_scope/entity/",
@@ -275,19 +288,29 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
             // "META-INF/",
             "META-INF/persistence.xml"
       };
-      JarInputStream jis = new JarInputStream( classesURL.openStream() );
-      HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));
-      Set<String> excess = new HashSet<String>();
-      JarEntry jarEntry;
-      while((jarEntry = jis.getNextJarEntry()) != null)
+
+      URL [] classesURLs = new URL []
       {
-         String name = jarEntry.getName();
-         boolean removed = missingEntries.remove(name);
-         if(!removed)
-            excess.add(name);
+         classes.toURL(),
+         new URL(classes.toURL() + "?" + VFSUtils.USE_COPY_QUERY + "=true")
+      };
+
+      for (URL url: classesURLs)
+      {
+         JarInputStream jis = new JarInputStream( url.openStream() );
+         HashSet<String> missingEntries = new HashSet<String>(Arrays.asList(entryNames));
+         Set<String> excess = new HashSet<String>();
+         JarEntry jarEntry;
+         while((jarEntry = jis.getNextJarEntry()) != null)
+         {
+            String name = jarEntry.getName();
+            boolean removed = missingEntries.remove(name);
+            if(!removed)
+               excess.add(name);
+         }
+         assertEquals("No missing entries: "+missingEntries, 0, missingEntries.size());
+         assertEquals("Excess entries: " + excess, 0, excess.size());
       }
-      assertEquals("No missing entries: "+missingEntries, 0, missingEntries.size());
-      assertEquals("Excess entries: " + excess, 0, excess.size());
       classes.closeStreams();
    }
 
