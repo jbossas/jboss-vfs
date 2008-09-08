@@ -225,5 +225,8 @@ abstract class ZipWrapper
     * @param path root path
     * @throws IOException for any error
     */
-   abstract protected void recomposeZip(OutputStream os, String path) throws IOException;   
+   protected void recomposeZip(OutputStream os, String path) throws IOException
+   {
+      // do nothing
+   }
 }
