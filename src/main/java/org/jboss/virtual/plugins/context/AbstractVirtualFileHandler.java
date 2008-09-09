@@ -179,6 +179,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    {
       boolean hasBeenModified = false;
       long last = getLastModified();
+      if(log.isTraceEnabled())
+         log.trace("hasBeenModified, lastModified: "+last+", cachedLastModified: "+cachedLastModified);
       if (cachedLastModified != last)
       {
          hasBeenModified = cachedLastModified != 0;
