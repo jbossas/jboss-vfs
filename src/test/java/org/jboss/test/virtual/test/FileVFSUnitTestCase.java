@@ -1044,6 +1044,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testWarLinkUpdate()
       throws Exception
    {
+      // Setup the system properties used in test-link.war.vfslink.properties 
       URL classesURL = getClass().getProtectionDomain().getCodeSource().getLocation();
       assertNotNull("classesURL", classesURL);
       System.setProperty("test.classes.url", classesURL.toString());
@@ -1060,19 +1061,25 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       File root = File.createTempFile("jboss-vfs-testWarLinkUpdate", ".tmp");
       root.delete();
       root.mkdir();
+      log.info("Using root: "+root);
 
+      // There should be no test-link.war under the new tmp root
       VFS vfs = VFS.getVFS(root.toURI());
       VirtualFile link = vfs.getChild("test-link.war");
       assertNull("test-link.war", link);
 
+      // Add the link properties, now test-link.war should exist
       File propsFile = new File(root, "test-link.war.vfslink.properties");
       VFSUtils.copyStreamAndClose(new FileInputStream(linkFile), new FileOutputStream(propsFile));
       link = vfs.getChild("test-link.war");
       assertNotNull("test-link.war", link);
 
       List<VirtualFile> children = link.getChildren();
-      assertTrue("Wrong number of link children", children.size() == 1);
-      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 2);
+      assertEquals("test-link.war has 1 child", 1, children.size());
+      assertEquals("WEB-INF has 2 children", 2, children.get(0).getChildren().size());
+
+      // Sleep 1sec+ to allow timestamp changes in files to be > 1000ms, JBVFS-59
+      Thread.sleep(1005);
 
       // modify properties file - add more children
       URL dynamicClassRoot = new URL("vfsmemory", ".vfslink-test", "");
@@ -1095,11 +1102,22 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       out.println("vfs.link.target.2=" + dynamicClassRoot.toExternalForm());
       out.close();
 
+      Properties linkProps = new Properties();
+      linkProps.load(new FileInputStream(propsFile));
+      assertEquals(1+3*2, linkProps.size());
+      assertEquals("vfs.link.name.0", "WEB-INF/classes", linkProps.getProperty("vfs.link.name.0"));
+      assertEquals("vfs.link.name.1", "WEB-INF/lib", linkProps.getProperty("vfs.link.name.1"));
+      assertEquals("vfs.link.name.2", "WEB-INF/web.xml", linkProps.getProperty("vfs.link.name.2"));
+      assertEquals("vfs.link.target.2", dynamicClassRoot.toExternalForm(), linkProps.getProperty("vfs.link.target.2"));
+ 
       // You need to get a new reference to LinkHandler - to get up-to-date configuration
       children = link.getChildren();
-      assertTrue("Wrong number of children", children.size() == 1);
-      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 3);
+      assertEquals("test-link.war has 1 child", 1, children.size());
+      log.info("WEB-INF children after update: "+children.get(0).getChildren());
+      assertEquals("WEB-INF has 3 children", 3, children.get(0).getChildren().size());
 
+      // Sleep 1sec+ to allow timestamp changes in files to be > 1000ms, JBVFS-59
+      Thread.sleep(1005);
       // modify properties file - remove all but first
       BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(propsFile)));
       baos = new ByteArrayOutputStream();
@@ -1119,9 +1137,11 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       fos.close();
 
       children = link.getChildren();
-      assertTrue("Wrong number of children", children.size() == 1);
-      assertTrue("Wrong number of WEB-INF link children", children.get(0).getChildren().size() == 1);
+      assertEquals("test-link.war has 1 child", 1, children.size());
+      assertEquals("WEB-INF has 1 child", 1, children.get(0).getChildren().size());
 
+      // Sleep 1sec+ to allow timestamp changes in files to be > 1000ms, JBVFS-59
+      Thread.sleep(1005);
       // modify properties file - remove all
       fos = new FileOutputStream(propsFile);
       fos.write(' ');
