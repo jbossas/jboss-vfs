@@ -1103,13 +1103,15 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       out.close();
 
       Properties linkProps = new Properties();
-      linkProps.load(new FileInputStream(propsFile));
+      InputStream propsIn = new FileInputStream(propsFile);
+      linkProps.load(propsIn);
       assertEquals(1+3*2, linkProps.size());
       assertEquals("vfs.link.name.0", "WEB-INF/classes", linkProps.getProperty("vfs.link.name.0"));
       assertEquals("vfs.link.name.1", "WEB-INF/lib", linkProps.getProperty("vfs.link.name.1"));
       assertEquals("vfs.link.name.2", "WEB-INF/web.xml", linkProps.getProperty("vfs.link.name.2"));
       assertEquals("vfs.link.target.2", dynamicClassRoot.toExternalForm(), linkProps.getProperty("vfs.link.target.2"));
- 
+      propsIn.close();
+
       // You need to get a new reference to LinkHandler - to get up-to-date configuration
       children = link.getChildren();
       assertEquals("test-link.war has 1 child", 1, children.size());
