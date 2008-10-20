@@ -208,7 +208,10 @@ public class VFS
       VirtualFileHandler handler = context.getRoot();
       VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
       if (result == null)
-         throw new IOException("Child not found " + path + " for " + handler);
+      {
+         List<VirtualFileHandler> children = handler.getChildren(true);
+         throw new IOException("Child not found " + path + " for " + handler + ", available children: " + children);
+      }
       return result.getVirtualFile();
    }
    
