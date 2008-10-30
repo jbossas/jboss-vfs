@@ -32,7 +32,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.util.file.ArchiveBrowser;
 
 /**

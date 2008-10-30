@@ -50,7 +50,7 @@ import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * VFS Utilities
@@ -116,7 +116,7 @@ public class VFSUtils
     */
    public static void stopCache()
    {
-      VFSCacheFactory.getInstance().stop();   
+      VFSCacheFactory.getInstance().stop();
    }
 
    /**

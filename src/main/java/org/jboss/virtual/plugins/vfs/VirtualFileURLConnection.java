@@ -28,7 +28,7 @@ import java.net.URLConnection;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Implements basic URLConnection for a VirtualFile
