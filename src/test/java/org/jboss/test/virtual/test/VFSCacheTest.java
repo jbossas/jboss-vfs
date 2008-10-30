@@ -45,9 +45,10 @@ public abstract class VFSCacheTest extends AbstractVFSTest
 
    protected abstract VFSCache createCache();
 
+   @SuppressWarnings("deprecation")
    public void testCache() throws Exception
    {
-      URL url = getResource("/vfs/test");
+      URL url = getResource("/vfs/test/nested");
 
       VFSCache cache = createCache();
       cache.start();
@@ -57,14 +58,21 @@ public abstract class VFSCacheTest extends AbstractVFSTest
          try
          {
             VirtualFile root = VFS.getRoot(url);
-            VirtualFile file = root.findChild("/nested/nested.jar/META-INF/empty.txt");
+
+            VirtualFile file = root.findChild("/nested.jar/META-INF/empty.txt");
             URL fileURL = file.toURL();
+            VirtualFile nested = root.findChild("/nested.jar/complex.jar/subfolder/subsubfolder/subsubchild");
+            URL nestedURL = nested.toURL();
 
             assertEquals(file, cache.getFile(fileURL));
+            assertEquals(nested, cache.getFile(nestedURL));
+
             VFSCacheFactory.setInstance(null);
             VFSCache wrapper = new WrapperVFSCache(cache);
             VFSCacheFactory.setInstance(wrapper);
+
             assertEquals(file, wrapper.getFile(fileURL));
+            assertEquals(nested, wrapper.getFile(nestedURL));
          }
          finally
          {
