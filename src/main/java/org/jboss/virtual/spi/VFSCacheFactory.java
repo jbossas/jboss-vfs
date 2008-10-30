@@ -92,6 +92,7 @@ public class VFSCacheFactory
             String className = System.getProperty(VFSUtils.VFS_CACHE_KEY);
             if (className != null)
             {
+               log.info("Initializing VFSCache [" + className + "] ...");
                ClassLoader cl = VFSCacheFactory.class.getClassLoader();
                Class<?> clazz = cl.loadClass(className);
                VFSCache cache = VFSCache.class.cast(clazz.newInstance());
