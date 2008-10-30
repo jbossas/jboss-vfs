@@ -22,7 +22,7 @@
 package org.jboss.test.virtual.test;
 
 import org.jboss.virtual.plugins.cache.SoftRefVFSCache;
-import org.jboss.virtual.spi.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCache;
 import junit.framework.Test;
 
 /**

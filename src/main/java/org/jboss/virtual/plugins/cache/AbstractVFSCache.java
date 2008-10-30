@@ -33,7 +33,8 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
-import org.jboss.virtual.spi.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -42,11 +43,17 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class AbstractVFSCache implements VFSCache
+public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 {
    protected Logger log = Logger.getLogger(getClass());
    
    protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+   private long timestamp;
+
+   public long lastInsert()
+   {
+      return timestamp;
+   }
 
    public VirtualFile getFile(URI uri) throws IOException
    {
@@ -175,6 +182,7 @@ public abstract class AbstractVFSCache implements VFSCache
       try
       {
          putContext(getKey(context), context);
+         timestamp = System.currentTimeMillis();
       }
       finally
       {

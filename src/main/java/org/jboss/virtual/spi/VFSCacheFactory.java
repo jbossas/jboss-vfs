@@ -32,6 +32,7 @@ import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * Simple vfs cache factory.

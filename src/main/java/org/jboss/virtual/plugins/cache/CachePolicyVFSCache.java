@@ -23,6 +23,7 @@ package org.jboss.virtual.plugins.cache;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
 
 import org.jboss.util.CachePolicy;
 import org.jboss.virtual.spi.VFSContext;
@@ -36,6 +37,17 @@ public abstract class CachePolicyVFSCache extends AbstractVFSCache
 {
    private CachePolicy policy;
    private boolean started;
+
+   public Iterable<VFSContext> getCachedContexts()
+   {
+      // cannot pull all cache entries from policy
+      return Collections.emptySet();
+   }
+
+   public int size()
+   {
+      return policy != null ? policy.size() : -1;
+   }
 
    public void start() throws Exception
    {

@@ -23,7 +23,7 @@ package org.jboss.test.virtual.test;
 
 import junit.framework.Test;
 import org.jboss.virtual.plugins.cache.LRUVFSCache;
-import org.jboss.virtual.spi.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * LRU VFSCache Test.

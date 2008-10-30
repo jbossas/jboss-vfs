@@ -19,62 +19,35 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.spi;
+package org.jboss.virtual.spi.cache;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-
-import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
- * Simple vfs cache interface.
+ * Simple vfs cache statistics
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public interface VFSCache
+public interface CacheStatistics
 {
    /**
-    * Get the file.
+    * Get cached contexts.
     *
-    * @param uri the file's uri
-    * @return virtual file instance
-    * @throws IOException for any error
+    * @return the cached contexts
     */
-   VirtualFile getFile(URI uri) throws IOException;
+   Iterable<VFSContext> getCachedContexts();
 
    /**
-    * Get the file.
+    * Get cache size.
     *
-    * @param url the file's url
-    * @return virtual file instance
-    * @throws IOException for any error
+    * @return the cache size
     */
-   VirtualFile getFile(URL url) throws IOException;
+   int size();
 
    /**
-    * Put vfs context to cache.
+    * Get last inster timestamp.
     *
-    * @param context the vfs context
+    * @return the last inster timestamp
     */
-   void putContext(VFSContext context);
-
-   /**
-    * Remove vfs context from cache.
-    *
-    * @param context the vfs context
-    */
-   void removeContext(VFSContext context);
-
-   /**
-    * Start the cache.
-    *
-    * @throws Exception for any error
-    */
-   void start() throws Exception;
-
-   /**
-    * Stop the cache.
-    */
-   void stop();
+   long lastInsert();
 }

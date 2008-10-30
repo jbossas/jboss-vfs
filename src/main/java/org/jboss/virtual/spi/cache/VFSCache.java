@@ -19,65 +19,63 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.cache;
+package org.jboss.virtual.spi.cache;
 
-import java.util.Collections;
-import java.util.Map;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 
 /**
- * Map vfs cache.
+ * Simple vfs cache interface.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class MapVFSCache extends AbstractVFSCache
+public interface VFSCache
 {
-   private Map<String, VFSContext> cache;
-
-   public Iterable<VFSContext> getCachedContexts()
-   {
-      if (cache == null)
-         return Collections.emptySet();
-      else
-         return cache.values(); 
-   }
-
-   public int size()
-   {
-      return cache != null ? cache.size() : -1;
-   }
-
-   protected VFSContext getContext(String path)
-   {
-      return cache.get(path);
-   }
-
-   protected void putContext(String path, VFSContext context)
-   {
-      cache.put(path, context);
-   }
-
-   protected void removeContext(String path, VFSContext context)
-   {
-      cache.remove(path);
-   }
+   /**
+    * Get the file.
+    *
+    * @param uri the file's uri
+    * @return virtual file instance
+    * @throws IOException for any error
+    */
+   VirtualFile getFile(URI uri) throws IOException;
 
    /**
-    * Create cache map.
+    * Get the file.
     *
-    * @return cache map
+    * @param url the file's url
+    * @return virtual file instance
+    * @throws IOException for any error
     */
-   protected abstract Map<String, VFSContext> createMap();
+   VirtualFile getFile(URL url) throws IOException;
 
-   public void start() throws Exception
-   {
-      cache = createMap();
-   }
+   /**
+    * Put vfs context to cache.
+    *
+    * @param context the vfs context
+    */
+   void putContext(VFSContext context);
 
-   public void stop()
-   {
-      if (cache != null)
-         cache.clear();
-   }
+   /**
+    * Remove vfs context from cache.
+    *
+    * @param context the vfs context
+    */
+   void removeContext(VFSContext context);
+
+   /**
+    * Start the cache.
+    *
+    * @throws Exception for any error
+    */
+   void start() throws Exception;
+
+   /**
+    * Stop the cache.
+    */
+   void stop();
 }

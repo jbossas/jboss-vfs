@@ -27,7 +27,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.VFSCacheFactory;
 
 /**
