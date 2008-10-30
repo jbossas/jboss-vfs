@@ -23,7 +23,6 @@ package org.jboss.virtual.spi.cache;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -122,16 +121,7 @@ public class VFSCacheFactory
 
       public VirtualFile getFile(URL url) throws IOException
       {
-         try
-         {
-            return getFile(VFSUtils.toURI(url));
-         }
-         catch (URISyntaxException e)
-         {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            throw ioe;
-         }
+         return VFS.getRoot(url);
       }
 
       public void putContext(VFSContext context)
