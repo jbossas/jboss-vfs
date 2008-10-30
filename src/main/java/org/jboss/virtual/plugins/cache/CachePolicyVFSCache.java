@@ -49,6 +49,12 @@ public abstract class CachePolicyVFSCache extends AbstractVFSCache
       return policy != null ? policy.size() : -1;
    }
 
+   protected void check()
+   {
+      if (policy == null)
+         throw new IllegalArgumentException("Cache needs to be started first.");
+   }
+
    public void start() throws Exception
    {
       policy = createCachePolicy();

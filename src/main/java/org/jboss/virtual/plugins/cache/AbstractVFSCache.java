@@ -55,8 +55,15 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       return timestamp;
    }
 
+   /**
+    * Is cache valid.
+    */
+   protected abstract void check();
+
    public VirtualFile getFile(URI uri) throws IOException
    {
+      check();
+
       VFSContext context = findContext(uri);
       if (context != null)
       {
@@ -84,6 +91,8 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    public VirtualFile getFile(URL url) throws IOException
    {
+      check();
+
       try
       {
          return getFile(VFSUtils.toURI(url));
@@ -177,6 +186,8 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       if (context == null)
          throw new IllegalArgumentException("Null context");
 
+      check();
+
       lock.writeLock().lock();
       try
       {
@@ -201,6 +212,8 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
    {
       if (context == null)
          throw new IllegalArgumentException("Null context");
+
+      check();
 
       lock.writeLock().lock();
       try

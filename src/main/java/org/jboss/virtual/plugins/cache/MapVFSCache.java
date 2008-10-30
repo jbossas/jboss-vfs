@@ -48,6 +48,12 @@ public abstract class MapVFSCache extends AbstractVFSCache
       return cache != null ? cache.size() : -1;
    }
 
+   protected void check()
+   {
+      if (cache == null)
+         throw new IllegalArgumentException("Cache needs to be started first.");
+   }
+
    protected VFSContext getContext(String path)
    {
       return cache.get(path);
