@@ -69,6 +69,18 @@ public abstract class AbstractVFSTest extends BaseTestCase
    {
       super.setUp();
 
+/*
+      // LRU
+      System.setProperty(VFSUtils.VFS_CACHE_KEY, LRUVFSCache.class.getName());
+      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", "2");
+      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", "100");
+*/
+/*
+      // Timed
+      System.setProperty(VFSUtils.VFS_CACHE_KEY, TimedVFSCache.class.getName());
+      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", "60");
+*/
+
       VFSContextFactoryLocator.registerFactory(fileFactory);
       VFSContextFactoryLocator.registerFactory(jarFactory);
 

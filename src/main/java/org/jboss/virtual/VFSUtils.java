@@ -50,6 +50,7 @@ import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSCacheFactory;
 
 /**
  * VFS Utilities
@@ -104,6 +105,19 @@ public class VFSUtils
     * Key used to turn on memory optimizations - less cache use at the expense of performance
     */
    public static final String OPTIMIZE_FOR_MEMORY_KEY = "jboss.vfs.optimizeForMemory";
+
+   /**
+    * Key used to determine VFS Cache impl
+    */
+   public static final String VFS_CACHE_KEY = "jboss.vfs.cache";
+
+   /**
+    * Stop cache.
+    */
+   public static void stopCache()
+   {
+      VFSCacheFactory.getInstance().stop();   
+   }
 
    /**
     * Get the paths string for a collection of virtual files

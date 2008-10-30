@@ -25,12 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collections;
-import java.util.Map;
 
-import org.jboss.util.collection.SoftValueHashMap;
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.spi.VFSCache;
+import org.jboss.virtual.spi.VFSCacheFactory;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -41,9 +39,6 @@ import org.jboss.virtual.VirtualFile;
  */
 public class VirtualFileURLConnection extends URLConnection
 {
-   @SuppressWarnings("unchecked")
-   public static Map<URL, VFS> urlCache = Collections.<URL, VFS>synchronizedMap(new SoftValueHashMap());
-
    protected VirtualFile file;
    protected URL vfsurl;
    protected String relativePath;
@@ -102,31 +97,15 @@ public class VirtualFileURLConnection extends URLConnection
    @SuppressWarnings("deprecation")
    protected static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
-      VFS vfs = urlCache.get(vfsurl);
-      if (vfs == null)
-      {
-         vfs = VFS.getVFS(vfsurl);
-         urlCache.put(vfsurl, vfs);
-      }
-      else
-      {
-         // if the root of VFS has changed on disk, lets purge it
-         // this is important for Jar files as we don't want stale jars as the
-         // root of the VFS (i.e., on redeployment)
-         if (vfs.getRoot().hasBeenModified())
-         {
-            vfs = VFS.getVFS(vfsurl);
-            urlCache.put(vfsurl, vfs);
-         }
-      }
-      return vfs.findChild(relativePath);
+      return resolveVirtualFile(vfsurl, relativePath);
    }
 
    @SuppressWarnings("deprecation")
    protected static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
-      VFS vfs = VFS.getVFS(vfsurl);
-      return vfs.findChild(relativePath);
+      VFSCache cache = VFSCacheFactory.getInstance();
+      VirtualFile file = cache.getFile(vfsurl);
+      return file.findChild(relativePath);
    }
 
    /**
@@ -138,16 +117,8 @@ public class VirtualFileURLConnection extends URLConnection
    protected synchronized VirtualFile getVirtualFile() throws IOException
    {
       if (file == null)
-      {
-         if (getUseCaches())
-         {
-            file = resolveCachedVirtualFile(vfsurl, relativePath);
-         }
-         else
-         {
-            file = resolveVirtualFile(vfsurl, relativePath);
-         }
-      }
+         file = resolveVirtualFile(vfsurl, relativePath);
+      
       return file;
    }
 }

@@ -32,6 +32,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSCacheFactory;
 import org.jboss.util.file.ArchiveBrowser;
 
 /**
@@ -39,6 +40,7 @@ import org.jboss.util.file.ArchiveBrowser;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a> 
  * @version $Revision: 1.1 $
  */
 public class VFS
@@ -87,6 +89,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURI);
       VFSContext context = factory.getVFS(rootURI);
+      VFSCacheFactory.getInstance().putContext(context);
       return context.getVFS();
    }
 
@@ -133,6 +136,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURL);
       VFSContext context = factory.getVFS(rootURL);
+      VFSCacheFactory.getInstance().putContext(context);
       return context.getVFS();
    }
 
