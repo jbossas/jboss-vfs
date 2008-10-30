@@ -57,16 +57,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    public VirtualFile getFile(URI uri) throws IOException
    {
-      lock.readLock().lock();
-      VFSContext context;
-      try
-      {
-         context = findContext(uri);
-      }
-      finally
-      {
-         lock.readLock().unlock();
-      }
+      VFSContext context = findContext(uri);
       if (context != null)
       {
          VirtualFileHandler root = context.getRoot();
@@ -151,12 +142,20 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       String uriString = stripProtocol(uri);
       List<String> tokens = PathTokenizer.getTokens(uriString);
       StringBuilder sb = new StringBuilder("/");
-      for (String token : tokens)
+      lock.readLock().lock();
+      try
       {
-         sb.append(token).append("/");
-         VFSContext context = getContext(sb.toString());
-         if (context != null)
-            return context;
+         for (String token : tokens)
+         {
+            sb.append(token).append("/");
+            VFSContext context = getContext(sb.toString());
+            if (context != null)
+               return context;
+         }
+      }
+      finally
+      {
+         lock.readLock().unlock();
       }
       return null;
    }
