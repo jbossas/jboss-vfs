@@ -135,6 +135,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    /**
     * Get the cached context.
+    *
     * @param path the path to match
     * @return cached context or null if not found
     */
@@ -188,10 +189,11 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
       check();
 
+      String path = getKey(context);
       lock.writeLock().lock();
       try
       {
-         putContext(getKey(context), context);
+         putContext(path, context);
          timestamp = System.currentTimeMillis();
       }
       finally
@@ -215,10 +217,11 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
       check();
 
+      String path = getKey(context);
       lock.writeLock().lock();
       try
       {
-         removeContext(getKey(context), context);
+         removeContext(path, context);
       }
       finally
       {
