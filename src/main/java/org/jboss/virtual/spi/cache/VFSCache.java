@@ -78,4 +78,9 @@ public interface VFSCache
     * Stop the cache.
     */
    void stop();
+
+   /**
+    * Flush the cache.
+    */
+   void flush();
 }

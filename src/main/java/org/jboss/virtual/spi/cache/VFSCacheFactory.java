@@ -139,5 +139,9 @@ public class VFSCacheFactory
       public void stop()
       {
       }
+
+      public void flush()
+      {
+      }
    }
 }

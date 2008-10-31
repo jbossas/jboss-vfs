@@ -158,5 +158,9 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       public void stop()
       {
       }
+
+      public void flush()
+      {
+      }
    }
 }

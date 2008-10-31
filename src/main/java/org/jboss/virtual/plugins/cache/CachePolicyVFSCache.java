@@ -74,6 +74,12 @@ public abstract class CachePolicyVFSCache extends AbstractVFSCache
       }
    }
 
+   public void flush()
+   {
+      if (policy != null)
+         policy.flush();
+   }
+
    protected VFSContext getContext(String path)
    {
       return VFSContext.class.cast(policy.get(path));

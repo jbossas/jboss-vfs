@@ -45,9 +45,9 @@ public interface CacheStatistics
    int size();
 
    /**
-    * Get last inster timestamp.
+    * Get last insert timestamp.
     *
-    * @return the last inster timestamp
+    * @return the last insert timestamp
     */
    long lastInsert();
 }

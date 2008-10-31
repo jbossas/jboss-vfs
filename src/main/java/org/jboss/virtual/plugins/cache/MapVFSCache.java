@@ -83,6 +83,11 @@ public abstract class MapVFSCache extends AbstractVFSCache
 
    public void stop()
    {
+      flush();
+   }
+
+   public void flush()
+   {
       if (cache != null)
          cache.clear();
    }
