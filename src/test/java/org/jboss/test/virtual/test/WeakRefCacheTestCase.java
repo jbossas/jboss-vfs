@@ -30,7 +30,7 @@ import junit.framework.Test;
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class WeakRefCacheTestCase extends VFSCacheTest
+public class WeakRefCacheTestCase extends MapVFSCacheTest
 {
    public WeakRefCacheTestCase(String name)
    {

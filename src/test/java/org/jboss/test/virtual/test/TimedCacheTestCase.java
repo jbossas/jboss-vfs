@@ -30,7 +30,7 @@ import junit.framework.Test;
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class TimedCacheTestCase extends VFSCacheTest
+public class TimedCacheTestCase extends CachePolicyVFSCacheTest
 {
    public TimedCacheTestCase(String name)
    {

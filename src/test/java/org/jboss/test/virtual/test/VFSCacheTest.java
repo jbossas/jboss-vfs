@@ -29,6 +29,7 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.VFSContext;
 
 /**
@@ -77,6 +78,43 @@ public abstract class VFSCacheTest extends AbstractVFSTest
          finally
          {
             VFSCacheFactory.setInstance(null);
+         }
+      }
+      finally
+      {
+         cache.stop();
+      }
+   }
+
+   protected abstract void testCachedContexts(Iterable<VFSContext> iter);
+
+   public void testCacheStatistics() throws Exception
+   {
+      URL url = getResource("/vfs/test/nested");
+
+      VFSCache cache = createCache();
+      cache.start();
+      try
+      {
+         if (cache instanceof CacheStatistics)
+         {
+            CacheStatistics statistics = CacheStatistics.class.cast(cache);
+            VFSCacheFactory.setInstance(cache);
+            try
+            {
+               VirtualFile root = VFS.getRoot(url);
+               assertNotNull(root);
+
+               Iterable<VFSContext> iter = statistics.getCachedContexts();
+               testCachedContexts(iter);
+
+               assertEquals(1, statistics.size());
+               assertTrue(statistics.lastInsert() != 0);
+            }
+            finally
+            {
+               VFSCacheFactory.setInstance(null);
+            }
          }
       }
       finally

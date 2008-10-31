@@ -21,29 +21,22 @@
 */
 package org.jboss.test.virtual.test;
 
-import junit.framework.Test;
-import org.jboss.virtual.plugins.cache.LRUVFSCache;
-import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
- * LRU VFSCache Test.
+ * Map VFSCache Test.
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class LRUCacheTestCase extends CachePolicyVFSCacheTest
+public abstract class CachePolicyVFSCacheTest extends VFSCacheTest
 {
-   public LRUCacheTestCase(String name)
+   public CachePolicyVFSCacheTest(String name)
    {
       super(name);
    }
 
-   public static Test suite()
+   protected void testCachedContexts(Iterable<VFSContext> iter)
    {
-      return suite(LRUCacheTestCase.class);
-   }
-
-   protected VFSCache createCache()
-   {
-      return new LRUVFSCache(2, 10);
+      assertFalse(iter.iterator().hasNext());
    }
 }

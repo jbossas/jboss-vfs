@@ -30,7 +30,7 @@ import junit.framework.Test;
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class SoftRefCacheTestCase extends VFSCacheTest
+public class SoftRefCacheTestCase extends MapVFSCacheTest
 {
    public SoftRefCacheTestCase(String name)
    {
