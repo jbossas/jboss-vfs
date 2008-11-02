@@ -31,7 +31,7 @@ import org.jboss.virtual.spi.VFSContext;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class MapVFSCache extends AbstractVFSCache
+public abstract class MapVFSCache extends IterableVFSCache
 {
    private Map<String, VFSContext> cache;
 
@@ -52,6 +52,11 @@ public abstract class MapVFSCache extends AbstractVFSCache
    {
       if (cache == null)
          throw new IllegalArgumentException("Cache needs to be started first.");
+   }
+
+   protected Iterable<String> getKeys()
+   {
+      return cache.keySet();
    }
 
    protected VFSContext getContext(String path)

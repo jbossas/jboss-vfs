@@ -25,18 +25,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.cache.CacheStatistics;
+import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * Abstract vfs cache.
@@ -47,7 +45,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 {
    protected Logger log = Logger.getLogger(getClass());
    
-   protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+   private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
    private long timestamp;
 
    public long lastInsert()
@@ -143,32 +141,12 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    /**
     * Find cached context.
+    * This method must take read lock.
     *
     * @param uri the uri to match
     * @return found context or null
     */
-   protected VFSContext findContext(URI uri)
-   {
-      String uriString = stripProtocol(uri);
-      List<String> tokens = PathTokenizer.getTokens(uriString);
-      StringBuilder sb = new StringBuilder("/");
-      lock.readLock().lock();
-      try
-      {
-         for (String token : tokens)
-         {
-            sb.append(token).append("/");
-            VFSContext context = getContext(sb.toString());
-            if (context != null)
-               return context;
-         }
-      }
-      finally
-      {
-         lock.readLock().unlock();
-      }
-      return null;
-   }
+   protected abstract VFSContext findContext(URI uri);
 
    /**
     * Get path key.
@@ -190,7 +168,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       check();
 
       String path = getKey(context);
-      lock.writeLock().lock();
+      writeLock();
       try
       {
          putContext(path, context);
@@ -198,7 +176,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       }
       finally
       {
-         lock.writeLock().unlock();
+         writeUnlock();
       }
    }
 
@@ -218,14 +196,14 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
       check();
 
       String path = getKey(context);
-      lock.writeLock().lock();
+      writeLock();
       try
       {
          removeContext(path, context);
       }
       finally
       {
-         lock.writeLock().unlock();
+         writeUnlock();
       }
    }
 
@@ -236,4 +214,36 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
     * @param context the vfs context
     */
    protected abstract void removeContext(String path, VFSContext context);
+
+   /**
+    * Read lock.
+    */
+   protected void readLock()
+   {
+      lock.readLock().lock();
+   }
+
+   /**
+    * Read unlock.
+    */
+   protected void readUnlock()
+   {
+      lock.readLock().unlock();
+   }
+
+   /**
+    * Write lock.
+    */
+   protected void writeLock()
+   {
+      lock.writeLock().lock();
+   }
+
+   /**
+    * Write unlock.
+    */
+   protected void writeUnlock()
+   {
+      lock.writeLock().unlock();
+   }
 }

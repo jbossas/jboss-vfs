@@ -33,7 +33,7 @@ import org.jboss.virtual.spi.VFSContext;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class CachePolicyVFSCache extends AbstractVFSCache
+public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
 {
    private CachePolicy policy;
    private boolean started;
