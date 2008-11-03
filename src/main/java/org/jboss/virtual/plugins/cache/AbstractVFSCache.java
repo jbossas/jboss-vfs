@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.jboss.logging.Logger;
@@ -166,6 +167,12 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
          throw new IllegalArgumentException("Null context");
 
       check();
+
+      if (log.isTraceEnabled())
+      {
+         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+         log.trace("VFSContext: " + context + ", Stack-trace:\n" + Arrays.toString(stackTraceElements));
+      }
 
       String path = getKey(context);
       writeLock();
