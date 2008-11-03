@@ -26,9 +26,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -103,8 +102,7 @@ public class VirtualFileURLConnection extends URLConnection
    @SuppressWarnings("deprecation")
    protected static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(vfsurl);
+      VirtualFile file = VFS.getCachedFile(vfsurl);
       return file.findChild(relativePath);
    }
 
