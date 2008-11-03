@@ -23,7 +23,7 @@ package org.jboss.virtual.plugins.cache;
 
 import java.util.Map;
 
-import org.jboss.util.collection.WeakValueHashMap;
+import org.jboss.util.collection.WeakValueTreeMap;
 import org.jboss.virtual.spi.VFSContext;
 
 /**
@@ -36,6 +36,6 @@ public class WeakRefVFSCache extends MapVFSCache
    @SuppressWarnings("unchecked")
    protected Map<String, VFSContext> createMap()
    {
-      return new WeakValueHashMap();
+      return new WeakValueTreeMap();
    }
 }

@@ -23,8 +23,8 @@ package org.jboss.virtual.plugins.cache;
 
 import java.util.Map;
 
+import org.jboss.util.collection.SoftValueTreeMap;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.util.collection.SoftValueHashMap;
 
 /**
  * SoftRef vfs cache.
@@ -36,6 +36,6 @@ public class SoftRefVFSCache extends MapVFSCache
    @SuppressWarnings("unchecked")
    protected Map<String, VFSContext> createMap()
    {
-      return new SoftValueHashMap();
+      return new SoftValueTreeMap();
    }
 }
