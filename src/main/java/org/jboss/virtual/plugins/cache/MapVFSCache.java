@@ -83,12 +83,14 @@ public abstract class MapVFSCache extends IterableVFSCache
 
    public void start() throws Exception
    {
-      cache = createMap();
+      if (cache == null)
+         cache = createMap();
    }
 
    public void stop()
    {
       flush();
+      cache = null;
    }
 
    public void flush()

@@ -57,12 +57,15 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
 
    public void start() throws Exception
    {
-      policy = createCachePolicy();
+      if (started == false)
+      {
+         policy = createCachePolicy();
 
-      policy.create();
-      policy.start();
+         policy.create();
+         policy.start();
 
-      started = true;
+         started = true;
+      }
    }
 
    public void stop()
@@ -72,6 +75,7 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
          policy.stop();
          policy.destroy();
       }
+      policy = null;
    }
 
    public void flush()

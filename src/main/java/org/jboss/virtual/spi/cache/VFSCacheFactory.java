@@ -60,7 +60,8 @@ public class VFSCacheFactory
       {
          synchronized (lock)
          {
-            instance = AccessController.doPrivileged(new VFSCacheCreatorAction());
+            if (instance == null)
+               instance = AccessController.doPrivileged(new VFSCacheCreatorAction());
          }
       }
 
