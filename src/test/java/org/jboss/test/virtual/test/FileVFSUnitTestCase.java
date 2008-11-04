@@ -1485,11 +1485,11 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VFS vfs = VFS.getVFS(rootURL);
       URL[] cp = {vfs.getRoot().toURL()};
       URLClassLoader ucl = new URLClassLoader(cp);
-      // Search for a non-existent absolute resource
-      URL qp = ucl.findResource("/nosuch-quartz.props");
-      assertNull("findResource(/nosuch-quartz.props)", qp);
-      InputStream is = ucl.getResourceAsStream("/nosuch-quartz.props");
-      assertNull("getResourceAsStream(/nosuch-quartz.props)", is);
+      // Search for a non-existent resource
+      URL qp = ucl.findResource("nosuch-quartz.props");
+      assertNull("findResource(nosuch-quartz.props)", qp);
+      InputStream is = ucl.getResourceAsStream("nosuch-quartz.props");
+      assertNull("getResourceAsStream(nosuch-quartz.props)", is);
    }
 
    /**
