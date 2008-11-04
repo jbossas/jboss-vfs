@@ -21,17 +21,11 @@
 */
 package org.jboss.virtual.spi.cache;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.jboss.logging.Logger;
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Simple vfs cache factory.
@@ -106,43 +100,6 @@ public class VFSCacheFactory
             log.warn("Exception instantiating VFS cache: " + t);
          }
          return new NoopVFSCache();
-      }
-   }
-
-   /**
-    * Noop cache.
-    * Doesn't do any caching.
-    */
-   private static class NoopVFSCache implements VFSCache
-   {
-      public VirtualFile getFile(URI uri) throws IOException
-      {
-         return VFS.getRoot(uri);
-      }
-
-      public VirtualFile getFile(URL url) throws IOException
-      {
-         return VFS.getRoot(url);
-      }
-
-      public void putContext(VFSContext context)
-      {
-      }
-
-      public void removeContext(VFSContext context)
-      {
-      }
-
-      public void start() throws Exception
-      {
-      }
-
-      public void stop()
-      {
-      }
-
-      public void flush()
-      {
       }
    }
 }
