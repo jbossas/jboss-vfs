@@ -32,6 +32,8 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.util.file.ArchiveBrowser;
 
 /**
@@ -39,6 +41,7 @@ import org.jboss.util.file.ArchiveBrowser;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a> 
  * @version $Revision: 1.1 $
  */
 public class VFS
@@ -87,6 +90,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURI);
       VFSContext context = factory.getVFS(rootURI);
+      VFSCacheFactory.getInstance().putContext(context);
       return context.getVFS();
    }
 
@@ -96,12 +100,30 @@ public class VFS
     * @param rootURI the root uri
     * @return the virtual file
     * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL
+    * @throws IllegalArgumentException if the rootURL is null
     */
    public static VirtualFile getRoot(URI rootURI) throws IOException
    {
       VFS vfs = getVFS(rootURI);
       return vfs.getRoot();
+   }
+
+   /**
+    * Get cached file.
+    *
+    * If VFSContext matching the rootURI parameter is cached
+    * this method will return cached virtual file
+    * else it will use VFS::getRoot(rootURI).
+    *
+    * @param rootURI the root uri
+    * @return the cached virtual file
+    * @throws IOException for any error
+    * @throws IllegalArgumentException if the rootURL is null
+    */
+   public static VirtualFile getCachedFile(URI rootURI) throws IOException
+   {
+      VFSCache cache = VFSCacheFactory.getInstance();
+      return cache.getFile(rootURI);
    }
 
    /**
@@ -133,6 +155,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURL);
       VFSContext context = factory.getVFS(rootURL);
+      VFSCacheFactory.getInstance().putContext(context);
       return context.getVFS();
    }
 
@@ -148,6 +171,24 @@ public class VFS
    {
       VFS vfs = getVFS(rootURL);
       return vfs.getRoot();
+   }
+
+   /**
+    * Get cached file.
+    *
+    * If VFSContext matching the rootURL parameter is cached
+    * this method will return cached virtual file
+    * else it will use VFS::getRoot(rootURL).
+    *
+    * @param rootURL the root url
+    * @return the cached virtual file
+    * @throws IOException for any error
+    * @throws IllegalArgumentException if the rootURL is null
+    */
+   public static VirtualFile getCachedFile(URL rootURL) throws IOException
+   {
+      VFSCache cache = VFSCacheFactory.getInstance();
+      return cache.getFile(rootURL);
    }
 
    /**
