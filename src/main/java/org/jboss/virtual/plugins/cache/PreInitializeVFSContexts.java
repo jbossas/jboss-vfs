@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.cache;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.logging.Logger;
@@ -36,6 +37,8 @@ public class PreInitializeVFSContexts
 {
    private Logger log = Logger.getLogger(PreInitializeVFSContexts.class);
    private List<URL> initializedVFSContexts;
+   private boolean holdReference;
+   private List<VFS> references;
 
    /**
     * Start initializer.
@@ -46,12 +49,38 @@ public class PreInitializeVFSContexts
    {
       if (initializedVFSContexts != null && initializedVFSContexts.isEmpty() == false)
       {
+         if (holdReference)
+            references = new ArrayList<VFS>();
+
          for (URL url : initializedVFSContexts)
          {
             VFS vfs = VFS.getVFS(url);
             log.debug("Initialized Virtual File: " + vfs.getRoot());
+            if (holdReference)
+            {
+               references.add(vfs);
+            }
          }
       }
+   }
+
+   /**
+    * Clear possible references.
+    */
+   public void stop()
+   {
+      if (references != null)
+         references.clear();
+   }
+
+   /**
+    * Get VFS references.
+    *
+    * @return the VFS references
+    */
+   public List<VFS> getReferences()
+   {
+      return references;
    }
 
    /**
@@ -62,5 +91,15 @@ public class PreInitializeVFSContexts
    public void setInitializedVFSContexts(List<URL> initializedVFSContexts)
    {
       this.initializedVFSContexts = initializedVFSContexts;
+   }
+
+   /**
+    * Should we hold the reference to initialized VFSs.
+    *
+    * @param holdReference the hold reference flag
+    */
+   public void setHoldReference(boolean holdReference)
+   {
+      this.holdReference = holdReference;
    }
 }
