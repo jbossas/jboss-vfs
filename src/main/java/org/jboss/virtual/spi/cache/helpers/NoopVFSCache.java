@@ -19,7 +19,7 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.spi.cache;
+package org.jboss.virtual.spi.cache.helpers;
 
 import java.net.URI;
 import java.net.URL;
@@ -28,6 +28,7 @@ import java.io.IOException;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * Noop cache.

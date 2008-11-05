@@ -26,6 +26,7 @@ import java.security.PrivilegedAction;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
 
 /**
  * Simple vfs cache factory.
