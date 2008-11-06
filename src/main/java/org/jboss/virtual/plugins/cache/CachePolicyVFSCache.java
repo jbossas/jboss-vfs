@@ -82,10 +82,24 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
    {
       if (policy != null)
       {
-         policy.stop();
-         policy.destroy();
-
-         policy = null;
+         try
+         {
+            policy.stop();
+         }
+         catch (Exception ignored)
+         {
+         }
+         try
+         {
+            policy.destroy();
+         }
+         catch (Exception ignored)
+         {
+         }
+         finally
+         {
+            policy = null;
+         }
       }
    }
 
