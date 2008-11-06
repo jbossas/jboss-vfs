@@ -32,6 +32,8 @@ import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
  * Simple vfs cache factory.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
+ * @author Scott.Stark@jboss.org
+ * @version $Revision: 80615 $
  */
 public class VFSCacheFactory
 {
@@ -51,15 +53,28 @@ public class VFSCacheFactory
     */
    public static VFSCache getInstance()
    {
+      return getInstance(null);
+   }
+   /**
+    * 
+    * Get VFS cache instance.
+    *
+    * @param defaultCacheImpl - the possibly null name of the VFSCache
+    * implementation to use. If null, the {@linkplain VFSUtils.VFS_CACHE_KEY}
+    * system property will be used.
+    * 
+    * @return the vfs cache instance
+    */
+   public static VFSCache getInstance(String defaultCacheImpl)
+   {
       if (instance == null)
       {
          synchronized (lock)
          {
             if (instance == null)
-               instance = AccessController.doPrivileged(new VFSCacheCreatorAction());
+               instance = AccessController.doPrivileged(new VFSCacheCreatorAction(defaultCacheImpl));
          }
       }
-
       return instance;
    }
 
@@ -81,11 +96,23 @@ public class VFSCacheFactory
 
    private static class VFSCacheCreatorAction implements PrivilegedAction<VFSCache>
    {
+      private String defaultCacheImpl;
+      VFSCacheCreatorAction(String defaultCacheImpl)
+      {
+         this.defaultCacheImpl = defaultCacheImpl;
+      }
+
       public VFSCache run()
       {
          try
          {
-            String className = System.getProperty(VFSUtils.VFS_CACHE_KEY);
+            // First look to the input cache imple
+            String className = defaultCacheImpl;
+            if(className == null || className.length() == 0)
+            {
+               // Else look at the VFS_CACHE_KEY system property
+               className = System.getProperty(VFSUtils.VFS_CACHE_KEY);
+            }
             if (className != null)
             {
                log.info("Initializing VFSCache [" + className + "] ...");
@@ -93,13 +120,15 @@ public class VFSCacheFactory
                Class<?> clazz = cl.loadClass(className);
                VFSCache cache = VFSCache.class.cast(clazz.newInstance());
                cache.start(); // start here, so we fall back to default no-op in case start fails
+               log.info("Using VFSCache [" + cache + "] ...");
                return cache;
             }
          }
          catch (Throwable t)
          {
-            log.warn("Exception instantiating VFS cache: " + t);
+            log.warn("Exception instantiating VFS cache: ", t);
          }
+         log.info("Using VFSCache [NoopVFSCache] ...");
          return new NoopVFSCache();
       }
    }
