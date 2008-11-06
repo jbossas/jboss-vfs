@@ -36,7 +36,6 @@ import org.jboss.virtual.spi.VFSContext;
 public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
 {
    private CachePolicy policy;
-   private boolean started;
 
    public Iterable<VFSContext> getCachedContexts()
    {
@@ -57,25 +56,37 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
 
    public void start() throws Exception
    {
-      if (started == false)
+      policy = createCachePolicy();
+      if (policy == null)
+         throw new IllegalArgumentException("Policy is null.");
+
+      policy.create();
+      try
       {
-         policy = createCachePolicy();
-
-         policy.create();
          policy.start();
-
-         started = true;
+      }
+      catch (Exception e)
+      {
+         try
+         {
+            policy.destroy();
+         }
+         catch (Exception ignored)
+         {
+         }
+         throw e;
       }
    }
 
    public void stop()
    {
-      if (started)
+      if (policy != null)
       {
          policy.stop();
          policy.destroy();
+
+         policy = null;
       }
-      policy = null;
    }
 
    public void flush()
@@ -111,7 +122,7 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
    /**
     * Read system property.
     *
-    * @param key the property key
+    * @param key          the property key
     * @param defaultValue the default value
     * @return system property or default value
     */
