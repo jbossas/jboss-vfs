@@ -21,6 +21,8 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.util.Map;
+
 import org.jboss.virtual.spi.VFSContext;
 
 /**
@@ -33,6 +35,11 @@ public abstract class MapVFSCacheTest extends VFSCacheTest
    public MapVFSCacheTest(String name)
    {
       super(name);
+   }
+
+   protected Map<Object, Object> getMap()
+   {
+      return null;
    }
 
    protected void testCachedContexts(Iterable<VFSContext> iter)

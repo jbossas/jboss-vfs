@@ -23,10 +23,13 @@ package org.jboss.test.virtual.test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Test path tokens.
@@ -102,5 +105,14 @@ public class PathTokensTestCase extends AbstractVFSTest
       testValidPath("//context////file");
       testValidPath("//context///jar//");
       testValidPath("//context///jar///");
+   }
+
+   public void testHiddenUnixPath() throws Throwable
+   {
+      // the trick is the .hudson bit
+      String path = "/home/hudson/.hudson/";
+      List<String> tokens = PathTokenizer.getTokens(path);
+      List<String> expected = Arrays.asList("home", "hudson", ".hudson");
+      assertEquals(expected, tokens);
    }
 }
