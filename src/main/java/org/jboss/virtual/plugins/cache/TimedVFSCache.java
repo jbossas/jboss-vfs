@@ -80,7 +80,7 @@ public class TimedVFSCache extends CachePolicyVFSCache
       else
          tcp = new TimedCachePolicy(defaultLifetime);
 
-      info = "TimedVFSCache[lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "]";
+      info = "TimedVFSCache{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
 
       return tcp;
    }
