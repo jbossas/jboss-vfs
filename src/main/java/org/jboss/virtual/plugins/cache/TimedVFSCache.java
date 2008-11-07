@@ -21,6 +21,8 @@
 */
 package org.jboss.virtual.plugins.cache;
 
+import java.util.Map;
+
 import org.jboss.util.CachePolicy;
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
@@ -35,6 +37,8 @@ public class TimedVFSCache extends CachePolicyVFSCache
    private Integer defaultLifetime;
    private Boolean threadSafe;
    private Integer resolution;
+
+   private String info;
 
    public TimedVFSCache()
    {
@@ -52,23 +56,33 @@ public class TimedVFSCache extends CachePolicyVFSCache
       this.resolution = resolution;
    }
 
+   public TimedVFSCache(Map<Object, Object> properties)
+   {
+      super(properties);
+   }
+
    protected CachePolicy createCachePolicy()
    {
       if (defaultLifetime == null)
-         defaultLifetime = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null));
+         defaultLifetime = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null, true));
       if (threadSafe == null)
-         threadSafe = Boolean.valueOf(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.threadSafe", Boolean.TRUE.toString()));
+         threadSafe = Boolean.valueOf(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.threadSafe", Boolean.TRUE, true).toString());
       if (resolution == null)
-         resolution = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.resolution", null));
+         resolution = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.resolution", null, true));
 
       log.debug("Creating timed cache policy, lifetime: " + defaultLifetime + ", threadSafe: " + threadSafe + ", resolution: " + resolution);
 
+      TimedCachePolicy tcp;
       if (defaultLifetime == null)
-         return new TimedCachePolicy();
+         tcp = new TimedCachePolicy();
       else if (resolution != null)
-         return new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
+         tcp = new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
       else
-         return new TimedCachePolicy(defaultLifetime);
+         tcp = new TimedCachePolicy(defaultLifetime);
+
+      info = "TimedVFSCache{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
+
+      return tcp;
    }
 
    /**
@@ -99,5 +113,10 @@ public class TimedVFSCache extends CachePolicyVFSCache
    public void setResolution(Integer resolution)
    {
       this.resolution = resolution;
+   }
+
+   public String toString()
+   {
+      return info;
    }
 }

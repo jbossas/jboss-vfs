@@ -117,12 +117,14 @@ public class PathTokenizer
          }
          else if (ch == '.')
          {
-            if (specialToken == null && buffer.length() == 0)
+            int bufferLength = buffer.length();
+
+            if (specialToken == null && bufferLength == 0)
                specialToken = CURRENT_PATH;
-            else if (specialToken == CURRENT_PATH && buffer.length() == 0)
+            else if (specialToken == CURRENT_PATH && bufferLength == 0)
                specialToken = REVERSE_PATH;
-            else if (specialToken != null && buffer.length() == 0)
-               throw new IllegalArgumentException("Illegal token in path: " + path);
+            else if (specialToken == REVERSE_PATH && bufferLength == 0)
+               throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
             else
                buffer.append(ch);
          }
@@ -130,8 +132,15 @@ public class PathTokenizer
          {
             // token starts with '.' or '..', but also has some path after that
             if (specialToken != null)
-               throw new IllegalArgumentException("Illegal token in path: " + path);
+            {
+               // we don't allow tokens after '..'
+               if (specialToken == REVERSE_PATH)
+                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
 
+               // after '.' more path is legal == unix hidden directories
+               buffer.append(specialToken);
+               specialToken = null;
+            }
             buffer.append(ch);
          }
       }

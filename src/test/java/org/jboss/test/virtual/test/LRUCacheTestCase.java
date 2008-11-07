@@ -21,7 +21,12 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Test;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.cache.LRUVFSCache;
 import org.jboss.virtual.spi.cache.VFSCache;
 
@@ -45,5 +50,20 @@ public class LRUCacheTestCase extends CachePolicyVFSCacheTest
    protected VFSCache createCache()
    {
       return new LRUVFSCache(2, 10);
+   }
+
+   protected Iterable<String> populateRequiredSystemProperties()
+   {
+      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", "2");
+      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", "10");      
+      return Arrays.asList(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max");
+   }
+
+   protected Map<Object, Object> getMap()
+   {
+      Map<Object, Object> map = new HashMap<Object, Object>();
+      map.put(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", 2);
+      map.put(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", 10);
+      return map;
    }
 }
