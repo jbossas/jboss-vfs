@@ -163,7 +163,10 @@ public abstract class VFSCacheTest extends AbstractVFSTest
 
          VFSCacheFactory.setInstance(null);
 
-         cache = VFSCacheFactory.getInstance(cacheClassName, getMap());
+         VFSCache mapParamCache = VFSCacheFactory.getInstance(cacheClassName, getMap());
+         // need new instance, so we know we're really testing map parameter
+         assertNotSame(cache, mapParamCache);
+         cache = mapParamCache;
          assertNotNull(cache);
          assertTrue(cache instanceof NoopVFSCache == false);
          cache.flush();
