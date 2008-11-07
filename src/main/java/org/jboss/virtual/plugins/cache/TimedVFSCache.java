@@ -38,6 +38,8 @@ public class TimedVFSCache extends CachePolicyVFSCache
    private Boolean threadSafe;
    private Integer resolution;
 
+   private String info;
+
    public TimedVFSCache()
    {
    }
@@ -70,12 +72,17 @@ public class TimedVFSCache extends CachePolicyVFSCache
 
       log.debug("Creating timed cache policy, lifetime: " + defaultLifetime + ", threadSafe: " + threadSafe + ", resolution: " + resolution);
 
+      TimedCachePolicy tcp;
       if (defaultLifetime == null)
-         return new TimedCachePolicy();
+         tcp = new TimedCachePolicy();
       else if (resolution != null)
-         return new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
+         tcp = new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
       else
-         return new TimedCachePolicy(defaultLifetime);
+         tcp = new TimedCachePolicy(defaultLifetime);
+
+      info = "TimedVFSCache[lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "]";
+
+      return tcp;
    }
 
    /**
@@ -106,5 +113,10 @@ public class TimedVFSCache extends CachePolicyVFSCache
    public void setResolution(Integer resolution)
    {
       this.resolution = resolution;
+   }
+
+   public String toString()
+   {
+      return info;
    }
 }

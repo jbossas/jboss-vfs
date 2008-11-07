@@ -86,4 +86,9 @@ public class LRUVFSCache extends CachePolicyVFSCache
    {
       this.max = max;
    }
+
+   public String toString()
+   {
+      return "LRUVFSCache[min=" + min + ", max=" + max + "]";
+   }
 }
