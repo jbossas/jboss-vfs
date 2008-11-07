@@ -21,8 +21,12 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import org.jboss.virtual.plugins.cache.TimedVFSCache;
 import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.VFSUtils;
 import junit.framework.Test;
 
 /**
@@ -44,6 +48,13 @@ public class TimedCacheTestCase extends CachePolicyVFSCacheTest
 
    protected VFSCache createCache()
    {
-      return new TimedVFSCache(60);
+      return new TimedVFSCache(5);
+   }
+
+   protected Map<Object, Object> getMap()
+   {
+      Map<Object, Object> map = new HashMap<Object, Object>();
+      map.put(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", 5);
+      return map;
    }
 }

@@ -21,8 +21,10 @@
 */
 package org.jboss.virtual.spi.cache;
 
+import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -53,8 +55,9 @@ public class VFSCacheFactory
     */
    public static VFSCache getInstance()
    {
-      return getInstance(null);
+      return getInstance(null, null);
    }
+
    /**
     * 
     * Get VFS cache instance.
@@ -62,17 +65,33 @@ public class VFSCacheFactory
     * @param defaultCacheImpl - the possibly null name of the VFSCache
     * implementation to use. If null, the {@linkplain VFSUtils.VFS_CACHE_KEY}
     * system property will be used.
-    * 
+    *
     * @return the vfs cache instance
     */
    public static VFSCache getInstance(String defaultCacheImpl)
+   {
+      return getInstance(defaultCacheImpl, null);
+   }
+
+   /**
+    *
+    * Get VFS cache instance.
+    *
+    * @param defaultCacheImpl - the possibly null name of the VFSCache
+    * implementation to use. If null, the {@linkplain VFSUtils.VFS_CACHE_KEY}
+    * system property will be used.
+    * @param properties the possible vfs cache impl properties
+    *
+    * @return the vfs cache instance
+    */
+   public static VFSCache getInstance(String defaultCacheImpl, Map<Object, Object> properties)
    {
       if (instance == null)
       {
          synchronized (lock)
          {
             if (instance == null)
-               instance = AccessController.doPrivileged(new VFSCacheCreatorAction(defaultCacheImpl));
+               instance = AccessController.doPrivileged(new VFSCacheCreatorAction(defaultCacheImpl, properties));
          }
       }
       return instance;
@@ -97,9 +116,12 @@ public class VFSCacheFactory
    private static class VFSCacheCreatorAction implements PrivilegedAction<VFSCache>
    {
       private String defaultCacheImpl;
-      VFSCacheCreatorAction(String defaultCacheImpl)
+      private Map<Object, Object> properties;
+
+      VFSCacheCreatorAction(String defaultCacheImpl, Map<Object, Object> properties)
       {
          this.defaultCacheImpl = defaultCacheImpl;
+         this.properties = properties;
       }
 
       public VFSCache run()
@@ -115,12 +137,22 @@ public class VFSCacheFactory
             }
             if (className != null)
             {
-               log.info("Initializing VFSCache [" + className + "] ...");
+               log.info("Initializing VFSCache [" + className + "]");
                ClassLoader cl = VFSCacheFactory.class.getClassLoader();
                Class<?> clazz = cl.loadClass(className);
-               VFSCache cache = VFSCache.class.cast(clazz.newInstance());
+               Object result;
+               if (properties != null)
+               {
+                  Constructor<?> constructor = clazz.getConstructor(Map.class);
+                  result = constructor.newInstance(properties);
+               }
+               else
+               {
+                  result = clazz.newInstance();
+               }
+               VFSCache cache = VFSCache.class.cast(result);
                cache.start(); // start here, so we fall back to default no-op in case start fails
-               log.info("Using VFSCache [" + cache + "] ...");
+               log.info("Using VFSCache [" + cache + "]");
                return cache;
             }
          }
@@ -128,7 +160,7 @@ public class VFSCacheFactory
          {
             log.warn("Exception instantiating VFS cache: ", t);
          }
-         log.info("Using VFSCache [NoopVFSCache] ...");
+         log.info("Using VFSCache [NoopVFSCache]");
          return new NoopVFSCache();
       }
    }

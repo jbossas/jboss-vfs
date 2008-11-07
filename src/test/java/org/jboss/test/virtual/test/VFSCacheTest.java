@@ -24,13 +24,16 @@ package org.jboss.test.virtual.test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
-import org.jboss.virtual.spi.cache.CacheStatistics;
-import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
 
 /**
  * VFSCache Test.
@@ -121,6 +124,54 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       {
          cache.stop();
       }
+   }
+
+   protected Class<? extends VFSCache> getCacheClass()
+   {
+      VFSCache cache = createCache();
+      return cache.getClass();
+   }
+
+   protected abstract Map<Object, Object> getMap();
+
+   public void testCacheFactory() throws Exception
+   {
+      VFSCache cache;
+      String cacheClassName = getCacheClass().getName();
+
+      VFSCacheFactory.setInstance(null);
+      try
+      {
+         Iterable<String> keys = populateRequiredSystemProperties();
+         try
+         {
+            cache = VFSCacheFactory.getInstance(cacheClassName);
+            assertNotNull(cache);
+            assertTrue(cache instanceof NoopVFSCache == false);
+            cache.flush();
+         }
+         finally
+         {
+            for (String key : keys)
+               System.clearProperty(key);
+         }
+
+         VFSCacheFactory.setInstance(null);
+
+         cache = VFSCacheFactory.getInstance(cacheClassName, getMap());
+         assertNotNull(cache);
+         assertTrue(cache instanceof NoopVFSCache == false);
+         cache.flush();
+      }
+      finally
+      {
+         VFSCacheFactory.setInstance(null);
+      }
+   }
+
+   protected Iterable<String> populateRequiredSystemProperties()
+   {
+      return Collections.emptySet();
    }
 
    private class WrapperVFSCache implements VFSCache
