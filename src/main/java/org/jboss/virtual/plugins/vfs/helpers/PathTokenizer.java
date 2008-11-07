@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import java.io.IOException;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,9 @@ public class PathTokenizer
 
    /** Catch some suspicious tokens */
    private static boolean errorOnSuspiciousTokens;
+
+   /** Flag permission */
+   private static Permission flagPermission = new RuntimePermission(PathTokenizer.class.getName() + ".setErrorOnSuspiciousTokens");
 
    /**
     * Utility class
@@ -239,6 +243,10 @@ public class PathTokenizer
     */
    public static void setErrorOnSuspiciousTokens(boolean errorOnSuspiciousTokens)
    {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(flagPermission);
+      
       PathTokenizer.errorOnSuspiciousTokens = errorOnSuspiciousTokens;
    }
 }
