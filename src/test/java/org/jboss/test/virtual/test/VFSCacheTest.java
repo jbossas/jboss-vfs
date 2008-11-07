@@ -132,6 +132,11 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       return cache.getClass();
    }
 
+   protected Iterable<String> populateRequiredSystemProperties()
+   {
+      return Collections.emptySet();
+   }
+
    protected abstract Map<Object, Object> getMap();
 
    public void testCacheFactory() throws Exception
@@ -167,11 +172,6 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       {
          VFSCacheFactory.setInstance(null);
       }
-   }
-
-   protected Iterable<String> populateRequiredSystemProperties()
-   {
-      return Collections.emptySet();
    }
 
    private class WrapperVFSCache implements VFSCache
