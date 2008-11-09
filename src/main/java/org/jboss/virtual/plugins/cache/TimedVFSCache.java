@@ -21,11 +21,15 @@
 */
 package org.jboss.virtual.plugins.cache;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.util.CachePolicy;
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Timed cache policy vfs cache.
@@ -59,6 +63,23 @@ public class TimedVFSCache extends CachePolicyVFSCache
    public TimedVFSCache(Map<Object, Object> properties)
    {
       super(properties);
+   }
+
+   @Override
+   @SuppressWarnings("unchecked")
+   public Iterable<VFSContext> getCachedContexts()
+   {
+      TimedCachePolicy tcp = (TimedCachePolicy)getPolicy();
+      List keys = tcp.getValidKeys();
+      if (keys != null && keys.isEmpty() == false)
+      {
+         List<VFSContext> contexts = new ArrayList<VFSContext>(keys.size());
+         for (Object key : keys)
+            contexts.add((VFSContext)tcp.peek(key));
+
+         return contexts;
+      }
+      return Collections.emptySet();
    }
 
    protected CachePolicy createCachePolicy()

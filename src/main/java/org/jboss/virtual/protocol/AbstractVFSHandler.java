@@ -49,7 +49,7 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
     * Get protocol name length.
     * e.g. vfsfile - 7, vfszip - 6, ...
     *
-    * @return
+    * @return protocol name lenght
     */
    protected int getProtocolNameLength()
    {

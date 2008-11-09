@@ -59,6 +59,18 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
       return policy != null ? policy.size() : -1;
    }
 
+   /**
+    * Get the policy.
+    * Run check before.
+    *
+    * @return the policy
+    */
+   protected CachePolicy getPolicy()
+   {
+      check();
+      return policy;
+   }
+
    protected void check()
    {
       if (policy == null)

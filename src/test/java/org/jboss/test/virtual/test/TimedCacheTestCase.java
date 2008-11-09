@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import org.jboss.virtual.plugins.cache.TimedVFSCache;
 import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.VFSUtils;
 import junit.framework.Test;
 
@@ -49,6 +50,12 @@ public class TimedCacheTestCase extends CachePolicyVFSCacheTest
    protected VFSCache createCache()
    {
       return new TimedVFSCache(5);
+   }
+
+   protected void testCachedContexts(Iterable<VFSContext> iter)
+   {
+      VFSContext context = iter.iterator().next();
+      assertNotNull(context);
    }
 
    protected Map<Object, Object> getMap()
