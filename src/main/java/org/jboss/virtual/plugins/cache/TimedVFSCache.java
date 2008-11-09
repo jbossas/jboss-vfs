@@ -21,10 +21,10 @@
 */
 package org.jboss.virtual.plugins.cache;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
@@ -72,11 +72,11 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
       List keys = tcp.getValidKeys();
       if (keys != null && keys.isEmpty() == false)
       {
-         List<VFSContext> contexts = new ArrayList<VFSContext>(keys.size());
+         Map<Object, VFSContext> contexts = new TreeMap<Object, VFSContext>();
          for (Object key : keys)
-            contexts.add((VFSContext)tcp.peek(key));
+            contexts.put(key, (VFSContext)tcp.peek(key));
 
-         return contexts;
+         return contexts.values();
       }
       return Collections.emptySet();
    }
