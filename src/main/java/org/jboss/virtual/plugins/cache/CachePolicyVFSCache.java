@@ -32,11 +32,12 @@ import org.jboss.virtual.spi.VFSContext;
 /**
  * Cache policy vfs cache.
  *
+ * @param <T> exact policy type
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
+public abstract class CachePolicyVFSCache<T extends CachePolicy> extends PathMatchingVFSCache
 {
-   private CachePolicy policy;
+   private T policy;
    private Map<Object, Object> properties;
 
    protected CachePolicyVFSCache()
@@ -65,7 +66,7 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
     *
     * @return the policy
     */
-   protected CachePolicy getPolicy()
+   protected T getPolicy()
    {
       check();
       return policy;
@@ -154,7 +155,7 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
     *
     * @return the cache policy
     */
-   protected abstract CachePolicy createCachePolicy();
+   protected abstract T createCachePolicy();
 
    /**
     * Read instance properties.

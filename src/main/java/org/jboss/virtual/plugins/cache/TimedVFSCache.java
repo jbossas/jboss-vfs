@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.util.CachePolicy;
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
@@ -36,7 +35,7 @@ import org.jboss.virtual.spi.VFSContext;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TimedVFSCache extends CachePolicyVFSCache
+public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
 {
    private Integer defaultLifetime;
    private Boolean threadSafe;
@@ -69,7 +68,7 @@ public class TimedVFSCache extends CachePolicyVFSCache
    @SuppressWarnings("unchecked")
    public Iterable<VFSContext> getCachedContexts()
    {
-      TimedCachePolicy tcp = (TimedCachePolicy)getPolicy();
+      TimedCachePolicy tcp = getPolicy();
       List keys = tcp.getValidKeys();
       if (keys != null && keys.isEmpty() == false)
       {
@@ -82,7 +81,7 @@ public class TimedVFSCache extends CachePolicyVFSCache
       return Collections.emptySet();
    }
 
-   protected CachePolicy createCachePolicy()
+   protected TimedCachePolicy createCachePolicy()
    {
       if (defaultLifetime == null)
          defaultLifetime = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null, true));
