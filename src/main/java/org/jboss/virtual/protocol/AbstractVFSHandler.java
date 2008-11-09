@@ -30,7 +30,10 @@ import java.net.URLStreamHandler;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * VFS's file URL handler.
@@ -65,6 +68,11 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
 
    protected URLConnection openConnection(URL url) throws IOException
    {
+      VFSCache cache = VFSCacheFactory.getInstance();
+      VirtualFile vf = cache.getFile(url);
+      if (vf != null)
+         return new VirtualFileURLConnection(url, vf);
+
       String file = URLDecoder.decode(url.toExternalForm(), "UTF-8").substring(getProtocolNameLength() + 1); // strip out vfs protocol + :
       URL vfsurl = null;
       String relative;

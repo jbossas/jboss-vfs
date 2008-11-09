@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.jboss.logging.Logger;
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
@@ -71,7 +70,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
          VirtualFileHandler child = root.getChild(relativePath);
          return child.getVirtualFile();
       }
-      return VFS.getRoot(uri);
+      return null;
    }
 
    /**

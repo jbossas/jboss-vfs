@@ -21,12 +21,11 @@
 */
 package org.jboss.virtual.spi.cache.helpers;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.io.IOException;
 
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VFS;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 
@@ -40,12 +39,12 @@ public class NoopVFSCache implements VFSCache
 {
    public VirtualFile getFile(URI uri) throws IOException
    {
-      return VFS.getRoot(uri);
+      return null;
    }
 
    public VirtualFile getFile(URL url) throws IOException
    {
-      return VFS.getRoot(url);
+      return null;
    }
 
    public void putContext(VFSContext context)

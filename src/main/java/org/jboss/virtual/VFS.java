@@ -123,7 +123,11 @@ public class VFS
    public static VirtualFile getCachedFile(URI rootURI) throws IOException
    {
       VFSCache cache = VFSCacheFactory.getInstance();
-      return cache.getFile(rootURI);
+      VirtualFile file = cache.getFile(rootURI);
+      if (file == null)
+         file = VFS.getRoot(rootURI);
+
+      return file;
    }
 
    /**
@@ -188,7 +192,11 @@ public class VFS
    public static VirtualFile getCachedFile(URL rootURL) throws IOException
    {
       VFSCache cache = VFSCacheFactory.getInstance();
-      return cache.getFile(rootURL);
+      VirtualFile file = cache.getFile(rootURL);
+      if (file == null)
+         file = VFS.getRoot(rootURL);
+      
+      return file;
    }
 
    /**
