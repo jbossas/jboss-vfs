@@ -137,10 +137,7 @@ public class VFS
    {
       VFSCache cache = VFSCacheFactory.getInstance();
       VirtualFile file = cache.getFile(rootURI);
-      if (file == null)
-         file = VFS.getRoot(rootURI);
-
-      return file;
+      return (file != null) ? file : getRoot(rootURI);
    }
 
    /**
@@ -206,10 +203,7 @@ public class VFS
    {
       VFSCache cache = VFSCacheFactory.getInstance();
       VirtualFile file = cache.getFile(rootURL);
-      if (file == null)
-         file = VFS.getRoot(rootURL);
-      
-      return file;
+      return (file != null) ? file : getRoot(rootURL);
    }
 
    /**
