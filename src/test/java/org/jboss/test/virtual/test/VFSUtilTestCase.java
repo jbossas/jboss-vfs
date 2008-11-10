@@ -22,19 +22,21 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 
 /**
  * VFSUtilTestCase.
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author anil.saldhana@jboss.com
  */
 public class VFSUtilTestCase extends AbstractMockVFSTest
 {
@@ -57,5 +59,25 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
       List<VirtualFile> paths = new ArrayList<VirtualFile>();
       VFSUtils.addManifestLocations(file, paths);
       assertEquals(3, paths.size());
+   }
+   
+   public void testRealURL() throws Exception
+   {
+	   URL url = getResource("/vfs/test");
+	   VirtualFile root = VFS.getRoot(url);
+	   VirtualFile jarFile = root.getChild("badmf.jar");
+	
+	   URL vfsURL = jarFile.toURL();
+	   assertTrue(vfsURL.toExternalForm().startsWith("vfszip"));
+	   URL realURL = VFSUtils.getRealURL(vfsURL); 
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
+       
+	   
+	   url = getResource("/vfs/context/file/simple");
+	   VirtualFile regularFile = VFS.getRoot(url).getChild("tomodify");
+	   vfsURL = regularFile.toURL();
+	   assertTrue(vfsURL.getProtocol().startsWith("vfsfile"));
+	   realURL = VFSUtils.getRealURL(vfsURL);
+	   assertTrue(realURL.toExternalForm().startsWith("file:"));
    }
 }

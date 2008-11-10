@@ -43,6 +43,7 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.collection.CollectionsFactory;
+import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.CopyMechanism;
 import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
 import org.jboss.virtual.plugins.copy.TempCopyMechanism;
@@ -112,6 +113,11 @@ public class VFSUtils
    public static final String VFS_CACHE_KEY = "jboss.vfs.cache";
 
    /**
+    * Constant representing the URL file protocol
+    */
+   public static final String FILE_PROTOCOL = "file";
+   
+   /**
     * Stop cache.
     */
    public static void stopCache()
@@ -148,6 +154,25 @@ public class VFSUtils
          buffer.append("<empty>");
 
       return buffer.toString();
+   }
+   
+   /**
+    * Get the Real URL
+    * @param vfsURL
+    * @return
+    * @throws Exception
+    */
+   public static URL getRealURL(URL vfsURL) throws Exception
+   { 
+	   if(vfsURL.getPath().endsWith("jar"))
+		   return JarUtils.createJarURL(vfsURL);
+	   
+	   if(vfsURL.getProtocol().startsWith("vfsfile"))
+		   return new URL(FILE_PROTOCOL, vfsURL.getHost(), vfsURL.getPort(), vfsURL.getFile());  
+	   
+	   if(log.isTraceEnabled())
+           log.trace("getRealURL did not have a match for:"+vfsURL.toExternalForm());
+	   return vfsURL;
    }
 
    /**
