@@ -77,6 +77,19 @@ public class VFS
    }
 
    /**
+    * Get the vfs context.
+    *
+    * This is package protected method.
+    * Same as VirtualFile::getHandler. 
+    *
+    * @return the vfs context
+    */
+   VFSContext getContext()
+   {
+      return context;
+   }
+
+   /**
     * Get the virtual file system for a root uri
     * 
     * @param rootURI the root URI

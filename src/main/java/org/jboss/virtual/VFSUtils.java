@@ -542,6 +542,21 @@ public class VFSUtils
    }
 
    /**
+    * Get the options for this vfs.
+    *
+    * @param vfs the vfs
+    * @return options map
+    */
+   private static Map<String, String> getOptions(VFS vfs)
+   {
+      if (vfs == null)
+         throw new IllegalArgumentException("Null vfs");
+
+      VFSContext context = vfs.getContext();
+      return context.getOptions();
+   }
+
+   /**
     * Get the option.
     *
     * @param file the file
@@ -551,6 +566,19 @@ public class VFSUtils
    public static String getOption(VirtualFile file, String key)
    {
       Map<String, String> options = getOptions(file);
+      return options != null ? options.get(key) : null;
+   }
+
+   /**
+    * Get the option.
+    *
+    * @param vfs the vfs
+    * @param key the option key
+    * @return key's option
+    */
+   public static String getOption(VFS vfs, String key)
+   {
+      Map<String, String> options = getOptions(vfs);
       return options != null ? options.get(key) : null;
    }
 
@@ -585,6 +613,36 @@ public class VFSUtils
    }
 
    /**
+    * Enable option.
+    *
+    * @param vfs the vfs
+    * @param optionName option name
+    */
+   protected static void enableOption(VFS vfs, String optionName)
+   {
+      Map<String, String> options = getOptions(vfs);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + vfs);
+
+      options.put(optionName, Boolean.TRUE.toString());
+   }
+
+   /**
+    * Disable option.
+    *
+    * @param vfs the vfs
+    * @param optionName option name
+    */
+   protected static void disableOption(VFS vfs, String optionName)
+   {
+      Map<String, String> options = getOptions(vfs);
+      if (options == null)
+         throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + vfs);
+
+      options.remove(optionName);
+   }
+
+   /**
     * Enable copy for file param.
     *
     * @param file the file
@@ -605,7 +663,27 @@ public class VFSUtils
    }
 
    /**
-    * Enable repaer for file param.
+    * Enable copy for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void enableCopy(VFS vfs)
+   {
+      enableOption(vfs, USE_COPY_QUERY);
+   }
+
+   /**
+    * Disable copy for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void disableCopy(VFS vfs)
+   {
+      disableOption(vfs, USE_COPY_QUERY);
+   }
+
+   /**
+    * Enable reaper for file param.
     *
     * @param file the file
     */
@@ -622,6 +700,26 @@ public class VFSUtils
    public static void disableNoReaper(VirtualFile file)
    {
       disableOption(file, NO_REAPER_QUERY);
+   }
+
+   /**
+    * Enable reaper for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void enableNoReaper(VFS vfs)
+   {
+      enableOption(vfs, NO_REAPER_QUERY);
+   }
+
+   /**
+    * Disable reaper for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void disableNoReaper(VFS vfs)
+   {
+      disableOption(vfs, NO_REAPER_QUERY);
    }
 
    /**
@@ -642,6 +740,26 @@ public class VFSUtils
    public static void disableCaseSensitive(VirtualFile file)
    {
       disableOption(file, CASE_SENSITIVE_QUERY);
+   }
+
+   /**
+    * Enable case sensitive for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void enableCaseSensitive(VFS vfs)
+   {
+      enableOption(vfs, CASE_SENSITIVE_QUERY);
+   }
+
+   /**
+    * Disable case sensitive for vfs param.
+    *
+    * @param vfs the vfs
+    */
+   public static void disableCaseSensitive(VFS vfs)
+   {
+      disableOption(vfs, CASE_SENSITIVE_QUERY);
    }
 
    /**
