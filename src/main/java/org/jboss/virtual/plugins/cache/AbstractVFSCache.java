@@ -60,6 +60,9 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    public VirtualFile getFile(URI uri) throws IOException
    {
+      if (uri == null)
+         throw new IllegalArgumentException("Null uri.");
+
       check();
 
       VFSContext context = findContext(uri);
@@ -68,6 +71,9 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
          VirtualFileHandler root = context.getRoot();
          String relativePath = getRelativePath(context, uri);
          VirtualFileHandler child = root.getChild(relativePath);
+         if (child == null)
+            throw new IOException("Cannot find child, root=" + root + ", relativePath=" + relativePath);
+         
          return child.getVirtualFile();
       }
       return null;
@@ -89,6 +95,9 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 
    public VirtualFile getFile(URL url) throws IOException
    {
+      if (url == null)
+         throw new IllegalArgumentException("Null url.");
+
       check();
 
       try
