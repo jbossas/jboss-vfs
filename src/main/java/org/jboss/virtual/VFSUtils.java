@@ -159,22 +159,6 @@ public class VFSUtils
    }
 
    /**
-    * Get real url.
-    * The closest thing that doesn't need the vfs url handlers.
-    *
-    * @param file the virtual file
-    * @return real url
-    * @throws IOException for any error
-    * @throws URISyntaxException for any uri syntac error
-    */
-   public static URL getRealURL(VirtualFile file) throws IOException, URISyntaxException
-   {
-      VirtualFileHandler handler = file.getHandler();
-      // TODO - JBVFS-77
-      return handler.toVfsUrl();
-   }
-
-   /**
     * Add manifest paths
     *
     * @param file the file
@@ -1049,4 +1033,20 @@ public class VFSUtils
          return new URI(string);
       }
    };
+
+   /**
+    * Get real url.
+    * The closest thing that doesn't need the vfs url handlers.
+    *
+    * @param file the virtual file
+    * @return real url
+    * @throws IOException for any error
+    * @throws URISyntaxException for any uri syntac error
+    */
+   public static URL getRealURL(VirtualFile file) throws IOException, URISyntaxException
+   {
+      VirtualFileHandler handler = file.getHandler();
+      // TODO - JBVFS-77
+      return handler.toVfsUrl();
+   }
 }
