@@ -25,11 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +43,6 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.collection.CollectionsFactory;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.CopyMechanism;
 import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
 import org.jboss.virtual.plugins.copy.TempCopyMechanism;
@@ -158,36 +157,21 @@ public class VFSUtils
 
       return buffer.toString();
    }
-   
+
    /**
-    * Get the Real URL
-    * @param vfsURL
-    * @return
-    * @throws Exception
+    * Get real url.
+    * The closest thing that doesn't need the vfs url handlers.
+    *
+    * @param file the virtual file
+    * @return real url
+    * @throws IOException for any error
+    * @throws URISyntaxException for any uri syntac error
     */
-   public static URL getRealURL(URL vfsURL) throws Exception
-   { 
-	   if(vfsURL.getPath().endsWith("jar"))
-	   {
-		   String urlStr = "jar:" + FILE_PROTOCOL + ":" + vfsURL.getPath() + JAR_URL_SEPARATOR;
-		   return new URL(urlStr);
-	   } 
-	   
-	   if(vfsURL.getProtocol().startsWith("vfsfile"))
-		   return new URL(FILE_PROTOCOL, vfsURL.getHost(), vfsURL.getPort(), vfsURL.getFile());  
-	   
-	   if(vfsURL.getProtocol().startsWith("vfszip"))
-	   {
-		   String urlStr = vfsURL.toExternalForm();
-		   //nested file
-		   int indexJar = urlStr.indexOf(".jar");
-		   String beforejar = urlStr.substring("vfszip:".length(), urlStr.indexOf(".jar"));
-		   String afterjar = urlStr.substring(indexJar + 1 + ".jar".length());
-		   return new URL("jar:file:" + beforejar + ".jar " + JAR_URL_SEPARATOR  + afterjar);
-	   }
-	   if(log.isTraceEnabled())
-           log.trace("getRealURL did not have a match for:"+vfsURL.toExternalForm());
-	   return vfsURL;
+   public static URL getRealURL(VirtualFile file) throws IOException, URISyntaxException
+   {
+      VirtualFileHandler handler = file.getHandler();
+      // TODO - JBVFS-77
+      return handler.toVfsUrl();
    }
 
    /**
