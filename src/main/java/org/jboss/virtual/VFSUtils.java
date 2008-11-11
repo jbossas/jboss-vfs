@@ -117,6 +117,9 @@ public class VFSUtils
     */
    public static final String FILE_PROTOCOL = "file";
    
+   /** Standard separator for JAR URL */
+   public static final String JAR_URL_SEPARATOR = "!/";
+   
    /**
     * Stop cache.
     */
@@ -165,11 +168,23 @@ public class VFSUtils
    public static URL getRealURL(URL vfsURL) throws Exception
    { 
 	   if(vfsURL.getPath().endsWith("jar"))
-		   return JarUtils.createJarURL(vfsURL);
+	   {
+		   String urlStr = "jar:" + FILE_PROTOCOL + ":" + vfsURL.getPath() + JAR_URL_SEPARATOR;
+		   return new URL(urlStr);
+	   } 
 	   
 	   if(vfsURL.getProtocol().startsWith("vfsfile"))
 		   return new URL(FILE_PROTOCOL, vfsURL.getHost(), vfsURL.getPort(), vfsURL.getFile());  
 	   
+	   if(vfsURL.getProtocol().startsWith("vfszip"))
+	   {
+		   String urlStr = vfsURL.toExternalForm();
+		   //nested file
+		   int indexJar = urlStr.indexOf(".jar");
+		   String beforejar = urlStr.substring("vfszip:".length(), urlStr.indexOf(".jar"));
+		   String afterjar = urlStr.substring(indexJar + 1 + ".jar".length());
+		   return new URL("jar:file:" + beforejar + ".jar " + JAR_URL_SEPARATOR  + afterjar);
+	   }
 	   if(log.isTraceEnabled())
            log.trace("getRealURL did not have a match for:"+vfsURL.toExternalForm());
 	   return vfsURL;

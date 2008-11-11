@@ -21,6 +21,7 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,16 +64,25 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
    
    public void testRealURL() throws Exception
    {
+	   //Regular jar
 	   URL url = getResource("/vfs/test");
 	   VirtualFile root = VFS.getRoot(url);
 	   VirtualFile jarFile = root.getChild("badmf.jar");
-	
-	   URL vfsURL = jarFile.toURL();
+	      
+	   URL vfsURL = jarFile.toURL(); 
 	   assertTrue(vfsURL.toExternalForm().startsWith("vfszip"));
 	   URL realURL = VFSUtils.getRealURL(vfsURL); 
 	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
-       
 	   
+	   //Nested file in a jar
+	   url = getResource("/vfs/test/nested");
+	   root = VFS.getRoot(url);
+	   VirtualFile nestedFile = root.getChild("/nested.jar/META-INF/empty.txt");
+	   URL fileURL = nestedFile.toURL();
+	   realURL = VFSUtils.getRealURL(fileURL); 
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
+	     
+	   //Regular file
 	   url = getResource("/vfs/context/file/simple");
 	   VirtualFile regularFile = VFS.getRoot(url).getChild("tomodify");
 	   vfsURL = regularFile.toURL();
