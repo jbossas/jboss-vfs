@@ -59,7 +59,33 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
       VFSUtils.addManifestLocations(file, paths);
       assertEquals(3, paths.size());
    }
-   
+
+   public void testOptionsPropagation() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(url);
+      VFSUtils.enableNoReaper(vfs);
+      VirtualFile root = vfs.getRoot();
+      assertOption(root, "nested", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/META-INF", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar/subfolder", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar/subfolder/subchild", VFSUtils.NO_REAPER_QUERY);
+
+      VirtualFile subchild = root.findChild("nested/nested.jar/complex.jar/subfolder/subchild");
+      VFSUtils.disableNoReaper(subchild);
+      assertNull(VFSUtils.getOption(subchild, VFSUtils.NO_REAPER_QUERY));
+   }
+
+   protected void assertOption(VirtualFile root, String path, String optionKey) throws Exception
+   {
+      VirtualFile child = root.findChild(path);
+      String optionValue = VFSUtils.getOption(root, optionKey);
+      assertNotNull(optionValue);
+      assertEquals(optionValue, VFSUtils.getOption(child, optionKey));
+   }
+
    public void testRealURL() throws Exception
    {
 	   //Regular jar
