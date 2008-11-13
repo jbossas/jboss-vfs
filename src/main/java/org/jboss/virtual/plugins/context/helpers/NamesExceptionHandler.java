@@ -19,28 +19,47 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.virtual.support;
+package org.jboss.virtual.plugins.context.helpers;
+
+import java.util.Collections;
+import java.util.Set;
 
 import org.jboss.virtual.plugins.context.AbstractExceptionHandler;
 
 /**
+ * Match names to ignore the exception.
+ * 
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class NameExceptionHandler extends AbstractExceptionHandler
+public class NamesExceptionHandler extends AbstractExceptionHandler
 {
-   private String name;
+   private Set<String> names;
 
-   public NameExceptionHandler(String name)
+   public NamesExceptionHandler(String name)
    {
-      this.name = name;
+      this(Collections.singleton(name));
+   }
+
+   public NamesExceptionHandler(Set<String> names)
+   {
+      if (names == null)
+         throw new IllegalArgumentException("Null names");
+
+      this.names = names;
    }
 
    @Override
-   public void handleZipEntriesInitException(Exception e, String name)
+   public void handleZipEntriesInitException(Exception e, String zipName)
    {
-      if (name.contains(this.name) == false)
-         super.handleZipEntriesInitException(e, name);
-      else
-         log.warn("Exception while initializing zip: " + name, e);
+      for (String name : names)
+      {
+         if (zipName.contains(name))
+         {
+            log.debug("Exception while reading " + zipName, e);
+            return;
+         }
+      }
+
+      super.handleZipEntriesInitException(e, zipName);
    }
 }

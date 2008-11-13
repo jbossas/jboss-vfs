@@ -27,7 +27,7 @@ import java.util.List;
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.test.virtual.support.NameExceptionHandler;
+import org.jboss.virtual.plugins.context.helpers.NamesExceptionHandler;
 
 /**
  * ExceptionHandlerTestCase.
@@ -50,7 +50,7 @@ public class ExceptionHandlerTestCase extends AbstractVFSTest
    {
       URL url = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(url);
-      vfs.setExceptionHandler(new NameExceptionHandler("_sqljdbc.jar"));
+      vfs.setExceptionHandler(new NamesExceptionHandler("_sqljdbc.jar"));
       VirtualFile root = vfs.getRoot();
       VirtualFile zipeinit = root.findChild("zipeinit.jar");
       VirtualFile child = zipeinit.findChild("sqljdbc.jar");
