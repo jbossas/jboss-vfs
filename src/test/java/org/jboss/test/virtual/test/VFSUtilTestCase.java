@@ -69,6 +69,7 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
       assertOption(root, "nested", VFSUtils.NO_REAPER_QUERY);
       assertOption(root, "nested/nested.jar", VFSUtils.NO_REAPER_QUERY);
       assertOption(root, "nested/nested.jar/META-INF", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/META-INF/empty.txt", VFSUtils.NO_REAPER_QUERY);
       assertOption(root, "nested/nested.jar/complex.jar", VFSUtils.NO_REAPER_QUERY);
       assertOption(root, "nested/nested.jar/complex.jar/subfolder", VFSUtils.NO_REAPER_QUERY);
       assertOption(root, "nested/nested.jar/complex.jar/subfolder/subchild", VFSUtils.NO_REAPER_QUERY);
