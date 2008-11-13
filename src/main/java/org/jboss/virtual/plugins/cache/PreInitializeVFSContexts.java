@@ -24,9 +24,12 @@ package org.jboss.virtual.plugins.cache;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.spi.ExceptionHandler;
 
 /**
  * Initialize vfs contexts - performance improvements.
@@ -36,7 +39,7 @@ import org.jboss.virtual.VFS;
 public class PreInitializeVFSContexts
 {
    private Logger log = Logger.getLogger(PreInitializeVFSContexts.class);
-   private List<URL> initializedVFSContexts;
+   private Map<URL, ExceptionHandler> initializedVFSContexts;
    private boolean holdReference;
    private List<VFS> references;
 
@@ -52,9 +55,14 @@ public class PreInitializeVFSContexts
          if (holdReference)
             references = new ArrayList<VFS>();
 
-         for (URL url : initializedVFSContexts)
+         for (Map.Entry<URL, ExceptionHandler> entry : initializedVFSContexts.entrySet())
          {
-            VFS vfs = VFS.getVFS(url);
+            VFS vfs = VFS.getVFS(entry.getKey());
+
+            ExceptionHandler eh = entry.getValue();
+            if (eh != null)
+               vfs.setExceptionHandler(eh);
+
             log.debug("Initialized Virtual File: " + vfs.getRoot());
             if (holdReference)
             {
@@ -89,6 +97,20 @@ public class PreInitializeVFSContexts
     * @param initializedVFSContexts the URLs to be initialized
     */
    public void setInitializedVFSContexts(List<URL> initializedVFSContexts)
+   {
+      this.initializedVFSContexts = new HashMap<URL, ExceptionHandler>();
+      for (URL url : initializedVFSContexts)
+      {
+         this.initializedVFSContexts.put(url, null);
+      }
+   }
+
+   /**
+    * Set URLs that need to be initialized before anything else.
+    *
+    * @param initializedVFSContexts the URLs to be initialized
+    */
+   public void setInitializedVFSContexts(Map<URL, ExceptionHandler> initializedVFSContexts)
    {
       this.initializedVFSContexts = initializedVFSContexts;
    }

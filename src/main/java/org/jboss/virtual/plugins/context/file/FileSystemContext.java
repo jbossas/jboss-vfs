@@ -278,6 +278,7 @@ public class FileSystemContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl);
+      mergeContexts(ctx);
 
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
@@ -304,7 +305,7 @@ public class FileSystemContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null uri");
 
       VirtualFileHandler handler = null;
-      if( VFSUtils.isLink(file.getName()) )
+      if(VFSUtils.isLink(file.getName()))
       {
          handler = createLinkHandler(parent, file, null);
       }

@@ -32,6 +32,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.util.file.ArchiveBrowser;
@@ -52,6 +53,19 @@ public class VFS
    static
    {
       init();
+   }
+
+   /**
+    * Create a new VFS.
+    *
+    * @param context the context
+    * @throws IllegalArgumentException for a null context
+    */
+   public VFS(VFSContext context)
+   {
+      if (context == null)
+         throw new IllegalArgumentException("Null name");
+      this.context = context;
    }
 
    /**
@@ -87,6 +101,16 @@ public class VFS
    VFSContext getContext()
    {
       return context;
+   }
+
+   /**
+    * Set exception handler.
+    *
+    * @param exceptionHandler the exception handler.
+    */
+   public void setExceptionHandler(ExceptionHandler exceptionHandler)
+   {
+      context.setExceptionHandler(exceptionHandler);
    }
 
    /**
@@ -221,19 +245,6 @@ public class VFS
       return vfs.findChild(name);
    }
 
-   /**
-    * Create a new VFS.
-    * 
-    * @param context the context
-    * @throws IllegalArgumentException for a null context
-    */
-   public VFS(VFSContext context)
-   {
-      if (context == null)
-         throw new IllegalArgumentException("Null name");
-      this.context = context;
-   }
-   
    /**
     * Get the root file of this VFS
     * 

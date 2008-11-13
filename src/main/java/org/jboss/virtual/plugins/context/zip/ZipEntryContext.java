@@ -56,6 +56,7 @@ import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -488,7 +489,11 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       catch (Exception ex)
       {
-         throw new RuntimeException("Failed to read zip file: " + zipSource, ex);
+         ExceptionHandler eh = getExceptionHandler();
+         if (eh != null)
+            eh.handleZipEntriesInitException(ex, zipSource.getName());
+         else
+            throw new RuntimeException("Failed to read zip file: " + zipSource, ex);
       }
       finally
       {
@@ -518,6 +523,8 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl, true);
+      mergeContexts(ctx);
+
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
 
@@ -546,6 +553,8 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, wrapper, false);
+      mergeContexts(ctx);
+
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
 
