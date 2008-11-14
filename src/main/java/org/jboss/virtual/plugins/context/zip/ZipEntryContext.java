@@ -122,6 +122,9 @@ public class ZipEntryContext extends AbstractVFSContext
    /** Have zip entries been navigated yet */
    private InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
 
+   /** RealURL of this context */
+   private URL realURL;
+
    /**
     * Create a new ZipEntryContext
     *
@@ -283,13 +286,18 @@ public class ZipEntryContext extends AbstractVFSContext
       if (file == null)
          throw new IOException("VFS file does not exist: " + rootPath);
 
+      RealURLInfo urlInfo = new RealURLInfo(file);
+
       if (relative != null)
       {
-         return findEntry(new FileInputStream(file), relative);
+         ZipWrapper wrapper = findEntry(new FileInputStream(file), relative, urlInfo);
+         realURL = urlInfo.toURL();
+         return wrapper;
       }
       else
       {
          boolean noReaper = Boolean.valueOf(getOptions().get(VFSUtils.NO_REAPER_QUERY));
+         realURL = urlInfo.toURL();
          return new ZipFileWrapper(file, autoClean, noReaper);
       }
    }
@@ -300,10 +308,11 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param is the input stream
     * @param relative relative path
+    * @param urlInfo
     * @return zip wrapper instance
     * @throws IOException for any error
     */
-   protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
+   protected ZipWrapper findEntry(InputStream is, String relative, RealURLInfo urlInfo) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       VFSUtils.copyStreamAndClose(is, baos);
@@ -356,8 +365,11 @@ public class ZipEntryContext extends AbstractVFSContext
          String entryName = entry.getName();
          if (entryName.equals(longestNameMatch))
          {
+            if (urlInfo != null)
+               urlInfo.relativePath = longestNameMatch;
+
             relative = relative.substring(longestNameMatch.length() + 1);
-            return findEntry(zis, relative);
+            return findEntry(zis, relative, null);
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
@@ -987,6 +999,14 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
+    *  Get RealURL corresponding to root handler
+    */
+   public URL getRealURL()
+   {
+      return realURL;
+   }
+
+   /**
     *  Internal data structure holding meta information of a virtual file in this context
     */
    static class EntryInfo
@@ -1215,9 +1235,35 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
-   static enum InitializationStatus {
+   static enum InitializationStatus
+   {
       NOT_INITIALIZED,
       INITIALIZING,
       INITIALIZED
+   }
+
+   private static class RealURLInfo
+   {
+      String rootURL;
+      String relativePath;
+
+      RealURLInfo(File file) throws MalformedURLException
+      {
+         String url = file.toURL().toExternalForm();
+         if (url.endsWith("/"))
+            url = url.substring(0, url.length()-1);
+         rootURL = "jar:" + url + "!/";
+      }
+
+      URL toURL() throws MalformedURLException
+      {
+         if (relativePath == null || relativePath.length() == 0)
+            return new URL(rootURL);
+
+         if (relativePath.startsWith("/"))
+            relativePath = relativePath.substring(1);
+
+         return new URL(rootURL + relativePath);
+      }
    }
 }

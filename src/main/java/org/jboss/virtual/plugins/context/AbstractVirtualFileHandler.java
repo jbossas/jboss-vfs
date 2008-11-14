@@ -258,6 +258,11 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return vfsUrl;
    }
 
+   public URL getRealURL() throws IOException, URISyntaxException
+   {
+      return toURL();
+   }
+
    /**
     * Get VFS url.
     *

@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.zip;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,7 +30,9 @@ import java.util.List;
 
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -191,5 +192,39 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
    {
       init();
       return super.getVfsUrl();
+   }
+
+   public URL getRealURL() throws IOException, URISyntaxException
+   {
+      // see how far the parent contexts go
+      // if there is no parent context or it is of type FileSystemContext
+      // ZipEntryContext -> jar!/
+      // ZipEntryContext / ZipEntryContext -> jar!/jar
+      // ZipEntryConteyt / ZipEntryContext / ZipEntryContext ... -> jar!/jar
+      VFSContext ctx = getLocalVFSContext();
+      VirtualFileHandler peer = getLocalVFSContext().getRootPeer();
+
+      if (peer == null)
+         return getZipEntryContext().getRealURL();
+
+      if (peer instanceof AbstractVirtualFileHandler
+         && ((AbstractVirtualFileHandler)peer).getLocalVFSContext() instanceof FileSystemContext)
+      {
+         String lpath = getLocalPathName();
+         return new URL("jar:file:" + ctx.getRootURI().getPath() + "!" + (lpath.length() == 0 ? "/" : lpath));
+      }
+
+      if (peer instanceof AbstractVirtualFileHandler)
+      {
+         AbstractVirtualFileHandler aPeer =(AbstractVirtualFileHandler) peer;
+         URL realUrl = aPeer.getLocalVFSContext().getRoot().getRealURL();
+         String urlStr = realUrl.toExternalForm();
+         if (urlStr.endsWith("!/"))
+            return new URL(urlStr + aPeer.getLocalPathName());
+         else
+            return realUrl;
+      }
+       
+      throw new RuntimeException("Operation not supported for handler: " + this);
    }
 }

@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.List;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
@@ -149,6 +150,52 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       memOut = new ByteArrayOutputStream();
       VFSUtils.copyStreamAndClose(handler.openStream(), memOut);
       assertTrue("read archive content", memOut.size() == handler.getSize());
+   }
+
+   /**
+    * Real URL test
+    *
+    * @throws Exception
+    */
+   public void testRealURL() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/");
+      FileSystemContext ctx = new FileSystemContext(url);
+
+      // valid archive
+      VirtualFileHandler root = ctx.getRoot();
+      assertEquals("Context Real URL", url.toExternalForm(), root.getRealURL().toExternalForm());
+      String jarName = "archive.jar";
+      VirtualFileHandler archive = root.getChild(jarName);
+      assertEquals("Child Real URL", "jar:" + url.toExternalForm() + jarName + "!/", archive.getRealURL().toExternalForm());
+
+      url = getResource("/vfs/test/");
+      ctx = new FileSystemContext(url);
+      root = ctx.getRoot();
+
+      jarName = "level1.zip";
+      archive = root.getChild(jarName);
+      String nestedName = "level2.zip";
+      VirtualFileHandler nested = archive.getChild(nestedName);
+
+      String jarURL = "jar:" + url.toExternalForm() + jarName + "!/" + nestedName;
+      assertEquals("First level nested Real URL", jarURL, nested.getRealURL().toExternalForm());
+
+      nested = nested.getChild("level3.zip");
+      assertEquals("Second level nested Real URL", jarURL, nested.getRealURL().toExternalForm());
+
+      // nested root test
+      url = getResource("/vfs/test/");
+      ZipEntryContext zctx = new ZipEntryContext(new URL("vfszip:" + url.getPath() + "/level1.zip/level2.zip/level3.zip"));
+
+      VirtualFileHandler handler = zctx.getRoot();
+      assertEquals("Nested root Real URL", jarURL, handler.getRealURL().toExternalForm());
+
+      List<VirtualFileHandler> children = handler.getChildren(false);
+      for (VirtualFileHandler child: children)
+      {
+         assertEquals("Nested root Real URL", jarURL, child.getRealURL().toExternalForm());
+      }
    }
 
    /**

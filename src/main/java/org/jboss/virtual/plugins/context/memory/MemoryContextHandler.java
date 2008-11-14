@@ -186,4 +186,9 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       }
       return getVfsUrl();
    }
+
+   public URL getRealURL() throws IOException, URISyntaxException
+   {
+      throw new UnsupportedOperationException("Operation not supported on handler: " + this);
+   }
 }
