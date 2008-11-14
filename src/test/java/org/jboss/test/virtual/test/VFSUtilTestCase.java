@@ -98,7 +98,7 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
 	   assertTrue(vfsURL.toExternalForm().startsWith("vfszip"));
 	   URL realURL = VFSUtils.getRealURL(jarFile);
       // TODO - JBVFS-77 --> do proper tests!
-	   //assertTrue(realURL.toExternalForm().startsWith("jar:"));
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
 	   
 	   //Nested file in a jar
 	   url = getResource("/vfs/test/nested");
@@ -106,7 +106,7 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
 	   VirtualFile nestedFile = root.getChild("/nested.jar/META-INF/empty.txt");
 	   realURL = VFSUtils.getRealURL(nestedFile);
       // TODO - JBVFS-77 --> do proper tests!
-	   //assertTrue(realURL.toExternalForm().startsWith("jar:"));
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
 	     
 	   //Regular file
 	   url = getResource("/vfs/context/file/simple");
@@ -115,6 +115,6 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
 	   assertTrue(vfsURL.getProtocol().startsWith("vfsfile"));
 	   realURL = VFSUtils.getRealURL(regularFile);
       // TODO - JBVFS-77 --> do proper tests!
-	   //assertTrue(realURL.toExternalForm().startsWith("file:"));
+	   assertTrue(realURL.toExternalForm().startsWith("file:"));
    }
 }

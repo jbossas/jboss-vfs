@@ -1046,7 +1046,6 @@ public class VFSUtils
    public static URL getRealURL(VirtualFile file) throws IOException, URISyntaxException
    {
       VirtualFileHandler handler = file.getHandler();
-      // TODO - JBVFS-77
-      return handler.toVfsUrl();
+      return handler.getRealURL();
    }
 }
