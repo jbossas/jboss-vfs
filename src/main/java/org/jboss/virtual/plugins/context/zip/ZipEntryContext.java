@@ -87,6 +87,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * {@link org.jboss.virtual.plugins.context.jar.JarContext}.
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.0 $
  */
 public class ZipEntryContext extends AbstractVFSContext
@@ -308,7 +309,7 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param is the input stream
     * @param relative relative path
-    * @param urlInfo
+    * @param urlInfo url info
     * @return zip wrapper instance
     * @throws IOException for any error
     */
@@ -725,13 +726,17 @@ public class ZipEntryContext extends AbstractVFSContext
       return Collections.emptyList();
    }
 
+   /**
+    * Do delete.
+    *
+    * @param handler the zip entry handler
+    * @param gracePeriod the grace period
+    * @return true if delete succeeded
+    * @throws IOException for any error
+    */
    public boolean delete(ZipEntryHandler handler, int gracePeriod) throws IOException
    {
-      if (getRoot().equals(handler))
-      {
-         return zipSource.delete(gracePeriod);
-      }
-      return false;
+      return getRoot().equals(handler) && zipSource.delete(gracePeriod);
    }
 
    /**
@@ -999,7 +1004,9 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    *  Get RealURL corresponding to root handler
+    * Get RealURL corresponding to root handler
+    *
+    * @return the real url
     */
    public URL getRealURL()
    {
