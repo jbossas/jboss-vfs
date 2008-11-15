@@ -23,12 +23,14 @@ package org.jboss.test.virtual.test;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.jboss.test.virtual.support.MockVirtualFileHandlerVisitor;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -52,12 +54,79 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
 
    protected abstract String getSuffix();
 
+   protected abstract String getRealProtocol();
+
+   protected abstract String getRealURLEnd();
+
+   protected abstract String transformExpectedEnd(String expecetedEnd);
+
    /* TODO URI testing
    public void testRootURI() throws Exception
    {
    }
    */
-   
+
+
+/*
+   TODO - test diff structures
+
+   public void testRealURL() throws Exception
+   {
+      assertRealURL("children", null, null);
+      assertRealURL("children", "child1", null);
+      assertRealURL("complex", null, null);
+      assertRealURL("complex", "subfolder", null);
+      assertRealURL("complex", "subfolder/subchild", null);
+      assertRealURL("complex", "subfolder/subsubfolder", null);
+      assertRealURL("complex", "subfolder/subsubfolder/subsubchild", null);
+      assertRealURL("nested", null, null);
+      assertRealURL("nested", "complex.jar", null);
+      assertRealURL("nested", "complex.jar/subfolder", "complex.jar");
+      assertRealURL("nested", "complex.jar/subfolder/subchild", "complex.jar");
+      assertRealURL("nested", "complex.jar/subfolder/subsubfolder", "complex.jar");
+      assertRealURL("nested", "complex.jar/subfolder/subsubfolder/subsubchild", "complex.jar");
+   }
+*/
+
+   @SuppressWarnings("deprecation")
+   public void assertRealURL(String name, String path, String expectedEnd) throws Exception
+   {
+      VFSContext context = getVFSContext(name);
+      VirtualFile root = context.getRoot().getVirtualFile();
+      VirtualFile file = root;
+      if (path != null && path.length() > 0)
+         file = root.findChild(path);
+
+      URL realURL = VFSUtils.getRealURL(file);
+      String realURLString = realURL.toExternalForm();
+
+      URL rootURL = root.toURL();
+      String rootURLString = rootURL.toExternalForm();
+      int p = rootURLString.indexOf(":/");
+      int l = rootURLString.length() - 1;
+      if (rootURLString.charAt(l - 1) == '!')
+         l--;
+      String middle = rootURLString.substring(p, l);
+      String end;
+      expectedEnd = transformExpectedEnd(expectedEnd);
+      if (expectedEnd == null)
+      {
+         end = (path != null) ? path : "";
+      }
+      else
+      {
+         end = expectedEnd;
+      }
+
+      String expectedRealURL = getRealProtocol() + middle + getRealURLEnd() + end;
+      if (expectedRealURL.endsWith("/") && realURLString.endsWith("/") == false)
+         realURLString += "/";
+      if (expectedRealURL.endsWith("/") == false && realURLString.endsWith("/"))
+         expectedRealURL += "/";
+
+      assertEquals(expectedRealURL, realURLString);
+   }
+
    public void testGetVFS() throws Exception
    {
       VFSContext context = getVFSContext("simple");

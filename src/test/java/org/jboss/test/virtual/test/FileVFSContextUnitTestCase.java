@@ -63,4 +63,19 @@ public class FileVFSContextUnitTestCase extends AbstractVFSContextTest
    {
       return "";
    }
+
+   protected String getRealProtocol()
+   {
+      return "file";
+   }
+
+   protected String getRealURLEnd()
+   {
+      return "/";
+   }
+
+   protected String transformExpectedEnd(String expecetedEnd)
+   {
+      return null;
+   }
 }

@@ -155,9 +155,9 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    /**
     * Real URL test
     *
-    * @throws Exception
+    * @throws Exception for any error
     */
-   public void testRealURL() throws Exception
+   public void testCustomRealURL() throws Exception
    {
       URL url = getResource("/vfs/context/jar/");
       FileSystemContext ctx = new FileSystemContext(url);
