@@ -130,7 +130,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       if (expectedRealURL.endsWith("/") == false && realURLString.endsWith("/"))
          expectedRealURL += "/";
 
-      assertEquals(expectedRealURL, realURLString);
+      assertEquals("Different real URL:", expectedRealURL, realURLString);
    }
 
    public void testGetVFS() throws Exception
