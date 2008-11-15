@@ -205,7 +205,22 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       VirtualFileHandler peer = getLocalVFSContext().getRootPeer();
 
       if (peer == null)
-         return getZipEntryContext().getRealURL();
+      {
+         URL ctxURL = getZipEntryContext().getRealURL();
+         String ctxURLStr = ctxURL.toExternalForm();
+         if (ctxURLStr.endsWith("!/"))
+         {
+            String lpath = getLocalPathName();
+            if (lpath.startsWith("/"))
+               lpath = lpath.substring(1);
+
+            if (lpath.length() == 0)
+               return ctxURL;
+            else
+               return new URL(ctxURLStr + lpath);
+         }
+         return ctxURL;
+      }
 
       if (peer instanceof AbstractVirtualFileHandler
          && ((AbstractVirtualFileHandler)peer).getLocalVFSContext() instanceof FileSystemContext)

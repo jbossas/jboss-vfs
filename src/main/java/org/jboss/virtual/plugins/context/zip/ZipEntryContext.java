@@ -1115,7 +1115,8 @@ public class ZipEntryContext extends AbstractVFSContext
 
 
    /**
-    * Make sure url protocol is <em>vfszip</em>
+    * Make sure url protocol is <em>vfszip</em>.
+    * Also remove any '!' from URL
     *
     * @param rootURL the root url
     * @return fixed url
@@ -1123,14 +1124,22 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private static URL fixUrl(URL rootURL) throws MalformedURLException
    {
+      String urlStr = rootURL.toExternalForm();
+      int pos = urlStr.indexOf("!");
+      if (pos != -1)
+      {
+         String tmp = urlStr.substring(0, pos);
+         if (pos < urlStr.length()-1)
+            tmp += urlStr.substring(pos+1);
+         urlStr = tmp;
+      }
       if ("vfszip".equals(rootURL.getProtocol()) == false)
       {
-         String url = rootURL.toString();
-         int pos = url.indexOf(":/");
+         pos = urlStr.indexOf(":/");
          if (pos != -1)
-            url = url.substring(pos);
+            urlStr = urlStr.substring(pos);
 
-         return new URL("vfszip" + url);
+         return new URL("vfszip" + urlStr);
       }
       return rootURL;
    }
