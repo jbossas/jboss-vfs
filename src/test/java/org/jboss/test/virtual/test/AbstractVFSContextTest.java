@@ -60,33 +60,39 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
 
    protected abstract String transformExpectedEnd(String expecetedEnd);
 
+   protected abstract boolean isRealURLSupported();
+
    /* TODO URI testing
    public void testRootURI() throws Exception
    {
    }
    */
 
-
-/*
-   TODO - test diff structures
-
    public void testRealURL() throws Exception
    {
-      assertRealURL("children", null, null);
-      assertRealURL("children", "child1", null);
-      assertRealURL("complex", null, null);
-      assertRealURL("complex", "subfolder", null);
-      assertRealURL("complex", "subfolder/subchild", null);
-      assertRealURL("complex", "subfolder/subsubfolder", null);
-      assertRealURL("complex", "subfolder/subsubfolder/subsubchild", null);
-      assertRealURL("nested", null, null);
-      assertRealURL("nested", "complex.jar", null);
-      assertRealURL("nested", "complex.jar/subfolder", "complex.jar");
-      assertRealURL("nested", "complex.jar/subfolder/subchild", "complex.jar");
-      assertRealURL("nested", "complex.jar/subfolder/subsubfolder", "complex.jar");
-      assertRealURL("nested", "complex.jar/subfolder/subsubfolder/subsubchild", "complex.jar");
+      try
+      {
+         assertRealURL("children", null, null);
+         assertRealURL("children", "child1", null);
+         assertRealURL("complex", null, null);
+         assertRealURL("complex", "subfolder", null);
+         assertRealURL("complex", "subfolder/subchild", null);
+         assertRealURL("complex", "subfolder/subsubfolder", null);
+         assertRealURL("complex", "subfolder/subsubfolder/subsubchild", null);
+         assertRealURL("nested", null, null);
+         assertRealURL("nested", "complex.jar", null);
+         assertRealURL("nested", "complex.jar/subfolder", "complex.jar");
+         assertRealURL("nested", "complex.jar/subfolder/subchild", "complex.jar");
+         assertRealURL("nested", "complex.jar/subfolder/subsubfolder", "complex.jar");
+         assertRealURL("nested", "complex.jar/subfolder/subsubfolder/subsubchild", "complex.jar");
+
+         assertTrue(isRealURLSupported());
+      }
+      catch (Throwable t)
+      {
+         assertFalse(t.getMessage(), isRealURLSupported());
+      }
    }
-*/
 
    @SuppressWarnings("deprecation")
    public void assertRealURL(String name, String path, String expectedEnd) throws Exception

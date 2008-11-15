@@ -109,6 +109,11 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return expecetedEnd;
    }
 
+   protected boolean isRealURLSupported()
+   {
+      return false;
+   }
+
    /**
     * Was having problems with a jar entry as root of VFS.
     *

@@ -78,4 +78,9 @@ public class FileVFSContextUnitTestCase extends AbstractVFSContextTest
    {
       return null;
    }
+
+   protected boolean isRealURLSupported()
+   {
+      return true;
+   }
 }

@@ -221,4 +221,9 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    {
       return "vfszip";
    }
+
+   protected boolean isRealURLSupported()
+   {
+      return true;
+   }
 }
