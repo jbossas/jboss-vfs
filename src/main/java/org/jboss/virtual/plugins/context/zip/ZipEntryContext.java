@@ -1107,13 +1107,6 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
-
-
-   //
-   //   Helper methods
-   //
-
-
    /**
     * Make sure url protocol is <em>vfszip</em>.
     * Also remove any '!' from URL
