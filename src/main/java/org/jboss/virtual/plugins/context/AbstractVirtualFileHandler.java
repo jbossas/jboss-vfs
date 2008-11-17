@@ -23,10 +23,10 @@ package org.jboss.virtual.plugins.context;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream;
 import java.io.ObjectOutputStream.PutField;
+import java.io.ObjectStreamField;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
