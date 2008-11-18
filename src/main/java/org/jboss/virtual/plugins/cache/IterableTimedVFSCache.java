@@ -78,4 +78,9 @@ public class IterableTimedVFSCache extends TimedVFSCache
       }
       return null;
    }
+
+   protected String getCacheName()
+   {
+      return "Iterable" + super.getCacheName();
+   }
 }

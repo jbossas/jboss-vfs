@@ -100,9 +100,19 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
       else
          tcp = new TimedCachePolicy(defaultLifetime);
 
-      info = "TimedVFSCache{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
+      info = getCacheName() + "{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
 
       return tcp;
+   }
+
+   /**
+    * Get the cache name.
+    *
+    * @return the cache name
+    */
+   protected String getCacheName()
+   {
+      return "TimedVFSCache";
    }
 
    /**
