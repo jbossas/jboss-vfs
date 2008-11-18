@@ -278,7 +278,6 @@ public class FileSystemContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl);
-      mergeContexts(ctx);
 
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);

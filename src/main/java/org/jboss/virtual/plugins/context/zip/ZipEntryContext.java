@@ -58,6 +58,7 @@ import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -248,6 +249,26 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // It's lazy init now
       //initEntries();
+   }
+
+   public Map<String, String> getOptions()
+   {
+      Map<String, String> options = new HashMap<String, String>();
+      VFSContext peerContext = getPeerContext();
+      if (peerContext != null)
+         options.putAll(peerContext.getOptions());
+      options.putAll(super.getOptions()); // put them after peer, possible override
+      return options;
+   }
+
+   public ExceptionHandler getExceptionHandler()
+   {
+      ExceptionHandler eh = super.getExceptionHandler();
+      if (eh != null)
+         return eh;
+
+      VFSContext peerContext = getPeerContext();
+      return peerContext != null ? peerContext.getExceptionHandler() : null;
    }
 
    /**
@@ -536,7 +557,6 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl, true);
-      mergeContexts(ctx);
 
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
@@ -566,7 +586,6 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, wrapper, false);
-      mergeContexts(ctx);
 
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);

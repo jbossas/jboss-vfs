@@ -128,6 +128,17 @@ public abstract class AbstractVFSContext implements VFSContext
    }
 
    /**
+    * Get peer vfs context.
+    *
+    * @return the peer context
+    */
+   protected VFSContext getPeerContext()
+   {
+      VirtualFileHandler peer = getRootPeer();
+      return peer != null ? peer.getVFSContext() : null;
+   }
+
+   /**
     * Helper method to set options on an URL
     *
     * @param url  url to set options on
@@ -151,33 +162,6 @@ public abstract class AbstractVFSContext implements VFSContext
       }
       
       return new URL(sb.toString());
-   }
-
-   /**
-    * Merge source context with this.
-    *
-    * @param target the vfs context source
-    */
-   protected void mergeContexts(VFSContext target)
-   {
-      if (target.getExceptionHandler() == null)
-         target.setExceptionHandler(getExceptionHandler());
-
-      mergeOptions(target);
-   }
-
-   /**
-    * Merge options.
-    *
-    * @param target the vfs context target
-    */
-   private void mergeOptions(VFSContext target)
-   {
-      Map<String, String> sourceOptions = getOptions();
-      if (sourceOptions != null && sourceOptions.isEmpty() == false)
-      {
-         target.getOptions().putAll(sourceOptions);
-      }
    }
 
    public List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException
