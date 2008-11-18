@@ -86,11 +86,14 @@ public class FileSystemContext extends AbstractVFSContext
          log.debug("VFS forced case sensitivity is enabled.");
    }
 
+   /** The temp file */
+   private transient File file;
+
    /** The root file */
-   private final VirtualFileHandler root;
+   private VirtualFileHandler root;
    
    /** A reference to the virtual file of the root to stop it getting closed */
-   private final VirtualFile rootFile;
+   private VirtualFile rootFile;
    
    /**
     * Get the file for a url
@@ -193,12 +196,7 @@ public class FileSystemContext extends AbstractVFSContext
    private FileSystemContext(URI rootURI, File file) throws IOException
    {
       super(rootURI);
-      root = createVirtualFileHandler(null, file);
-      if (root == null)
-         throw new java.io.FileNotFoundException((file == null ? "null" : file.getName())
-                 + " doesn't exist. (rootURI: " + rootURI + ", file: " + file + ")");
-
-      rootFile = root.getVirtualFile();
+      this.file = file;
    }
 
    public String getName()
@@ -208,6 +206,16 @@ public class FileSystemContext extends AbstractVFSContext
 
    public VirtualFileHandler getRoot() throws IOException
    {
+      if (root == null)
+      {
+         root = createVirtualFileHandler(null, file);
+         if (root == null)
+            throw new java.io.FileNotFoundException((file == null ? "<null>" : file.getName())
+                    + " doesn't exist. (rootURI: " + getRootURI() + ", file: " + file + ")");
+
+         rootFile = root.getVirtualFile();
+         file = null; // nullify temp file
+      }
       return root;
    }
 
