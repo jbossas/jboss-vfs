@@ -201,7 +201,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    public String getName()
    {
-      return root.getName();
+      return (root != null) ? root.getName() : file.getName();
    }
 
    public VirtualFileHandler getRoot() throws IOException
