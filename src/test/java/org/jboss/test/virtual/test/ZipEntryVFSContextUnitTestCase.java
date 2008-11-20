@@ -26,12 +26,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
@@ -196,6 +198,29 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       {
          assertEquals("Nested root Real URL", jarURL, child.getRealURL().toExternalForm());
       }
+   }
+
+   /**
+    * Test that options are properly propagated to mounted subcontexts
+    *
+    * @throws IOException
+    */
+   public void testOptionPropagation() throws IOException
+   {
+      // jar:file: url test
+      URL url = getResource("/vfs/test/level1.zip");
+      VFS vfs = VFS.getVFS(new URL("jar:file:" + url.getPath() + "!/"));
+      VFSUtils.enableNoReaper(vfs);
+
+      VirtualFile vf = vfs.getChild("level2.zip/level3.zip");
+      assertEquals("jar:file: option propagation", VFSUtils.getOption(vf, VFSUtils.NO_REAPER_QUERY), "true");
+
+      // vfszip: url test
+      vfs = VFS.getVFS(new URL("vfszip:" + url.getPath()));
+      VFSUtils.enableNoReaper(vfs);
+
+      vf = vfs.getChild("level2.zip/level3.zip");
+      assertEquals("vfszip: option propagation", VFSUtils.getOption(vf, VFSUtils.NO_REAPER_QUERY), "true");
    }
 
    /**
