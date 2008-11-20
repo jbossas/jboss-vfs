@@ -253,9 +253,16 @@ public class ZipEntryContext extends AbstractVFSContext
       //initEntries();
    }
 
+   /**
+    * Get zip source.
+    * Lazy init.
+    *
+    * @return the zip source
+    */
    protected synchronized ZipWrapper getZipSource()
    {
       if (zipSource == null)
+      {
          try
          {
             zipSource = createZipSource(filePath);
@@ -264,7 +271,7 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             throw new RuntimeException("Failed to initialize ZipWrapper: " + filePath, e);
          }
-
+      }
       return zipSource;
    }
 
