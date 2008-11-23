@@ -86,6 +86,7 @@ public class VFS
       org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
       // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
       org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsfile", factory);
+      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfszip", factory);
       org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsjar", factory);
       org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfs", factory);
    }
