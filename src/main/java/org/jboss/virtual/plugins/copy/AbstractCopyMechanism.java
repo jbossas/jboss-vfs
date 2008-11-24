@@ -37,6 +37,7 @@ import org.jboss.util.id.GUID;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -137,8 +138,13 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       VFSContext oldVFSContext = handler.getVFSContext();
       Map<String, String> newOptions = fileSystemContext.getOptions();
       Map<String, String> oldOptions = oldVFSContext.getOptions();
-      if (newOptions != null && oldOptions != null)
+      if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)
          newOptions.putAll(oldOptions);
+
+      // copy exception handler
+      ExceptionHandler eh = oldVFSContext.getExceptionHandler();
+      if (eh != null)
+         fileSystemContext.setExceptionHandler(eh);
 
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
       VirtualFileHandler parent = handler.getParent();
