@@ -180,6 +180,11 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return getDelegate().toVfsUrl();
    }
 
+   public URL getRealURL() throws IOException, URISyntaxException
+   {
+      return getDelegate().getRealURL();
+   }
+
    public int hashCode()
    {
       if (delegate != null)

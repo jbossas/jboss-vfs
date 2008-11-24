@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.cache;
 
 import java.util.Map;
 
-import org.jboss.util.CachePolicy;
 import org.jboss.util.LRUCachePolicy;
 import org.jboss.virtual.VFSUtils;
 
@@ -32,7 +31,7 @@ import org.jboss.virtual.VFSUtils;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class LRUVFSCache extends CachePolicyVFSCache
+public class LRUVFSCache extends CachePolicyVFSCache<LRUCachePolicy>
 {
    private Integer min;
    private Integer max;
@@ -52,7 +51,7 @@ public class LRUVFSCache extends CachePolicyVFSCache
       super(properties);
    }
 
-   protected CachePolicy createCachePolicy()
+   protected LRUCachePolicy createCachePolicy()
    {
       if (min == null)
          min = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", null, true));

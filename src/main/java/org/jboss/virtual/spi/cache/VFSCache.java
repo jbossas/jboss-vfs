@@ -37,18 +37,22 @@ public interface VFSCache
 {
    /**
     * Get the file.
+    * Check the cache for cached entry,
+    * return null if no matching entry exists.
     *
     * @param uri the file's uri
-    * @return virtual file instance
+    * @return virtual file instance or null if it doesn't exist in cache
     * @throws IOException for any error
     */
    VirtualFile getFile(URI uri) throws IOException;
 
    /**
     * Get the file.
+    * Check the cache for cached entry,
+    * return null if no matching entry exists.
     *
     * @param url the file's url
-    * @return virtual file instance
+    * @return virtual file instance or null if it doesn't exist in cache
     * @throws IOException for any error
     */
    VirtualFile getFile(URL url) throws IOException;

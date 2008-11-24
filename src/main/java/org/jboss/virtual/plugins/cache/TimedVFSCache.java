@@ -21,18 +21,21 @@
 */
 package org.jboss.virtual.plugins.cache;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import org.jboss.util.CachePolicy;
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Timed cache policy vfs cache.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TimedVFSCache extends CachePolicyVFSCache
+public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
 {
    private Integer defaultLifetime;
    private Boolean threadSafe;
@@ -61,7 +64,24 @@ public class TimedVFSCache extends CachePolicyVFSCache
       super(properties);
    }
 
-   protected CachePolicy createCachePolicy()
+   @Override
+   @SuppressWarnings("unchecked")
+   public Iterable<VFSContext> getCachedContexts()
+   {
+      TimedCachePolicy tcp = getPolicy();
+      List keys = tcp.getValidKeys();
+      if (keys != null && keys.isEmpty() == false)
+      {
+         Map<Object, VFSContext> contexts = new TreeMap<Object, VFSContext>();
+         for (Object key : keys)
+            contexts.put(key, (VFSContext)tcp.peek(key));
+
+         return contexts.values();
+      }
+      return Collections.emptySet();
+   }
+
+   protected TimedCachePolicy createCachePolicy()
    {
       if (defaultLifetime == null)
          defaultLifetime = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null, true));
@@ -80,9 +100,19 @@ public class TimedVFSCache extends CachePolicyVFSCache
       else
          tcp = new TimedCachePolicy(defaultLifetime);
 
-      info = "TimedVFSCache{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
+      info = getCacheName() + "{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
 
       return tcp;
+   }
+
+   /**
+    * Get the cache name.
+    *
+    * @return the cache name
+    */
+   protected String getCacheName()
+   {
+      return "TimedVFSCache";
    }
 
    /**

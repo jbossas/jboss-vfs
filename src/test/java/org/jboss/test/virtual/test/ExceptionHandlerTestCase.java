@@ -19,51 +19,42 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.spi.cache.helpers;
+package org.jboss.test.virtual.test;
 
-import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
+import java.util.List;
 
+import junit.framework.Test;
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.plugins.context.helpers.NamesExceptionHandler;
 
 /**
- * Noop cache.
- * Doesn't do any caching.
+ * ExceptionHandlerTestCase.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class NoopVFSCache implements VFSCache
+public class ExceptionHandlerTestCase extends AbstractVFSTest
 {
-   public VirtualFile getFile(URI uri) throws IOException
+   public static Test suite()
    {
-      return null;
+      return suite(ExceptionHandlerTestCase.class);
    }
 
-   public VirtualFile getFile(URL url) throws IOException
+   public ExceptionHandlerTestCase(String name)
    {
-      return null;
+      super(name, true);
    }
 
-   public void putContext(VFSContext context)
+   public void testZipEntriesInit() throws Exception
    {
-   }
-
-   public void removeContext(VFSContext context)
-   {
-   }
-
-   public void start() throws Exception
-   {
-   }
-
-   public void stop()
-   {
-   }
-
-   public void flush()
-   {
+      URL url = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(url);
+      vfs.setExceptionHandler(new NamesExceptionHandler("_sqljdbc.jar"));
+      VirtualFile root = vfs.getRoot();
+      VirtualFile zipeinit = root.findChild("zipeinit.jar");
+      VirtualFile child = zipeinit.findChild("sqljdbc.jar");
+      List<VirtualFile> children = child.getChildren();
+      assertTrue(children.isEmpty());
    }
 }

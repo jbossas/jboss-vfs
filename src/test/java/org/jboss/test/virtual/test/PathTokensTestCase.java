@@ -80,15 +80,23 @@ public class PathTokensTestCase extends AbstractVFSTest
 
    public void testSpecialTokens() throws Throwable
    {
-      testBrokenPath("/.../");
-      testBrokenPath(".../");
-      testBrokenPath("/...");
-      testBrokenPath("...");
-      testBrokenPath("/..somemorepath/");
-      testBrokenPath("..somemorepath/");
-      testBrokenPath("/..somemorepath");
-      testBrokenPath("..somemorepath");
+      PathTokenizer.setErrorOnSuspiciousTokens(true);
+      try
+      {
+         testBrokenPath("/.../");
+         testBrokenPath(".../");
+         testBrokenPath("/...");
+         testBrokenPath("...");
+         testBrokenPath("/..somemorepath/");
+         testBrokenPath("..somemorepath/");
+         testBrokenPath("/..somemorepath");
+         testBrokenPath("..somemorepath");
       }
+      finally
+      {
+         PathTokenizer.setErrorOnSuspiciousTokens(false);
+      }
+   }
 
    public void testRepeatedSlashes() throws Throwable
    {
@@ -107,12 +115,32 @@ public class PathTokensTestCase extends AbstractVFSTest
       testValidPath("//context///jar///");
    }
 
-   public void testHiddenUnixPath() throws Throwable
+   public void testSuspiciousTokens() throws Throwable
    {
-      // the trick is the .hudson bit
-      String path = "/home/hudson/.hudson/";
-      List<String> tokens = PathTokenizer.getTokens(path);
-      List<String> expected = Arrays.asList("home", "hudson", ".hudson");
-      assertEquals(expected, tokens);
+      testSuspiciousTokens(false);
+      testSuspiciousTokens(true);      
+   }
+
+   public void testSuspiciousTokens(boolean flag) throws Throwable
+   {
+      PathTokenizer.setErrorOnSuspiciousTokens(flag);
+      try
+      {
+         String path = "/.hudson/..hudson/...hudson/./../.../.*foo/foo.bar";
+         List<String> tokens = PathTokenizer.getTokens(path);
+         List<String> expected = Arrays.asList(".hudson", "..hudson", "...hudson", ".", "..", "...", ".*foo", "foo.bar");
+         assertEquals(expected, tokens);
+         if (flag)
+            fail("Should not be here.");
+      }
+      catch (Throwable t)
+      {
+         if (!flag)
+            throw t;
+      }
+      finally
+      {
+         PathTokenizer.setErrorOnSuspiciousTokens(!flag);
+      }
    }
 }

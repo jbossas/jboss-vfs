@@ -21,47 +21,29 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.util.Map;
-import java.util.HashMap;
-
-import org.jboss.virtual.plugins.cache.TimedVFSCache;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.VFSUtils;
 import junit.framework.Test;
+import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
+import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
- * Timed VFSCache Test.
+ * Iterable timed VFSCache Test.
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public class TimedCacheTestCase extends CachePolicyVFSCacheTest
+public class IterableTimedCacheTestCase extends TimedCacheTestCase
 {
-   public TimedCacheTestCase(String name)
+   public IterableTimedCacheTestCase(String name)
    {
       super(name);
    }
 
    public static Test suite()
    {
-      return suite(TimedCacheTestCase.class);
+      return suite(IterableTimedCacheTestCase.class);
    }
 
    protected VFSCache createCache()
    {
-      return new TimedVFSCache(5);
-   }
-
-   protected void testCachedContexts(Iterable<VFSContext> iter)
-   {
-      VFSContext context = iter.iterator().next();
-      assertNotNull(context);
-   }
-
-   protected Map<Object, Object> getMap()
-   {
-      Map<Object, Object> map = new HashMap<Object, Object>();
-      map.put(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", 5);
-      return map;
+      return new IterableTimedVFSCache(5);
    }
 }

@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import java.io.IOException;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,12 @@ public class PathTokenizer
 
    /** The reverse path const */
    private static final String REVERSE_PATH = "..";
+
+   /** Catch some suspicious tokens */
+   private static boolean errorOnSuspiciousTokens;
+
+   /** Flag permission */
+   private static Permission flagPermission = new RuntimePermission(PathTokenizer.class.getName() + ".setErrorOnSuspiciousTokens");
 
    /**
     * Utility class
@@ -124,7 +131,13 @@ public class PathTokenizer
             else if (specialToken == CURRENT_PATH && bufferLength == 0)
                specialToken = REVERSE_PATH;
             else if (specialToken == REVERSE_PATH && bufferLength == 0)
-               throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
+            {
+               if (errorOnSuspiciousTokens)
+                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
+
+               buffer.append(specialToken).append(ch);
+               specialToken = null;
+            }
             else
                buffer.append(ch);
          }
@@ -134,7 +147,7 @@ public class PathTokenizer
             if (specialToken != null)
             {
                // we don't allow tokens after '..'
-               if (specialToken == REVERSE_PATH)
+               if (errorOnSuspiciousTokens && specialToken == REVERSE_PATH)
                   throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
 
                // after '.' more path is legal == unix hidden directories
@@ -221,5 +234,19 @@ public class PathTokenizer
    public static boolean isReverseToken(String token)
    {
       return REVERSE_PATH == token;
+   }
+
+   /**
+    * Set errorOnSuspiciousTokens flag.
+    *
+    * @param errorOnSuspiciousTokens the errorOnSuspiciousTokens flag
+    */
+   public static void setErrorOnSuspiciousTokens(boolean errorOnSuspiciousTokens)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(flagPermission);
+      
+      PathTokenizer.errorOnSuspiciousTokens = errorOnSuspiciousTokens;
    }
 }

@@ -30,12 +30,15 @@ import java.net.URISyntaxException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.id.GUID;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -130,6 +133,19 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       File copy = copy(guidDir, handler);
       // create new handler
       FileSystemContext fileSystemContext = new FileSystemContext(copy);
+
+      // merge old options
+      VFSContext oldVFSContext = handler.getVFSContext();
+      Map<String, String> newOptions = fileSystemContext.getOptions();
+      Map<String, String> oldOptions = oldVFSContext.getOptions();
+      if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)
+         newOptions.putAll(oldOptions);
+
+      // copy exception handler
+      ExceptionHandler eh = oldVFSContext.getExceptionHandler();
+      if (eh != null)
+         fileSystemContext.setExceptionHandler(eh);
+
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
       VirtualFileHandler parent = handler.getParent();
       if (parent != null && replaceOldHandler(parent, handler, newHandler))

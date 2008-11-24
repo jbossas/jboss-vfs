@@ -22,19 +22,20 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 
 /**
  * VFSUtilTestCase.
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author anil.saldhana@jboss.com
  */
 public class VFSUtilTestCase extends AbstractMockVFSTest
 {
@@ -57,5 +58,63 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
       List<VirtualFile> paths = new ArrayList<VirtualFile>();
       VFSUtils.addManifestLocations(file, paths);
       assertEquals(3, paths.size());
+   }
+
+   public void testOptionsPropagation() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(url);
+      VFSUtils.enableNoReaper(vfs);
+      VirtualFile root = vfs.getRoot();
+      assertOption(root, "nested", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/META-INF", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/META-INF/empty.txt", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar/subfolder", VFSUtils.NO_REAPER_QUERY);
+      assertOption(root, "nested/nested.jar/complex.jar/subfolder/subchild", VFSUtils.NO_REAPER_QUERY);
+
+      VirtualFile subchild = root.findChild("nested/nested.jar/complex.jar/subfolder/subchild");
+      VFSUtils.disableNoReaper(subchild);
+      assertNull(VFSUtils.getOption(subchild, VFSUtils.NO_REAPER_QUERY));
+   }
+
+   protected void assertOption(VirtualFile root, String path, String optionKey) throws Exception
+   {
+      VirtualFile child = root.findChild(path);
+      String optionValue = VFSUtils.getOption(root, optionKey);
+      assertNotNull(optionValue);
+      assertEquals(optionValue, VFSUtils.getOption(child, optionKey));
+   }
+
+   public void testRealURL() throws Exception
+   {
+	   //Regular jar
+	   URL url = getResource("/vfs/test");
+	   VirtualFile root = VFS.getRoot(url);
+	   VirtualFile jarFile = root.getChild("badmf.jar");
+	      
+	   URL vfsURL = jarFile.toURL(); 
+	   assertTrue(vfsURL.toExternalForm().startsWith("vfszip"));
+	   URL realURL = VFSUtils.getRealURL(jarFile);
+      // TODO - JBVFS-77 --> do proper tests!
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
+	   
+	   //Nested file in a jar
+	   url = getResource("/vfs/test/nested");
+	   root = VFS.getRoot(url);
+	   VirtualFile nestedFile = root.getChild("/nested.jar/META-INF/empty.txt");
+	   realURL = VFSUtils.getRealURL(nestedFile);
+      // TODO - JBVFS-77 --> do proper tests!
+	   assertTrue(realURL.toExternalForm().startsWith("jar:"));
+	     
+	   //Regular file
+	   url = getResource("/vfs/context/file/simple");
+	   VirtualFile regularFile = VFS.getRoot(url).getChild("tomodify");
+	   vfsURL = regularFile.toURL();
+	   assertTrue(vfsURL.getProtocol().startsWith("vfsfile"));
+	   realURL = VFSUtils.getRealURL(regularFile);
+      // TODO - JBVFS-77 --> do proper tests!
+	   assertTrue(realURL.toExternalForm().startsWith("file:"));
    }
 }

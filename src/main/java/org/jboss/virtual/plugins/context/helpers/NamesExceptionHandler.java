@@ -19,51 +19,47 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.spi.cache.helpers;
+package org.jboss.virtual.plugins.context.helpers;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.util.Collections;
+import java.util.Set;
 
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.plugins.context.AbstractExceptionHandler;
 
 /**
- * Noop cache.
- * Doesn't do any caching.
- *
+ * Match names to ignore the exception.
+ * 
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class NoopVFSCache implements VFSCache
+public class NamesExceptionHandler extends AbstractExceptionHandler
 {
-   public VirtualFile getFile(URI uri) throws IOException
+   private Set<String> names;
+
+   public NamesExceptionHandler(String name)
    {
-      return null;
+      this(Collections.singleton(name));
    }
 
-   public VirtualFile getFile(URL url) throws IOException
+   public NamesExceptionHandler(Set<String> names)
    {
-      return null;
+      if (names == null)
+         throw new IllegalArgumentException("Null names");
+
+      this.names = names;
    }
 
-   public void putContext(VFSContext context)
+   @Override
+   public void handleZipEntriesInitException(Exception e, String zipName)
    {
-   }
+      for (String name : names)
+      {
+         if (zipName.contains(name))
+         {
+            log.debug("Exception while reading " + zipName, e);
+            return;
+         }
+      }
 
-   public void removeContext(VFSContext context)
-   {
-   }
-
-   public void start() throws Exception
-   {
-   }
-
-   public void stop()
-   {
-   }
-
-   public void flush()
-   {
+      super.handleZipEntriesInitException(e, zipName);
    }
 }
