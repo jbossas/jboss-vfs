@@ -26,11 +26,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
@@ -152,6 +155,75 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    }
 
    /**
+    * Real URL test
+    *
+    * @throws Exception for any error
+    */
+   public void testCustomRealURL() throws Exception
+   {
+      URL url = getResource("/vfs/context/jar/");
+      FileSystemContext ctx = new FileSystemContext(url);
+
+      // valid archive
+      VirtualFileHandler root = ctx.getRoot();
+      assertEquals("Context Real URL", url.toExternalForm(), root.getRealURL().toExternalForm());
+      String jarName = "archive.jar";
+      VirtualFileHandler archive = root.getChild(jarName);
+      assertEquals("Child Real URL", "jar:" + url.toExternalForm() + jarName + "!/", archive.getRealURL().toExternalForm());
+
+      url = getResource("/vfs/test/");
+      ctx = new FileSystemContext(url);
+      root = ctx.getRoot();
+
+      jarName = "level1.zip";
+      archive = root.getChild(jarName);
+      String nestedName = "level2.zip";
+      VirtualFileHandler nested = archive.getChild(nestedName);
+
+      String jarURL = "jar:" + url.toExternalForm() + jarName + "!/" + nestedName;
+      assertEquals("First level nested Real URL", jarURL, nested.getRealURL().toExternalForm());
+
+      nested = nested.getChild("level3.zip");
+      assertEquals("Second level nested Real URL", jarURL, nested.getRealURL().toExternalForm());
+
+      // nested root test
+      url = getResource("/vfs/test/");
+      ZipEntryContext zctx = new ZipEntryContext(new URL("vfszip:" + url.getPath() + "/level1.zip/level2.zip/level3.zip"));
+
+      VirtualFileHandler handler = zctx.getRoot();
+      assertEquals("Nested root Real URL", jarURL, handler.getRealURL().toExternalForm());
+
+      List<VirtualFileHandler> children = handler.getChildren(false);
+      for (VirtualFileHandler child: children)
+      {
+         assertEquals("Nested root Real URL", jarURL, child.getRealURL().toExternalForm());
+      }
+   }
+
+   /**
+    * Test that options are properly propagated to mounted subcontexts
+    *
+    * @throws IOException
+    */
+   public void testOptionPropagation() throws IOException
+   {
+      // jar:file: url test
+      URL url = getResource("/vfs/test/level1.zip");
+      VFS vfs = VFS.getVFS(new URL("jar:file:" + url.getPath() + "!/"));
+      VFSUtils.enableNoReaper(vfs);
+
+      VirtualFile vf = vfs.getChild("level2.zip/level3.zip");
+      assertEquals("jar:file: option propagation", VFSUtils.getOption(vf, VFSUtils.NO_REAPER_QUERY), "true");
+
+      // vfszip: url test
+      vfs = VFS.getVFS(new URL("vfszip:" + url.getPath()));
+      VFSUtils.enableNoReaper(vfs);
+
+      vf = vfs.getChild("level2.zip/level3.zip");
+      assertEquals("vfszip: option propagation", VFSUtils.getOption(vf, VFSUtils.NO_REAPER_QUERY), "true");
+   }
+
+   /**
     * Handler representing a directory must return a recomposed zip archive
     * that has requested entry as its root.
     *
@@ -173,5 +245,10 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    protected String getProtocol()
    {
       return "vfszip";
+   }
+
+   protected boolean isRealURLSupported()
+   {
+      return true;
    }
 }

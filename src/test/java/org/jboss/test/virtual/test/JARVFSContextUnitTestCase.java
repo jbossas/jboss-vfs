@@ -94,6 +94,26 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return ".jar";
    }
 
+   protected String getRealProtocol()
+   {
+      return "jar:file";
+   }
+
+   protected String getRealURLEnd()
+   {
+      return "!/";
+   }
+
+   protected String transformExpectedEnd(String expecetedEnd)
+   {
+      return expecetedEnd;
+   }
+
+   protected boolean isRealURLSupported()
+   {
+      return false;
+   }
+
    /**
     * Was having problems with a jar entry as root of VFS.
     *

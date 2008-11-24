@@ -35,6 +35,7 @@ import org.jboss.test.virtual.support.MockVFSContext;
 import org.jboss.test.virtual.support.MockVirtualFileFilter;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 
 /**
@@ -54,6 +55,24 @@ public class VFSUnitTestCase extends AbstractMockVFSTest
    {
       return new TestSuite(VFSUnitTestCase.class);
    }
+
+   public void testVFSOptions() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      VFS vfs = VFS.getVFS(url);
+
+      // currently we don't test any vfs root's behavior
+
+      VFSUtils.enableCopy(vfs);
+      VFSUtils.disableCopy(vfs);
+
+      VFSUtils.enableNoReaper(vfs);
+      VFSUtils.disableNoReaper(vfs);
+
+      VFSUtils.enableCaseSensitive(vfs);
+      VFSUtils.disableCaseSensitive(vfs);
+   }
+
 
    public void testGetVFSURI() throws Exception
    {

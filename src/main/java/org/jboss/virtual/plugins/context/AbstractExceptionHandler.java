@@ -19,32 +19,23 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.virtual.test;
+package org.jboss.virtual.plugins.context;
 
-import java.util.Map;
-
-import org.jboss.virtual.spi.VFSContext;
+import org.jboss.logging.Logger;
+import org.jboss.virtual.spi.ExceptionHandler;
 
 /**
- * Map VFSCache Test.
+ * AbstractExceptionHandler
  *
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class MapVFSCacheTest extends VFSCacheTest
+public abstract class AbstractExceptionHandler implements ExceptionHandler
 {
-   public MapVFSCacheTest(String name)
-   {
-      super(name);
-   }
+   /** The log */
+   protected final Logger log = Logger.getLogger(getClass());
 
-   protected Map<Object, Object> getMap()
+   public void handleZipEntriesInitException(Exception e, String name)
    {
-      return null;
-   }
-
-   protected void testCachedContexts(Iterable<VFSContext> iter)
-   {
-      VFSContext context = iter.iterator().next();
-      assertNotNull(context);
+      throw new RuntimeException(e);
    }
 }

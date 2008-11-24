@@ -22,10 +22,10 @@
 package org.jboss.virtual.plugins.context;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +35,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
@@ -44,6 +45,7 @@ import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractVFSContext implements VFSContext
@@ -62,6 +64,9 @@ public abstract class AbstractVFSContext implements VFSContext
 
    /** Root's peer within another context */
    private VirtualFileHandler rootPeer;
+
+   /** The exception handler */
+   private ExceptionHandler exceptionHandler;
 
    /**
     * Create a new AbstractVFSContext.
@@ -120,6 +125,17 @@ public abstract class AbstractVFSContext implements VFSContext
    public Map<String, String> getOptions()
    {
       return rootOptions;
+   }
+
+   /**
+    * Get peer vfs context.
+    *
+    * @return the peer context
+    */
+   protected VFSContext getPeerContext()
+   {
+      VirtualFileHandler peer = getRootPeer();
+      return peer != null ? peer.getVFSContext() : null;
    }
 
    /**
@@ -319,7 +335,17 @@ public abstract class AbstractVFSContext implements VFSContext
          }
       }
    }
-   
+
+   public ExceptionHandler getExceptionHandler()
+   {
+      return exceptionHandler;
+   }
+
+   public void setExceptionHandler(ExceptionHandler exceptionHandler)
+   {
+      this.exceptionHandler = exceptionHandler;
+   }
+
    @Override
    public String toString()
    {

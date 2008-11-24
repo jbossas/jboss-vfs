@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import java.io.IOException;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,12 @@ public class PathTokenizer
 
    /** The reverse path const */
    private static final String REVERSE_PATH = "..";
+
+   /** Catch some suspicious tokens */
+   private static boolean errorOnSuspiciousTokens;
+
+   /** Flag permission */
+   private static Permission flagPermission = new RuntimePermission(PathTokenizer.class.getName() + ".setErrorOnSuspiciousTokens");
 
    /**
     * Utility class
@@ -117,12 +124,20 @@ public class PathTokenizer
          }
          else if (ch == '.')
          {
-            if (specialToken == null && buffer.length() == 0)
+            int bufferLength = buffer.length();
+
+            if (specialToken == null && bufferLength == 0)
                specialToken = CURRENT_PATH;
-            else if (specialToken == CURRENT_PATH && buffer.length() == 0)
+            else if (specialToken == CURRENT_PATH && bufferLength == 0)
                specialToken = REVERSE_PATH;
-            else if (specialToken != null && buffer.length() == 0)
-               throw new IllegalArgumentException("Illegal token in path: " + path);
+            else if (specialToken == REVERSE_PATH && bufferLength == 0)
+            {
+               if (errorOnSuspiciousTokens)
+                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
+
+               buffer.append(specialToken).append(ch);
+               specialToken = null;
+            }
             else
                buffer.append(ch);
          }
@@ -130,8 +145,15 @@ public class PathTokenizer
          {
             // token starts with '.' or '..', but also has some path after that
             if (specialToken != null)
-               throw new IllegalArgumentException("Illegal token in path: " + path);
+            {
+               // we don't allow tokens after '..'
+               if (errorOnSuspiciousTokens && specialToken == REVERSE_PATH)
+                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
 
+               // after '.' more path is legal == unix hidden directories
+               buffer.append(specialToken);
+               specialToken = null;
+            }
             buffer.append(ch);
          }
       }
@@ -212,5 +234,19 @@ public class PathTokenizer
    public static boolean isReverseToken(String token)
    {
       return REVERSE_PATH == token;
+   }
+
+   /**
+    * Set errorOnSuspiciousTokens flag.
+    *
+    * @param errorOnSuspiciousTokens the errorOnSuspiciousTokens flag
+    */
+   public static void setErrorOnSuspiciousTokens(boolean errorOnSuspiciousTokens)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+         sm.checkPermission(flagPermission);
+      
+      PathTokenizer.errorOnSuspiciousTokens = errorOnSuspiciousTokens;
    }
 }

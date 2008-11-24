@@ -21,7 +21,8 @@
 */
 package org.jboss.virtual.plugins.cache;
 
-import org.jboss.util.CachePolicy;
+import java.util.Map;
+
 import org.jboss.util.LRUCachePolicy;
 import org.jboss.virtual.VFSUtils;
 
@@ -30,7 +31,7 @@ import org.jboss.virtual.VFSUtils;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class LRUVFSCache extends CachePolicyVFSCache
+public class LRUVFSCache extends CachePolicyVFSCache<LRUCachePolicy>
 {
    private Integer min;
    private Integer max;
@@ -45,12 +46,17 @@ public class LRUVFSCache extends CachePolicyVFSCache
       this.max = max;
    }
 
-   protected CachePolicy createCachePolicy()
+   public LRUVFSCache(Map<Object, Object> properties)
+   {
+      super(properties);
+   }
+
+   protected LRUCachePolicy createCachePolicy()
    {
       if (min == null)
-         min = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", null));
+         min = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", null, true));
       if (max == null)
-         max = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", null));
+         max = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", null, true));
 
       if (min == null || max == null)
          throw new IllegalArgumentException("Missing min (" + min + ") or max (" + max + ").");
@@ -78,5 +84,10 @@ public class LRUVFSCache extends CachePolicyVFSCache
    public void setMax(Integer max)
    {
       this.max = max;
+   }
+
+   public String toString()
+   {
+      return "LRUVFSCache{min=" + min + ", max=" + max + "}";
    }
 }

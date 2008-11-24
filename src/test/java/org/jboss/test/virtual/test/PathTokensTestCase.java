@@ -23,10 +23,13 @@ package org.jboss.test.virtual.test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Test path tokens.
@@ -77,15 +80,23 @@ public class PathTokensTestCase extends AbstractVFSTest
 
    public void testSpecialTokens() throws Throwable
    {
-      testBrokenPath("/.../");
-      testBrokenPath(".../");
-      testBrokenPath("/...");
-      testBrokenPath("...");
-      testBrokenPath("/..somemorepath/");
-      testBrokenPath("..somemorepath/");
-      testBrokenPath("/..somemorepath");
-      testBrokenPath("..somemorepath");
+      PathTokenizer.setErrorOnSuspiciousTokens(true);
+      try
+      {
+         testBrokenPath("/.../");
+         testBrokenPath(".../");
+         testBrokenPath("/...");
+         testBrokenPath("...");
+         testBrokenPath("/..somemorepath/");
+         testBrokenPath("..somemorepath/");
+         testBrokenPath("/..somemorepath");
+         testBrokenPath("..somemorepath");
       }
+      finally
+      {
+         PathTokenizer.setErrorOnSuspiciousTokens(false);
+      }
+   }
 
    public void testRepeatedSlashes() throws Throwable
    {
@@ -102,5 +113,34 @@ public class PathTokensTestCase extends AbstractVFSTest
       testValidPath("//context////file");
       testValidPath("//context///jar//");
       testValidPath("//context///jar///");
+   }
+
+   public void testSuspiciousTokens() throws Throwable
+   {
+      testSuspiciousTokens(false);
+      testSuspiciousTokens(true);      
+   }
+
+   public void testSuspiciousTokens(boolean flag) throws Throwable
+   {
+      PathTokenizer.setErrorOnSuspiciousTokens(flag);
+      try
+      {
+         String path = "/.hudson/..hudson/...hudson/./../.../.*foo/foo.bar";
+         List<String> tokens = PathTokenizer.getTokens(path);
+         List<String> expected = Arrays.asList(".hudson", "..hudson", "...hudson", ".", "..", "...", ".*foo", "foo.bar");
+         assertEquals(expected, tokens);
+         if (flag)
+            fail("Should not be here.");
+      }
+      catch (Throwable t)
+      {
+         if (!flag)
+            throw t;
+      }
+      finally
+      {
+         PathTokenizer.setErrorOnSuspiciousTokens(!flag);
+      }
    }
 }

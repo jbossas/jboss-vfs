@@ -21,20 +21,27 @@
 */
 package org.jboss.virtual.plugins.cache;
 
-import org.jboss.util.CachePolicy;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.jboss.util.TimedCachePolicy;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Timed cache policy vfs cache.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TimedVFSCache extends CachePolicyVFSCache
+public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
 {
    private Integer defaultLifetime;
    private Boolean threadSafe;
    private Integer resolution;
+
+   private String info;
 
    public TimedVFSCache()
    {
@@ -52,23 +59,60 @@ public class TimedVFSCache extends CachePolicyVFSCache
       this.resolution = resolution;
    }
 
-   protected CachePolicy createCachePolicy()
+   public TimedVFSCache(Map<Object, Object> properties)
+   {
+      super(properties);
+   }
+
+   @Override
+   @SuppressWarnings("unchecked")
+   public Iterable<VFSContext> getCachedContexts()
+   {
+      TimedCachePolicy tcp = getPolicy();
+      List keys = tcp.getValidKeys();
+      if (keys != null && keys.isEmpty() == false)
+      {
+         Map<Object, VFSContext> contexts = new TreeMap<Object, VFSContext>();
+         for (Object key : keys)
+            contexts.put(key, (VFSContext)tcp.peek(key));
+
+         return contexts.values();
+      }
+      return Collections.emptySet();
+   }
+
+   protected TimedCachePolicy createCachePolicy()
    {
       if (defaultLifetime == null)
-         defaultLifetime = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null));
+         defaultLifetime = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", null, true));
       if (threadSafe == null)
-         threadSafe = Boolean.valueOf(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.threadSafe", Boolean.TRUE.toString()));
+         threadSafe = Boolean.valueOf(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.threadSafe", Boolean.TRUE, true).toString());
       if (resolution == null)
-         resolution = parseInteger(readSystemProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.resolution", null));
+         resolution = getInteger(readInstanceProperties(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.resolution", null, true));
 
       log.debug("Creating timed cache policy, lifetime: " + defaultLifetime + ", threadSafe: " + threadSafe + ", resolution: " + resolution);
 
+      TimedCachePolicy tcp;
       if (defaultLifetime == null)
-         return new TimedCachePolicy();
+         tcp = new TimedCachePolicy();
       else if (resolution != null)
-         return new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
+         tcp = new TimedCachePolicy(defaultLifetime, threadSafe, resolution);
       else
-         return new TimedCachePolicy(defaultLifetime);
+         tcp = new TimedCachePolicy(defaultLifetime);
+
+      info = getCacheName() + "{lifetime=" + tcp.getDefaultLifetime() + ", resolution=" + tcp.getResolution() + "}";
+
+      return tcp;
+   }
+
+   /**
+    * Get the cache name.
+    *
+    * @return the cache name
+    */
+   protected String getCacheName()
+   {
+      return "TimedVFSCache";
    }
 
    /**
@@ -99,5 +143,10 @@ public class TimedVFSCache extends CachePolicyVFSCache
    public void setResolution(Integer resolution)
    {
       this.resolution = resolution;
+   }
+
+   public String toString()
+   {
+      return info;
    }
 }

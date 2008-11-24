@@ -113,4 +113,18 @@ public interface VFSContext
     * @throws IllegalArgumentException if the handler or visitor is null
     */
    void visit(VirtualFileHandler handler, VirtualFileHandlerVisitor visitor) throws IOException;
+
+   /**
+    * Get the exception handler.
+    *
+    * @return the exception handler
+    */
+   ExceptionHandler getExceptionHandler();
+
+   /**
+    * Set exception handler.
+    *
+    * @param exceptionHandler the exception handler.
+    */
+   void setExceptionHandler(ExceptionHandler exceptionHandler);
 }

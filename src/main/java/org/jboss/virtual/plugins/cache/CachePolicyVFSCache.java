@@ -24,6 +24,7 @@ package org.jboss.virtual.plugins.cache;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
+import java.util.Map;
 
 import org.jboss.util.CachePolicy;
 import org.jboss.virtual.spi.VFSContext;
@@ -31,11 +32,22 @@ import org.jboss.virtual.spi.VFSContext;
 /**
  * Cache policy vfs cache.
  *
+ * @param <T> exact policy type
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
+public abstract class CachePolicyVFSCache<T extends CachePolicy> extends PathMatchingVFSCache
 {
-   private CachePolicy policy;
+   private T policy;
+   private Map<Object, Object> properties;
+
+   protected CachePolicyVFSCache()
+   {
+   }
+
+   protected CachePolicyVFSCache(Map<Object, Object> properties)
+   {
+      this.properties = properties;
+   }
 
    public Iterable<VFSContext> getCachedContexts()
    {
@@ -46,6 +58,18 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
    public int size()
    {
       return policy != null ? policy.size() : -1;
+   }
+
+   /**
+    * Get the policy.
+    * Run check before.
+    *
+    * @return the policy
+    */
+   protected T getPolicy()
+   {
+      check();
+      return policy;
    }
 
    protected void check()
@@ -131,7 +155,35 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
     *
     * @return the cache policy
     */
-   protected abstract CachePolicy createCachePolicy();
+   protected abstract T createCachePolicy();
+
+   /**
+    * Read instance properties.
+    *
+    * @param key the property key
+    * @param defaultValue the default value
+    * @param useSystemProperties do we fallback to system properties
+    * @return property or default value
+    */
+   protected Object readInstanceProperties(final String key, final Object defaultValue, final boolean useSystemProperties)
+   {
+      Object result = null;
+      if (properties != null && properties.isEmpty() == false)
+      {
+         result = properties.get(key);
+      }
+      if (result == null)
+      {
+         if (useSystemProperties)
+         {
+            String stringDefaultValue = defaultValue != null ? defaultValue.toString() : null;
+            result = readSystemProperty(key, stringDefaultValue);
+         }
+         else
+            result = defaultValue;
+      }
+      return result;
+   }
 
    /**
     * Read system property.
@@ -159,7 +211,7 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
     * Parse integer.
     *
     * @param value the string int value
-    * @return integer value of null
+    * @return integer value or null
     */
    protected static Integer parseInteger(String value)
    {
@@ -167,5 +219,21 @@ public abstract class CachePolicyVFSCache extends PathMatchingVFSCache
          return null;
 
       return Integer.parseInt(value);
+   }
+
+   /**
+    * Get integer from value.
+    *
+    * @param value the value
+    * @return integer value or null
+    */
+   protected static Integer getInteger(Object value)
+   {
+      if (value == null)
+         return null;
+      else if (value instanceof Number)
+         return Number.class.cast(value).intValue();
+      else
+         return Integer.parseInt(value.toString());
    }
 }

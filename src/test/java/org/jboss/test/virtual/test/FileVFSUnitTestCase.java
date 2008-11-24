@@ -1608,15 +1608,16 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    {
       File tmpRoot = File.createTempFile("vfs", ".root");
       VFS vfs = VFS.getVFS(tmpRoot.toURL());
+      VirtualFile root = vfs.getRoot();
 
       // non-existent directory - exists() not
       tmpRoot.delete();
-      assertFalse(tmpRoot + ".exits() == false", vfs.getRoot().exists());
+      assertFalse(tmpRoot + ".exits() == false", root.exists());
 
       // existing directory - exists(), delete()
       tmpRoot.mkdir();
-      assertTrue(tmpRoot + ".exits()", vfs.getRoot().exists());
-      assertTrue(tmpRoot + ".delete()", vfs.getRoot().delete());
+      assertTrue(tmpRoot + ".exits()", root.exists());
+      assertTrue(tmpRoot + ".delete()", root.delete());
       tmpRoot.mkdir();
 
       // non-empty directory - delete()
@@ -1648,7 +1649,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertNull(tmpRoot + ".getChild('" + tmp.getName() + "') == null", tmpVF);
 
       // directory delete()
-      assertTrue(tmpRoot + ".delete()", vfs.getRoot().delete());
+      assertTrue(tmpRoot + ".delete()", root.delete());
    }
 
    /**

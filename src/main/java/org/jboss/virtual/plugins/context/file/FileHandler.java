@@ -107,6 +107,11 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return getVfsUrl();
    }
 
+   public URL getRealURL() throws IOException, URISyntaxException
+   {
+      return getURL();
+   }
+
    @Override
    public FileSystemContext getVFSContext()
    {

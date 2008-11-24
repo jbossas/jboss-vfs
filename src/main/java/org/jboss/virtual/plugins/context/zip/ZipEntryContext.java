@@ -56,7 +56,9 @@ import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -86,6 +88,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * {@link org.jboss.virtual.plugins.context.jar.JarContext}.
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.0 $
  */
 public class ZipEntryContext extends AbstractVFSContext
@@ -112,6 +115,9 @@ public class ZipEntryContext extends AbstractVFSContext
    /** Entry path representing a context root - archive root is not necessarily a context root */
    private String rootEntryPath = "";
 
+   /** path to zip file - used for lazy ZipWrapper initialization */
+   private String filePath = null;
+
    /** AutoClean signals if zip archive should be deleted after closing the context - true for nested archives */
    private boolean autoClean = false;
 
@@ -120,6 +126,9 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /** Have zip entries been navigated yet */
    private InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
+
+   /** RealURL of this context */
+   private URL realURL;
 
    /**
     * Create a new ZipEntryContext
@@ -213,8 +222,7 @@ public class ZipEntryContext extends AbstractVFSContext
             throw new IllegalArgumentException("No ZipWrapper specified and localRootURL is null");
 
          // initialize rootEntryPath and get archive file path
-         String rootPath = initRootAndPath(localRootURL);
-         zipSource = createZipSource(rootPath);
+         filePath = initRootAndPath(localRootURL);
       }
       else
       {
@@ -243,6 +251,56 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // It's lazy init now
       //initEntries();
+   }
+
+   /**
+    * Get zip source.
+    * Lazy init.
+    *
+    * @return the zip source
+    */
+   protected synchronized ZipWrapper getZipSource()
+   {
+      if (zipSource == null)
+      {
+         try
+         {
+            zipSource = createZipSource(filePath);
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException("Failed to initialize ZipWrapper: " + filePath, e);
+         }
+      }
+      return zipSource;
+   }
+
+   /**
+    * Returns aggregated options.
+    *
+    * If peer exists, it uses peer context's options as a basis,
+    * and overrides them with this context's options.
+    *
+    * @return map containing aggregated options
+    */
+   public Map<String, String> getAggregatedOptions()
+   {
+      Map<String, String> options = new HashMap<String, String>();
+      VFSContext peerContext = getPeerContext();
+      if (peerContext != null)
+         options.putAll(peerContext.getOptions());
+      options.putAll(super.getOptions()); // put them after peer, possible override
+      return options;
+   }
+
+   public ExceptionHandler getExceptionHandler()
+   {
+      ExceptionHandler eh = super.getExceptionHandler();
+      if (eh != null)
+         return eh;
+
+      VFSContext peerContext = getPeerContext();
+      return peerContext != null ? peerContext.getExceptionHandler() : null;
    }
 
    /**
@@ -282,13 +340,18 @@ public class ZipEntryContext extends AbstractVFSContext
       if (file == null)
          throw new IOException("VFS file does not exist: " + rootPath);
 
+      RealURLInfo urlInfo = new RealURLInfo(file);
+
       if (relative != null)
       {
-         return findEntry(new FileInputStream(file), relative);
+         ZipWrapper wrapper = findEntry(new FileInputStream(file), relative, urlInfo);
+         realURL = urlInfo.toURL();
+         return wrapper;
       }
       else
       {
-         boolean noReaper = Boolean.valueOf(getOptions().get(VFSUtils.NO_REAPER_QUERY));
+         boolean noReaper = Boolean.valueOf(getAggregatedOptions().get(VFSUtils.NO_REAPER_QUERY));
+         realURL = urlInfo.toURL();
          return new ZipFileWrapper(file, autoClean, noReaper);
       }
    }
@@ -299,10 +362,11 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param is the input stream
     * @param relative relative path
+    * @param urlInfo url info
     * @return zip wrapper instance
     * @throws IOException for any error
     */
-   protected ZipWrapper findEntry(InputStream is, String relative) throws IOException
+   protected ZipWrapper findEntry(InputStream is, String relative, RealURLInfo urlInfo) throws IOException
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       VFSUtils.copyStreamAndClose(is, baos);
@@ -355,8 +419,11 @@ public class ZipEntryContext extends AbstractVFSContext
          String entryName = entry.getName();
          if (entryName.equals(longestNameMatch))
          {
+            if (urlInfo != null)
+               urlInfo.relativePath = longestNameMatch;
+
             relative = relative.substring(longestNameMatch.length() + 1);
-            return findEntry(zis, relative);
+            return findEntry(zis, relative, null);
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
@@ -374,7 +441,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (peer != null)
          return peer.getName();
       else
-         return zipSource.getName();
+         return getZipSource().getName();
    }
 
    /**
@@ -390,6 +457,7 @@ public class ZipEntryContext extends AbstractVFSContext
       // this way we ensure that parent entries are processed before child entries
 
       Map<String, ZipEntry> relevant = new HashMap<String, ZipEntry>();
+      ZipWrapper zipSource = getZipSource();
       zipSource.acquire();
       try
       {
@@ -428,7 +496,7 @@ public class ZipEntryContext extends AbstractVFSContext
                boolean useCopyMode = forceCopy;
                if (useCopyMode == false)
                {
-                  String flag = getOptions().get(VFSUtils.USE_COPY_QUERY);
+                  String flag = getAggregatedOptions().get(VFSUtils.USE_COPY_QUERY);
                   useCopyMode = Boolean.valueOf(flag);
                }
 
@@ -488,7 +556,11 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       catch (Exception ex)
       {
-         throw new RuntimeException("Failed to read zip file: " + zipSource, ex);
+         ExceptionHandler eh = getExceptionHandler();
+         if (eh != null)
+            eh.handleZipEntriesInitException(ex, getZipSource().getName());
+         else
+            throw new RuntimeException("Failed to read zip file: " + getZipSource(), ex);
       }
       finally
       {
@@ -518,6 +590,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl, true);
+
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
 
@@ -546,6 +619,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
       ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, wrapper, false);
+
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
 
@@ -618,13 +692,13 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          ensureEntries();
       }
-      else if (initStatus == InitializationStatus.INITIALIZED && zipSource.hasBeenModified())
+      else if (initStatus == InitializationStatus.INITIALIZED && getZipSource().hasBeenModified())
       {
          EntryInfo rootInfo = entries.get("");
          entries = new ConcurrentHashMap<String, EntryInfo>();
          entries.put("", rootInfo);
 
-         if (zipSource.exists())
+         if (getZipSource().exists())
          {
             try
             {
@@ -704,13 +778,17 @@ public class ZipEntryContext extends AbstractVFSContext
       return Collections.emptyList();
    }
 
+   /**
+    * Do delete.
+    *
+    * @param handler the zip entry handler
+    * @param gracePeriod the grace period
+    * @return true if delete succeeded
+    * @throws IOException for any error
+    */
    public boolean delete(ZipEntryHandler handler, int gracePeriod) throws IOException
    {
-      if (getRoot().equals(handler))
-      {
-         return zipSource.delete(gracePeriod);
-      }
-      return false;
+      return getRoot().equals(handler) && getZipSource().delete(gracePeriod);
    }
 
    /**
@@ -731,7 +809,7 @@ public class ZipEntryContext extends AbstractVFSContext
          return 0;
 
       if(ei.entry == null) {
-         return zipSource.getLastModified();
+         return getZipSource().getLastModified();
       }
 
       return ei.entry.getTime();
@@ -749,7 +827,7 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null handler");
 
       if(getRoot().equals(handler))
-         return zipSource.getSize();
+         return getZipSource().getSize();
 
       checkIfModified();
 
@@ -772,7 +850,7 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null handler");
 
       if (getRoot().equals(handler))
-         return zipSource.exists();
+         return getZipSource().exists();
 
       checkIfModified();
       EntryInfo ei = entries.get(handler.getLocalPathName());
@@ -873,7 +951,7 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new IllegalArgumentException("Null handler");
 
       if (getRoot().equals(handler))
-         return zipSource.getRootAsStream();
+         return getZipSource().getRootAsStream();
 
       checkIfModified();
 
@@ -896,7 +974,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if(ei.entry == null)
          return new ByteArrayInputStream(new byte[0]);
 
-      return zipSource.openStream(ei.entry);
+      return getZipSource().openStream(ei.entry);
    }
 
    /**
@@ -975,6 +1053,19 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          throw new RuntimeException("Parent does not exist: " + parent);
       }
+   }
+
+   /**
+    * Get RealURL corresponding to root handler
+    *
+    * @return the real url
+    */
+   public URL getRealURL()
+   {
+      // make sure realURL has been initialized
+      // realURL is initialized when ZipSource is initialized
+      getZipSource();
+      return realURL;
    }
 
    /**
@@ -1078,15 +1169,9 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
-
-
-   //
-   //   Helper methods
-   //
-
-
    /**
-    * Make sure url protocol is <em>vfszip</em>
+    * Make sure url protocol is <em>vfszip</em>.
+    * Also remove any '!' from URL
     *
     * @param rootURL the root url
     * @return fixed url
@@ -1094,14 +1179,22 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private static URL fixUrl(URL rootURL) throws MalformedURLException
    {
+      String urlStr = rootURL.toExternalForm();
+      int pos = urlStr.indexOf("!");
+      if (pos != -1)
+      {
+         String tmp = urlStr.substring(0, pos);
+         if (pos < urlStr.length()-1)
+            tmp += urlStr.substring(pos+1);
+         urlStr = tmp;
+      }
       if ("vfszip".equals(rootURL.getProtocol()) == false)
       {
-         String url = rootURL.toString();
-         int pos = url.indexOf(":/");
+         pos = urlStr.indexOf(":/");
          if (pos != -1)
-            url = url.substring(pos);
+            urlStr = urlStr.substring(pos);
 
-         return new URL("vfszip" + url);
+         return new URL("vfszip" + urlStr);
       }
       return rootURL;
    }
@@ -1206,9 +1299,35 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
-   static enum InitializationStatus {
+   static enum InitializationStatus
+   {
       NOT_INITIALIZED,
       INITIALIZING,
       INITIALIZED
+   }
+
+   private static class RealURLInfo
+   {
+      String rootURL;
+      String relativePath;
+
+      RealURLInfo(File file) throws MalformedURLException
+      {
+         String url = file.toURL().toExternalForm();
+         if (url.endsWith("/"))
+            url = url.substring(0, url.length()-1);
+         rootURL = "jar:" + url + "!/";
+      }
+
+      URL toURL() throws MalformedURLException
+      {
+         if (relativePath == null || relativePath.length() == 0)
+            return new URL(rootURL);
+
+         if (relativePath.startsWith("/"))
+            relativePath = relativePath.substring(1);
+
+         return new URL(rootURL + relativePath);
+      }
    }
 }

@@ -27,14 +27,13 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
-import org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.util.file.ArchiveBrowser;
 
 /**
  * Virtual File System
@@ -55,8 +54,22 @@ public class VFS
    }
 
    /**
+    * Create a new VFS.
+    *
+    * @param context the context
+    * @throws IllegalArgumentException for a null context
+    */
+   public VFS(VFSContext context)
+   {
+      if (context == null)
+         throw new IllegalArgumentException("Null name");
+      this.context = context;
+   }
+
+   /**
     * Initialize VFS protocol handlers package property. 
     */
+   @SuppressWarnings({"deprecation", "unchecked"})
    public static void init()
    {
       String pkgs = System.getProperty("java.protocol.handler.pkgs");
@@ -70,10 +83,35 @@ public class VFS
          pkgs += "|org.jboss.virtual.protocol";
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
+      org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
       // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
-      ArchiveBrowser.factoryFinder.put("vfsfile", new VfsArchiveBrowserFactory());
-      ArchiveBrowser.factoryFinder.put("vfsjar", new VfsArchiveBrowserFactory());
-      ArchiveBrowser.factoryFinder.put("vfs", new VfsArchiveBrowserFactory());      
+      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsfile", factory);
+      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfszip", factory);
+      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsjar", factory);
+      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfs", factory);
+   }
+
+   /**
+    * Get the vfs context.
+    *
+    * This is package protected method.
+    * Same as VirtualFile::getHandler. 
+    *
+    * @return the vfs context
+    */
+   VFSContext getContext()
+   {
+      return context;
+   }
+
+   /**
+    * Set exception handler.
+    *
+    * @param exceptionHandler the exception handler.
+    */
+   public void setExceptionHandler(ExceptionHandler exceptionHandler)
+   {
+      context.setExceptionHandler(exceptionHandler);
    }
 
    /**
@@ -123,7 +161,8 @@ public class VFS
    public static VirtualFile getCachedFile(URI rootURI) throws IOException
    {
       VFSCache cache = VFSCacheFactory.getInstance();
-      return cache.getFile(rootURI);
+      VirtualFile file = cache.getFile(rootURI);
+      return (file != null) ? file : getRoot(rootURI);
    }
 
    /**
@@ -135,6 +174,7 @@ public class VFS
     * @throws IOException if there is a problem accessing the VFS
     * @throws IllegalArgumentException if the rootURL or name is null
     */
+   @SuppressWarnings("deprecation")
    public static VirtualFile getVirtualFile(URI rootURI, String name) throws IOException
    {
       VFS vfs = getVFS(rootURI);
@@ -188,7 +228,8 @@ public class VFS
    public static VirtualFile getCachedFile(URL rootURL) throws IOException
    {
       VFSCache cache = VFSCacheFactory.getInstance();
-      return cache.getFile(rootURL);
+      VirtualFile file = cache.getFile(rootURL);
+      return (file != null) ? file : getRoot(rootURL);
    }
 
    /**
@@ -200,25 +241,13 @@ public class VFS
     * @throws IOException if there is a problem accessing the VFS
     * @throws IllegalArgumentException if the rootURL or name is null
     */
+   @SuppressWarnings("deprecation")
    public static VirtualFile getVirtualFile(URL rootURL, String name) throws IOException
    {
       VFS vfs = getVFS(rootURL);
       return vfs.findChild(name);
    }
 
-   /**
-    * Create a new VFS.
-    * 
-    * @param context the context
-    * @throws IllegalArgumentException for a null context
-    */
-   public VFS(VFSContext context)
-   {
-      if (context == null)
-         throw new IllegalArgumentException("Null name");
-      this.context = context;
-   }
-   
    /**
     * Get the root file of this VFS
     * 
@@ -283,6 +312,7 @@ public class VFS
     * @throws IllegalArgumentException if the path is null
     */
    @Deprecated
+   @SuppressWarnings("deprecation")
    public VirtualFile findChildFromRoot(String path) throws IOException
    {
       return findChild(path);

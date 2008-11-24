@@ -72,6 +72,22 @@ public interface VirtualFileHandler extends Serializable
     */
    URL toVfsUrl() throws MalformedURLException, URISyntaxException;
    
+   /**
+    * Get a file: or jar:file: URL representing a resource as precisely as possible.
+    * file: urls can represent files in the file system  (i.e.: file:/classes/MyClass.class)
+    * jar:file: urls can represent entries within zip archives in the filesystem
+    * (i.e.: jar:file:/lib/classes.jar!/MyClass.class)
+    * There is no standard URL handler to represent entries within archives that are themselves
+    * entries within archives.
+    * (i.e.: this doesn't work: jar:file:/lib/app.ear!/classes.jar!/MyClass.class
+    * In this case the most precise supported resource locator is: jar:file:/lib/app.ear!/classes.jar
+    * )
+    *
+    * @return the url
+    * @throws URISyntaxException for an error parsing the URI
+    * @throws MalformedURLException for any error constructing the URL
+    */
+   URL getRealURL() throws IOException, URISyntaxException;
 
    /**
     * Get the VF URI (file://root/org/jboss/X.java)

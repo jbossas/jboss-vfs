@@ -19,51 +19,30 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.spi.cache.helpers;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.cache.VFSCache;
+package org.jboss.virtual.spi;
 
 /**
- * Noop cache.
- * Doesn't do any caching.
+ * VFS exception handler.
+ *
+ * Custom exception handling methods shoud be added here
+ * and used at the pointcut where exception is thrown.
+ *
+ * Its abstract super class should implement them all
+ * hence back compatibility is assured by noop.
+ *
+ * Real handlers should just override some methods that
+ * they know how to handle. 
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class NoopVFSCache implements VFSCache
+public interface ExceptionHandler
 {
-   public VirtualFile getFile(URI uri) throws IOException
-   {
-      return null;
-   }
-
-   public VirtualFile getFile(URL url) throws IOException
-   {
-      return null;
-   }
-
-   public void putContext(VFSContext context)
-   {
-   }
-
-   public void removeContext(VFSContext context)
-   {
-   }
-
-   public void start() throws Exception
-   {
-   }
-
-   public void stop()
-   {
-   }
-
-   public void flush()
-   {
-   }
+   /**
+    * Handle zip entries initializaion exception.
+    *
+    * @param e the cause exception
+    * @param name the file name
+    * @throws RuntimeException if not handled
+    */
+   void handleZipEntriesInitException(Exception e, String name);
 }

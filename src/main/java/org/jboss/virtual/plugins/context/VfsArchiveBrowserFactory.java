@@ -25,22 +25,26 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 
-import org.jboss.util.file.ArchiveBrowser;
 import org.jboss.util.file.ArchiveBrowserFactory;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**
- * This is a bridge to an older, crappier API written by myself.
+ * This is a bridge to an older, crappier API written by Bill.
  *
  * @deprecated
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
+@SuppressWarnings("deprecation")
 public class VfsArchiveBrowserFactory implements ArchiveBrowserFactory
 {
+   /** VFS archive browser instance */
+   public static final VfsArchiveBrowserFactory INSTANCE = new VfsArchiveBrowserFactory();
+
    @SuppressWarnings("deprecation")
-   public Iterator create(URL url, ArchiveBrowser.Filter filter)
+   public Iterator create(URL url, org.jboss.util.file.ArchiveBrowser.Filter filter)
    {
       try
       {
