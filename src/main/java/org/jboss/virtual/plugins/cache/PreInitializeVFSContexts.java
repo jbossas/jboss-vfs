@@ -96,12 +96,20 @@ public class PreInitializeVFSContexts
     *
     * @param initializedVFSContexts the URLs to be initialized
     */
+   @Deprecated
    public void setInitializedVFSContexts(List<URL> initializedVFSContexts)
    {
-      this.initializedVFSContexts = new HashMap<URL, ExceptionHandler>();
-      for (URL url : initializedVFSContexts)
+      if (initializedVFSContexts != null)
       {
-         this.initializedVFSContexts.put(url, null);
+         this.initializedVFSContexts = new HashMap<URL, ExceptionHandler>();
+         for (URL url : initializedVFSContexts)
+         {
+            this.initializedVFSContexts.put(url, null);
+         }
+      }
+      else
+      {
+         this.initializedVFSContexts = null;
       }
    }
 
