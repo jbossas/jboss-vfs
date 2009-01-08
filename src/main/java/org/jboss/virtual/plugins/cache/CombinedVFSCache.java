@@ -47,7 +47,7 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
 {
    private boolean initializing;
 
-   private MapVFSCache permanentCache = new PermanentVFSCache();
+   private PermanentVFSCache permanentCache = new PermanentVFSCache();
    private VFSCache realCache;
 
    /**
@@ -56,10 +56,13 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
     * @param initializationEntries the initialization entries
     * @throws IOException for any error
     */
-   public void setPermanentRoots(Map<URL, ExceptionHandler> initializationEntries) throws IOException
+   public void setPermanentRoots(Map<URL, ExceptionHandler> initializationEntries) throws Exception
    {
       if (initializationEntries != null && initializationEntries.isEmpty() == false)
       {
+         if (permanentCache.isStarted() == false)
+            permanentCache.start();
+
          initializing = true;
          try
          {
@@ -99,7 +102,7 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
    /**
     * Check if real cache has been set.
     */
-   public void check()
+   private void check()
    {
       if (realCache == null)
          realCache = new NoopVFSCache();
@@ -150,12 +153,14 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
 
    public void start() throws Exception
    {
-      permanentCache.start();
+      if (permanentCache.isStarted() == false)
+         permanentCache.start();
    }
 
    public void stop()
    {
-      permanentCache.stop();
+      if (permanentCache.isStarted())
+         permanentCache.stop();
    }
 
    public void flush()
@@ -211,9 +216,28 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
 
    private class PermanentVFSCache extends MapVFSCache
    {
+      private boolean started;
+
       protected Map<String, VFSContext> createMap()
       {
          return new TreeMap<String, VFSContext>();
+      }
+
+      @Override
+      public void start() throws Exception
+      {
+         super.start();
+         started = true;
+      }
+
+      /**
+       * Is the cache started.
+       *
+       * @return the started flag
+       */
+      public boolean isStarted()
+      {
+         return started;
       }
    }
 }
