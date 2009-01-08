@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
@@ -50,19 +51,22 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
    private VFSCache realCache;
 
    /**
-    * Set permanent roots.
+    * Set permanent roots and its exception handlers.
     *
-    * @param permanentRootUrls the permanent roots urls
+    * @param initializationEntries the initialization entries
     * @throws IOException for any error
     */
-   public void setPermanentRoots(URL... permanentRootUrls) throws IOException
+   public void setPermanentRoots(Map<URL, ExceptionHandler> initializationEntries) throws IOException
    {
-      if (permanentRootUrls != null)
+      if (initializationEntries != null && initializationEntries.isEmpty() == false)
       {
          initializing = true;
-         for (URL url : permanentRootUrls)
+         for (Map.Entry<URL, ExceptionHandler> entry : initializationEntries.entrySet())
          {
-            VFS.getRoot(url);
+            VFS vfs = VFS.getVFS(entry.getKey());
+            ExceptionHandler eh = entry.getValue();
+            if (eh != null)
+               vfs.setExceptionHandler(eh);
          }
          initializing = false;
       }

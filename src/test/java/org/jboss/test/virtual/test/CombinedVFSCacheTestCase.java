@@ -21,12 +21,15 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.net.URL;
+import java.util.Collections;
 import java.util.Map;
 
 import junit.framework.Test;
 import org.jboss.virtual.plugins.cache.CombinedVFSCache;
 import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
@@ -71,7 +74,9 @@ public class CombinedVFSCacheTestCase extends VFSCacheTest
       try
       {
          CombinedWrapperVFSCache cache = new CombinedWrapperVFSCache();
-         cache.setPermanentRoots(getResource("/vfs/test/nested"));
+         URL url = getResource("/vfs/test/nested");
+         Map<URL, ExceptionHandler> map = Collections.singletonMap(url, null);
+         cache.setPermanentRoots(map);
 
          IterableTimedVFSCache realCache = new IterableTimedVFSCache(5);
          realCache.start();
