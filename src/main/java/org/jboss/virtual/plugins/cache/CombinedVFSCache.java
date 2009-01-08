@@ -45,10 +45,9 @@ import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
  */
 public class CombinedVFSCache implements VFSCache, CacheStatistics
 {
-   private boolean initializing;
-
    private PermanentVFSCache permanentCache = new PermanentVFSCache();
    private VFSCache realCache;
+   private boolean initializing;
 
    /**
     * Set permanent roots and its exception handlers.
