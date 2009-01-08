@@ -61,14 +61,20 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
       if (initializationEntries != null && initializationEntries.isEmpty() == false)
       {
          initializing = true;
-         for (Map.Entry<URL, ExceptionHandler> entry : initializationEntries.entrySet())
+         try
          {
-            VFS vfs = VFS.getVFS(entry.getKey());
-            ExceptionHandler eh = entry.getValue();
-            if (eh != null)
-               vfs.setExceptionHandler(eh);
+            for (Map.Entry<URL, ExceptionHandler> entry : initializationEntries.entrySet())
+            {
+               VFS vfs = VFS.getVFS(entry.getKey());
+               ExceptionHandler eh = entry.getValue();
+               if (eh != null)
+                  vfs.setExceptionHandler(eh);
+            }
          }
-         initializing = false;
+         finally
+         {
+            initializing = false;
+         }
       }
    }
 
