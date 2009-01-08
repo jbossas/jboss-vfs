@@ -49,6 +49,12 @@ public abstract class VFSCacheTest extends AbstractVFSTest
 
    protected abstract VFSCache createCache();
 
+   protected void stopCache(VFSCache cache)
+   {
+      if (cache != null)
+         cache.stop();
+   }
+
    @SuppressWarnings("deprecation")
    public void testCache() throws Exception
    {
@@ -85,7 +91,7 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       }
       finally
       {
-         cache.stop();
+         stopCache(cache);
       }
    }
 
@@ -122,7 +128,7 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       }
       finally
       {
-         cache.stop();
+         stopCache(cache);
       }
    }
 
@@ -141,7 +147,7 @@ public abstract class VFSCacheTest extends AbstractVFSTest
 
    public void testCacheFactory() throws Exception
    {
-      VFSCache cache;
+      VFSCache cache = null;
       String cacheClassName = getCacheClass().getName();
 
       VFSCacheFactory.setInstance(null);
@@ -173,6 +179,7 @@ public abstract class VFSCacheTest extends AbstractVFSTest
       }
       finally
       {
+         stopCache(cache);
          VFSCacheFactory.setInstance(null);
       }
    }
