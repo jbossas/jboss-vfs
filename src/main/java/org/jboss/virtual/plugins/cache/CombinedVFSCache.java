@@ -105,15 +105,6 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
          realCache = new NoopVFSCache();
    }
 
-   public long lastInsert()
-   {
-      if (realCache instanceof CacheStatistics)
-      {
-         return CacheStatistics.class.cast(realCache).lastInsert();
-      }
-      return -1l;
-   }
-
    public VirtualFile getFile(URI uri) throws IOException
    {
       VirtualFile file = permanentCache.getFile(uri);
@@ -199,6 +190,17 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
          size += CacheStatistics.class.cast(realCache).size();
       }
       return size;
+   }
+
+   public long lastInsert()
+   {
+      long permanentHit = permanentCache.lastInsert();
+      long realHit = -1;
+      if (realCache instanceof CacheStatistics)
+      {
+         realHit = CacheStatistics.class.cast(realCache).lastInsert();
+      }
+      return permanentHit > realHit ? permanentHit : realHit;
    }
 
    @Override

@@ -49,6 +49,10 @@ public abstract class VFSCacheTest extends AbstractVFSTest
 
    protected abstract VFSCache createCache();
 
+   protected void configureCache(VFSCache cache) throws Exception
+   {
+   }
+
    protected void stopCache(VFSCache cache)
    {
       if (cache != null)
@@ -67,7 +71,9 @@ public abstract class VFSCacheTest extends AbstractVFSTest
          VFSCacheFactory.setInstance(cache);
          try
          {
-            VirtualFile root = VFS.getRoot(url);
+            configureCache(cache);
+
+            VirtualFile root = VFS.getCachedFile(url);
 
             VirtualFile file = root.findChild("/nested.jar/META-INF/empty.txt");
             URL fileURL = file.toURL();
@@ -111,7 +117,9 @@ public abstract class VFSCacheTest extends AbstractVFSTest
             VFSCacheFactory.setInstance(cache);
             try
             {
-               VirtualFile root = VFS.getRoot(url);
+               configureCache(cache);
+
+               VirtualFile root = VFS.getCachedFile(url);
                assertNotNull(root);
 
                Iterable<VFSContext> iter = statistics.getCachedContexts();

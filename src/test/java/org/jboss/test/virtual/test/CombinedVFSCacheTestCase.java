@@ -28,8 +28,8 @@ import java.util.Map;
 import junit.framework.Test;
 import org.jboss.virtual.plugins.cache.CombinedVFSCache;
 import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
@@ -47,6 +47,25 @@ public class CombinedVFSCacheTestCase extends VFSCacheTest
    public static Test suite()
    {
       return suite(CombinedVFSCacheTestCase.class);
+   }
+
+   @Override
+   protected void configureCache(VFSCache cache) throws Exception
+   {
+      if (cache instanceof CombinedVFSCache)
+      {
+         CombinedVFSCache cvc = CombinedVFSCache.class.cast(cache);
+
+         URL url = getResource("/vfs/test/nested");
+         Map<URL, ExceptionHandler> map = Collections.singletonMap(url, null);
+         cvc.setPermanentRoots(map);
+
+         IterableTimedVFSCache realCache = new IterableTimedVFSCache(5);
+         realCache.start();
+         cvc.setRealCache(realCache);
+
+         cvc.create();
+      }
    }
 
    @Override
@@ -71,25 +90,7 @@ public class CombinedVFSCacheTestCase extends VFSCacheTest
 
    protected CombinedVFSCache createCache()
    {
-      try
-      {
-         CombinedWrapperVFSCache cache = new CombinedWrapperVFSCache();
-         URL url = getResource("/vfs/test/nested");
-         Map<URL, ExceptionHandler> map = Collections.singletonMap(url, null);
-         cache.setPermanentRoots(map);
-
-         IterableTimedVFSCache realCache = new IterableTimedVFSCache(5);
-         realCache.start();
-         cache.setRealCache(realCache);
-
-         cache.create();         
-
-         return cache;
-      }
-      catch (Exception e)
-      {
-         throw new IllegalArgumentException(e);
-      }
+      return new CombinedWrapperVFSCache();
    }
 
    protected Map<Object, Object> getMap()
