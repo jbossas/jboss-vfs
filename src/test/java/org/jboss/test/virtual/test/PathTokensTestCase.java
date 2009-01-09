@@ -133,10 +133,11 @@ public class PathTokensTestCase extends AbstractVFSTest
       try
       {
          List<String> tokens = PathTokenizer.getTokens(path);
-         List<String> expectedTokens = Arrays.asList(expected);
-         assertEquals(expectedTokens, tokens);
          if (flag)
             fail("Should not be here.");
+
+         List<String> expectedTokens = Arrays.asList(expected);
+         assertEquals(expectedTokens, tokens);
       }
       catch (Throwable t)
       {
