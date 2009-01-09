@@ -117,19 +117,24 @@ public class PathTokensTestCase extends AbstractVFSTest
 
    public void testSuspiciousTokens() throws Throwable
    {
-      testSuspiciousTokens(false);
-      testSuspiciousTokens(true);      
+      testSuspiciousTokens("/.hudson/..hudson/...hudson/./../.../.*foo/foo.bar", ".hudson", "..hudson", "...hudson", ".", "..", "...", ".*foo", "foo.bar");     
+      testSuspiciousTokens("jpa/.svn", "jpa", ".svn");
    }
 
-   public void testSuspiciousTokens(boolean flag) throws Throwable
+   protected void testSuspiciousTokens(String path, String... expected) throws Throwable
+   {
+      testSuspiciousTokens(true, path, expected);
+      testSuspiciousTokens(false, path, expected);
+   }
+
+   protected void testSuspiciousTokens(boolean flag, String path, String... expected) throws Throwable
    {
       PathTokenizer.setErrorOnSuspiciousTokens(flag);
       try
       {
-         String path = "/.hudson/..hudson/...hudson/./../.../.*foo/foo.bar";
          List<String> tokens = PathTokenizer.getTokens(path);
-         List<String> expected = Arrays.asList(".hudson", "..hudson", "...hudson", ".", "..", "...", ".*foo", "foo.bar");
-         assertEquals(expected, tokens);
+         List<String> expectedTokens = Arrays.asList(expected);
+         assertEquals(expectedTokens, tokens);
          if (flag)
             fail("Should not be here.");
       }
