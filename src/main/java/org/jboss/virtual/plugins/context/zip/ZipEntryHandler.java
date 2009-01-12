@@ -116,7 +116,7 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
 
    public boolean exists() throws IOException
    {
-      checkClosed();
+//      checkClosed(); // TODO - this fails with JBVFS-85 check
       return getZipEntryContext().exists(this);
    }
 
