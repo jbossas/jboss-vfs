@@ -226,7 +226,7 @@ public class ZipEntryInputStream extends InputStream
    /**
     * Properly release held resources
     */
-   protected void finalize()
+   protected void finalize() throws Throwable
    {
       try
       {
@@ -235,6 +235,7 @@ public class ZipEntryInputStream extends InputStream
       catch(IOException ignored)
       {
       }
+      super.finalize();
    }
 
    /**

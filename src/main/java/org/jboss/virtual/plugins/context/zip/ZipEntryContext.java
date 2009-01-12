@@ -1001,11 +1001,10 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Properly release held resources
     */
-   protected void finalize()
+   protected void finalize() throws Throwable
    {
       try
       {
-         super.finalize();
          if (zipSource != null)
             zipSource.close();
       }
@@ -1013,6 +1012,7 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          log.debug("IGNORING: Failed to close zip source: " + zipSource, ignored);
       }
+      super.finalize();
    }
 
    /**
