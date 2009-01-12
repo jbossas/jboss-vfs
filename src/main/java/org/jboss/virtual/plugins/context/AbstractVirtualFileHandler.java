@@ -343,10 +343,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
          // bypass parent and delegate straight to peer
 
-         if (peer instanceof AbstractVirtualFileHandler)
+         if (parent != null && peer instanceof AbstractVirtualFileHandler)
          {
             AbstractVirtualFileHandler handler = (AbstractVirtualFileHandler) peer;
-            if (parent != null && handler.initPath(pathName))
+            if (handler.initPath(pathName))
                pathName.append('/');
          }
          else
