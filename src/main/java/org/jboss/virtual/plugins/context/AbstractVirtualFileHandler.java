@@ -313,7 +313,12 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return false;
    }
 
-
+   /**
+    * Initialise the peer path.
+    *
+    * @param pathName the path name
+    * @return whether it added anything
+    */
    private boolean initPeerPath(StringBuilder pathName)
    {
       VirtualFileHandler grandParent = null;
@@ -332,17 +337,16 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          }
       }
 
-      VirtualFileHandler peer = context.getRootPeer();
-
-
       if (grandParent == null)
       {
+         VirtualFileHandler peer = context.getRootPeer();
+
          // bypass parent and delegate straight to peer
 
          if (peer instanceof AbstractVirtualFileHandler)
          {
             AbstractVirtualFileHandler handler = (AbstractVirtualFileHandler) peer;
-            if (handler.initPath(pathName) && parent != null)
+            if (parent != null && handler.initPath(pathName))
                pathName.append('/');
          }
          else
@@ -384,8 +388,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       {
          if (context instanceof AbstractVFSContext)
          {
-            AbstractVFSContext avfs = (AbstractVFSContext) context;
-            VirtualFileHandler peer = avfs.getRootPeer();
+            AbstractVFSContext avfc = (AbstractVFSContext) context;
+            VirtualFileHandler peer = avfc.getRootPeer();
             if (peer != null)
                return peer.getParent();
          }
