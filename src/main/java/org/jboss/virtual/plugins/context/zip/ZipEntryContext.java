@@ -792,6 +792,20 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
+    * Close the handler, if it's root.
+    *
+    * @param handler the handler to close
+    */
+   public void close(ZipEntryHandler handler)
+   {
+      VirtualFileHandler rootHandler = getRoot();
+      if (rootHandler.equals(handler))
+      {
+         getZipSource().close();
+      }
+   }
+
+   /**
     * Returns lastModified timestamp for a given handler
     *
     * @param handler a handler

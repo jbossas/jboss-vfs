@@ -235,6 +235,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             // if underlying file has been modified then create a new handler instead of using the cached one
             if (handler != null && handler.hasBeenModified())
             {
+               handler.close(); // close old cached one
                handler = null;
             }
             if (handler == null)

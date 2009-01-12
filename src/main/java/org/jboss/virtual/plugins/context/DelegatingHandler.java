@@ -150,6 +150,12 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return getDelegate().isNested();
    }
 
+   @Override
+   public void close()
+   {
+      getDelegate().close();
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
       return getDelegate().delete(gracePeriod);
