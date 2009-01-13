@@ -62,7 +62,6 @@ public class FileCloseUnitTestCase extends AbstractVFSTest
 
       // TODO - some real test of deletion
       nestedChild.close();
-      child.close();
       root.close();
    }
 }
