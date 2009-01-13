@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -129,6 +130,9 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /** RealURL of this context */
    private URL realURL;
+
+   /** Nested handlers */
+   private List<VirtualFileHandler> nestedHandlers = new CopyOnWriteArrayList<VirtualFileHandler>();
 
    /**
     * Create a new ZipEntryContext
@@ -491,6 +495,7 @@ public class ZipEntryContext extends AbstractVFSContext
             }
             AbstractVirtualFileHandler parent = ei != null ? ei.handler : null;
 
+            // it's a nested jar
             if(ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
             {
                boolean useCopyMode = forceCopy;
@@ -526,6 +531,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
                entries.put(delegator.getLocalPathName(), new EntryInfo(delegator, ent));
                addChild(parent, delegator);
+               nestedHandlers.add(delegator); // add nested delegator
             }
             else
             {
@@ -802,6 +808,11 @@ public class ZipEntryContext extends AbstractVFSContext
       if (rootHandler.equals(handler))
       {
          getZipSource().close();
+         // only close nested - as they might be temp files we want to delete
+         for (VirtualFileHandler vfh : nestedHandlers)
+         {
+            vfh.close();
+         }
       }
    }
 

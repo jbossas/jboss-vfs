@@ -179,8 +179,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    {
       boolean hasBeenModified = false;
       long last = getLastModified();
-      if(log.isTraceEnabled())
-         log.trace("hasBeenModified, lastModified: "+last+", cachedLastModified: "+cachedLastModified);
       if (cachedLastModified != last)
       {
          hasBeenModified = cachedLastModified != 0;
@@ -213,7 +211,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /**
     * todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
     *
-    * @param path
+    * @param path the path name
     */
    public void setPathName(String path)
    {

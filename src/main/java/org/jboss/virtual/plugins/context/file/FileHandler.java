@@ -337,25 +337,12 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
 
    public boolean removeChild(String name) throws IOException
    {
-      VirtualFileHandler fileHandler = childCache.remove(name);
-      if (fileHandler != null)
-      {
-         fileHandler.close();
-         return true;
-      }
-      else
-      {
-         return false;
-      }
+      return (childCache.remove(name) != null);
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
-      VirtualFileHandler previousHandler = childCache.put(original.getName(), replacement);
-      if (previousHandler != null)
-      {
-         previousHandler.close();
-      }
+      childCache.put(original.getName(), replacement);
    }
 
    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException

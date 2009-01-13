@@ -153,7 +153,21 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    @Override
    public void close()
    {
-      getDelegate().close();
+      if (delegate == null)
+         return;
+
+      if (delegate instanceof AbstractVirtualFileHandler)
+      {
+         if (decrement() == 0)
+         {
+            AbstractVirtualFileHandler avfh = AbstractVirtualFileHandler.class.cast(delegate);
+            avfh.doClose();
+         }
+      }
+      else
+      {
+         delegate.close();
+      }
    }
 
    public boolean delete(int gracePeriod) throws IOException

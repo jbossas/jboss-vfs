@@ -102,15 +102,12 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
       }
       
       // Verify the manifest the VFS way
-      // TODO - JBVFS-85 check
-/*
       {
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
          Manifest manifest = new Manifest(manifestFile.openStream());
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("VFS found the wrong manifest", "v2", actual);
       }
-*/
 
       // Verify again - through new context
       {
