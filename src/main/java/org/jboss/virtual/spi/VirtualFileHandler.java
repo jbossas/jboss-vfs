@@ -257,11 +257,4 @@ public interface VirtualFileHandler extends Serializable
     *  @throws IOException for any error
     */
    boolean delete(int gracePeriod) throws IOException;
-
-   /**
-    * Is the handler temporary.
-    *
-    * @return true if temporary, false otherwise
-    */
-   boolean isTemporary();
 }

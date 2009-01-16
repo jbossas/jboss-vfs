@@ -468,8 +468,13 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    public void cleanup()
    {
    }
-
-   public boolean isTemporary()
+   
+   /**
+    * Is the handler temporary.
+    *
+    * @return true if temporary, false otherwise
+    */
+   protected boolean isTemporary()
    {
       Map<String, String> options = getVFSContext().getOptions();
       return (options != null && Boolean.valueOf(options.get(VFSUtils.IS_TEMP_FILE)));
