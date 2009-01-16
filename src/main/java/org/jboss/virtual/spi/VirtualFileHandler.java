@@ -222,7 +222,12 @@ public interface VirtualFileHandler extends Serializable
     * @throws IllegalStateException if closed
     */
    VirtualFile getVirtualFile();
-   
+
+   /**
+    * Cleanup resources.
+    */
+   void cleanup();
+
    /**
     * Close the resources
     */
@@ -251,5 +256,12 @@ public interface VirtualFileHandler extends Serializable
     *  @return boolean true if file was deleted, false otherwise
     *  @throws IOException for any error
     */
-   public boolean delete(int gracePeriod) throws IOException;
+   boolean delete(int gracePeriod) throws IOException;
+
+   /**
+    * Is the handler temporary.
+    *
+    * @return true if temporary, false otherwise
+    */
+   boolean isTemporary();
 }

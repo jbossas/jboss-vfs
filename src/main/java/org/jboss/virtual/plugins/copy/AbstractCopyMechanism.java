@@ -35,6 +35,7 @@ import java.util.Map;
 import org.jboss.logging.Logger;
 import org.jboss.util.id.GUID;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.ExceptionHandler;
@@ -137,6 +138,8 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       // merge old options
       VFSContext oldVFSContext = handler.getVFSContext();
       Map<String, String> newOptions = fileSystemContext.getOptions();
+      if (newOptions != null) // shouldn't be null, but we check anyway
+         newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());
       Map<String, String> oldOptions = oldVFSContext.getOptions();
       if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)
          newOptions.putAll(oldOptions);

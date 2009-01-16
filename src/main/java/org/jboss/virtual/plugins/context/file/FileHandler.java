@@ -161,6 +161,13 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      if (isTemporary())
+         Files.delete(file);
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
       File f = getFile();
@@ -235,7 +242,6 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             // if underlying file has been modified then create a new handler instead of using the cached one
             if (handler != null && handler.hasBeenModified())
             {
-               handler.close(); // close old cached one
                handler = null;
             }
             if (handler == null)
@@ -270,7 +276,6 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       // if the child has been modified on disk then create a new handler
       if (handler != null && handler.hasBeenModified())
       {
-         handler.close(); // close old cached one
          handler = null;
       }
       if (handler == null)

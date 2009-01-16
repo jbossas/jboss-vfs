@@ -356,7 +356,8 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          boolean noReaper = Boolean.valueOf(getAggregatedOptions().get(VFSUtils.NO_REAPER_QUERY));
          realURL = urlInfo.toURL();
-         return new ZipFileWrapper(file, autoClean, noReaper);
+         boolean isAutoClean = autoClean || Boolean.valueOf(getAggregatedOptions().get(VFSUtils.IS_TEMP_FILE));
+         return new ZipFileWrapper(file, isAutoClean, noReaper);
       }
    }
 
@@ -802,17 +803,17 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param handler the handler to close
     */
-   public void close(ZipEntryHandler handler)
+   public void cleanup(ZipEntryHandler handler)
    {
       VirtualFileHandler rootHandler = getRoot();
       if (rootHandler.equals(handler))
       {
-         getZipSource().close();
-         // only close nested - as they might be temp files we want to delete
+         // only cleanup nested - as they might be temp files we want to delete
          for (VirtualFileHandler vfh : nestedHandlers)
          {
-            vfh.close();
+            vfh.cleanup();
          }
+         getZipSource().close(); // close == cleanup in zip source impl
       }
    }
 

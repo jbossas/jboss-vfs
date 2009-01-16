@@ -118,7 +118,10 @@ public class VFSUtils
    
    /** Standard separator for JAR URL */
    public static final String JAR_URL_SEPARATOR = "!/";
-   
+
+   /** The temp marker flag */
+   public static final String IS_TEMP_FILE = "IS_TEMP_FILE";
+
    /**
     * Stop cache.
     */
@@ -768,6 +771,17 @@ public class VFSUtils
    public static void disableCaseSensitive(VFS vfs)
    {
       disableOption(vfs, CASE_SENSITIVE_QUERY);
+   }
+
+   /**
+    * Is the virtual file temporary.
+    *
+    * @param file the file
+    * @return true if temporary, false otherwise
+    */
+   public static boolean isTemporaryFile(VirtualFile file)
+   {
+      return Boolean.valueOf(getOption(file, IS_TEMP_FILE));
    }
 
    /**

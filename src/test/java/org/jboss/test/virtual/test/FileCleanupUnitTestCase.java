@@ -26,20 +26,22 @@ import java.net.URL;
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VFSUtils;
 
 /**
  * Test file closing
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class FileCloseUnitTestCase extends AbstractVFSTest
+// TODO - some real test of deletion - count the temp files == 0?
+public class FileCleanupUnitTestCase extends AbstractVFSTest
 {
-   public FileCloseUnitTestCase(String name)
+   public FileCleanupUnitTestCase(String name)
    {
       super(name, true, false);
    }
 
-   protected FileCloseUnitTestCase(String name, boolean forceCopy)
+   protected FileCleanupUnitTestCase(String name, boolean forceCopy)
    {
       super(name, forceCopy, false);
    }
@@ -47,10 +49,10 @@ public class FileCloseUnitTestCase extends AbstractVFSTest
    public static Test suite()
    {
       VFS.init();
-      return suite(FileCloseUnitTestCase.class);
+      return suite(FileCleanupUnitTestCase.class);
    }
 
-   public void testNestedJarClosing() throws Exception
+   public void testNestedJarCleanup() throws Exception
    {
       URL url = getResource("/vfs/test/nested/nested.jar");
       VirtualFile root = VFS.getRoot(url);
@@ -60,8 +62,20 @@ public class FileCloseUnitTestCase extends AbstractVFSTest
       VirtualFile nestedChild = child.getChild("child");
       assertNotNull(nestedChild);
 
-      // TODO - some real test of deletion
-      nestedChild.close();
-      root.close();
+      nestedChild.cleanup();
+      root.cleanup();
+   }
+
+   public void testExplicitCopyCleanup() throws Exception
+   {
+      URL url = getResource("/vfs/test/nested/nested.jar");
+      VirtualFile root = VFS.getRoot(url);
+      assertNotNull(root);
+
+      VirtualFile copy = VFSUtils.temp(root);
+      assertNotNull(copy);
+      assertTrue(VFSUtils.isTemporaryFile(copy));
+
+      copy.cleanup();
    }
 }

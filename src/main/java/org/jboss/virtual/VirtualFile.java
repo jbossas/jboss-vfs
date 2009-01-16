@@ -263,6 +263,15 @@ public class VirtualFile implements Serializable
    }
 
    /**
+    * Do file cleanup.
+    * e.g. delete temp files
+    */
+   public void cleanup()
+   {
+      getHandler().cleanup();
+   }
+
+   /**
     * Close the file resources (stream, etc.)
     */
    public void close()

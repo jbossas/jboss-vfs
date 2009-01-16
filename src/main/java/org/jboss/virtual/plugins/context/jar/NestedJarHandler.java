@@ -32,6 +32,7 @@ import java.net.URL;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.jboss.util.file.Files;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -188,12 +189,26 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      if (temp != null)
+         Files.delete(temp);
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
-      boolean deleted = temp.delete();
-      if (deleted)
-         return super.delete(gracePeriod);
-      return deleted;
+      if (temp != null)
+      {
+         boolean deleted = temp.delete();
+         if (deleted)
+            return super.delete(gracePeriod);
+         return deleted;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    /**

@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.logging.Logger;
@@ -453,11 +454,38 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       if (references.get() < 0)
          throw new IllegalStateException("Closed " + toStringLocal());
    }
-   
-   public void close() 
+
+   /**
+    * Get the references count.
+    *
+    * @return the ref count
+    */
+   protected int getReferences()
    {
-      if (decrement() == 0)
-         doClose();
+      return references.get();
+   }
+
+   public void cleanup()
+   {
+   }
+
+   public boolean isTemporary()
+   {
+      Map<String, String> options = getVFSContext().getOptions();
+      return (options != null && Boolean.valueOf(options.get(VFSUtils.IS_TEMP_FILE)));
+   }
+
+   public void close()
+   {
+      try
+      {
+         if (getReferences() == 1)
+            doClose();
+      }
+      finally
+      {
+         references.decrementAndGet();   
+      }
    }
 
    /**
