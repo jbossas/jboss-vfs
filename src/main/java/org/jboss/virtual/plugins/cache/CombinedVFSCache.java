@@ -164,7 +164,6 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
 
    public void flush()
    {
-      permanentCache.flush();
       check();
       realCache.flush();
    }
