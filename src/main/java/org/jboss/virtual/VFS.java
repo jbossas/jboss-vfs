@@ -27,13 +27,13 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Virtual File System
@@ -112,6 +112,31 @@ public class VFS
    public void setExceptionHandler(ExceptionHandler exceptionHandler)
    {
       context.setExceptionHandler(exceptionHandler);
+   }
+
+   /**
+    * Cleanup any resources tied to this file.
+    * e.g. vfs cache
+    *
+    * @param file the file
+    */
+   static void cleanup(VirtualFile file)
+   {
+      try
+      {
+         VirtualFileHandler fileHandler = file.getHandler();
+         VFSContext context = fileHandler.getVFSContext();
+         VirtualFileHandler contextHandler = context.getRoot();
+         // the file is the context root, hence possible cache candidate
+         if (fileHandler.equals(contextHandler))
+         {
+            VFSCache cache = VFSCacheFactory.getInstance();
+            cache.removeContext(context);
+         }
+      }
+      catch (Exception ignored)
+      {
+      }
    }
 
    /**

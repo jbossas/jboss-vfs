@@ -268,7 +268,14 @@ public class VirtualFile implements Serializable
     */
    public void cleanup()
    {
-      getHandler().cleanup();
+      try
+      {
+         getHandler().cleanup();
+      }
+      finally
+      {
+         VFS.cleanup(this);
+      }
    }
 
    /**
