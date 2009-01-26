@@ -43,9 +43,4 @@ public class UnpackCopyMechanism extends AbstractCopyMechanism
    {
       return handler.isNested() == false;
    }
-
-   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
-   {
-      return true;
-   }
 }

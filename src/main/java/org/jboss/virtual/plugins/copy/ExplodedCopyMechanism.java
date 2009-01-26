@@ -44,9 +44,4 @@ public class ExplodedCopyMechanism extends AbstractCopyMechanism
    {
       return handler instanceof FileHandler || handler.isLeaf();
    }
-
-   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
-   {
-      return false;
-   }
 }

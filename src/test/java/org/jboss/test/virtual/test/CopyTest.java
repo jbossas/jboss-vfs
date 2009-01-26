@@ -81,7 +81,10 @@ public abstract class CopyTest extends AbstractVFSTest
       assertNotNull(replacement.findChild("jar2.jar"));
    }
 
-   protected abstract void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception;
+   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
+   {
+      assertEquals(originalParent, replacementParent);
+   }
 
    public void testUnpackTopLevel() throws Throwable
    {
@@ -165,7 +168,7 @@ public abstract class CopyTest extends AbstractVFSTest
    protected void assertExplodedReplacement(VirtualFile original, VirtualFile replacement) throws Exception
    {
       assertReplacement(original, replacement);
-      assertNull(replacement.getParent());
+      assertNotNull(replacement.getParent());
    }
 
    protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws Exception
