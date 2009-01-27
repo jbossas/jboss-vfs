@@ -188,12 +188,31 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      try
+      {
+         delete(2000);
+      }
+      catch (Exception ignored)
+      {
+      }
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
-      boolean deleted = temp.delete();
-      if (deleted)
-         return super.delete(gracePeriod);
-      return deleted;
+      if (temp != null)
+      {
+         boolean deleted = temp.delete();
+         if (deleted)
+            return super.delete(gracePeriod);
+         return deleted;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    /**

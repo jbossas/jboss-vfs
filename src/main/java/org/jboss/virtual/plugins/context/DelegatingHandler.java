@@ -150,6 +150,36 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return getDelegate().isNested();
    }
 
+   @Override
+   public void cleanup()
+   {
+      getDelegate().cleanup();
+   }
+
+   @Override
+   public void close()
+   {
+      if (delegate == null)
+         return;
+
+      try
+      {
+         if ((delegate instanceof AbstractVirtualFileHandler) && getReferences() == 1)
+         {
+            AbstractVirtualFileHandler avfh = AbstractVirtualFileHandler.class.cast(delegate);
+            avfh.doClose();
+         }
+         else
+         {
+            delegate.close();
+         }
+      }
+      finally
+      {
+         decrement();
+      }
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
       return getDelegate().delete(gracePeriod);

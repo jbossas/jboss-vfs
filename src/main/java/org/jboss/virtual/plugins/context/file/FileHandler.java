@@ -161,9 +161,25 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      if (isTemporary())
+      {
+         try
+         {
+            delete(2000);
+         }
+         catch (Exception ignored)
+         {
+         }
+      }
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
-      File f = getFile();
+      // we can bypass the checkClosed
+      File f = file;
 
       boolean exists = f.exists();
       if (exists == false)
@@ -335,7 +351,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
 
    public boolean removeChild(String name) throws IOException
    {
-      return childCache.remove(name) != null;
+      return (childCache.remove(name) != null);
    }
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)

@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.logging.Logger;
@@ -179,8 +180,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    {
       boolean hasBeenModified = false;
       long last = getLastModified();
-      if(log.isTraceEnabled())
-         log.trace("hasBeenModified, lastModified: "+last+", cachedLastModified: "+cachedLastModified);
       if (cachedLastModified != last)
       {
          hasBeenModified = cachedLastModified != 0;
@@ -213,7 +212,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /**
     * todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
     *
-    * @param path
+    * @param path the path name
     */
    public void setPathName(String path)
    {
@@ -313,7 +312,12 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return false;
    }
 
-
+   /**
+    * Initialise the peer path.
+    *
+    * @param pathName the path name
+    * @return whether it added anything
+    */
    private boolean initPeerPath(StringBuilder pathName)
    {
       VirtualFileHandler grandParent = null;
@@ -332,11 +336,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          }
       }
 
-      VirtualFileHandler peer = context.getRootPeer();
-
-
       if (grandParent == null)
       {
+         VirtualFileHandler peer = context.getRootPeer();
+
          // bypass parent and delegate straight to peer
 
          if (peer instanceof AbstractVirtualFileHandler)
@@ -384,8 +387,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       {
          if (context instanceof AbstractVFSContext)
          {
-            AbstractVFSContext avfs = (AbstractVFSContext) context;
-            VirtualFileHandler peer = avfs.getRootPeer();
+            AbstractVFSContext avfc = (AbstractVFSContext) context;
+            VirtualFileHandler peer = avfc.getRootPeer();
             if (peer != null)
                return peer.getParent();
          }
@@ -451,11 +454,43 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       if (references.get() < 0)
          throw new IllegalStateException("Closed " + toStringLocal());
    }
-   
-   public void close() 
+
+   /**
+    * Get the references count.
+    *
+    * @return the ref count
+    */
+   protected int getReferences()
    {
-      if (decrement() == 0)
-         doClose();
+      return references.get();
+   }
+
+   public void cleanup()
+   {
+   }
+   
+   /**
+    * Is the handler temporary.
+    *
+    * @return true if temporary, false otherwise
+    */
+   protected boolean isTemporary()
+   {
+      Map<String, String> options = getVFSContext().getOptions();
+      return (options != null && Boolean.valueOf(options.get(VFSUtils.IS_TEMP_FILE)));
+   }
+
+   public void close()
+   {
+      try
+      {
+         if (getReferences() == 1)
+            doClose();
+      }
+      finally
+      {
+         references.decrementAndGet();   
+      }
    }
 
    /**

@@ -102,7 +102,7 @@ public class VirtualFileURLConnection extends URLConnection
    @SuppressWarnings("deprecation")
    protected static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
    {
-      VirtualFile file = VFS.getCachedFile(vfsurl);
+      VirtualFile file = VFS.getRoot(vfsurl);
       return file.findChild(relativePath);
    }
 

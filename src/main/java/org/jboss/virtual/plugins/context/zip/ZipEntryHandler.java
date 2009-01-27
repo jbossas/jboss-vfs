@@ -160,6 +160,12 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      getZipEntryContext().cleanup(this);
+   }
+
    public boolean delete(int gracePeriod) throws IOException
    {
       checkClosed();
@@ -183,6 +189,11 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       getZipEntryContext().replaceChild(this, (AbstractVirtualFileHandler) original, replacement);
    }
 
+   /**
+    * Get owner zip entry context.
+    *
+    * @return the owner zip entry context
+    */
    private ZipEntryContext getZipEntryContext()
    {
       return ((ZipEntryContext) getLocalVFSContext());

@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -129,6 +130,9 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /** RealURL of this context */
    private URL realURL;
+
+   /** Nested handlers */
+   private List<VirtualFileHandler> nestedHandlers = new CopyOnWriteArrayList<VirtualFileHandler>();
 
    /**
     * Create a new ZipEntryContext
@@ -352,7 +356,8 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          boolean noReaper = Boolean.valueOf(getAggregatedOptions().get(VFSUtils.NO_REAPER_QUERY));
          realURL = urlInfo.toURL();
-         return new ZipFileWrapper(file, autoClean, noReaper);
+         boolean isAutoClean = autoClean || Boolean.valueOf(getAggregatedOptions().get(VFSUtils.IS_TEMP_FILE));
+         return new ZipFileWrapper(file, isAutoClean, noReaper);
       }
    }
 
@@ -491,6 +496,7 @@ public class ZipEntryContext extends AbstractVFSContext
             }
             AbstractVirtualFileHandler parent = ei != null ? ei.handler : null;
 
+            // it's a nested jar
             if(ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
             {
                boolean useCopyMode = forceCopy;
@@ -526,6 +532,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
                entries.put(delegator.getLocalPathName(), new EntryInfo(delegator, ent));
                addChild(parent, delegator);
+               nestedHandlers.add(delegator); // add nested delegator
             }
             else
             {
@@ -792,6 +799,25 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
+    * Close the handler, if it's root.
+    *
+    * @param handler the handler to close
+    */
+   public void cleanup(ZipEntryHandler handler)
+   {
+      VirtualFileHandler rootHandler = getRoot();
+      if (rootHandler.equals(handler))
+      {
+         // only cleanup nested - as they might be temp files we want to delete
+         for (VirtualFileHandler vfh : nestedHandlers)
+         {
+            vfh.cleanup();
+         }
+         getZipSource().close(); // close == cleanup in zip source impl
+      }
+   }
+
+   /**
     * Returns lastModified timestamp for a given handler
     *
     * @param handler a handler
@@ -1001,11 +1027,10 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Properly release held resources
     */
-   protected void finalize()
+   protected void finalize() throws Throwable
    {
       try
       {
-         super.finalize();
          if (zipSource != null)
             zipSource.close();
       }
@@ -1013,6 +1038,7 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          log.debug("IGNORING: Failed to close zip source: " + zipSource, ignored);
       }
+      super.finalize();
    }
 
    /**

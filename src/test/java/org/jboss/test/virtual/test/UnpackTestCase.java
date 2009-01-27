@@ -61,9 +61,4 @@ public class UnpackTestCase extends CopyTest
    {
       assertUnpackedReplacement(original, replacement);
    }
-
-   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
-   {
-      assertEquals(originalParent, replacementParent);
-   }
 }

@@ -27,13 +27,13 @@ import java.net.URL;
 import java.util.List;
 
 import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Virtual File System
@@ -115,6 +115,31 @@ public class VFS
    }
 
    /**
+    * Cleanup any resources tied to this file.
+    * e.g. vfs cache
+    *
+    * @param file the file
+    */
+   static void cleanup(VirtualFile file)
+   {
+      try
+      {
+         VirtualFileHandler fileHandler = file.getHandler();
+         VFSContext context = fileHandler.getVFSContext();
+         VirtualFileHandler contextHandler = context.getRoot();
+         // the file is the context root, hence possible cache candidate
+         if (fileHandler.equals(contextHandler))
+         {
+            VFSCache cache = VFSCacheFactory.getInstance();
+            cache.removeContext(context);
+         }
+      }
+      catch (Exception ignored)
+      {
+      }
+   }
+
+   /**
     * Get the virtual file system for a root uri
     * 
     * @param rootURI the root URI
@@ -133,6 +158,20 @@ public class VFS
    }
 
    /**
+    * Create new root
+    *
+    * @param rootURI the root url
+    * @return the virtual file
+    * @throws IOException if there is a problem accessing the VFS
+    * @throws IllegalArgumentException if the rootURL
+    */
+   public static VirtualFile createNewRoot(URI rootURI) throws IOException
+   {
+      VFS vfs = getVFS(rootURI);
+      return vfs.getRoot();
+   }
+
+   /**
     * Get the root virtual file
     * 
     * @param rootURI the root uri
@@ -142,8 +181,9 @@ public class VFS
     */
    public static VirtualFile getRoot(URI rootURI) throws IOException
    {
-      VFS vfs = getVFS(rootURI);
-      return vfs.getRoot();
+      VFSCache cache = VFSCacheFactory.getInstance();
+      VirtualFile file = cache.getFile(rootURI);
+      return (file != null) ? file : createNewRoot(rootURI);
    }
 
    /**
@@ -157,12 +197,12 @@ public class VFS
     * @return the cached virtual file
     * @throws IOException for any error
     * @throws IllegalArgumentException if the rootURL is null
+    * @deprecated use getRoot
     */
+   @Deprecated
    public static VirtualFile getCachedFile(URI rootURI) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(rootURI);
-      return (file != null) ? file : getRoot(rootURI);
+      return getRoot(rootURI);
    }
 
    /**
@@ -177,8 +217,8 @@ public class VFS
    @SuppressWarnings("deprecation")
    public static VirtualFile getVirtualFile(URI rootURI, String name) throws IOException
    {
-      VFS vfs = getVFS(rootURI);
-      return vfs.findChild(name);
+      VirtualFile root = getRoot(rootURI);
+      return root.findChild(name);
    }
 
    /**
@@ -200,8 +240,22 @@ public class VFS
    }
 
    /**
-    * Get the root virtual file
+    * Create new root
     * 
+    * @param rootURL the root url
+    * @return the virtual file
+    * @throws IOException if there is a problem accessing the VFS
+    * @throws IllegalArgumentException if the rootURL
+    */
+   public static VirtualFile createNewRoot(URL rootURL) throws IOException
+   {
+      VFS vfs = getVFS(rootURL);
+      return vfs.getRoot();
+   }
+
+   /**
+    * Get the root virtual file
+    *
     * @param rootURL the root url
     * @return the virtual file
     * @throws IOException if there is a problem accessing the VFS
@@ -209,8 +263,9 @@ public class VFS
     */
    public static VirtualFile getRoot(URL rootURL) throws IOException
    {
-      VFS vfs = getVFS(rootURL);
-      return vfs.getRoot();
+      VFSCache cache = VFSCacheFactory.getInstance();
+      VirtualFile file = cache.getFile(rootURL);
+      return (file != null) ? file : createNewRoot(rootURL);
    }
 
    /**
@@ -224,12 +279,12 @@ public class VFS
     * @return the cached virtual file
     * @throws IOException for any error
     * @throws IllegalArgumentException if the rootURL is null
+    * @deprecated use getRoot
     */
+   @Deprecated
    public static VirtualFile getCachedFile(URL rootURL) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(rootURL);
-      return (file != null) ? file : getRoot(rootURL);
+      return getRoot(rootURL);
    }
 
    /**
@@ -244,8 +299,8 @@ public class VFS
    @SuppressWarnings("deprecation")
    public static VirtualFile getVirtualFile(URL rootURL, String name) throws IOException
    {
-      VFS vfs = getVFS(rootURL);
-      return vfs.findChild(name);
+      VirtualFile root = getRoot(rootURL);
+      return root.findChild(name);
    }
 
    /**

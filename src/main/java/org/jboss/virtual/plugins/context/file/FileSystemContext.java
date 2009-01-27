@@ -32,16 +32,15 @@ import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Properties;
 
+import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
-import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.plugins.context.jar.JarHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.logging.Logger;
 
 /**
  * FileSystemContext.
@@ -91,10 +90,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /** The root file */
    private VirtualFileHandler root;
-   
-   /** A reference to the virtual file of the root to stop it getting closed */
-   private VirtualFile rootFile;
-   
+
    /**
     * Get the file for a url
     * 
@@ -213,7 +209,6 @@ public class FileSystemContext extends AbstractVFSContext
             throw new java.io.FileNotFoundException((file == null ? "<null>" : file.getName())
                     + " doesn't exist. (rootURI: " + getRootURI() + ", file: " + file + ")");
 
-         rootFile = root.getVirtualFile();
          file = null; // nullify temp file
       }
       return root;
@@ -409,16 +404,9 @@ public class FileSystemContext extends AbstractVFSContext
     *
     * @return true if case sensitivity is enabled
     */
-   public boolean isForcedCaseSensitive() {
-      return forceCaseSensitive;
-   }
-
-   @Override
-   protected void finalize() throws Throwable
+   public boolean isForcedCaseSensitive()
    {
-      if (rootFile != null)
-         rootFile.close();
-      super.finalize();
+      return forceCaseSensitive;
    }
 
    private static class CheckForceVfsJar implements PrivilegedAction<Boolean>

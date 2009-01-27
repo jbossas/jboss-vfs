@@ -92,8 +92,11 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(IterableTimedCacheTestCase.suite());
       suite.addTest(SoftRefCacheTestCase.suite());
       suite.addTest(WeakRefCacheTestCase.suite());
+      suite.addTest(CombinedVFSCacheTestCase.suite());
       // exception handler
       suite.addTest(ExceptionHandlerTestCase.suite());
+      // operations
+      suite.addTest(FileCleanupUnitTestCase.suite());
 
       return suite;
    }
