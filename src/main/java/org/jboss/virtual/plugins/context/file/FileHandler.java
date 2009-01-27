@@ -165,12 +165,21 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
    public void cleanup()
    {
       if (isTemporary())
-         Files.delete(file);
+      {
+         try
+         {
+            delete(2000);
+         }
+         catch (Exception ignored)
+         {
+         }
+      }
    }
 
    public boolean delete(int gracePeriod) throws IOException
    {
-      File f = getFile();
+      // we can bypass the checkClosed
+      File f = file;
 
       boolean exists = f.exists();
       if (exists == false)
