@@ -50,7 +50,13 @@ public abstract class DetachedCopyTest extends CopyTest
    protected void assertTopLevel(VirtualFile original, VirtualFile replacement) throws Exception
    {
       assertReplacement(original, replacement, isExploded());
-      assertNotNull(replacement.getParent());
+      assertNull(replacement.getParent());
+   }
+
+   @Override
+   protected void assertTopLevelParent(VirtualFile originalParent, VirtualFile replacementParent) throws Exception
+   {
+      assertNull(replacementParent);
    }
 
    protected void assertNestedLevel(VirtualFile original, VirtualFile replacement) throws Exception

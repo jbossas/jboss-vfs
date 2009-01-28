@@ -55,11 +55,12 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.plugins.context.ReplacementHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -1062,7 +1063,7 @@ public class ZipEntryContext extends AbstractVFSContext
          }
          else
          {
-            newOne = new DelegatingHandler(this, parent, original.getName(), replacement);
+            newOne = new ReplacementHandler(this, parent, original.getName(), replacement);
          }
 
          synchronized(this)

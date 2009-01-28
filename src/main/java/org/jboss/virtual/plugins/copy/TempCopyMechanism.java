@@ -68,4 +68,9 @@ public class TempCopyMechanism extends AbstractCopyMechanism
 
       return super.copy(guidDir, handler);
    }
+
+   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
+   {
+      return false;
+   }
 }

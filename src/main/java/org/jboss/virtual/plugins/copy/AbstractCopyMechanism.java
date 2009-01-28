@@ -102,10 +102,7 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
     * @return true if needs replacement
     * @throws IOException for any error
     */
-   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
-   {
-      return true;
-   }
+   protected abstract boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException;
 
    /**
     * Unwrap the handler from possible delegate handler.

@@ -168,7 +168,7 @@ public abstract class CopyTest extends AbstractVFSTest
    protected void assertExplodedReplacement(VirtualFile original, VirtualFile replacement) throws Exception
    {
       assertReplacement(original, replacement);
-      assertNotNull(replacement.getParent());
+      assertNull(replacement.getParent());
    }
 
    protected void assertReplacement(VirtualFile original, VirtualFile replacement) throws Exception
