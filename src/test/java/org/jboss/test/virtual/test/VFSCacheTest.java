@@ -80,8 +80,8 @@ public abstract class VFSCacheTest extends AbstractVFSTest
             VirtualFile nested = root.findChild("/nested.jar/complex.jar/subfolder/subsubfolder/subsubchild");
             URL nestedURL = nested.toURL();
 
-            assertEquals(file, cache.getFile(fileURL));
-            assertEquals(nested, cache.getFile(nestedURL));
+            assertEquals(file, VFS.getRoot(fileURL));
+            assertEquals(nested, VFS.getRoot(nestedURL));
 
             VFSCacheFactory.setInstance(null);
             VFSCache wrapper = new WrapperVFSCache(cache);

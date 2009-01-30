@@ -42,7 +42,7 @@ public abstract class IterableVFSCache extends AbstractVFSCache
     */
    protected abstract Iterable<String> getKeys();
 
-   protected VFSContext findContext(URI uri)
+   public VFSContext findContext(URI uri)
    {
       String uriString = stripProtocol(uri);
       Iterable<String> keys = getKeys();

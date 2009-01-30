@@ -32,8 +32,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * Virtual File System
@@ -126,12 +125,14 @@ public class VFS
       {
          VirtualFileHandler fileHandler = file.getHandler();
          VFSContext context = fileHandler.getVFSContext();
+         context.cleanupTempHandlers(fileHandler.getPathName());
+         
          VirtualFileHandler contextHandler = context.getRoot();
          // the file is the context root, hence possible cache candidate
          if (fileHandler.equals(contextHandler))
          {
-            VFSCache cache = VFSCacheFactory.getInstance();
-            cache.removeContext(context);
+            VFSRegistry registry = VFSRegistry.getInstance();
+            registry.removeContext(context);
          }
       }
       catch (Exception ignored)
@@ -153,7 +154,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURI);
       VFSContext context = factory.getVFS(rootURI);
-      VFSCacheFactory.getInstance().putContext(context);
+      VFSRegistry.getInstance().addContext(context);
       return context.getVFS();
    }
 
@@ -181,8 +182,8 @@ public class VFS
     */
    public static VirtualFile getRoot(URI rootURI) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(rootURI);
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VirtualFile file = registry.getFile(rootURI);
       return (file != null) ? file : createNewRoot(rootURI);
    }
 
@@ -235,7 +236,7 @@ public class VFS
       if (factory == null)
          throw new IOException("No context factory for " + rootURL);
       VFSContext context = factory.getVFS(rootURL);
-      VFSCacheFactory.getInstance().putContext(context);
+      VFSRegistry.getInstance().addContext(context);
       return context.getVFS();
    }
 
@@ -263,8 +264,8 @@ public class VFS
     */
    public static VirtualFile getRoot(URL rootURL) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(rootURL);
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VirtualFile file = registry.getFile(rootURL);
       return (file != null) ? file : createNewRoot(rootURL);
    }
 

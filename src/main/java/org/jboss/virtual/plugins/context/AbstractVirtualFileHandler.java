@@ -99,6 +99,9 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /** The vfsPath */
    private transient String vfsPath;
 
+   /** The local vfsPath */
+   private transient String localVfsPath;
+
    /** The reference count */
    private transient AtomicInteger references = new AtomicInteger(0);
 
@@ -225,6 +228,19 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * @return pathName
     */
    public String getLocalPathName()
+   {
+      if (localVfsPath == null)
+         localVfsPath = readLocalPathName();
+
+      return localVfsPath;
+   }
+
+   /**
+    * Create local path name.
+    *
+    * @return the local path name
+    */
+   private String readLocalPathName()
    {
       try
       {

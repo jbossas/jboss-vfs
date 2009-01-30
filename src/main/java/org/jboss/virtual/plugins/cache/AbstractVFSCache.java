@@ -33,6 +33,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.registry.VFSContextFinder;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 
@@ -41,7 +42,7 @@ import org.jboss.virtual.spi.cache.VFSCache;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
+public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFSContextFinder
 {
    protected Logger log = Logger.getLogger(getClass());
    
@@ -147,15 +148,6 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
     * @return cached context or null if not found
     */
    protected abstract VFSContext getContext(String path);
-
-   /**
-    * Find cached context.
-    * This method must take read lock.
-    *
-    * @param uri the uri to match
-    * @return found context or null
-    */
-   protected abstract VFSContext findContext(URI uri);
 
    /**
     * Get path key.

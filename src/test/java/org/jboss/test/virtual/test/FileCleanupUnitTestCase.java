@@ -28,13 +28,15 @@ import java.net.URI;
 import java.net.URL;
 
 import junit.framework.Test;
+import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.plugins.cache.LRUVFSCache;
+import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.registry.VFSRegistryBuilder;
 
 /**
  * Test file closing
@@ -72,10 +74,17 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
       field.setAccessible(true);
       field.set(null, null);
 
+      // nullify the registry
+      clazz = VFSRegistryBuilder.class;
+      field = clazz.getDeclaredField("singleton");
+      field.setAccessible(true);
+      field.set(null, null);
+
       String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
-      String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")) + "filecleanup";
+      String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")) + GUID.asString();
 
       tempDir =  new File(tempDirString);
+      tempDir.deleteOnExit();      
       if (tempDir.exists())
       {
          deleteTempDir();
@@ -94,21 +103,15 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
    {
       try
       {
-         VFSCacheFactory.getInstance().stop();
-      }
-      catch (Throwable ignored)
-      {
-      }
-      finally
-      {
-         VFSCacheFactory.setInstance(null);
-      }
-
-      System.clearProperty("jboss.server.temp.dir");
-
-      try
-      {
          deleteTempDir();
+
+         VFSCacheFactory.getInstance().stop();
+         VFSCacheFactory.setInstance(null);
+
+         System.clearProperty("jboss.server.temp.dir");
+      }
+      catch (Throwable t)
+      {
       }
       finally
       {
@@ -155,7 +158,7 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
    {
       VFSCache cache = VFSCacheFactory.getInstance();
       VirtualFile file = cache.getFile(uri);
-      assertNull(file);
+      assertNull("" + uri, file);
    }
 
    public void testNestedJarCleanup() throws Exception

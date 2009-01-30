@@ -132,11 +132,12 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       File guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
       // unpack handler
       File copy = copy(guidDir, handler);
+
+      VFSContext oldVFSContext = handler.getVFSContext();
       // create new handler
-      FileSystemContext fileSystemContext = new FileSystemContext(copy);
+      FileSystemContext fileSystemContext = new TempContext(copy, oldVFSContext, handler.getPathName());
 
       // merge old options
-      VFSContext oldVFSContext = handler.getVFSContext();
       Map<String, String> newOptions = fileSystemContext.getOptions();
       if (newOptions != null) // shouldn't be null, but we check anyway
          newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());

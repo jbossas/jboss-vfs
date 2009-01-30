@@ -26,8 +26,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
@@ -64,6 +66,9 @@ public abstract class AbstractVFSContext implements VFSContext
 
    /** Root's peer within another context */
    private VirtualFileHandler rootPeer;
+
+   /** The temp handlers */
+   private Map<String, VirtualFileHandler> tempHandlers = new ConcurrentHashMap<String, VirtualFileHandler>();
 
    /** The exception handler */
    private ExceptionHandler exceptionHandler;
@@ -332,6 +337,46 @@ public abstract class AbstractVFSContext implements VFSContext
                log.debug("Original: " + child, e);
                throw new IOException("Stack overflow, the file system is too complicated? " + child);
             }
+         }
+      }
+   }
+
+   public void addTempHandler(String path, VirtualFileHandler handler)
+   {
+      tempHandlers.put(path, handler);
+   }
+
+   public VirtualFileHandler findTempHandler(URI uri) throws IOException
+   {
+      String relativePath = VFSUtils.getRelativePath(this, uri);
+      for (Map.Entry<String, VirtualFileHandler> entry : tempHandlers.entrySet())
+      {
+         if (relativePath.startsWith(entry.getKey()))
+         {
+            VirtualFileHandler handler = entry.getValue();
+            String path = relativePath.substring(handler.getPathName().length());
+            return handler.getChild(path);
+         }
+      }
+      return null;
+   }
+
+   public void cleanupTempHandlers(String path)
+   {
+      Iterator<Map.Entry<String, VirtualFileHandler>> iter = tempHandlers.entrySet().iterator();
+      while (iter.hasNext())
+      {
+         Map.Entry<String, VirtualFileHandler> entry = iter.next();
+         if (entry.getKey().startsWith(path))
+         {
+            try
+            {
+               entry.getValue().cleanup();
+            }
+            catch (Throwable ignored)
+            {
+            }
+            iter.remove();
          }
       }
    }

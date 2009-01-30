@@ -57,7 +57,7 @@ public class IterableTimedVFSCache extends TimedVFSCache
    }
 
    @SuppressWarnings("unchecked")
-   protected VFSContext findContext(URI uri)
+   public VFSContext findContext(URI uri)
    {
       String uriString = stripProtocol(uri);
       TimedCachePolicy tcp = getPolicy();

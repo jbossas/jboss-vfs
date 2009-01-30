@@ -19,47 +19,40 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.cache;
+package org.jboss.virtual.plugins.copy;
 
-import java.net.URI;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
- * Iterable vfs cache.
+ * Temp context;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class PathMatchingVFSCache extends AbstractVFSCache
+public class TempContext extends FileSystemContext
 {
-   /**
-    * Match the uri's path with cached contexts path.
-    *
-    * @param uri the uri to match
-    * @return found context or null
-    */
-   public VFSContext findContext(URI uri)
+   /** The old context */
+   private VFSContext oldContext;
+
+   /**The relative path */
+   private String relativePath;
+
+   public TempContext(File file, VFSContext oldContext, String relativePath) throws IOException, URISyntaxException
    {
-      String uriString = stripProtocol(uri);
-      List<String> tokens = PathTokenizer.getTokens(uriString);
-      StringBuilder sb = new StringBuilder("/");
-      readLock();
-      try
-      {
-         for (String token : tokens)
-         {
-            sb.append(token).append("/");
-            VFSContext context = getContext(sb.toString());
-            if (context != null)
-               return context;
-         }
-      }
-      finally
-      {
-         readUnlock();
-      }
-      return null;
+      super(file);
+      this.oldContext = oldContext;
+      this.relativePath = relativePath;
+   }
+
+   @Override
+   public void cleanupTempHandlers(String path)
+   {
+      // this path should be ""?
+      super.cleanupTempHandlers(path);
+      oldContext.cleanupTempHandlers(relativePath + path);      
    }
 }

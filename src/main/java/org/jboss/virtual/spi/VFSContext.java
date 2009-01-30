@@ -127,4 +127,10 @@ public interface VFSContext
     * @param exceptionHandler the exception handler.
     */
    void setExceptionHandler(ExceptionHandler exceptionHandler);
+
+   void addTempHandler(String path, VirtualFileHandler handler);
+
+   VirtualFileHandler findTempHandler(URI uri) throws IOException;
+
+   void cleanupTempHandlers(String path);
 }

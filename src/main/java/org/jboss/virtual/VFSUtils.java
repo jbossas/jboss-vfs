@@ -1062,4 +1062,58 @@ public class VFSUtils
       VirtualFileHandler handler = file.getHandler();
       return handler.getRealURL();
    }
+
+   /**
+    * Get relative path.
+    *
+    * @param context the vfs context
+    * @param uri the uri
+    * @return uri's relative path to context's root
+    */
+   public static String getRelativePath(VFSContext context, URI uri)
+   {
+      String uriPath = stripProtocol(uri);
+      String contextKey = getKey(context);
+      return uriPath.substring(contextKey.length());
+   }
+
+   /**
+    * Strip protocol from url string.
+    *
+    * @param uri the uri
+    * @return uri's path string
+    */
+   protected static String stripProtocol(URI uri)
+   {
+      String path = uri.getPath();
+      if (path != null && path.length() > 0)
+      {
+         StringBuilder sb = new StringBuilder(path);
+
+         if (sb.charAt(0) != '/')
+            sb.insert(0, '/');
+         if (sb.charAt(sb.length() - 1) != '/')
+            sb.append('/');
+
+         path = sb.toString();
+      }
+      else
+      {
+         path = "/";
+      }
+
+      return path;
+   }
+
+   /**
+    * Get path key.
+    *
+    * @param context the vfs context
+    * @return contex's root path w/o protocol
+    */
+   protected static String getKey(VFSContext context)
+   {
+      URI uri = context.getRootURI();
+      return stripProtocol(uri);
+   }
 }
