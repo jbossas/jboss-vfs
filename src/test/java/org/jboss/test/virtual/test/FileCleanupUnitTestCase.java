@@ -23,6 +23,7 @@ package org.jboss.test.virtual.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FilenameFilter;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URL;
@@ -125,18 +126,35 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
    {
       File dir = new File(tempDir, "vfs-nested.tmp");
       File[] files = dir.listFiles();
-      assertNotNull(files);
-      assertEquals(size, files.length);
+      if (dir.exists())
+      {
+         assertEquals(size, files.length);
+      }
+      else if (size == 0)
+      {
+         assertNull(files);
+      }
+      else
+      {
+         fail("Illegal dir: " + dir);
+      }
    }
 
    protected void assertCopyMechanismFiles(int size) throws Exception
    {
-      File[] files = tempDir.listFiles();
+      File[] files = tempDir.listFiles(new FilenameFilter()
+      {
+         public boolean accept(File dir, String name)
+         {
+            return name.contains("vfs-nested.tmp") == false;
+         }
+      });
       assertNotNull(files);
       int counter = 0;
       for (File dir : files)
       {
-         counter += dir.listFiles().length;
+         File[] realFiles = dir.listFiles();
+         counter += realFiles.length;
       }
       assertEquals(size, counter);
    }
@@ -194,5 +212,52 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
 
       root.cleanup();
       assertNoRegistryEntry(root.toURI());
+   }
+
+   public void test3Levels() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      VFS root = VFS.getVFS(url);
+
+      VirtualFile ear = root.getChild("level1.zip");
+      VirtualFile earCopy = VFSUtils.temp(ear);
+
+      VirtualFile l3 = ear.getChild("level2.zip/level3.zip/test3.txt");
+      assertNotNull(l3);
+      assertTempFiles(2);
+
+      VirtualFile l3copy = earCopy.getChild("level2.zip/level3.zip/test3.txt");
+      assertNotNull(l3copy);
+      assertCopyMechanismFiles(1);
+
+      earCopy.cleanup();
+
+      assertTempFiles(0);
+      assertCopyMechanismFiles(0);
+   }
+
+   public void testDirectURLUsage() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      VFS root = VFS.getVFS(url);
+
+      VirtualFile ear = root.getChild("level1.zip");
+      assertTempFiles(0);
+      VirtualFile earCopy = VFSUtils.temp(ear);
+
+      VirtualFile l3 = earCopy.getChild("level2.zip/level3.zip/test3.txt");
+      assertNotNull(l3);
+      assertCopyMechanismFiles(1);
+
+      url = new URL(root.getRoot().toURL().toExternalForm() + "level1.zip/level2.zip/level3.zip/test3.txt");
+      VirtualFile l3url = VFS.getRoot(url);
+
+      assertEquals(l3, l3url);
+      assertTempFiles(2);
+      assertCopyMechanismFiles(1);
+
+      earCopy.cleanup();
+
+      assertCopyMechanismFiles(0);
    }
 }

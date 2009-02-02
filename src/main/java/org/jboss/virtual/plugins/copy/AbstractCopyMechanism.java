@@ -34,11 +34,11 @@ import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.id.GUID;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
-import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;

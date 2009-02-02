@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.TempInfo;
 
 /**
  * Temp context;
@@ -46,6 +47,18 @@ public class TempContext extends FileSystemContext
       super(file);
       this.oldContext = oldContext;
       this.relativePath = relativePath;
+      if (relativePath.endsWith("/") == false)
+         this.relativePath += "/";
+   }
+
+   @Override
+   public TempInfo getTempInfo(String path)
+   {
+      TempInfo tempInfo = super.getTempInfo(path);
+      if (tempInfo != null)
+         return tempInfo;
+
+      return oldContext.getTempInfo(relativePath + path);
    }
 
    @Override
