@@ -72,4 +72,10 @@ public class BasicTempInfo implements TempInfo
    {
       this.handler = handler;
    }
+
+   @Override
+   public String toString()
+   {
+      return getPath() + " / " + getTempFile().getName();
+   }
 }

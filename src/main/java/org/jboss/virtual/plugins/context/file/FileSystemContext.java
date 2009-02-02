@@ -64,7 +64,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class FileSystemContext extends AbstractVFSContext
 {
-   private static final Logger log = Logger.getLogger(FileSystemContext.class);
+   protected static final Logger log = Logger.getLogger(FileSystemContext.class);
 
    /** true if forcing fallback to vfsjar from default vfszip */
    private static boolean forceVfsJar;

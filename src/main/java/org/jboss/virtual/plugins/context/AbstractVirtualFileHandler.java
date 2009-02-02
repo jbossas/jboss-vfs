@@ -108,6 +108,9 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    /** The cached last modified */
    protected transient long cachedLastModified;
 
+   /** The vfsUrlCache */
+   private transient URL vfsUrlCached;
+
    /**
     * Create a new handler
     * 
@@ -269,6 +272,60 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    }
 
    public URL toVfsUrl() throws MalformedURLException, URISyntaxException
+   {
+      if (vfsUrlCached == null)
+      {
+         if (isTemporary())
+         {
+            StringBuffer buf = new StringBuffer(getProtocol()).append(':');
+
+            VFSContext context = getVFSContext();
+            String rootString = context.getOptions().get(VFSUtils.OLD_ROOT_STRING);
+            if (rootString == null)
+            {
+               URI rootURI = context.getRootURI();
+               rootString = VFSUtils.stripProtocol(rootURI);
+            }
+
+            buf.append(rootString);
+            String path = getPathName();
+            if (path != null && path.length() > 0)
+            {
+               if (buf.charAt(buf.length() - 1) != '/')
+               {
+                  buf.append('/');
+               }
+               buf.append(getPathName());
+            }
+
+            vfsUrlCached = new URL(buf.toString());
+         }
+         else
+         {
+            vfsUrlCached = toInternalVfsUrl();
+         }
+      }
+      return vfsUrlCached;
+   }
+
+   /**
+    * Get the protocol.
+    *
+    * @return the protocol
+    */
+   protected String getProtocol()
+   {
+      throw new IllegalArgumentException("Unsupported impl.");
+   }
+
+   /**
+    * Get internal representation of vfs url.
+    *
+    * @return the vfs url
+    * @throws MalformedURLException for any error
+    * @throws URISyntaxException for any error
+    */
+   protected URL toInternalVfsUrl() throws MalformedURLException, URISyntaxException
    {
       return vfsUrl;
    }

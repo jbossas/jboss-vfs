@@ -63,6 +63,11 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
+   protected String getProtocol()
+   {
+      return "vfs";
+   }
+
    public VirtualFileHandler addChild(VirtualFileHandler handler)
    {
       if (handler.getClass().isAnnotationPresent(Assembled.class) == false)

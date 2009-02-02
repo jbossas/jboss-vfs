@@ -60,6 +60,11 @@ public class ByteArrayHandler extends AbstractVirtualFileHandler
       setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
+   protected String getProtocol()
+   {
+      return "vfsmemory";
+   }
+
    @Override
    public URL toURL() throws MalformedURLException, URISyntaxException
    {

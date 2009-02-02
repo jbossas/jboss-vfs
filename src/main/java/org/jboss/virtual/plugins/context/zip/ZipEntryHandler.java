@@ -72,6 +72,11 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       }
    }
 
+   protected String getProtocol()
+   {
+      return "vfszip";
+   }
+
    private synchronized void init()
    {
       if (initialized)
@@ -199,7 +204,7 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       return ((ZipEntryContext) getLocalVFSContext());
    }
 
-   public URL toVfsUrl()
+   protected URL toInternalVfsUrl()
    {
       init();
       return super.getVfsUrl();

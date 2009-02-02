@@ -122,6 +122,9 @@ public class VFSUtils
    /** The temp marker flag */
    public static final String IS_TEMP_FILE = "IS_TEMP_FILE";
 
+   /** The old root string */
+   public static final String OLD_ROOT_STRING = "OLD_ROOT_STRING";
+
    /**
     * Stop cache.
     */

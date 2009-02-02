@@ -98,7 +98,12 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       // ignore that url.openConnection.lastModified
    }
 
-   public URL toVfsUrl() throws MalformedURLException, URISyntaxException
+   protected String getProtocol()
+   {
+      return "vfsfile";
+   }
+
+   protected URL toInternalVfsUrl() throws MalformedURLException, URISyntaxException
    {
       if (getVfsUrl() == null)
       {

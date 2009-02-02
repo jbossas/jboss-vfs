@@ -134,14 +134,18 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       // unpack handler
       File copy = copy(guidDir, handler);
 
+      String path = handler.getPathName();
       VFSContext oldVFSContext = handler.getVFSContext();
       // create new handler
-      FileSystemContext fileSystemContext = new TempContext(copy, oldVFSContext, handler.getPathName());
+      FileSystemContext fileSystemContext = new TempContext(copy, oldVFSContext, path);
 
       // merge old options
       Map<String, String> newOptions = fileSystemContext.getOptions();
       if (newOptions != null) // shouldn't be null, but we check anyway
+      {
          newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());
+         newOptions.put(VFSUtils.OLD_ROOT_STRING, VFSUtils.stripProtocol(oldVFSContext.getRootURI()) + path);
+      }
       Map<String, String> oldOptions = oldVFSContext.getOptions();
       if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)
          newOptions.putAll(oldOptions);
@@ -152,7 +156,7 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
          fileSystemContext.setExceptionHandler(eh);
 
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
-      oldVFSContext.addTempInfo(new BasicTempInfo(handler.getPathName(), copy, newHandler));
+      oldVFSContext.addTempInfo(new BasicTempInfo(path, copy, newHandler));
 
       VirtualFileHandler parent = handler.getParent();
       if (parent != null && replaceOldHandler(parent, handler, newHandler))

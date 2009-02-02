@@ -268,4 +268,28 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
 
       assertCopyMechanismFiles(0);
    }
+
+   // TODO - move this test
+   public void testTempUrls() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      String urlString = VFSUtils.stripProtocol(VFSUtils.toURI(url));
+      VFS root = VFS.getVFS(url);
+
+      VirtualFile ear = root.getChild("level1.zip");
+      VirtualFile earCopy = VFSUtils.temp(ear);
+      assertEquals("vfszip:" + urlString + "level1.zip", earCopy.toURL().toExternalForm());
+
+      VirtualFile l2 = earCopy.getChild("level2.zip");
+      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip", l2.toURL().toExternalForm());
+      VirtualFile l2sub = l2.getChild("test2.txt");
+      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
+
+      VirtualFile l3 = l2.getChild("level3.zip");
+      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/level3.zip", l3.toURL().toExternalForm());
+      VirtualFile l3sub = l3.getChild("test3.txt");
+      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
+
+      ear.cleanup();
+   }
 }

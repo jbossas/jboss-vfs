@@ -80,6 +80,11 @@ public abstract class AbstractJarHandler extends AbstractURLHandler
       this.entry = entry;
    }
 
+   protected String getProtocol()
+   {
+      return "vfsjar";
+   }
+
    /**
     * Get the jar.
     *

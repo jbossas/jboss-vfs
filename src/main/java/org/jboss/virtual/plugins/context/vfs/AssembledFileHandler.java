@@ -50,6 +50,12 @@ public class AssembledFileHandler extends DelegatingHandler
       setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
    }
 
+   @Override
+   protected String getProtocol()
+   {
+      return "vfs";
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       throw new IOException("File cannot have children: " + this);
