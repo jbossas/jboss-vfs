@@ -523,6 +523,8 @@ public class ZipEntryContext extends AbstractVFSContext
                         dest = ti.getTempFile();
                   }
 
+                  boolean createNewTempInfo = (dest == null); 
+
                   if (dest == null)
                   {
                      // extract it to temp dir
@@ -540,7 +542,7 @@ public class ZipEntryContext extends AbstractVFSContext
                   // mount another instance of ZipEntryContext
                   delegator = mountZipFile(parent, name, dest);
 
-                  if (context != null && path != null)
+                  if (context != null && path != null && createNewTempInfo)
                      context.addTempInfo(new BasicTempInfo(path, dest, delegator));
                }
                else
