@@ -69,28 +69,36 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
    {
       super.setUp();
 
-      // nullify the temp dir
-      Class<?> clazz = AbstractCopyMechanism.class;
-      Field field = clazz.getDeclaredField("tempDir");
-      field.setAccessible(true);
-      field.set(null, null);
-
-      String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
-      String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")) + GUID.asString();
-
-      tempDir =  new File(tempDirString);
-      tempDir.deleteOnExit();      
-      if (tempDir.exists())
+      try
       {
-         deleteTempDir();
+         // nullify the temp dir
+         Class<?> clazz = AbstractCopyMechanism.class;
+         Field field = clazz.getDeclaredField("tempDir");
+         field.setAccessible(true);
+         field.set(null, null);
+
+         String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
+         String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")) + GUID.asString();
+
+         tempDir =  new File(tempDirString);
+         tempDir.deleteOnExit();
+         if (tempDir.exists())
+         {
+            deleteTempDir();
+         }
+         assertTrue(tempDir.mkdir());
+
+         System.setProperty("jboss.server.temp.dir", tempDirString);
+
+         VFSCache cache = new LRUVFSCache(2, 5);
+         cache.start();
+         VFSCacheFactory.setInstance(cache);
       }
-      assertTrue(tempDir.mkdir());
-
-      System.setProperty("jboss.server.temp.dir", tempDirString);
-
-      VFSCache cache = new LRUVFSCache(2, 5);
-      cache.start();
-      VFSCacheFactory.setInstance(cache);
+      catch (Exception e)
+      {
+         super.tearDown();
+         throw e;
+      }
    }
 
    @Override
