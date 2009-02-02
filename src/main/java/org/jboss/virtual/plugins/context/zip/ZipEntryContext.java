@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -457,6 +458,8 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private synchronized void initEntries() throws IOException, URISyntaxException
    {
+      boolean trace = log.isTraceEnabled();
+
       // we're using a two phase approach - we first select the relevant ones
       // then we order these by name and only then we process them
       // this way we ensure that parent entries are processed before child entries
@@ -530,6 +533,12 @@ public class ZipEntryContext extends AbstractVFSContext
                      // extract it to temp dir
                      dest = new File(getTempDir() + "/" + getTempFileName(entryName));
                      dest.deleteOnExit();
+
+                     if (trace)
+                     {
+                        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+                        log.trace("Dest: " + dest + ", Stack-trace:\n" + Arrays.toString(stackTraceElements));
+                     }
 
                      // ensure parent exists
                      dest.getParentFile().mkdirs();
