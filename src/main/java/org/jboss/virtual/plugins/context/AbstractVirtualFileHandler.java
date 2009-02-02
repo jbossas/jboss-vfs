@@ -295,7 +295,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
                {
                   buf.append('/');
                }
-               buf.append(getPathName());
+               buf.append(path);
             }
 
             vfsUrlCached = new URL(buf.toString());
