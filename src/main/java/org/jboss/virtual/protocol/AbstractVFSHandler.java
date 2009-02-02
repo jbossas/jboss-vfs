@@ -32,8 +32,7 @@ import java.util.WeakHashMap;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * VFS's file URL handler.
@@ -68,8 +67,8 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
 
    protected URLConnection openConnection(URL url) throws IOException
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile vf = cache.getFile(url);
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VirtualFile vf = registry.getFile(url);
       if (vf != null)
          return new VirtualFileURLConnection(url, vf);
 

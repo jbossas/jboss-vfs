@@ -125,10 +125,10 @@ public class VFS
       {
          VirtualFileHandler fileHandler = file.getHandler();
          VFSContext context = fileHandler.getVFSContext();
-         context.cleanupTempHandlers(fileHandler.getPathName());
+         context.cleanupTempInfo(fileHandler.getPathName());
          
          VirtualFileHandler contextHandler = context.getRoot();
-         // the file is the context root, hence possible cache candidate
+         // the file is the context root, hence possible registry candidate
          if (fileHandler.equals(contextHandler))
          {
             VFSRegistry registry = VFSRegistry.getInstance();

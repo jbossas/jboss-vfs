@@ -40,6 +40,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * under a different parent and name.
  * 
  * @author Scott.Stark@jboss.org
+ * @author Ales.Justin@jboss.org
  * @version $Revision:$
  */
 public class DelegatingHandler extends AbstractVirtualFileHandler

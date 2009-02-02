@@ -49,10 +49,10 @@ public class TempContext extends FileSystemContext
    }
 
    @Override
-   public void cleanupTempHandlers(String path)
+   public void cleanupTempInfo(String path)
    {
       // this path should be ""?
-      super.cleanupTempHandlers(path);
-      oldContext.cleanupTempHandlers(relativePath + path);      
+      super.cleanupTempInfo(path);
+      oldContext.cleanupTempInfo(relativePath + path);
    }
 }

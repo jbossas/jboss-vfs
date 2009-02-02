@@ -21,14 +21,15 @@
 */
 package org.jboss.virtual.plugins.cache;
 
-import java.util.Map;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.net.URI;
 
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.util.TimedCachePolicy;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Iterable timed cache policy vfs cache.
@@ -59,7 +60,7 @@ public class IterableTimedVFSCache extends TimedVFSCache
    @SuppressWarnings("unchecked")
    public VFSContext findContext(URI uri)
    {
-      String uriString = stripProtocol(uri);
+      String uriString = VFSUtils.stripProtocol(uri);
       TimedCachePolicy tcp = getPolicy();
       List validKeys = tcp.getValidKeys();
       Set<String> keys = new TreeSet<String>(validKeys);

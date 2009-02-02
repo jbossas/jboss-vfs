@@ -21,8 +21,6 @@
 */
 package org.jboss.virtual.plugins.cache;
 
-import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
@@ -30,10 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.registry.VFSContextFinder;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 
@@ -42,10 +37,10 @@ import org.jboss.virtual.spi.cache.VFSCache;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFSContextFinder
+public abstract class AbstractVFSCache implements VFSCache, CacheStatistics
 {
    protected Logger log = Logger.getLogger(getClass());
-   
+
    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
    private long timestamp;
 
@@ -59,86 +54,16 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
     */
    protected abstract void check();
 
-   public VirtualFile getFile(URI uri) throws IOException
+   public VFSContext findContext(URL url)
    {
-      if (uri == null)
-         throw new IllegalArgumentException("Null uri.");
-
-      check();
-
-      VFSContext context = findContext(uri);
-      if (context != null)
-      {
-         VirtualFileHandler root = context.getRoot();
-         String relativePath = getRelativePath(context, uri);
-         VirtualFileHandler child = root.getChild(relativePath);
-         if (child == null)
-            throw new IOException("Cannot find child, root=" + root + ", relativePath=" + relativePath);
-         
-         return child.getVirtualFile();
-      }
-      return null;
-   }
-
-   /**
-    * Get relative path.
-    *
-    * @param context the vfs context
-    * @param uri the uri
-    * @return uri's relative path to context's root
-    */
-   protected String getRelativePath(VFSContext context, URI uri)
-   {
-      String uriPath = stripProtocol(uri);
-      String contextKey = getKey(context);
-      return uriPath.substring(contextKey.length());
-   }
-
-   public VirtualFile getFile(URL url) throws IOException
-   {
-      if (url == null)
-         throw new IllegalArgumentException("Null url.");
-
-      check();
-
       try
       {
-         return getFile(VFSUtils.toURI(url));
+         return findContext(VFSUtils.toURI(url));
       }
       catch (URISyntaxException e)
       {
-         IOException ioe = new IOException();
-         ioe.initCause(e);
-         throw ioe;
+         throw new RuntimeException(e);
       }
-   }
-
-   /**
-    * Strip protocol from url string.
-    *
-    * @param uri the uri
-    * @return uri's path string
-    */
-   protected static String stripProtocol(URI uri)
-   {
-      String path = uri.getPath();
-      if (path != null && path.length() > 0)
-      {
-         StringBuilder sb = new StringBuilder(path);
-
-         if (sb.charAt(0) != '/')
-            sb.insert(0, '/');
-         if (sb.charAt(sb.length() - 1) != '/')
-            sb.append('/');
-
-         path = sb.toString();
-      }
-      else
-      {
-         path = "/";
-      }
-
-      return path;
    }
 
    /**
@@ -148,18 +73,6 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
     * @return cached context or null if not found
     */
    protected abstract VFSContext getContext(String path);
-
-   /**
-    * Get path key.
-    *
-    * @param context the vfs context
-    * @return contex's root path w/o protocol
-    */
-   protected static String getKey(VFSContext context)
-   {
-      URI uri = context.getRootURI();
-      return stripProtocol(uri);
-   }
 
    public void putContext(VFSContext context)
    {
@@ -174,7 +87,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
          log.trace("VFSContext: " + context + ", Stack-trace:\n" + Arrays.toString(stackTraceElements));
       }
 
-      String path = getKey(context);
+      String path = VFSUtils.getKey(context);
       writeLock();
       try
       {
@@ -190,7 +103,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
    /**
     * Put vfs context and its path key into cache.
     *
-    * @param path the context's path
+    * @param path    the context's path
     * @param context the vfs context
     */
    protected abstract void putContext(String path, VFSContext context);
@@ -202,7 +115,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
 
       check();
 
-      String path = getKey(context);
+      String path = VFSUtils.getKey(context);
       writeLock();
       try
       {
@@ -217,7 +130,7 @@ public abstract class AbstractVFSCache implements VFSCache, CacheStatistics, VFS
    /**
     * Remove vfs context and its path key from cache.
     *
-    * @param path the context's path
+    * @param path    the context's path
     * @param context the vfs context
     */
    protected abstract void removeContext(String path, VFSContext context);

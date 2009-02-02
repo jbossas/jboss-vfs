@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
@@ -107,27 +107,24 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
          realCache = new NoopVFSCache();
    }
 
-   public VirtualFile getFile(URI uri) throws IOException
+   public VFSContext findContext(URI uri)
    {
-      VirtualFile file = permanentCache.getFile(uri);
-      if (file != null)
-         return file;
+      VFSContext context = permanentCache.findContext(uri);
+      if (context != null)
+         return context;
 
-      check();
-      return realCache.getFile(uri);
+      return realCache.findContext(uri);
    }
 
-   public VirtualFile getFile(URL url) throws IOException
+   public VFSContext findContext(URL url)
    {
       try
       {
-         return getFile(url.toURI());
+         return findContext(VFSUtils.toURI(url));
       }
       catch (URISyntaxException e)
       {
-         IOException ioe = new IOException();
-         ioe.initCause(e);
-         throw ioe;
+         throw new RuntimeException(e);
       }
    }
 

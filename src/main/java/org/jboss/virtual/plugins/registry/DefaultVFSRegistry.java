@@ -30,9 +30,9 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
-import org.jboss.virtual.spi.registry.VFSContextFinder;
 import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
@@ -43,7 +43,6 @@ import org.jboss.virtual.spi.registry.VFSRegistry;
 public class DefaultVFSRegistry extends VFSRegistry
 {
    private VFSCache cache;
-   private VFSContextFinder finder;
 
    protected VFSCache getCache()
    {
@@ -51,27 +50,6 @@ public class DefaultVFSRegistry extends VFSRegistry
          cache = VFSCacheFactory.getInstance();
 
       return cache;
-   }
-
-   protected VFSContextFinder getContextFinder()
-   {
-      if (finder == null)
-         finder = createContextFinder();
-
-      return finder;
-   }
-
-   protected VFSContextFinder createContextFinder()
-   {
-      VFSCache cache = getCache();
-      if (cache instanceof VFSContextFinder)
-      {
-         return VFSContextFinder.class.cast(cache);
-      }
-      else
-      {
-         return new DummyVFSContextFinder();
-      }
    }
 
    public void addContext(VFSContext context)
@@ -89,14 +67,29 @@ public class DefaultVFSRegistry extends VFSRegistry
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
-      VFSContext context = getContextFinder().findContext(uri);
+      VFSContext context = getCache().findContext(uri);
       if (context != null)
       {
-         VirtualFileHandler handler = context.findTempHandler(uri);
-         if (handler != null)
-            return handler.getVirtualFile();
+         String relativePath = VFSUtils.getRelativePath(context, uri);
+         for (TempInfo ti : context.getTempInfos())
+         {
+            String path = ti.getPath();
+            if (relativePath.startsWith(path))
+            {
+               VirtualFileHandler handler = ti.getHandler();
+               VirtualFileHandler child = handler.getChild(relativePath.substring(path.length()));
+               return child.getVirtualFile();
+            }
+         }
+
+         VirtualFileHandler root = context.getRoot();
+         VirtualFileHandler child = root.getChild(relativePath);
+         if (child == null)
+            throw new IOException("Cannot find child, root=" + root + ", relativePath=" + relativePath);
+
+         return child.getVirtualFile();
       }
-      return getCache().getFile(uri);
+      return null;
    }
 
    public VirtualFile getFile(URL url) throws IOException
@@ -113,14 +106,6 @@ public class DefaultVFSRegistry extends VFSRegistry
          IOException ioe = new IOException();
          ioe.initCause(e);
          throw ioe;
-      }
-   }
-
-   private static class DummyVFSContextFinder implements VFSContextFinder
-   {
-      public VFSContext findContext(URI uri)
-      {
-         return null;
       }
    }
 }

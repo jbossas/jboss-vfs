@@ -36,14 +36,14 @@ import org.jboss.virtual.plugins.cache.LRUVFSCache;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
-import org.jboss.virtual.spi.registry.VFSRegistryBuilder;
+import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * Test file closing
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class FileCleanupUnitTestCase extends AbstractVFSTest
+public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
 {
    private File tempDir;
 
@@ -71,12 +71,6 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
       // nullify the temp dir
       Class<?> clazz = AbstractCopyMechanism.class;
       Field field = clazz.getDeclaredField("tempDir");
-      field.setAccessible(true);
-      field.set(null, null);
-
-      // nullify the registry
-      clazz = VFSRegistryBuilder.class;
-      field = clazz.getDeclaredField("singleton");
       field.setAccessible(true);
       field.set(null, null);
 
@@ -110,7 +104,7 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
 
          System.clearProperty("jboss.server.temp.dir");
       }
-      catch (Throwable t)
+      catch (Throwable ignored)
       {
       }
       finally
@@ -147,17 +141,17 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
       assertEquals(size, counter);
    }
 
-   protected void assertCacheExists(URI uri) throws Exception
+   protected void assertRegistryEntryExists(URI uri) throws Exception
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(uri);
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VirtualFile file = registry.getFile(uri);
       assertNotNull(file);
    }
 
-   protected void assertNoCache(URI uri) throws Exception
+   protected void assertNoRegistryEntry(URI uri) throws Exception
    {
-      VFSCache cache = VFSCacheFactory.getInstance();
-      VirtualFile file = cache.getFile(uri);
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VirtualFile file = registry.getFile(uri);
       assertNull("" + uri, file);
    }
 
@@ -174,12 +168,12 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
       assertTempFiles(1);
 
       nestedChild.cleanup();
-      assertCacheExists(nestedChild.toURI());
+      assertRegistryEntryExists(nestedChild.toURI());
 
       root.cleanup();
 
       assertTempFiles(0);
-      assertNoCache(root.toURI());
+      assertNoRegistryEntry(root.toURI());
    }
 
    public void testExplicitCopyCleanup() throws Exception
@@ -199,6 +193,6 @@ public class FileCleanupUnitTestCase extends AbstractVFSTest
       assertCopyMechanismFiles(0);
 
       root.cleanup();
-      assertNoCache(root.toURI());
+      assertNoRegistryEntry(root.toURI());
    }
 }

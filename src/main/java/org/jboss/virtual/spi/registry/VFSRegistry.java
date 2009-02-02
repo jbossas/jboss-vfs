@@ -40,11 +40,39 @@ public abstract class VFSRegistry
       return VFSRegistryBuilder.getInstance();
    }
 
+   /**
+    * Add new vfs context.
+    *
+    * @param context the context
+    */
    public abstract void addContext(VFSContext context);
 
+   /**
+    * Remove the context.
+    *
+    * @param context the context
+    */
    public abstract void removeContext(VFSContext context);
 
+   /**
+    * Get the file.
+    * Check the cache for cached entry,
+    * return null if no matching entry exists.
+    *
+    * @param uri the file's uri
+    * @return virtual file instance or null if it doesn't exist in cache
+    * @throws IOException for any error
+    */
    public abstract VirtualFile getFile(URI uri) throws IOException;
 
+   /**
+    * Get the file.
+    * Check the cache for cached entry,
+    * return null if no matching entry exists.
+    *
+    * @param url the file's url
+    * @return virtual file instance or null if it doesn't exist in cache
+    * @throws IOException for any error
+    */
    public abstract VirtualFile getFile(URL url) throws IOException;
 }

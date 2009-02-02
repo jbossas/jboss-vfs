@@ -21,11 +21,9 @@
 */
 package org.jboss.virtual.spi.cache;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 
 /**
@@ -36,26 +34,20 @@ import org.jboss.virtual.spi.VFSContext;
 public interface VFSCache
 {
    /**
-    * Get the file.
-    * Check the cache for cached entry,
-    * return null if no matching entry exists.
+    * Find the context based on uri.
     *
-    * @param uri the file's uri
-    * @return virtual file instance or null if it doesn't exist in cache
-    * @throws IOException for any error
+    * @param uri the uri
+    * @return found context or null
     */
-   VirtualFile getFile(URI uri) throws IOException;
+   VFSContext findContext(URI uri);
 
    /**
-    * Get the file.
-    * Check the cache for cached entry,
-    * return null if no matching entry exists.
+    * Find the context based on url.
     *
-    * @param url the file's url
-    * @return virtual file instance or null if it doesn't exist in cache
-    * @throws IOException for any error
+    * @param url the url
+    * @return found context or null
     */
-   VirtualFile getFile(URL url) throws IOException;
+   VFSContext findContext(URL url);
 
    /**
     * Put vfs context to cache.

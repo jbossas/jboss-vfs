@@ -128,9 +128,11 @@ public interface VFSContext
     */
    void setExceptionHandler(ExceptionHandler exceptionHandler);
 
-   void addTempHandler(String path, VirtualFileHandler handler);
+   void addTempInfo(TempInfo tempInfo);
 
-   VirtualFileHandler findTempHandler(URI uri) throws IOException;
+   TempInfo getTempInfo(String path);
 
-   void cleanupTempHandlers(String path);
+   Iterable<TempInfo> getTempInfos();
+
+   void cleanupTempInfo(String path);
 }

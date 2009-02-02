@@ -21,7 +21,6 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -40,7 +39,7 @@ import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
-public abstract class VFSCacheTest extends AbstractVFSTest
+public abstract class VFSCacheTest extends AbstractVFSRegistryTest
 {
    public VFSCacheTest(String name)
    {
@@ -87,8 +86,8 @@ public abstract class VFSCacheTest extends AbstractVFSTest
             VFSCache wrapper = new WrapperVFSCache(cache);
             VFSCacheFactory.setInstance(wrapper);
 
-            assertEquals(file, wrapper.getFile(fileURL));
-            assertEquals(nested, wrapper.getFile(nestedURL));
+            assertEquals(file, VFS.getRoot(fileURL));
+            assertEquals(nested, VFS.getRoot(nestedURL));
          }
          finally
          {
@@ -201,14 +200,14 @@ public abstract class VFSCacheTest extends AbstractVFSTest
          this.delegate = delegate;
       }
 
-      public VirtualFile getFile(URI uri) throws IOException
+      public VFSContext findContext(URI uri)
       {
-         return delegate.getFile(uri);
+         return delegate.findContext(uri);
       }
 
-      public VirtualFile getFile(URL url) throws IOException
+      public VFSContext findContext(URL url)
       {
-         return delegate.getFile(url);
+         return delegate.findContext(url);
       }
 
       public void putContext(VFSContext context)

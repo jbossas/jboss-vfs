@@ -24,8 +24,9 @@ package org.jboss.virtual.plugins.cache;
 import java.net.URI;
 import java.util.List;
 
-import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Iterable vfs cache.
@@ -42,7 +43,7 @@ public abstract class PathMatchingVFSCache extends AbstractVFSCache
     */
    public VFSContext findContext(URI uri)
    {
-      String uriString = stripProtocol(uri);
+      String uriString = VFSUtils.stripProtocol(uri);
       List<String> tokens = PathTokenizer.getTokens(uriString);
       StringBuilder sb = new StringBuilder("/");
       readLock();

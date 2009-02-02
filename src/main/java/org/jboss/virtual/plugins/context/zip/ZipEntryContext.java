@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -57,8 +57,10 @@ import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.ReplacementHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
+import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -131,9 +133,6 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /** RealURL of this context */
    private URL realURL;
-
-   /** Nested handlers */
-   private List<VirtualFileHandler> nestedHandlers = new CopyOnWriteArrayList<VirtualFileHandler>();
 
    /**
     * Create a new ZipEntryContext
@@ -511,19 +510,38 @@ public class ZipEntryContext extends AbstractVFSContext
 
                if (useCopyMode)
                {
-                  // extract it to temp dir
-                  File dest = new File(getTempDir() + "/" + getTempFileName(ent.getName()));
-                  dest.deleteOnExit();
+                  File dest = null;
+                  String entryName = ent.getName();
+                  String path = null;
 
-                  // ensure parent exists
-                  dest.getParentFile().mkdirs();
+                  VFSContext context = getPeerContext();
+                  if (context != null)
+                  {
+                     path = getPath(context, entryName);
+                     TempInfo ti = context.getTempInfo(path);
+                     if (ti != null)
+                        dest = ti.getTempFile();
+                  }
 
-                  InputStream is = zipSource.openStream(ent);
-                  OutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
-                  VFSUtils.copyStreamAndClose(is, os);
+                  if (dest == null)
+                  {
+                     // extract it to temp dir
+                     dest = new File(getTempDir() + "/" + getTempFileName(entryName));
+                     dest.deleteOnExit();
+
+                     // ensure parent exists
+                     dest.getParentFile().mkdirs();
+
+                     InputStream is = zipSource.openStream(ent);
+                     OutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
+                     VFSUtils.copyStreamAndClose(is, os);
+                  }
 
                   // mount another instance of ZipEntryContext
                   delegator = mountZipFile(parent, name, dest);
+
+                  if (context != null && path != null)
+                     context.addTempInfo(new BasicTempInfo(path, dest, delegator));
                }
                else
                {
@@ -533,7 +551,6 @@ public class ZipEntryContext extends AbstractVFSContext
 
                entries.put(delegator.getLocalPathName(), new EntryInfo(delegator, ent));
                addChild(parent, delegator);
-               nestedHandlers.add(delegator); // add nested delegator
             }
             else
             {
@@ -548,6 +565,21 @@ public class ZipEntryContext extends AbstractVFSContext
       }
    }
 
+   /**
+    * Get temp path.
+    *
+    * @param peer the peer vfs context
+    * @param entryName the zip entry name
+    * @return full temp path
+    */
+   protected String getPath(VFSContext peer, String entryName)
+   {
+      URI peerURI = peer.getRootURI();
+      String peerString = VFSUtils.stripProtocol(peerURI);
+      String thisString = VFSUtils.stripProtocol(getRootURI());
+      return thisString.substring(peerString.length()) + entryName;
+   }
+   
    /**
     * Perform initialization only if it hasn't been done yet
     */
@@ -809,11 +841,6 @@ public class ZipEntryContext extends AbstractVFSContext
       VirtualFileHandler rootHandler = getRoot();
       if (rootHandler.equals(handler))
       {
-         // only cleanup nested - as they might be temp files we want to delete
-         for (VirtualFileHandler vfh : nestedHandlers)
-         {
-            vfh.cleanup();
-         }
          getZipSource().close(); // close == cleanup in zip source impl
       }
    }

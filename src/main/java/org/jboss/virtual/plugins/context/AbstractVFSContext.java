@@ -26,10 +26,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
@@ -38,6 +39,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
@@ -68,7 +70,7 @@ public abstract class AbstractVFSContext implements VFSContext
    private VirtualFileHandler rootPeer;
 
    /** The temp handlers */
-   private Map<String, VirtualFileHandler> tempHandlers = new ConcurrentHashMap<String, VirtualFileHandler>();
+   private Map<String, TempInfo> tempInfos = Collections.synchronizedSortedMap(new TreeMap<String, TempInfo>());
 
    /** The exception handler */
    private ExceptionHandler exceptionHandler;
@@ -341,32 +343,27 @@ public abstract class AbstractVFSContext implements VFSContext
       }
    }
 
-   public void addTempHandler(String path, VirtualFileHandler handler)
+   public void addTempInfo(TempInfo tempInfo)
    {
-      tempHandlers.put(path, handler);
+      tempInfos.put(tempInfo.getPath(), tempInfo);
    }
 
-   public VirtualFileHandler findTempHandler(URI uri) throws IOException
+   public TempInfo getTempInfo(String path)
    {
-      String relativePath = VFSUtils.getRelativePath(this, uri);
-      for (Map.Entry<String, VirtualFileHandler> entry : tempHandlers.entrySet())
-      {
-         if (relativePath.startsWith(entry.getKey()))
-         {
-            VirtualFileHandler handler = entry.getValue();
-            String path = relativePath.substring(handler.getPathName().length());
-            return handler.getChild(path);
-         }
-      }
-      return null;
+      return tempInfos.get(path);
    }
 
-   public void cleanupTempHandlers(String path)
+   public Iterable<TempInfo> getTempInfos()
    {
-      Iterator<Map.Entry<String, VirtualFileHandler>> iter = tempHandlers.entrySet().iterator();
+      return tempInfos.values();
+   }
+
+   public void cleanupTempInfo(String path)
+   {
+      Iterator<Map.Entry<String, TempInfo>> iter = tempInfos.entrySet().iterator();
       while (iter.hasNext())
       {
-         Map.Entry<String, VirtualFileHandler> entry = iter.next();
+         Map.Entry<String, TempInfo> entry = iter.next();
          if (entry.getKey().startsWith(path))
          {
             try

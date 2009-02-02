@@ -1083,7 +1083,7 @@ public class VFSUtils
     * @param uri the uri
     * @return uri's path string
     */
-   protected static String stripProtocol(URI uri)
+   public static String stripProtocol(URI uri)
    {
       String path = uri.getPath();
       if (path != null && path.length() > 0)
@@ -1111,7 +1111,7 @@ public class VFSUtils
     * @param context the vfs context
     * @return contex's root path w/o protocol
     */
-   protected static String getKey(VFSContext context)
+   public static String getKey(VFSContext context)
    {
       URI uri = context.getRootURI();
       return stripProtocol(uri);

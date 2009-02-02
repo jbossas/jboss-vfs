@@ -23,6 +23,7 @@ package org.jboss.virtual.plugins.cache;
 
 import java.net.URI;
 
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
 
 /**
@@ -44,7 +45,7 @@ public abstract class IterableVFSCache extends AbstractVFSCache
 
    public VFSContext findContext(URI uri)
    {
-      String uriString = stripProtocol(uri);
+      String uriString = VFSUtils.stripProtocol(uri);
       Iterable<String> keys = getKeys();
       readLock();
       try
