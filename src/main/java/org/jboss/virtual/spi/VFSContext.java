@@ -128,11 +128,33 @@ public interface VFSContext
     */
    void setExceptionHandler(ExceptionHandler exceptionHandler);
 
+   /**
+    * Add temp info.
+    *
+    * @param tempInfo the temp info
+    */
    void addTempInfo(TempInfo tempInfo);
 
+   /**
+    * Get exact temp info match.
+    *
+    * @param path the path to match
+    * @return temp info instance or null if not found
+    */
    TempInfo getTempInfo(String path);
 
+   /**
+    * Iterate over all temp infos.
+    * This should return lexicographically ordered temp infos.
+    *
+    * @return ordered temp infos
+    */
    Iterable<TempInfo> getTempInfos();
 
+   /**
+    * Cleanup all temp infos under path param.
+    *
+    * @param path the path to cleanup
+    */
    void cleanupTempInfo(String path);
 }

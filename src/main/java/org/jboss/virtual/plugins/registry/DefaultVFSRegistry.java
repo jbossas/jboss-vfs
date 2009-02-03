@@ -42,14 +42,14 @@ import org.jboss.virtual.spi.registry.VFSRegistry;
  */
 public class DefaultVFSRegistry extends VFSRegistry
 {
-   private VFSCache cache;
-
+   /**
+    * Get vfs cache.
+    *
+    * @return the vfs cache
+    */
    protected VFSCache getCache()
    {
-      if (cache == null)
-         cache = VFSCacheFactory.getInstance();
-
-      return cache;
+      return VFSCacheFactory.getInstance();
    }
 
    public void addContext(VFSContext context)
