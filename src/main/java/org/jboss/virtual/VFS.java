@@ -153,6 +153,7 @@ public class VFS
       VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
       if (factory == null)
          throw new IOException("No context factory for " + rootURI);
+
       VFSContext context = factory.getVFS(rootURI);
       VFSRegistry.getInstance().addContext(context);
       return context.getVFS();
@@ -216,6 +217,7 @@ public class VFS
       VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURL);
       if (factory == null)
          throw new IOException("No context factory for " + rootURL);
+
       VFSContext context = factory.getVFS(rootURL);
       VFSRegistry.getInstance().addContext(context);
       return context.getVFS();
@@ -318,22 +320,6 @@ public class VFS
       VirtualFileHandler handler = context.getRoot();
       VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
       return result != null ? result.getVirtualFile() : null;
-   }
-
-   /**
-    * Find a child from the root
-    * 
-    * @deprecated use {@link #findChild(String)}
-    * @param path the child path
-    * @return the child
-    * @throws IOException for any problem accessing the VFS (including the child does not exist)
-    * @throws IllegalArgumentException if the path is null
-    */
-   @Deprecated
-   @SuppressWarnings("deprecation")
-   public VirtualFile findChildFromRoot(String path) throws IOException
-   {
-      return findChild(path);
    }
    
    /**
