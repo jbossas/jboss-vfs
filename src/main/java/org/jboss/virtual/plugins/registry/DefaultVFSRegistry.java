@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
@@ -80,7 +81,10 @@ public class DefaultVFSRegistry extends VFSRegistry
                String subpath = relativePath.substring(path.length());
                VirtualFileHandler child = handler.getChild(subpath);
                if (child == null)
-                  throw new IOException("Cannot find child, root=" + handler + ", relativePath=" + subpath);
+               {
+                  List<VirtualFileHandler> children = handler.getChildren(true);
+                  throw new IOException("Child not found " + subpath + " for " + handler + ", available children: " + children);
+               }
 
                return child.getVirtualFile();
             }
@@ -89,7 +93,10 @@ public class DefaultVFSRegistry extends VFSRegistry
          VirtualFileHandler root = context.getRoot();
          VirtualFileHandler child = root.getChild(relativePath);
          if (child == null)
-            throw new IOException("Cannot find child, root=" + root + ", relativePath=" + relativePath);
+         {
+            List<VirtualFileHandler> children = root.getChildren(true);
+            throw new IOException("Child not found " + relativePath + " for " + root + ", available children: " + children);
+         }
 
          return child.getVirtualFile();
       }
