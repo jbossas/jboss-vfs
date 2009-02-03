@@ -44,16 +44,16 @@ import org.jboss.virtual.spi.registry.VFSRegistry;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
+public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
 {
    private File tempDir;
 
-   public FileCleanupUnitTestCase(String name)
+   protected FileCleanupUnitTest(String name)
    {
       super(name, true, true);
    }
 
-   protected FileCleanupUnitTestCase(String name, boolean forceCopy, boolean forceNoReaper)
+   protected FileCleanupUnitTest(String name, boolean forceCopy, boolean forceNoReaper)
    {
       super(name, forceCopy, forceNoReaper);
    }
@@ -61,8 +61,12 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
    public static Test suite()
    {
       VFS.init();
-      return suite(FileCleanupUnitTestCase.class);
+      return suite(FileCleanupUnitTest.class);
    }
+
+   protected abstract VirtualFile modify(VirtualFile original) throws Exception;
+
+   protected abstract String getProtocol();
 
    @Override
    protected void setUp() throws Exception
@@ -208,7 +212,7 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
       VirtualFile root = VFS.getRoot(url);
       assertNotNull(root);
 
-      VirtualFile copy = VFSUtils.temp(root);
+      VirtualFile copy = modify(root);
       assertNotNull(copy);
       assertTrue(VFSUtils.isTemporaryFile(copy));
 
@@ -228,7 +232,7 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
       VFS root = VFS.getVFS(url);
 
       VirtualFile ear = root.getChild("level1.zip");
-      VirtualFile earCopy = VFSUtils.temp(ear);
+      VirtualFile earCopy = modify(ear);
 
       VirtualFile l3 = ear.getChild("level2.zip/level3.zip/test3.txt");
       assertNotNull(l3);
@@ -251,7 +255,7 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
 
       VirtualFile ear = root.getChild("level1.zip");
       assertTempFiles(0);
-      VirtualFile earCopy = VFSUtils.temp(ear);
+      VirtualFile earCopy = modify(ear);
 
       VirtualFile l3 = earCopy.getChild("level2.zip/level3.zip/test3.txt");
       assertNotNull(l3);
@@ -277,18 +281,18 @@ public class FileCleanupUnitTestCase extends AbstractVFSRegistryTest
       VFS root = VFS.getVFS(url);
 
       VirtualFile ear = root.getChild("level1.zip");
-      VirtualFile earCopy = VFSUtils.temp(ear);
-      assertEquals("vfszip:" + urlString + "level1.zip", earCopy.toURL().toExternalForm());
+      VirtualFile earCopy = modify(ear);
+      assertEquals(getProtocol() + urlString + "level1.zip", earCopy.toURL().toExternalForm());
 
       VirtualFile l2 = earCopy.getChild("level2.zip");
-      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip", l2.toURL().toExternalForm());
+      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip", l2.toURL().toExternalForm());
       VirtualFile l2sub = l2.getChild("test2.txt");
-      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
+      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
 
       VirtualFile l3 = l2.getChild("level3.zip");
-      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/level3.zip", l3.toURL().toExternalForm());
+      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip", l3.toURL().toExternalForm());
       VirtualFile l3sub = l3.getChild("test3.txt");
-      assertEquals("vfszip:" + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
+      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
 
       ear.cleanup();
    }

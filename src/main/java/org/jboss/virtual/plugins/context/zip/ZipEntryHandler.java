@@ -131,6 +131,13 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       return getZipEntryContext().isLeaf(this);
    }
 
+   @Override
+   public boolean isArchive() throws IOException
+   {
+      checkClosed();
+      return getZipEntryContext().isArchive(this);
+   }
+
    public boolean isHidden() throws IOException
    {
       checkClosed();

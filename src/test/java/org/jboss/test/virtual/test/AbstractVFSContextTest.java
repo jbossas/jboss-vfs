@@ -39,6 +39,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * AbstractVFSContextTest.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractVFSContextTest extends AbstractVFSTest
@@ -61,6 +62,8 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    protected abstract String transformExpectedEnd(String expecetedEnd);
 
    protected abstract boolean isRealURLSupported();
+
+   protected abstract boolean isArchive();
 
    /* TODO URI testing
    public void testRootURI() throws Exception
@@ -271,6 +274,34 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       {
          checkThrowable(IllegalArgumentException.class, t);
       }
+   }
+
+   public void testIsArchive() throws Exception
+   {
+      VFSContext context = getVFSContext("nested");
+
+      VirtualFileHandler root = context.getRoot();
+      assertEquals(isArchive(), root.isArchive());
+
+      VirtualFileHandler complex = root.getChild("complex.jar");
+      assertNotNull(complex);
+      assertEquals(isArchive(), complex.isArchive());
+
+      VirtualFileHandler subfolder = complex.getChild("subfolder");
+      assertNotNull(subfolder);
+      assertFalse(subfolder.isArchive());
+
+      VirtualFileHandler subchild = subfolder.getChild("subchild");
+      assertNotNull(subchild);
+      assertFalse(subchild.isArchive());
+
+      VirtualFileHandler subsubfolder = subfolder.getChild("subsubfolder");
+      assertNotNull(subsubfolder);
+      assertFalse(subsubfolder.isArchive());
+
+      VirtualFileHandler subsubchild = subsubfolder.getChild("subsubchild");
+      assertNotNull(subsubchild);
+      assertFalse(subsubchild.isArchive());
    }
 
    public void testSpecialTokensOnLeaf() throws Exception

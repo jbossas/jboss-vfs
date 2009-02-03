@@ -780,7 +780,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param name  name of the child
     * @return child handler or null if not found
     */
-   public VirtualFileHandler getChild(ZipEntryHandler parent, String name)
+   VirtualFileHandler getChild(ZipEntryHandler parent, String name)
    {
       if (parent == null)
          throw new IllegalArgumentException("Null parent");
@@ -837,7 +837,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return true if delete succeeded
     * @throws IOException for any error
     */
-   public boolean delete(ZipEntryHandler handler, int gracePeriod) throws IOException
+   boolean delete(ZipEntryHandler handler, int gracePeriod) throws IOException
    {
       return getRoot().equals(handler) && getZipSource().delete(gracePeriod);
    }
@@ -847,7 +847,7 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param handler the handler to close
     */
-   public void cleanup(ZipEntryHandler handler)
+   void cleanup(ZipEntryHandler handler)
    {
       VirtualFileHandler rootHandler = getRoot();
       if (rootHandler.equals(handler))
@@ -862,7 +862,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param handler a handler
     * @return lastModified timestamp
     */
-   public long getLastModified(ZipEntryHandler handler)
+   long getLastModified(ZipEntryHandler handler)
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
@@ -886,7 +886,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param handler a handler
     * @return size in bytes
     */
-   public long getSize(ZipEntryHandler handler)
+   long getSize(ZipEntryHandler handler)
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
@@ -909,7 +909,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param handler a handler
     * @return true if entry exists
     */
-   public boolean exists(ZipEntryHandler handler)
+   boolean exists(ZipEntryHandler handler)
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
@@ -925,10 +925,10 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Returns true if handler represents a non-directory entry
     *
-    * @param handler a handler
+    * @param handler the handler
     * @return true if not a directory
     */
-   public boolean isLeaf(ZipEntryHandler handler)
+   boolean isLeaf(ZipEntryHandler handler)
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
@@ -941,6 +941,17 @@ public class ZipEntryContext extends AbstractVFSContext
          return false;
 
       return ei.entry.isDirectory() == false;
+   }
+
+   /**
+    * Is the handler archive.
+    *
+    * @param handler the handler
+    * @return true if archive, false otherwise
+    */
+   boolean isArchive(ZipEntryHandler handler)
+   {
+      return getRoot().equals(handler);
    }
 
    /**
@@ -1010,7 +1021,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return InputStream with entry's content
     * @throws IOException for any error
     */
-   public InputStream openStream(ZipEntryHandler handler) throws IOException
+   InputStream openStream(ZipEntryHandler handler) throws IOException
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
@@ -1087,7 +1098,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param original current child
     * @param replacement new child
     */
-   public void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
+   void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
    {
       ensureEntries();
       EntryInfo parentEntry = entries.get(parent.getLocalPathName());
@@ -1125,7 +1136,7 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @return the real url
     */
-   public URL getRealURL()
+   URL getRealURL()
    {
       // make sure realURL has been initialized
       // realURL is initialized when ZipSource is initialized

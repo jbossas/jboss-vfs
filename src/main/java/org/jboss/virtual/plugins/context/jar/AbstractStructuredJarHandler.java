@@ -253,6 +253,12 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
       return next;
    }
 
+   @Override
+   public boolean isArchive() throws IOException
+   {
+      return true;
+   }
+
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
       checkClosed();

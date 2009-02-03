@@ -36,8 +36,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * Nested Jar Handler.
  * 
- * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class NoCopyNestedJarHandler extends AbstractJarHandler
@@ -111,6 +111,12 @@ public class NoCopyNestedJarHandler extends AbstractJarHandler
    public long getSize() throws IOException
    {
       return getEntry().getSize();
+   }
+
+   @Override
+   public boolean isArchive() throws IOException
+   {
+      return njar.isArchive();
    }
 
    public boolean isNested() throws IOException

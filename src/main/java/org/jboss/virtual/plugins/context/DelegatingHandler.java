@@ -145,6 +145,12 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return getDelegate().isLeaf();
    }
 
+   @Override
+   public boolean isArchive() throws IOException
+   {
+      return getDelegate().isArchive();
+   }
+
    public boolean exists() throws IOException
    {
       return getDelegate().exists();

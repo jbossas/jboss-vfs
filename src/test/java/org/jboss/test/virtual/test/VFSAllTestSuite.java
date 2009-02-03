@@ -96,7 +96,8 @@ public class VFSAllTestSuite extends TestSuite
       // exception handler
       suite.addTest(ExceptionHandlerTestCase.suite());
       // operations
-      suite.addTest(FileCleanupUnitTestCase.suite());
+      suite.addTest(TempCleanupUnitTestCase.suite());
+      suite.addTest(ExplodeCleanupUnitTestCase.suite());
 
       return suite;
    }

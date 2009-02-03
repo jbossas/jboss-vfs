@@ -182,6 +182,11 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       return childPathName;
    }
 
+   public boolean isArchive() throws IOException
+   {
+      return false;
+   }
+
    public boolean hasBeenModified() throws IOException
    {
       boolean hasBeenModified = false;

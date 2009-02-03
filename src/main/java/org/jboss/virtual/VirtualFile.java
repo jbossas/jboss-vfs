@@ -193,6 +193,17 @@ public class VirtualFile implements Serializable
    }
 
    /**
+    * Is the file archive.
+    * 
+    * @return true if archive, false otherwise
+    * @throws IOException for any error
+    */
+   public boolean isArchive() throws IOException
+   {
+      return getHandler().isArchive();
+   }
+
+   /**
     * Whether it is hidden
     *
     * @return true when hidden

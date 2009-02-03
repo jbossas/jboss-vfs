@@ -44,6 +44,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * ZipEntryVFSContextUnitTestCase.
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
+ * @author <a href="ales.justin@parsek.net">Ales Justin</a>
  * @version $Revision: 1.0 $
  */
 public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
@@ -203,7 +204,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
    /**
     * Test that options are properly propagated to mounted subcontexts
     *
-    * @throws IOException
+    * @throws IOException for any error
     */
    public void testOptionPropagation() throws IOException
    {

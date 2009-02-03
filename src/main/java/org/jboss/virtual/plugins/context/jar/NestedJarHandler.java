@@ -38,9 +38,9 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * Nested Jar Handler.
  * 
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class NestedJarHandler extends AbstractStructuredJarHandler<Object>

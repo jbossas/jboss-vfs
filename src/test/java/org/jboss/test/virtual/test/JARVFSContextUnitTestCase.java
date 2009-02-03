@@ -114,6 +114,11 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return false;
    }
 
+   protected boolean isArchive()
+   {
+      return true;
+   }
+
    /**
     * Was having problems with a jar entry as root of VFS.
     *

@@ -188,25 +188,6 @@ public class VFS
    }
 
    /**
-    * Get cached file.
-    *
-    * If VFSContext matching the rootURI parameter is cached
-    * this method will return cached virtual file
-    * else it will use VFS::getRoot(rootURI).
-    *
-    * @param rootURI the root uri
-    * @return the cached virtual file
-    * @throws IOException for any error
-    * @throws IllegalArgumentException if the rootURL is null
-    * @deprecated use getRoot
-    */
-   @Deprecated
-   public static VirtualFile getCachedFile(URI rootURI) throws IOException
-   {
-      return getRoot(rootURI);
-   }
-
-   /**
     * Get a virtual file
     * 
     * @param rootURI the root uri
@@ -267,25 +248,6 @@ public class VFS
       VFSRegistry registry = VFSRegistry.getInstance();
       VirtualFile file = registry.getFile(rootURL);
       return (file != null) ? file : createNewRoot(rootURL);
-   }
-
-   /**
-    * Get cached file.
-    *
-    * If VFSContext matching the rootURL parameter is cached
-    * this method will return cached virtual file
-    * else it will use VFS::getRoot(rootURL).
-    *
-    * @param rootURL the root url
-    * @return the cached virtual file
-    * @throws IOException for any error
-    * @throws IllegalArgumentException if the rootURL is null
-    * @deprecated use getRoot
-    */
-   @Deprecated
-   public static VirtualFile getCachedFile(URL rootURL) throws IOException
-   {
-      return getRoot(rootURL);
    }
 
    /**
