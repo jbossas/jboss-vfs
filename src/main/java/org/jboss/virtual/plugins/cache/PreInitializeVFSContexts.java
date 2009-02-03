@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
@@ -89,28 +88,6 @@ public class PreInitializeVFSContexts
    public List<VFS> getReferences()
    {
       return references;
-   }
-
-   /**
-    * Set URLs that need to be initialized before anything else.
-    *
-    * @param initializedVFSContexts the URLs to be initialized
-    */
-   @Deprecated
-   public void setInitializedVFSContexts(List<URL> initializedVFSContexts)
-   {
-      if (initializedVFSContexts != null)
-      {
-         this.initializedVFSContexts = new HashMap<URL, ExceptionHandler>();
-         for (URL url : initializedVFSContexts)
-         {
-            this.initializedVFSContexts.put(url, null);
-         }
-      }
-      else
-      {
-         this.initializedVFSContexts = null;
-      }
    }
 
    /**

@@ -37,6 +37,7 @@ import org.jboss.virtual.VirtualFile;
  * 
  * @author Scott.Stark@jboss.org
  * @author Adrian.Brock
+ * @author Ales.Justin@jboss.org
  * @version $Revision: 44334 $
  */
 public interface VirtualFileHandler extends Serializable

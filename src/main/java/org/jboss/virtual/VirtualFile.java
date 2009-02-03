@@ -44,6 +44,7 @@ import org.jboss.util.collection.WeakSet;
  *
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
+ * @author Ales.Justin@jboss.org
  * @version $Revision: 44334 $
  */
 public class VirtualFile implements Serializable
