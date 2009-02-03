@@ -35,6 +35,11 @@ import org.jboss.virtual.spi.VFSContext;
  */
 public abstract class VFSRegistry
 {
+   /**
+    * Get an instance of vfs registry.
+    *
+    * @return the vfs registry instance
+    */
    public static VFSRegistry getInstance()
    {
       return VFSRegistryBuilder.getInstance();

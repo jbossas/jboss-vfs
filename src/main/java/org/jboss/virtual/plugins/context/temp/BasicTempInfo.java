@@ -28,7 +28,7 @@ import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * AbstractTempInfo
+ * BasicTempInfo
  *
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
@@ -40,7 +40,13 @@ public class BasicTempInfo implements TempInfo
 
    public BasicTempInfo(String path, File file, VirtualFileHandler handler)
    {
+      if (path == null)
+         throw new IllegalArgumentException("Null path");
+      if (file == null && handler == null)
+         throw new IllegalArgumentException("Both, file and handler, are null");
+
       this.path = path;
+      // file and handler can even be null
       this.file = file;
       this.handler = handler;
    }
@@ -66,11 +72,6 @@ public class BasicTempInfo implements TempInfo
    public VirtualFileHandler getHandler()
    {
       return handler;
-   }
-
-   public void setHandler(VirtualFileHandler handler)
-   {
-      this.handler = handler;
    }
 
    @Override

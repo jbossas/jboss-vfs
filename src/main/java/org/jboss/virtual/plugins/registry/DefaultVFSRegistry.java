@@ -74,10 +74,14 @@ public class DefaultVFSRegistry extends VFSRegistry
          for (TempInfo ti : context.getTempInfos())
          {
             String path = ti.getPath();
-            if (relativePath.startsWith(path))
+            if (relativePath.startsWith(path) && ti.getHandler() != null)
             {
                VirtualFileHandler handler = ti.getHandler();
-               VirtualFileHandler child = handler.getChild(relativePath.substring(path.length()));
+               String subpath = relativePath.substring(path.length());
+               VirtualFileHandler child = handler.getChild(subpath);
+               if (child == null)
+                  throw new IOException("Cannot find child, root=" + handler + ", relativePath=" + subpath);
+
                return child.getVirtualFile();
             }
          }

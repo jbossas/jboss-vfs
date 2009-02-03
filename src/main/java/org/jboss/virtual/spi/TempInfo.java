@@ -30,11 +30,29 @@ import java.io.File;
  */
 public interface TempInfo
 {
+   /**
+    * Get relative path to vfs context.
+    *
+    * @return the relative path
+    */
    String getPath();
 
+   /**
+    * Get temp file.
+    *
+    * @return the temp file
+    */
    File getTempFile();
 
+   /**
+    * Do temp info cleanup.
+    */
    void cleanup();
 
+   /**
+    * Get the new temp handler.
+    *
+    * @return the temp handler
+    */
    VirtualFileHandler getHandler();
 }
