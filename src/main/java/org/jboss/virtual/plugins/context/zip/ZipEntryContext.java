@@ -526,9 +526,9 @@ public class ZipEntryContext extends AbstractVFSContext
                         dest = ti.getTempFile();
                   }
 
-                  boolean createNewTempInfo = (dest == null); 
+                  boolean createNewTempInfo = (dest == null || dest.exists() == false);
 
-                  if (dest == null)
+                  if (createNewTempInfo)
                   {
                      // extract it to temp dir
                      dest = new File(getTempDir() + "/" + getTempFileName(entryName));
