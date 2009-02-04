@@ -282,28 +282,39 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       {
          if (isTemporary())
          {
-            StringBuffer buf = new StringBuffer(getProtocol()).append(':');
-
-            VFSContext context = getVFSContext();
-            String rootString = context.getOptions().get(VFSUtils.OLD_ROOT_STRING);
-            if (rootString == null)
+            try
             {
-               URI rootURI = context.getRootURI();
-               rootString = VFSUtils.stripProtocol(rootURI);
-            }
+               StringBuffer buf = new StringBuffer(getProtocol()).append(':');
 
-            buf.append(rootString);
-            String path = getPathName();
-            if (path != null && path.length() > 0)
-            {
-               if (buf.charAt(buf.length() - 1) != '/')
+               VFSContext context = getVFSContext();
+               String rootString = context.getOptions().get(VFSUtils.OLD_ROOT_STRING);
+               if (rootString == null)
+               {
+                  URI rootURI = context.getRootURI();
+                  rootString = VFSUtils.stripProtocol(rootURI);
+               }
+
+               buf.append(rootString);
+               String path = getPathName();
+               if (path != null && path.length() > 0)
+               {
+                  if (buf.charAt(buf.length() - 1) != '/')
+                  {
+                     buf.append('/');
+                  }
+                  buf.append(path);
+               }
+               if (buf.charAt(buf.length() - 1) != '/' && isLeaf() == false)
                {
                   buf.append('/');
                }
-               buf.append(path);
-            }
 
-            vfsUrlCached = new URL(buf.toString());
+               vfsUrlCached = new URL(buf.toString());
+            }
+            catch (IOException e)
+            {
+               throw new MalformedURLException(e.getMessage());
+            }
          }
          else
          {
