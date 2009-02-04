@@ -610,10 +610,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    public boolean delete(int gracePeriod) throws IOException
    {
       VirtualFileHandler parent = getParent();
-      if (parent != null)
-         return parent.removeChild(getName());
-
-      return false;
+      return parent != null && parent.removeChild(getName());
    }
 
    /**
