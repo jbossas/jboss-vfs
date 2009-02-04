@@ -77,30 +77,36 @@ public class DefaultVFSRegistry extends VFSRegistry
             String path = ti.getPath();
             if (relativePath.startsWith(path) && ti.getHandler() != null)
             {
-               VirtualFileHandler handler = ti.getHandler();
                String subpath = relativePath.substring(path.length());
-               VirtualFileHandler child = handler.getChild(subpath);
-               if (child == null)
-               {
-                  List<VirtualFileHandler> children = handler.getChildren(true);
-                  throw new IOException("Child not found " + subpath + " for " + handler + ", available children: " + children);
-               }
-
+               VirtualFileHandler child = findHandler(ti.getHandler(), subpath);
                return child.getVirtualFile();
             }
          }
 
          VirtualFileHandler root = context.getRoot();
-         VirtualFileHandler child = root.getChild(relativePath);
-         if (child == null)
-         {
-            List<VirtualFileHandler> children = root.getChildren(true);
-            throw new IOException("Child not found " + relativePath + " for " + root + ", available children: " + children);
-         }
-
+         VirtualFileHandler child = findHandler(root, relativePath);
          return child.getVirtualFile();
       }
       return null;
+   }
+
+   /**
+    * Find the handler.
+    *
+    * @param root the root
+    * @param path the path
+    * @return child handler
+    * @throws IOException for any error
+    */
+   protected VirtualFileHandler findHandler(VirtualFileHandler root, String path) throws IOException
+   {
+      VirtualFileHandler child = root.getChild(path);
+      if (child == null)
+      {
+         List<VirtualFileHandler> children = root.getChildren(true);
+         throw new IOException("Child not found " + path + " for " + root + ", available children: " + children);
+      }
+      return child;
    }
 
    public VirtualFile getFile(URL url) throws IOException
