@@ -963,24 +963,15 @@ public class VFSUtils
       if (creator == null)
          throw new IllegalArgumentException("Null creator");
 
-      T resource = creator.getResource(file);
-      if (resource == null)
-         throw new IllegalArgumentException("Null resource: " + file);
-
-      // is not nested, so direct VFS resource is not an option
-      if (isNestedFile(file) == false)
+      if (isNestedFile(file))
       {
-         String uriString = creator.getString(resource);
-         if (uriString.startsWith("vfs"))
-         {
-            // treat vfszip as file
-            if (uriString.startsWith("vfszip"))
-               resource = creator.createResource("file" + uriString.substring(6));
-            else
-               resource = creator.createResource(uriString.substring(3)); // (vfs)file and (vfs)jar are ok
-         }
+         return creator.getNestedResource(file);
       }
-      return resource;
+      else
+      {
+         // is not nested, so direct VFS resource is not an option
+         return creator.getRealResource(file);
+      }
    }
 
    /**
@@ -995,59 +986,41 @@ public class VFSUtils
        * @return resource instance from file
        * @throws Exception for any error
        */
-      T getResource(VirtualFile file) throws Exception;
+      T getNestedResource(VirtualFile file) throws Exception;
 
       /**
-       * Get string from resource.
+       * Get real resource from virtual file.
        *
-       * @param resource the resource
-       * @return resoruce's string representation
-       */
-      String getString(T resource);
-
-      /**
-       * Create new resource.
-       *
-       * @param string the string to create resource from
-       * @return new resoruce instance
+       * @param file the virtual file
+       * @return resource instance from file
        * @throws Exception for any error
        */
-      T createResource(String string) throws Exception;
+      T getRealResource(VirtualFile file) throws Exception;
    }
 
    private static final ResourceCreator<URL> URL_CREATOR = new ResourceCreator<URL>()
    {
-      public URL getResource(VirtualFile file) throws Exception
+      public URL getNestedResource(VirtualFile file) throws Exception
       {
          return file.toURL();
       }
 
-      public String getString(URL resource)
+      public URL getRealResource(VirtualFile file) throws Exception
       {
-         return resource.toExternalForm();
-      }
-
-      public URL createResource(String string) throws Exception
-      {
-         return new URL(string);
+         return getRealURL(file);
       }
    };
 
    private static final ResourceCreator<URI> URI_CREATOR = new ResourceCreator<URI>()
    {
-      public URI getResource(VirtualFile file) throws Exception
+      public URI getNestedResource(VirtualFile file) throws Exception
       {
          return file.toURI();
       }
 
-      public String getString(URI resource)
+      public URI getRealResource(VirtualFile file) throws Exception
       {
-         return resource.toString();
-      }
-
-      public URI createResource(String string) throws Exception
-      {
-         return new URI(string);
+         return toURI(getRealURL(file));
       }
    };
 
