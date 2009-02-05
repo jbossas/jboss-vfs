@@ -43,6 +43,7 @@ public class TempCopyMechanism extends AbstractCopyMechanism
 
    protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
    {
+      // this is already a copy
       return handler instanceof NestedJarHandler;
    }
 
