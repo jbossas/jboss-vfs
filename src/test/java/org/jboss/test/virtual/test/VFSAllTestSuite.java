@@ -79,6 +79,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(UnpackTestCase.suite());
       suite.addTest(ExplodeTestCase.suite());
       suite.addTest(TempTestCase.suite());
+      suite.addTest(UnjarTestCase.suite());
       // visitor
       suite.addTest(VisitorUnitTestCase.suite());
       // utils
@@ -98,6 +99,7 @@ public class VFSAllTestSuite extends TestSuite
       // operations
       suite.addTest(TempCleanupUnitTestCase.suite());
       suite.addTest(ExplodeCleanupUnitTestCase.suite());
+      suite.addTest(UnjarCleanupUnitTestCase.suite());
 
       return suite;
    }

@@ -19,49 +19,43 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.copy;
+package org.jboss.test.virtual.test;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
-import org.jboss.virtual.spi.VirtualFileHandler;
+import junit.framework.Test;
+import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VFSUtils;
 
 /**
- * Copy any non-temp file into temp dir.
+ * Unpack tests.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TempCopyMechanism extends AbstractCopyMechanism
+public class UnjarTestCase extends DetachedCopyTest
 {
-   public static final TempCopyMechanism INSTANCE = new TempCopyMechanism();
-   
-   protected String getType()
+   public UnjarTestCase(String s)
    {
-      return "temp";
+      super(s);
    }
 
-   protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
+   public static Test suite()
    {
-      return handler instanceof NestedJarHandler;
+      return suite(UnjarTestCase.class);
    }
 
-   protected File copy(File guidDir, VirtualFileHandler handler) throws IOException
+   protected VirtualFile modify(VirtualFile file) throws Exception
    {
-      // leave top level archives or leaves in one piece
-      if (handler.isArchive() || handler.isLeaf())
-      {
-         File temp = new File(guidDir, handler.getName());
-         temp.deleteOnExit();
-         rewrite(handler, temp);
-         return temp;
-      }
-
-      return super.copy(guidDir, handler);
+      return VFSUtils.unjar(file);
    }
 
-   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
+   protected boolean isExploded() throws Exception
    {
+      return true;
+   }
+
+   protected boolean isSame(VirtualFile original) throws Exception
+   {
+      // should almost never be same
+      // except if file was already nested jar copy
       return false;
    }
 }

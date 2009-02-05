@@ -23,41 +23,46 @@ package org.jboss.virtual.plugins.copy;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
+import org.jboss.util.file.JarUtils;
+import org.jboss.virtual.plugins.context.file.FileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * Copy any non-temp file into temp dir.
+ * Unjar file into temp dir.
+ * Uses old JarUtils.unjar method
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TempCopyMechanism extends AbstractCopyMechanism
+public class UnjarCopyMechanism extends AbstractCopyMechanism
 {
-   public static final TempCopyMechanism INSTANCE = new TempCopyMechanism();
-   
+   public static final UnjarCopyMechanism INSTANCE = new UnjarCopyMechanism();
+
    protected String getType()
    {
-      return "temp";
+      return "unjared";
    }
 
    protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
    {
-      return handler instanceof NestedJarHandler;
+      return handler instanceof FileHandler || handler.isLeaf();
    }
 
+   @Override
    protected File copy(File guidDir, VirtualFileHandler handler) throws IOException
    {
-      // leave top level archives or leaves in one piece
-      if (handler.isArchive() || handler.isLeaf())
+      File copy = createTempDirectory(guidDir, handler.getName());
+      InputStream in = handler.openStream();
+      try
       {
-         File temp = new File(guidDir, handler.getName());
-         temp.deleteOnExit();
-         rewrite(handler, temp);
-         return temp;
+         JarUtils.unjar(in, copy);
       }
-
-      return super.copy(guidDir, handler);
+      finally
+      {
+         in.close();
+      }
+      return copy;
    }
 
    protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException

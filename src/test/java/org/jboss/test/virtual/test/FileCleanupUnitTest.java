@@ -265,12 +265,17 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
       VirtualFile l3url = VFS.getRoot(url);
 
       assertEquals(l3, l3url);
-      assertTempFiles(2);
+      assertTempFiles(getTempFiles());
       assertCopyMechanismFiles(1);
 
       earCopy.cleanup();
 
       assertCopyMechanismFiles(0);
+   }
+
+   protected int getTempFiles()
+   {
+      return 2;
    }
 
    // TODO - move this test
@@ -285,15 +290,20 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
       assertEquals(getProtocol() + urlString + "level1.zip/", earCopy.toURL().toExternalForm());
 
       VirtualFile l2 = earCopy.getChild("level2.zip");
-      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/", l2.toURL().toExternalForm());
+      assertEquals(getNestedProtocol() + urlString + "level1.zip/level2.zip/", l2.toURL().toExternalForm());
       VirtualFile l2sub = l2.getChild("test2.txt");
-      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
+      assertEquals(getNestedProtocol() + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
 
       VirtualFile l3 = l2.getChild("level3.zip");
-      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/", l3.toURL().toExternalForm());
+      assertEquals(getNestedProtocol() + urlString + "level1.zip/level2.zip/level3.zip/", l3.toURL().toExternalForm());
       VirtualFile l3sub = l3.getChild("test3.txt");
-      assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
+      assertEquals(getNestedProtocol() + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
 
       ear.cleanup();
+   }
+
+   protected String getNestedProtocol()
+   {
+      return getProtocol();
    }
 }

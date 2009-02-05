@@ -46,6 +46,7 @@ import org.jboss.util.collection.CollectionsFactory;
 import org.jboss.virtual.plugins.copy.CopyMechanism;
 import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
 import org.jboss.virtual.plugins.copy.TempCopyMechanism;
+import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContext;
@@ -825,6 +826,19 @@ public class VFSUtils
    public static VirtualFile temp(VirtualFile file) throws IOException, URISyntaxException
    {
       return copy(file, TempCopyMechanism.INSTANCE);
+   }
+
+   /**
+    * Unjar.
+    *
+    * @param file the file to unjar
+    * @return temp file
+    * @throws IOException for any io error
+    * @throws URISyntaxException for any uri error
+    */
+   public static VirtualFile unjar(VirtualFile file) throws IOException, URISyntaxException
+   {
+      return copy(file, UnjarCopyMechanism.INSTANCE);
    }
 
    /**
