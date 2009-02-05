@@ -21,7 +21,6 @@
 */
 package org.jboss.virtual.plugins.copy;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
@@ -32,7 +31,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class TempCopyMechanism extends AbstractCopyMechanism
+public class TempCopyMechanism extends ExactCopyMechanism
 {
    public static final TempCopyMechanism INSTANCE = new TempCopyMechanism();
    
@@ -45,20 +44,6 @@ public class TempCopyMechanism extends AbstractCopyMechanism
    {
       // this is already a copy
       return handler instanceof NestedJarHandler;
-   }
-
-   protected File copy(File guidDir, VirtualFileHandler handler) throws IOException
-   {
-      // leave top level archives or leaves in one piece
-      if (handler.isArchive() || handler.isLeaf())
-      {
-         File temp = new File(guidDir, handler.getName());
-         temp.deleteOnExit();
-         rewrite(handler, temp);
-         return temp;
-      }
-
-      return super.copy(guidDir, handler);
    }
 
    protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException

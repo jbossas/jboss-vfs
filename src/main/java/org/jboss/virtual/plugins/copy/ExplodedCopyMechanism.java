@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.copy;
 
 import java.io.IOException;
+import java.io.File;
 
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.plugins.context.file.FileHandler;
@@ -43,6 +44,11 @@ public class ExplodedCopyMechanism extends AbstractCopyMechanism
    protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
    {
       return handler instanceof FileHandler || handler.isLeaf();
+   }
+
+   protected void doCopy(File copy, VirtualFileHandler handler) throws IOException
+   {
+      explode(copy, handler);
    }
 
    protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException

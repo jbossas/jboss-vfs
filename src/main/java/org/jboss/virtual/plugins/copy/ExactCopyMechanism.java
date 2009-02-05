@@ -21,39 +21,35 @@
 */
 package org.jboss.virtual.plugins.copy;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.File;
 
-import org.jboss.virtual.plugins.context.file.FileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
- * Unjar file into temp dir.
- * Uses old JarUtils.unjar method
+ * Excat copy mechanism.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnjarCopyMechanism extends AbstractCopyMechanism
+public abstract class ExactCopyMechanism extends AbstractCopyMechanism
 {
-   public static final UnjarCopyMechanism INSTANCE = new UnjarCopyMechanism();
-
-   protected String getType()
+   @Override
+   protected File createCopy(File guidDir, VirtualFileHandler handler) throws IOException
    {
-      return "unjared";
-   }
-
-   protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
-   {
-      return handler instanceof FileHandler || handler.isLeaf();
+      if (handler.isArchive() || handler.isLeaf())
+      {
+         File copy = new File(guidDir, handler.getName());
+         copy.deleteOnExit();
+         return copy;
+      }
+      else
+      {
+         return super.createCopy(guidDir, handler);
+      }
    }
 
    protected void doCopy(File copy, VirtualFileHandler handler) throws IOException
    {
-      unjar(copy, handler);
-   }
-
-   protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException
-   {
-      return false;
+      exactCopy(copy, handler);
    }
 }

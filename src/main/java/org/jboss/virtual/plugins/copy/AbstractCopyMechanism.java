@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.id.GUID;
+import org.jboss.util.file.JarUtils;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
@@ -175,10 +176,32 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
     */
    protected File copy(File guidDir, VirtualFileHandler handler) throws IOException
    {
-      File copy = createTempDirectory(guidDir, handler.getName());
-      unpack(handler, copy, false);
+      File copy = createCopy(guidDir, handler);
+      doCopy(copy, handler);
       return copy;
    }
+
+   /**
+    * Create copy destination.
+    *
+    * @param guidDir the guid dir
+    * @param handler the handler to copy
+    * @return copy's destination
+    * @throws IOException for any error
+    */
+   protected File createCopy(File guidDir, VirtualFileHandler handler) throws IOException
+   {
+      return createTempDirectory(guidDir, handler.getName());
+   }
+
+   /**
+    * Do copy.
+    *
+    * @param copy the copy destination
+    * @param handler the handler
+    * @throws IOException for any error
+    */
+   protected abstract void doCopy(File copy, VirtualFileHandler handler) throws IOException;
 
    /**
     * Create the temp directory.
@@ -197,35 +220,112 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
    }
 
    /**
+    * Exact copy.
+    *
+    * @param copy the copy dest
+    * @param root the handler to copy
+    * @throws IOException for any error
+    */
+   protected static void exactCopy(File copy, VirtualFileHandler root) throws IOException
+   {
+      unpack(copy, root, COPY);   
+   }
+
+   /**
+    * Explode the root into file.
+    *
+    * @param copy the copy dest
+    * @param root the root
+    * @throws IOException for any error
+    */
+   protected static void explode(File copy, VirtualFileHandler root) throws IOException
+   {
+      unpack(copy, root, EXPLODE);
+   }
+
+   /**
     * Unpack the root into file.
     * Repeat this on the root's children.
     *
+    * @param copy the copy dest
     * @param root the root
-    * @param file the file
-    * @param writeRoot do we write root
+    * @param checker do we write the root checker
     * @throws IOException for any error
     */
-   protected static void unpack(VirtualFileHandler root, File file, boolean writeRoot) throws IOException
+   protected static void unpack(File copy, VirtualFileHandler root, WriteRootChecker checker) throws IOException
    {
       // should we write the root
-      if (writeRoot)
-         rewrite(root, file);
+      boolean writeRoot = checker.writeRoot(root);
 
-      if (root.isLeaf() == false)
+      if (writeRoot)
+         rewrite(root, copy);
+
+      if (writeRoot == false)
       {
          List<VirtualFileHandler> children = root.getChildren(true);
          if (children != null && children.isEmpty() == false)
          {
             for (VirtualFileHandler handler : children)
             {
-               File next = new File(file, handler.getName());
-               if (handler.isLeaf() == false && next.mkdir() == false)
+               File next = new File(copy, handler.getName());
+               if (checker.writeRoot(handler) == false && next.mkdir() == false)
                   throw new IllegalArgumentException("Problems creating new directory: " + next);
                next.deleteOnExit();
 
-               unpack(handler, next, handler.isLeaf());
+               unpack(next, handler, checker);
             }
          }
+      }
+   }
+
+   /**
+    * Check if we need to write the root.
+    */
+   private static interface WriteRootChecker
+   {
+      /**
+       * Do we write the root.
+       *
+       * @param handler the handler
+       * @return true if we write the root
+       * @throws IOException for any error
+       */
+      boolean writeRoot(VirtualFileHandler handler) throws IOException;
+   }
+
+   private static WriteRootChecker COPY = new WriteRootChecker()
+   {
+      public boolean writeRoot(VirtualFileHandler handler) throws IOException
+      {
+         return handler.isArchive() || handler.isLeaf();
+      }
+   };
+
+   private static WriteRootChecker EXPLODE = new WriteRootChecker()
+   {
+      public boolean writeRoot(VirtualFileHandler handler) throws IOException
+      {
+         return handler.isLeaf();
+      }
+   };
+
+   /**
+    * Unjar to copy parameter.
+    *
+    * @param copy the dest to unjar
+    * @param handler the handler to unjar
+    * @throws IOException for any error
+    */
+   protected static void unjar(File copy, VirtualFileHandler handler) throws IOException
+   {
+      InputStream in = handler.openStream();
+      try
+      {
+         JarUtils.unjar(in, copy);
+      }
+      finally
+      {
+         in.close();
       }
    }
 

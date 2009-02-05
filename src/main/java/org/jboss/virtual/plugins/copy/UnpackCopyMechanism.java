@@ -30,7 +30,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class UnpackCopyMechanism extends AbstractCopyMechanism
+public class UnpackCopyMechanism extends ExactCopyMechanism
 {
    public static final UnpackCopyMechanism INSTANCE = new UnpackCopyMechanism();
    
