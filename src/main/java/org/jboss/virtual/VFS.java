@@ -121,12 +121,30 @@ public class VFS
     */
    static void cleanup(VirtualFile file)
    {
+      VirtualFileHandler fileHandler = file.getHandler();
+      VFSContext context = fileHandler.getVFSContext();
+
       try
       {
-         VirtualFileHandler fileHandler = file.getHandler();
-         VFSContext context = fileHandler.getVFSContext();
          context.cleanupTempInfo(fileHandler.getPathName());
-         
+      }
+      catch (Exception ignored)
+      {
+      }
+
+      try
+      {
+         // just to make sure the ref is removed
+         VirtualFileHandler parent = fileHandler.getParent();
+         if (parent != null)
+            parent.removeChild(fileHandler.getName());
+      }
+      catch (Exception ignored)
+      {
+      }
+
+      try
+      {
          VirtualFileHandler contextHandler = context.getRoot();
          // the file is the context root, hence possible registry candidate
          if (fileHandler.equals(contextHandler))
