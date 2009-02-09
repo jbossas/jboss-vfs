@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
 import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
@@ -44,6 +45,9 @@ import org.jboss.virtual.spi.registry.VFSRegistry;
  */
 public class VFS
 {
+   /** The log */
+   private static final Logger log = Logger.getLogger(VFS.class);
+
    /** The VFS Context */
    private final VFSContext context;
 
@@ -128,8 +132,9 @@ public class VFS
       {
          context.cleanupTempInfo(fileHandler.getPathName());
       }
-      catch (Exception ignored)
+      catch (Exception e)
       {
+         log.debug("Exception cleaning temp info, file=" + file, e);
       }
 
       try
@@ -139,8 +144,9 @@ public class VFS
          if (parent != null)
             parent.removeChild(fileHandler.getName());
       }
-      catch (Exception ignored)
+      catch (Exception e)
       {
+         log.debug("Exception removing child, file=" + file, e);
       }
 
       try
@@ -153,8 +159,9 @@ public class VFS
             registry.removeContext(context);
          }
       }
-      catch (Exception ignored)
+      catch (Exception e)
       {
+         log.debug("Exception removing cached context, file=" + file, e);
       }
    }
 
