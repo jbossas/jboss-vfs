@@ -43,14 +43,14 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * The assembled directory handler.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 @Assembled
 public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
    private long lastModified = System.currentTimeMillis();
-   private List<VirtualFileHandler> children = new ArrayList<VirtualFileHandler>();
-   private Map<String, VirtualFileHandler> childrenMap = new HashMap<String, VirtualFileHandler>();
+   private Map<String, VirtualFileHandler> children = new HashMap<String, VirtualFileHandler>();
 
    public AssembledDirectoryHandler(VFSContext context, AssembledDirectoryHandler parent, String name) throws IOException
    {
@@ -81,8 +81,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
             throw new RuntimeException(e);
          }
       }
-      children.add(handler);
-      childrenMap.put(handler.getName(), handler);
+      children.put(handler.getName(), handler);
       lastModified = System.currentTimeMillis();
       return handler;
    }
@@ -95,14 +94,13 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
     */
    public boolean removeChild(String name)
    {
-      Iterator<VirtualFileHandler> it = children.iterator();
+      Iterator<String> it = children.keySet().iterator();
       while (it.hasNext())
       {
-         VirtualFileHandler child = it.next();
-         if (child.getName().equals(name))
+         String key = it.next();
+         if (key.equals(name))
          {
             it.remove();
-            childrenMap.remove(name);
             lastModified = System.currentTimeMillis();
             return true;
          }
@@ -112,7 +110,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
 
    public VirtualFileHandler findChild(String name)
    {
-      return childrenMap.get(name);
+      return children.get(name);
    }
 
    public VirtualFileHandler getChild(String path) throws IOException
@@ -162,12 +160,12 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
 
    public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
    {
-      return children;
+      return new ArrayList<VirtualFileHandler>(children.values());
    }
 
    public VirtualFileHandler createChildHandler(String name) throws IOException
    {
-      return childrenMap.get(name);
+      return children.get(name);
    }
 
    @Override
@@ -186,8 +184,7 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
 
    protected void internalReplaceChild(VirtualFileHandler original, VirtualFileHandler replacement)
    {
-      children.remove(original);
-      children.add(replacement);
-      childrenMap.put(original.getName(), replacement);
+      children.remove(original.getName());
+      children.put(original.getName(), replacement);
    }
 }
