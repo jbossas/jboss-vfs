@@ -26,11 +26,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
@@ -70,7 +70,7 @@ public abstract class AbstractVFSContext implements VFSContext
    private VirtualFileHandler rootPeer;
 
    /** The temp handlers */
-   private Map<String, TempInfo> tempInfos = Collections.synchronizedSortedMap(new TreeMap<String, TempInfo>());
+   private Map<String, TempInfo> tempInfos = new ConcurrentHashMap<String, TempInfo>();
 
    /** The exception handler */
    private ExceptionHandler exceptionHandler;
