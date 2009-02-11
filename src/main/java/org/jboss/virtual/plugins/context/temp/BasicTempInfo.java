@@ -22,6 +22,7 @@
 package org.jboss.virtual.plugins.context.temp;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.jboss.util.file.Files;
 import org.jboss.virtual.spi.TempInfo;
@@ -72,6 +73,18 @@ public class BasicTempInfo implements TempInfo
    public VirtualFileHandler getHandler()
    {
       return handler;
+   }
+
+   public boolean isValid()
+   {
+      try
+      {
+         return handler != null && handler.exists() && file != null && file.exists();
+      }
+      catch (IOException e)
+      {
+         return false;
+      }
    }
 
    @Override

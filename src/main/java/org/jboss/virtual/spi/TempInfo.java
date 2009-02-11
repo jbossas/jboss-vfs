@@ -55,4 +55,11 @@ public interface TempInfo
     * @return the temp handler
     */
    VirtualFileHandler getHandler();
+
+   /**
+    * Is the temp info still valid.
+    *
+    * @return true if still valid, false otherwise
+    */
+   boolean isValid();
 }

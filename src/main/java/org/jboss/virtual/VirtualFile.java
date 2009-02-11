@@ -54,9 +54,6 @@ public class VirtualFile implements Serializable
    /** The virtual file handler */
    private final VirtualFileHandler handler;
 
-   /** Whether we are cleaned */
-   private final AtomicBoolean cleaned = new AtomicBoolean(false);
-
    /** Whether we are closed */
    private final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -85,20 +82,6 @@ public class VirtualFile implements Serializable
     */
    VirtualFileHandler getHandler()
    {
-      return getHandler(true);
-   }
-
-   /**
-    * Get the virtual handler.
-    *
-    * @param checkCleaned should we check cleaned
-    * @return the handler
-    * @throws IllegalStateException if the file is closed or cleaned
-    */
-   private VirtualFileHandler getHandler(boolean checkCleaned)
-   {
-      if (checkCleaned && cleaned.get())
-         throw new IllegalStateException("The virtual file is cleaned");
       if (closed.get())
          throw new IllegalStateException("The virtual file is closed");
 
@@ -113,7 +96,7 @@ public class VirtualFile implements Serializable
     */
    public String getName()
    {
-      return getHandler(false).getName();
+      return getHandler().getName();
    }
 
    /**
@@ -124,7 +107,7 @@ public class VirtualFile implements Serializable
     */
    public String getPathName()
    {
-      return getHandler(false).getPathName();
+      return getHandler().getPathName();
    }
 
    /**
@@ -137,7 +120,7 @@ public class VirtualFile implements Serializable
     */
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
-      return getHandler(false).toVfsUrl();
+      return getHandler().toVfsUrl();
    }
 
    /**
@@ -220,7 +203,7 @@ public class VirtualFile implements Serializable
     */
    public boolean isArchive() throws IOException
    {
-      return getHandler(false).isArchive();
+      return getHandler().isArchive();
    }
 
    /**
@@ -299,23 +282,13 @@ public class VirtualFile implements Serializable
     */
    public void cleanup()
    {
-      if (cleaned.get() == false)
+      try
       {
-         try
-         {
-            try
-            {
-               getHandler().cleanup();
-            }
-            finally
-            {
-               VFS.cleanup(this);
-            }
-         }
-         finally
-         {
-            cleaned.set(true);
-         }
+         getHandler().cleanup();
+      }
+      finally
+      {
+         VFS.cleanup(this);
       }
    }
 
@@ -340,7 +313,7 @@ public class VirtualFile implements Serializable
    public boolean delete() throws IOException
    {
       // gracePeriod of 2 seconds
-      return getHandler(false).delete(2000);
+      return getHandler().delete(2000);
    }
 
    /**
@@ -352,7 +325,7 @@ public class VirtualFile implements Serializable
     */
    public boolean delete(int gracePeriod) throws IOException
    {
-      return getHandler(false).delete(gracePeriod);
+      return getHandler().delete(gracePeriod);
    }
 
    /**
