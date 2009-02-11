@@ -54,6 +54,9 @@ public class VirtualFile implements Serializable
    /** The virtual file handler */
    private final VirtualFileHandler handler;
 
+   /** Whether we are cleaned */
+   private final AtomicBoolean cleaned = new AtomicBoolean(false);
+
    /** Whether we are closed */
    private final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -70,6 +73,7 @@ public class VirtualFile implements Serializable
    {
       if (handler == null)
          throw new IllegalArgumentException("Null handler");
+
       this.handler = handler;
    }
 
@@ -77,12 +81,27 @@ public class VirtualFile implements Serializable
     * Get the virtual file handler
     *
     * @return the handler
-    * @throws IllegalStateException if the file is closed
+    * @throws IllegalStateException if the file is closed or cleaned
     */
    VirtualFileHandler getHandler()
    {
+      return getHandler(true);
+   }
+
+   /**
+    * Get the virtual handler.
+    *
+    * @param checkCleaned should we check cleaned
+    * @return the handler
+    * @throws IllegalStateException if the file is closed or cleaned
+    */
+   private VirtualFileHandler getHandler(boolean checkCleaned)
+   {
+      if (checkCleaned && cleaned.get())
+         throw new IllegalStateException("The virtual file is cleaned");
       if (closed.get())
          throw new IllegalStateException("The virtual file is closed");
+
       return handler;
    }
 
@@ -94,7 +113,7 @@ public class VirtualFile implements Serializable
     */
    public String getName()
    {
-      return getHandler().getName();
+      return getHandler(false).getName();
    }
 
    /**
@@ -105,7 +124,7 @@ public class VirtualFile implements Serializable
     */
    public String getPathName()
    {
-      return getHandler().getPathName();
+      return getHandler(false).getPathName();
    }
 
    /**
@@ -118,7 +137,7 @@ public class VirtualFile implements Serializable
     */
    public URL toURL() throws MalformedURLException, URISyntaxException
    {
-      return getHandler().toVfsUrl();
+      return getHandler(false).toVfsUrl();
    }
 
    /**
@@ -201,7 +220,7 @@ public class VirtualFile implements Serializable
     */
    public boolean isArchive() throws IOException
    {
-      return getHandler().isArchive();
+      return getHandler(false).isArchive();
    }
 
    /**
@@ -280,13 +299,23 @@ public class VirtualFile implements Serializable
     */
    public void cleanup()
    {
-      try
+      if (cleaned.get() == false)
       {
-         getHandler().cleanup();
-      }
-      finally
-      {
-         VFS.cleanup(this);
+         try
+         {
+            try
+            {
+               getHandler().cleanup();
+            }
+            finally
+            {
+               VFS.cleanup(this);
+            }
+         }
+         finally
+         {
+            cleaned.set(true);
+         }
       }
    }
 
@@ -311,7 +340,7 @@ public class VirtualFile implements Serializable
    public boolean delete() throws IOException
    {
       // gracePeriod of 2 seconds
-      return getHandler().delete(2000);
+      return getHandler(false).delete(2000);
    }
 
    /**
@@ -323,7 +352,7 @@ public class VirtualFile implements Serializable
     */
    public boolean delete(int gracePeriod) throws IOException
    {
-      return getHandler().delete(gracePeriod);
+      return getHandler(false).delete(gracePeriod);
    }
 
    /**

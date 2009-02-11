@@ -111,7 +111,13 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
       try
       {
          deleteTempDir();
+      }
+      catch (Throwable ignored)
+      {
+      }
 
+      try
+      {
          VFSCacheFactory.getInstance().stop();
          VFSCacheFactory.setInstance(null);
 
