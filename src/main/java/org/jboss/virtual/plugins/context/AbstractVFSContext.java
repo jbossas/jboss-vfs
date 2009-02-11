@@ -350,12 +350,39 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public TempInfo getTempInfo(String path)
    {
-      return tempInfos.get(path);
+      TempInfo tempInfo = tempInfos.get(path);
+      if (tempInfo == null)
+      {
+         return null;
+      }
+      else if (tempInfo.isValid() == false)
+      {
+         tempInfos.remove(path);
+         return null;
+      }
+      else
+      {
+         return tempInfo;
+      }
    }
 
    public Iterable<TempInfo> getTempInfos()
    {
-      return tempInfos.values();
+      Map<String, TempInfo> result = new TreeMap<String, TempInfo>();
+      Iterator<Map.Entry<String, TempInfo>> iter = tempInfos.entrySet().iterator();
+      while(iter.hasNext())
+      {
+         Map.Entry<String, TempInfo> entry = iter.next();
+         if (entry.getValue().isValid())
+         {
+            result.put(entry.getKey(), entry.getValue());
+         }
+         else
+         {
+            iter.remove();
+         }
+      }
+      return result.values();
    }
 
    public void cleanupTempInfo(String path)
