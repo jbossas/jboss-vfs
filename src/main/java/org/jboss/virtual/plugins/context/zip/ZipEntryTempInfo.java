@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.zip;
 
 import java.io.File;
 
-import org.jboss.logging.Logger;
 import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -35,7 +34,6 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryTempInfo extends BasicTempInfo
 {
-   private Logger log = Logger.getLogger(getClass());
    private ZipEntryContext context;
 
    public ZipEntryTempInfo(String path, File file, VirtualFileHandler handler, ZipEntryContext context)
