@@ -72,6 +72,9 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       }
    }
 
+   /**
+    * Initialization method.
+    */
    private synchronized void init()
    {
       if (initialized)

@@ -37,6 +37,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -58,7 +58,6 @@ import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.ReplacementHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.TempInfo;
@@ -552,7 +551,7 @@ public class ZipEntryContext extends AbstractVFSContext
                   delegator = mountZipFile(parent, name, dest);
 
                   if (context != null && path != null && createNewTempInfo)
-                     context.addTempInfo(new BasicTempInfo(path, dest, delegator));
+                     context.addTempInfo(new ZipEntryTempInfo(path, dest, delegator, this));
                }
                else
                {
@@ -618,6 +617,14 @@ public class ZipEntryContext extends AbstractVFSContext
          if (initStatus == InitializationStatus.INITIALIZING)
             initStatus = InitializationStatus.NOT_INITIALIZED;
       }
+   }
+
+   /**
+    * Reset init status.
+    */
+   void resetInitStatus()
+   {
+      initStatus = InitializationStatus.NOT_INITIALIZED;
    }
 
    /**

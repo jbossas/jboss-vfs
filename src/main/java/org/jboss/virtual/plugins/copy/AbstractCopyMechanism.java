@@ -113,7 +113,7 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
     * @param handler the handler to unwrap
     * @return unwrapped handler
     */
-   protected VirtualFileHandler unwrap(VirtualFileHandler handler)
+   protected static VirtualFileHandler unwrap(VirtualFileHandler handler)
    {
       if (handler instanceof DelegatingHandler)
          handler = ((DelegatingHandler)handler).getDelegate();
