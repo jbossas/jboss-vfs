@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
@@ -387,12 +388,23 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public void cleanupTempInfo(String path)
    {
+      boolean trace = log.isTraceEnabled();
+      List<String> info = null;
+
       Iterator<Map.Entry<String, TempInfo>> iter = tempInfos.entrySet().iterator();
       while (iter.hasNext())
       {
          Map.Entry<String, TempInfo> entry = iter.next();
          if (entry.getKey().startsWith(path))
          {
+            if (trace)
+            {
+               if (info == null)
+                  info = new ArrayList<String>();
+               
+               info.add(entry.getValue().toString());
+            }
+            
             try
             {
                entry.getValue().cleanup();
@@ -403,6 +415,8 @@ public abstract class AbstractVFSContext implements VFSContext
             iter.remove();
          }
       }
+      if (trace)
+         log.trace("Removing temp info for path: '" + path + "', temps: " + info);
    }
 
    public ExceptionHandler getExceptionHandler()
