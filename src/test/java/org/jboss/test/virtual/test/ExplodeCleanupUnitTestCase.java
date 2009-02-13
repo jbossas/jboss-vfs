@@ -48,9 +48,4 @@ public class ExplodeCleanupUnitTestCase extends FileCleanupUnitTest
    {
       return VFSUtils.explode(original);
    }
-
-   protected String getProtocol()
-   {
-      return "vfsfile:";
-   }
 }

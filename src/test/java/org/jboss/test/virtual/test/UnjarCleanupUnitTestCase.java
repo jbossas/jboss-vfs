@@ -49,20 +49,9 @@ public class UnjarCleanupUnitTestCase extends FileCleanupUnitTest
       return VFSUtils.unjar(original);
    }
 
-   protected String getProtocol()
-   {
-      return "vfsfile:";
-   }
-
    @Override
    protected int getTempFiles()
    {
       return 1;
-   }
-
-   @Override
-   protected String getNestedProtocol()
-   {
-      return "vfszip:";
    }
 }

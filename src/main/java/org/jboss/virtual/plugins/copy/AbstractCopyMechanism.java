@@ -27,14 +27,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.id.GUID;
 import org.jboss.util.file.JarUtils;
+import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
@@ -145,7 +146,9 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       if (newOptions != null) // shouldn't be null, but we check anyway
       {
          newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());
-         newOptions.put(VFSUtils.OLD_ROOT_STRING, VFSUtils.stripProtocol(oldVFSContext.getRootURI()) + path);
+         // save old url
+         URL handlerURL = handler.toVfsUrl();
+         newOptions.put(VFSUtils.OLD_URL_STRING, handlerURL.toExternalForm());
       }
       Map<String, String> oldOptions = oldVFSContext.getOptions();
       if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)

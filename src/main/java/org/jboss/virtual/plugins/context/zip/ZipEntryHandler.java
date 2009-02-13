@@ -72,11 +72,6 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       }
    }
 
-   protected String getProtocol()
-   {
-      return "vfszip";
-   }
-
    private synchronized void init()
    {
       if (initialized)

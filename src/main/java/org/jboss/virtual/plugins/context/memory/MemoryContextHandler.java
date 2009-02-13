@@ -63,11 +63,6 @@ public class MemoryContextHandler extends AbstractURLHandler implements Structur
       }
    }
 
-   protected String getProtocol()
-   {
-      return "vfsmemory";
-   }
-
    protected synchronized void addChild(String name, MemoryContextHandler child)
    {
       if (entryMap == Collections.EMPTY_MAP)

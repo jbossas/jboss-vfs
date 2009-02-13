@@ -284,18 +284,19 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          {
             try
             {
-               StringBuffer buf = new StringBuffer(getProtocol()).append(':');
-
                VFSContext context = getVFSContext();
-               String rootString = context.getOptions().get(VFSUtils.OLD_ROOT_STRING);
+               String path = getPathName();
+               StringBuffer buf = new StringBuffer();
+
+               String rootString = context.getOptions().get(VFSUtils.OLD_URL_STRING);
                if (rootString == null)
                {
                   URI rootURI = context.getRootURI();
-                  rootString = VFSUtils.stripProtocol(rootURI);
+                  URI copyURI = new URI(rootURI.getScheme(), rootURI.getHost(), rootURI.getPath(), null);
+                  rootString = copyURI.toURL().toExternalForm();
                }
-
                buf.append(rootString);
-               String path = getPathName();
+
                if (path != null && path.length() > 0)
                {
                   if (buf.charAt(buf.length() - 1) != '/')
@@ -304,6 +305,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
                   }
                   buf.append(path);
                }
+
                if (buf.charAt(buf.length() - 1) != '/' && isLeaf() == false)
                {
                   buf.append('/');
@@ -322,16 +324,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
          }
       }
       return vfsUrlCached;
-   }
-
-   /**
-    * Get the protocol.
-    *
-    * @return the protocol
-    */
-   protected String getProtocol()
-   {
-      throw new IllegalArgumentException("Unsupported impl.");
    }
 
    /**

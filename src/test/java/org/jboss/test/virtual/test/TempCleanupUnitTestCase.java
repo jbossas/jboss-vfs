@@ -48,9 +48,4 @@ public class TempCleanupUnitTestCase extends FileCleanupUnitTest
    {
       return VFSUtils.temp(original);
    }
-
-   protected String getProtocol()
-   {
-      return "vfszip:";
-   }
 }

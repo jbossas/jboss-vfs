@@ -89,15 +89,6 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
       return delegate;
    }
 
-   protected String getProtocol()
-   {
-      if (delegate instanceof AbstractVirtualFileHandler)
-      {
-         return ((AbstractVirtualFileHandler)delegate).getProtocol();
-      }
-      return null;
-   }
-
    /**
     * Set the vfs url.
     *
