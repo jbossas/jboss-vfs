@@ -145,14 +145,15 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       Map<String, String> newOptions = fileSystemContext.getOptions();
       if (newOptions != null) // shouldn't be null, but we check anyway
       {
+         Map<String, String> oldOptions = oldVFSContext.getOptions();
+         if (oldOptions != null && oldOptions.isEmpty() == false)
+            newOptions.putAll(oldOptions);
+
          newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());
          // save old url
          URL handlerURL = handler.toVfsUrl();
          newOptions.put(VFSUtils.OLD_URL_STRING, handlerURL.toExternalForm());
       }
-      Map<String, String> oldOptions = oldVFSContext.getOptions();
-      if (newOptions != null && oldOptions != null && oldOptions.isEmpty() == false)
-         newOptions.putAll(oldOptions);
 
       // copy exception handler
       ExceptionHandler eh = oldVFSContext.getExceptionHandler();
