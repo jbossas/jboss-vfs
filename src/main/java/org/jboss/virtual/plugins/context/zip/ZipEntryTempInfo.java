@@ -47,7 +47,6 @@ public class ZipEntryTempInfo extends BasicTempInfo
    @Override
    public void cleanup()
    {
-      log.warn("Cleanup context: " + context);
       context.resetInitStatus();
       super.cleanup();
    }
