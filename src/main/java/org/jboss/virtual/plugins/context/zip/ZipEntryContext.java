@@ -252,7 +252,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // init initial root EntryInfo that will be overwritten
       // if zip entry exists for rootEntryPath
-      entries.put("", new EntryInfo(new ZipEntryHandler(this, null, name, true), null));
+      entries.put("", new EntryInfo(new ZipEntryHandler(this, null, name, false), null));
 
       // It's lazy init now
       //initEntries();

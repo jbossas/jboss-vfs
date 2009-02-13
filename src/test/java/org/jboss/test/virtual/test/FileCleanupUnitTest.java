@@ -291,16 +291,27 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
 
       VirtualFile ear = root.getChild("level1.zip");
       VirtualFile earCopy = modify(ear);
+      assertEquals(ear.toURL(), earCopy.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/", earCopy.toURL().toExternalForm());
 
+      VirtualFile o2 = ear.getChild("level2.zip");
       VirtualFile l2 = earCopy.getChild("level2.zip");
+      assertEquals(o2.toURL(), l2.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/", l2.toURL().toExternalForm());
+
+      VirtualFile o2sub = o2.getChild("test2.txt");
       VirtualFile l2sub = l2.getChild("test2.txt");
+      assertEquals(o2sub.toURL(), l2sub.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
 
+      VirtualFile o3 = o2.getChild("level3.zip");
       VirtualFile l3 = l2.getChild("level3.zip");
+      assertEquals(o3.toURL(), l3.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/", l3.toURL().toExternalForm());
+
+      VirtualFile o3sub = o3.getChild("test3.txt");
       VirtualFile l3sub = l3.getChild("test3.txt");
+      assertEquals(o3sub.toURL(), l3sub.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
 
       ear.cleanup();
