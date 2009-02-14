@@ -26,11 +26,9 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
- * TypeInfoOptions.
+ * Options.
  *
- * TODO add some security on who can add options
- * @author <a href="adrian@jboss.com">Adrian Brock</a>
- * @author <a href="les.justin@jboss.com">Ales Justin</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  */
 public class Options
 {
