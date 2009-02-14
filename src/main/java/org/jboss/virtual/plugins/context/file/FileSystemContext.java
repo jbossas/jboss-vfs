@@ -64,7 +64,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class FileSystemContext extends AbstractVFSContext
 {
-   protected static final Logger log = Logger.getLogger(FileSystemContext.class);
+   protected static final Logger staticLog = Logger.getLogger(FileSystemContext.class);
 
    /** true if forcing fallback to vfsjar from default vfszip */
    private static boolean forceVfsJar;
@@ -77,12 +77,12 @@ public class FileSystemContext extends AbstractVFSContext
       forceVfsJar = AccessController.doPrivileged(new CheckForceVfsJar());
 
       if (forceVfsJar)
-         log.info("VFS forced fallback to vfsjar is enabled.");
+         staticLog.info("VFS forced fallback to vfsjar is enabled.");
 
       forceCaseSensitive = AccessController.doPrivileged(new CheckForceCaseSensitive());
 
       if (forceCaseSensitive)
-         log.debug("VFS forced case sensitivity is enabled.");
+         staticLog.debug("VFS forced case sensitivity is enabled.");
    }
 
    /** The temp file */
@@ -386,7 +386,7 @@ public class FileSystemContext extends AbstractVFSContext
       boolean isCaseSensitive = forceCaseSensitive;
       if (isCaseSensitive == false)
       {
-         String flag = getOptions().get(VFSUtils.CASE_SENSITIVE_QUERY);
+         String flag = getOption(VFSUtils.CASE_SENSITIVE_QUERY, String.class);
          isCaseSensitive = Boolean.valueOf(flag);
       }
 

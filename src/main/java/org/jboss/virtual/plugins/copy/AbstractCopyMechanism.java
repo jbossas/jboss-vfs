@@ -27,11 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.file.JarUtils;
@@ -41,7 +39,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
-import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -142,23 +140,17 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       FileSystemContext fileSystemContext = new TempContext(copy, oldVFSContext, path);
 
       // merge old options
-      Map<String, String> newOptions = fileSystemContext.getOptions();
+      Options newOptions = fileSystemContext.getOptions();
       if (newOptions != null) // shouldn't be null, but we check anyway
       {
-         Map<String, String> oldOptions = oldVFSContext.getOptions();
-         if (oldOptions != null && oldOptions.isEmpty() == false)
-            newOptions.putAll(oldOptions);
+         Options oldOptions = oldVFSContext.getOptions();
+         if (oldOptions != null && oldOptions.size() > 0)
+            newOptions.merge(oldOptions);
 
-         newOptions.put(VFSUtils.IS_TEMP_FILE, Boolean.TRUE.toString());
-         // save old url
-         URL handlerURL = handler.toVfsUrl();
-         newOptions.put(VFSUtils.OLD_URL_STRING, handlerURL.toExternalForm());
+         newOptions.addOption(VFSUtils.IS_TEMP_FILE, Boolean.TRUE);
+         // save old handler
+         newOptions.addOption(VirtualFileHandler.class.getName(), handler);
       }
-
-      // copy exception handler
-      ExceptionHandler eh = oldVFSContext.getExceptionHandler();
-      if (eh != null)
-         fileSystemContext.setExceptionHandler(eh);
 
       VirtualFileHandler newHandler = fileSystemContext.getRoot();
       oldVFSContext.addTempInfo(new BasicTempInfo(path, copy, newHandler));

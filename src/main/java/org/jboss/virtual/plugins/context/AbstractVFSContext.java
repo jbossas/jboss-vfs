@@ -26,11 +26,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
@@ -40,6 +40,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -65,16 +66,13 @@ public abstract class AbstractVFSContext implements VFSContext
    private final URI rootURI;
 
    /** Options associated with the root URL */
-   private Map<String, String> rootOptions;
+   private Options options = new Options();
 
    /** Root's peer within another context */
    private VirtualFileHandler rootPeer;
 
    /** The temp handlers */
    private Map<String, TempInfo> tempInfos = new ConcurrentHashMap<String, TempInfo>();
-
-   /** The exception handler */
-   private ExceptionHandler exceptionHandler;
 
    /**
     * Create a new AbstractVFSContext.
@@ -88,7 +86,8 @@ public abstract class AbstractVFSContext implements VFSContext
          throw new IllegalArgumentException("Null rootURI");
       this.rootURI = rootURI;
       String query = rootURI.getQuery();
-      rootOptions = VFSUtils.parseURLQuery(query);
+      Map<String, ?> map = VFSUtils.parseURLQuery(query);
+      options.addOptions(map);
    }
 
    /**
@@ -125,14 +124,43 @@ public abstract class AbstractVFSContext implements VFSContext
       return rootPeer;
    }
 
-   protected void addOption(String key, String value)
+   public Options getOptions()
    {
-      rootOptions.put(key, value);
+      return options;
    }
 
-   public Map<String, String> getOptions()
+   public void mergeOptions(Options other)
    {
-      return rootOptions;
+      options.merge(other);
+   }
+
+   public void setOption(String name, Object option)
+   {
+      if (name == null)
+         throw new IllegalArgumentException("Null name");
+
+      if (option == null)
+         options.removeOption(name);
+      else
+         options.addOption(name, option);
+   }
+
+   public Object getOption(String name)
+   {
+      return options.getOption(name);
+   }
+
+   public <T> T getOption(Class<T> expectedType)
+   {
+      if (expectedType == null)
+         throw new IllegalArgumentException("Null expectedType");
+
+      return getOption(expectedType.getName(), expectedType);
+   }
+
+   public <T> T getOption(String name, Class<T> expectedType)
+   {
+      return options.getOption(name, expectedType);
    }
 
    /**
@@ -155,13 +183,15 @@ public abstract class AbstractVFSContext implements VFSContext
     */
    protected URL setOptionsToURL(URL url) throws MalformedURLException
    {
-      if (rootOptions.size() == 0)
+      Map<String, String> map = options.getOptions(String.class);
+      if (map.isEmpty())
          return url;
 
       StringBuilder sb = new StringBuilder(url.toString());
       sb.append("?");
       int i = 0;
-      for (Map.Entry<String, String> ent : rootOptions.entrySet())
+
+      for (Map.Entry<String, String> ent : map.entrySet())
       {
          if (i > 0)
             sb.append("&");
@@ -421,12 +451,12 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public ExceptionHandler getExceptionHandler()
    {
-      return exceptionHandler;
+      return getOption(ExceptionHandler.class);
    }
 
    public void setExceptionHandler(ExceptionHandler exceptionHandler)
    {
-      this.exceptionHandler = exceptionHandler;
+      setOption(ExceptionHandler.class.getName(), exceptionHandler);
    }
 
    @Override

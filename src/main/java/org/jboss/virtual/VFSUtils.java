@@ -49,6 +49,7 @@ import org.jboss.virtual.plugins.copy.TempCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
@@ -122,9 +123,6 @@ public class VFSUtils
 
    /** The temp marker flag */
    public static final String IS_TEMP_FILE = "IS_TEMP_FILE";
-
-   /** The old root string */
-   public static final String OLD_URL_STRING = "OLD_ROOT_STRING";
 
    /**
     * Stop cache.
@@ -546,7 +544,7 @@ public class VFSUtils
     * @param file the file
     * @return options map
     */
-   private static Map<String, String> getOptions(VirtualFile file)
+   private static Options getOptions(VirtualFile file)
    {
       if (file == null)
          throw new IllegalArgumentException("Null file");
@@ -562,7 +560,7 @@ public class VFSUtils
     * @param vfs the vfs
     * @return options map
     */
-   private static Map<String, String> getOptions(VFS vfs)
+   private static Options getOptions(VFS vfs)
    {
       if (vfs == null)
          throw new IllegalArgumentException("Null vfs");
@@ -580,8 +578,7 @@ public class VFSUtils
     */
    public static String getOption(VirtualFile file, String key)
    {
-      Map<String, String> options = getOptions(file);
-      return options != null ? options.get(key) : null;
+      return getOption(file, key, String.class);
    }
 
    /**
@@ -593,8 +590,37 @@ public class VFSUtils
     */
    public static String getOption(VFS vfs, String key)
    {
-      Map<String, String> options = getOptions(vfs);
-      return options != null ? options.get(key) : null;
+      return getOption(vfs, key, String.class);
+   }
+
+   /**
+    * Get the option.
+    *
+    * @param <T> exact type
+    * @param file the file
+    * @param key the option key
+    * @param exactType the exact type
+    * @return key's option
+    */
+   public static <T> T getOption(VirtualFile file, String key, Class<T> exactType)
+   {
+      Options options = getOptions(file);
+      return options != null ? options.getOption(key, exactType) : null;
+   }
+
+   /**
+    * Get the option.
+    *
+    * @param <T> exact type
+    * @param vfs the vfs
+    * @param key the option key
+    * @param exactType the exact type
+    * @return key's option
+    */
+   public static <T> T getOption(VFS vfs, String key, Class<T> exactType)
+   {
+      Options options = getOptions(vfs);
+      return options != null ? options.getOption(key, exactType) : null;
    }
 
    /**
@@ -605,11 +631,11 @@ public class VFSUtils
     */
    protected static void enableOption(VirtualFile file, String optionName)
    {
-      Map<String, String> options = getOptions(file);
+      Options options = getOptions(file);
       if (options == null)
          throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + file);
 
-      options.put(optionName, Boolean.TRUE.toString());
+      options.addOption(optionName, Boolean.TRUE.toString());
    }
 
    /**
@@ -620,11 +646,11 @@ public class VFSUtils
     */
    protected static void disableOption(VirtualFile file, String optionName)
    {
-      Map<String, String> options = getOptions(file);
+      Options options = getOptions(file);
       if (options == null)
          throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + file);
 
-      options.remove(optionName);
+      options.removeOption(optionName);
    }
 
    /**
@@ -635,11 +661,11 @@ public class VFSUtils
     */
    protected static void enableOption(VFS vfs, String optionName)
    {
-      Map<String, String> options = getOptions(vfs);
+      Options options = getOptions(vfs);
       if (options == null)
          throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + vfs);
 
-      options.put(optionName, Boolean.TRUE.toString());
+      options.addOption(optionName, Boolean.TRUE.toString());
    }
 
    /**
@@ -650,11 +676,11 @@ public class VFSUtils
     */
    protected static void disableOption(VFS vfs, String optionName)
    {
-      Map<String, String> options = getOptions(vfs);
+      Options options = getOptions(vfs);
       if (options == null)
          throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + vfs);
 
-      options.remove(optionName);
+      options.removeOption(optionName);
    }
 
    /**
@@ -785,7 +811,8 @@ public class VFSUtils
     */
    public static boolean isTemporaryFile(VirtualFile file)
    {
-      return Boolean.valueOf(getOption(file, IS_TEMP_FILE));
+      Boolean isTemp = getOption(file, IS_TEMP_FILE, Boolean.class);
+      return isTemp != null && isTemp;
    }
 
    /**
@@ -798,6 +825,7 @@ public class VFSUtils
     */
    public static VirtualFile unpack(VirtualFile file) throws IOException, URISyntaxException
    {
+      log.warn("Using unpack modification is not yet fully supported - rewire-ing issues.");
       return copy(file, UnpackCopyMechanism.INSTANCE);
    }
 

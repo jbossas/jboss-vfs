@@ -32,7 +32,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.logging.Logger;
@@ -286,32 +285,41 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
             {
                VFSContext context = getVFSContext();
                String path = getPathName();
-               StringBuffer buf = new StringBuffer();
 
-               String rootString = context.getOptions().get(VFSUtils.OLD_URL_STRING);
-               if (rootString == null)
+               VirtualFileHandler oldRoot = context.getOption(VirtualFileHandler.class);
+               if (oldRoot == null)
                {
+                  StringBuffer buf = new StringBuffer();
+
                   URI rootURI = context.getRootURI();
                   URI copyURI = new URI(rootURI.getScheme(), rootURI.getHost(), rootURI.getPath(), null);
-                  rootString = copyURI.toURL().toExternalForm();
-               }
-               buf.append(rootString);
+                  buf.append(copyURI.toURL().toExternalForm());
 
-               if (path != null && path.length() > 0)
-               {
-                  if (buf.charAt(buf.length() - 1) != '/')
+                  if (path != null && path.length() > 0)
+                  {
+                     if (buf.charAt(buf.length() - 1) != '/')
+                     {
+                        buf.append('/');
+                     }
+                     buf.append(path);
+                  }
+
+                  if (buf.charAt(buf.length() - 1) != '/' && isLeaf() == false)
                   {
                      buf.append('/');
                   }
-                  buf.append(path);
-               }
 
-               if (buf.charAt(buf.length() - 1) != '/' && isLeaf() == false)
+                  vfsUrlCached = new URL(buf.toString());
+               }
+               else
                {
-                  buf.append('/');
+                  VirtualFileHandler handler = oldRoot.getChild(path);
+                  if (handler == null)
+                     throw new IllegalArgumentException("No such child: " + path + ", root: " + oldRoot);
+
+                  vfsUrlCached = handler.toVfsUrl();
                }
 
-               vfsUrlCached = new URL(buf.toString());
             }
             catch (IOException e)
             {
@@ -557,8 +565,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected boolean isTemporary()
    {
-      Map<String, String> options = getVFSContext().getOptions();
-      return (options != null && Boolean.valueOf(options.get(VFSUtils.IS_TEMP_FILE)));
+      Boolean isTemp = getVFSContext().getOption(VFSUtils.IS_TEMP_FILE, Boolean.class);
+      return isTemp != null && isTemp;
    }
 
    public void close()

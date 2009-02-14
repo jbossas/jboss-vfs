@@ -119,9 +119,9 @@ public abstract class CopyTest extends AbstractVFSTest
       VirtualFile replacement;
 
       original = vfs.findChild("level1.zip/level2.zip");
+      VirtualFile parent = original.getParent();
       replacement = modify(original);
       assertNestedLevel(original, replacement);
-      VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level2.zip");
       //assertEquals(replacement, child);
       assertOnURI(child, replacement);
@@ -141,9 +141,9 @@ public abstract class CopyTest extends AbstractVFSTest
       VirtualFile replacement;
 
       original = vfs.findChild("level1.zip/level2.zip/level3.zip");
+      VirtualFile parent = original.getParent();
       replacement = modify(original);
       assertNestedLevel(original, replacement);
-      VirtualFile parent = original.getParent();
       VirtualFile child = parent.findChild("level3.zip");
       //assertEquals(replacement, child);
       assertOnURI(child, replacement);

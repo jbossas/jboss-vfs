@@ -306,7 +306,7 @@ public abstract class AbstractStructuredJarHandler<T> extends AbstractJarHandler
          boolean useCopyJarHandler = forceCopy;
          if (useCopyJarHandler == false)
          {
-            String flag = context.getOptions().get(VFSUtils.USE_COPY_QUERY);
+            String flag = context.getOptions().getOption(VFSUtils.USE_COPY_QUERY, String.class);
             useCopyJarHandler = Boolean.valueOf(flag);
          }
 

@@ -60,6 +60,7 @@ import org.jboss.virtual.plugins.context.ReplacementHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -287,14 +288,14 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @return map containing aggregated options
     */
-   public Map<String, String> getAggregatedOptions()
+   public Options getAggregatedOptions()
    {
-      Map<String, String> options = new HashMap<String, String>();
+      Options aggregatedOptions = new Options();
       VFSContext peerContext = getPeerContext();
       if (peerContext != null)
-         options.putAll(peerContext.getOptions());
-      options.putAll(super.getOptions()); // put them after peer, possible override
-      return options;
+         aggregatedOptions.merge(peerContext.getOptions());
+      aggregatedOptions.merge(super.getOptions()); // put them after peer, possible override
+      return aggregatedOptions;
    }
 
    public ExceptionHandler getExceptionHandler()
@@ -354,9 +355,11 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       else
       {
-         boolean noReaper = Boolean.valueOf(getAggregatedOptions().get(VFSUtils.NO_REAPER_QUERY));
+         Options aggregatedOptions = getAggregatedOptions();
+         boolean noReaper = Boolean.valueOf(aggregatedOptions.getOption(VFSUtils.NO_REAPER_QUERY, String.class));
          realURL = urlInfo.toURL();
-         boolean isAutoClean = autoClean || Boolean.valueOf(getAggregatedOptions().get(VFSUtils.IS_TEMP_FILE));
+         Boolean isTemp = aggregatedOptions.getOption(VFSUtils.IS_TEMP_FILE, Boolean.class);
+         boolean isAutoClean = autoClean || (isTemp != null && isTemp);
          return new ZipFileWrapper(file, isAutoClean, noReaper);
       }
    }
@@ -504,7 +507,7 @@ public class ZipEntryContext extends AbstractVFSContext
                boolean useCopyMode = forceCopy;
                if (useCopyMode == false)
                {
-                  String flag = getAggregatedOptions().get(VFSUtils.USE_COPY_QUERY);
+                  String flag = getAggregatedOptions().getOption(VFSUtils.USE_COPY_QUERY, String.class);
                   useCopyMode = Boolean.valueOf(flag);
                }
 
