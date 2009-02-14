@@ -46,6 +46,8 @@ public class ZipEntryTempInfo extends BasicTempInfo
    public void cleanup()
    {
       context.resetInitStatus();
+      context = null; // release
+
       super.cleanup();
    }
 }
