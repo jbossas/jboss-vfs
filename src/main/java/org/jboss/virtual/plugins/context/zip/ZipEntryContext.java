@@ -627,6 +627,10 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    void resetInitStatus()
    {
+      EntryInfo rootInfo = entries.get("");
+      entries = new ConcurrentHashMap<String, EntryInfo>();
+      entries.put("", rootInfo);
+
       initStatus = InitializationStatus.NOT_INITIALIZED;
    }
 
