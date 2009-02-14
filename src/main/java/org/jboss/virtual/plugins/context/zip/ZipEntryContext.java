@@ -98,6 +98,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryContext extends AbstractVFSContext
 {
+   private boolean reset;
+
    /** Logger */
    private static final Logger log = Logger.getLogger(ZipEntryContext.class);
 
@@ -460,6 +462,11 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    private synchronized void initEntries() throws IOException, URISyntaxException
    {
+      if (reset)
+      {
+         log.fatal("*************** Re-init " + getName());   
+      }
+
       boolean trace = log.isTraceEnabled();
 
       // we're using a two phase approach - we first select the relevant ones
@@ -627,6 +634,8 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    void resetInitStatus()
    {
+      reset = true;
+
       EntryInfo rootInfo = entries.get("");
       entries = new ConcurrentHashMap<String, EntryInfo>();
       entries.put("", rootInfo);
@@ -798,6 +807,11 @@ public class ZipEntryContext extends AbstractVFSContext
    {
       if (parent == null)
          throw new IllegalArgumentException("Null parent");
+
+      if (reset && name.contains("FaceletViewHandler"))
+      {
+         throw new RuntimeException("STACKTRACE");
+      }
 
       checkIfModified();
 
@@ -1073,7 +1087,7 @@ public class ZipEntryContext extends AbstractVFSContext
     * @param parent a parent
     * @param child a child
     */
-   public void addChild(AbstractVirtualFileHandler parent, AbstractVirtualFileHandler child)
+   void addChild(AbstractVirtualFileHandler parent, AbstractVirtualFileHandler child)
    {
       if (parent == null)
          throw new IllegalArgumentException("Null parent");
