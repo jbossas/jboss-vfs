@@ -136,9 +136,6 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public void setOption(String name, Object option)
    {
-      if (name == null)
-         throw new IllegalArgumentException("Null name");
-
       if (option == null)
          options.removeOption(name);
       else
