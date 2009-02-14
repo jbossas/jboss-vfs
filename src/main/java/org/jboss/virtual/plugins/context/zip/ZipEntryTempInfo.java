@@ -50,4 +50,10 @@ public class ZipEntryTempInfo extends BasicTempInfo
 
       super.cleanup();
    }
+
+   @Override
+   public boolean isValid()
+   {
+      return context != null && super.isValid();
+   }
 }
