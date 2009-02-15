@@ -42,6 +42,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.Options;
 
 /**
  * AbstractVirtualFileHandler.
@@ -286,7 +287,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
                VFSContext context = getVFSContext();
                String path = getPathName();
 
-               VirtualFileHandler oldRoot = context.getOption(VirtualFileHandler.class);
+               Options options = context.getOptions();
+               VirtualFileHandler oldRoot = options.getOption(VirtualFileHandler.class);
                if (oldRoot == null)
                {
                   StringBuffer buf = new StringBuffer();
@@ -565,8 +567,8 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected boolean isTemporary()
    {
-      Boolean isTemp = getVFSContext().getOption(VFSUtils.IS_TEMP_FILE, Boolean.class);
-      return isTemp != null && isTemp;
+      Options options = getVFSContext().getOptions();
+      return options.getBooleanOption(VFSUtils.IS_TEMP_FILE);
    }
 
    public void close()

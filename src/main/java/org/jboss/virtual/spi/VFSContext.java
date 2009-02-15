@@ -82,62 +82,6 @@ public interface VFSContext
    Options getOptions();
 
    /**
-    * Merge options.
-    *
-    * @param other other options
-    */
-   void mergeOptions(Options other);
-
-   /**
-    * Get an option from the type
-    *
-    * @param name the name
-    * @return the option
-    */
-   Object getOption(String name);
-
-   /**
-    * Get an option from the type,
-    * uses the expected type as both the name
-    * and to cast the resulting object.
-    *
-    * @param <T> the expected type
-    * @param expectedType the expected type
-    * @return the option
-    * @throws ClassCastException when the object is not of the expected type
-    */
-   <T> T getOption(Class<T> expectedType);
-
-   /**
-    * Get an option from the type,
-    * uses the expected type as both the name
-    * and to cast the resulting object.
-    *
-    * @param <T> the expected type
-    * @param name the name
-    * @param expectedType the expected type
-    * @return the option
-    * @throws ClassCastException when the object is not of the expected type
-    */
-   <T> T getOption(String name, Class<T> expectedType);
-
-   /**
-    * Set an option against the type.
-    * This is useful for caching information against a type.<p>
-    *
-    * If you add a future object, subsequent gets will wait for the result<p>
-    *
-    * WARNING: Be careful about what you put in here. Don't create
-    * references across classloaders, if you are not sure add a WeakReference
-    * to the information.
-    *
-    * @param name the name
-    * @param option the option, pass null to remove an option
-    * @throws IllegalArgumentException for a null name
-    */
-   void setOption(String name, Object option);
-
-   /**
     * Get the children
     * 
     * @param parent the parent

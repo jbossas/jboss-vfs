@@ -290,7 +290,7 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    public Options getAggregatedOptions()
    {
-      Options aggregatedOptions = new Options();
+      Options aggregatedOptions = createNewOptions();
       VFSContext peerContext = getPeerContext();
       if (peerContext != null)
          aggregatedOptions.merge(peerContext.getOptions());
@@ -358,8 +358,7 @@ public class ZipEntryContext extends AbstractVFSContext
          Options aggregatedOptions = getAggregatedOptions();
          boolean noReaper = Boolean.valueOf(aggregatedOptions.getOption(VFSUtils.NO_REAPER_QUERY, String.class));
          realURL = urlInfo.toURL();
-         Boolean isTemp = aggregatedOptions.getOption(VFSUtils.IS_TEMP_FILE, Boolean.class);
-         boolean isAutoClean = autoClean || (isTemp != null && isTemp);
+         boolean isAutoClean = autoClean || aggregatedOptions.getBooleanOption(VFSUtils.IS_TEMP_FILE);
          return new ZipFileWrapper(file, isAutoClean, noReaper);
       }
    }

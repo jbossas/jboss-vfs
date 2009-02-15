@@ -66,7 +66,7 @@ public abstract class AbstractVFSContext implements VFSContext
    private final URI rootURI;
 
    /** Options associated with the root URL */
-   private Options options = new Options();
+   private Options options = createNewOptions();
 
    /** Root's peer within another context */
    private VirtualFileHandler rootPeer;
@@ -102,6 +102,16 @@ public abstract class AbstractVFSContext implements VFSContext
       this(rootURL.toURI());
    }
 
+   /**
+    * Create options.
+    *
+    * @return the new options
+    */
+   protected Options createNewOptions()
+   {
+      return new DefaultOptions();
+   }
+
    public VFS getVFS()
    {
       if (vfs == null)
@@ -129,12 +139,7 @@ public abstract class AbstractVFSContext implements VFSContext
       return options;
    }
 
-   public void mergeOptions(Options other)
-   {
-      options.merge(other);
-   }
-
-   public void setOption(String name, Object option)
+   protected void setOption(String name, Object option)
    {
       if (option == null)
          options.removeOption(name);
@@ -142,12 +147,12 @@ public abstract class AbstractVFSContext implements VFSContext
          options.addOption(name, option);
    }
 
-   public Object getOption(String name)
+   protected Object getOption(String name)
    {
       return options.getOption(name);
    }
 
-   public <T> T getOption(Class<T> expectedType)
+   protected <T> T getOption(Class<T> expectedType)
    {
       if (expectedType == null)
          throw new IllegalArgumentException("Null expectedType");
@@ -155,7 +160,7 @@ public abstract class AbstractVFSContext implements VFSContext
       return getOption(expectedType.getName(), expectedType);
    }
 
-   public <T> T getOption(String name, Class<T> expectedType)
+   protected <T> T getOption(String name, Class<T> expectedType)
    {
       return options.getOption(name, expectedType);
    }

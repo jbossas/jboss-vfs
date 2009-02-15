@@ -49,9 +49,9 @@ import org.jboss.virtual.plugins.copy.TempCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
-import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
@@ -811,8 +811,8 @@ public class VFSUtils
     */
    public static boolean isTemporaryFile(VirtualFile file)
    {
-      Boolean isTemp = getOption(file, IS_TEMP_FILE, Boolean.class);
-      return isTemp != null && isTemp;
+      Options options = getOptions(file);
+      return options.getBooleanOption(IS_TEMP_FILE);
    }
 
    /**
