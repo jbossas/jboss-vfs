@@ -385,10 +385,7 @@ public class FileSystemContext extends AbstractVFSContext
       // if force case sensitive is enabled - extra check is required
       boolean isCaseSensitive = forceCaseSensitive;
       if (isCaseSensitive == false)
-      {
-         String flag = getOption(VFSUtils.CASE_SENSITIVE_QUERY, String.class);
-         isCaseSensitive = Boolean.valueOf(flag);
-      }
+         isCaseSensitive = getOptions().getBooleanOption(VFSUtils.CASE_SENSITIVE_QUERY);
 
       if (isCaseSensitive && file.getCanonicalFile().getName().equals(file.getName()) == false)
          return false;

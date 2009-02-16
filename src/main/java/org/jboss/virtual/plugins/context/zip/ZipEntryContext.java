@@ -356,7 +356,7 @@ public class ZipEntryContext extends AbstractVFSContext
       else
       {
          Options aggregatedOptions = getAggregatedOptions();
-         boolean noReaper = Boolean.valueOf(aggregatedOptions.getOption(VFSUtils.NO_REAPER_QUERY, String.class));
+         boolean noReaper = aggregatedOptions.getBooleanOption(VFSUtils.NO_REAPER_QUERY);
          realURL = urlInfo.toURL();
          boolean isAutoClean = autoClean || aggregatedOptions.getBooleanOption(VFSUtils.IS_TEMP_FILE);
          return new ZipFileWrapper(file, isAutoClean, noReaper);
@@ -505,10 +505,7 @@ public class ZipEntryContext extends AbstractVFSContext
             {
                boolean useCopyMode = forceCopy;
                if (useCopyMode == false)
-               {
-                  String flag = getAggregatedOptions().getOption(VFSUtils.USE_COPY_QUERY, String.class);
-                  useCopyMode = Boolean.valueOf(flag);
-               }
+                  useCopyMode = getAggregatedOptions().getBooleanOption(VFSUtils.USE_COPY_QUERY);
 
                DelegatingHandler delegator;
 
