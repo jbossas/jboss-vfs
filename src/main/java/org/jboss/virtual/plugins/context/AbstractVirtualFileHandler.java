@@ -317,9 +317,14 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
                {
                   VirtualFileHandler handler = oldRoot.getChild(path);
                   if (handler == null)
-                     throw new IllegalArgumentException("No such child: " + path + ", root: " + oldRoot);
-
-                  vfsUrlCached = handler.toVfsUrl();
+                  {
+                     vfsUrlCached = new URL(oldRoot.toVfsUrl(), path);
+                     log.warn("No such existing handler, falling back to old root + path: " + vfsUrlCached);
+                  }
+                  else
+                  {
+                     vfsUrlCached = handler.toVfsUrl();
+                  }
                }
 
             }
