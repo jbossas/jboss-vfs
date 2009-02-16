@@ -472,22 +472,22 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          Enumeration<? extends ZipEntry> zipEntries = zipSource.entries();
          // zoom-in on entries under rootEntryPath - ignoring the rest
-         while(zipEntries.hasMoreElements())
+         while (zipEntries.hasMoreElements())
          {
             ZipEntry ent = zipEntries.nextElement();
-            if(ent.getName().startsWith(rootEntryPath))
+            if (ent.getName().startsWith(rootEntryPath))
             {
                relevant.put(ent.getName(), ent);
             }
          }
 
          Map<String, ZipEntry> orderedRelevant = new TreeMap<String, ZipEntry>(relevant);
-         for(Map.Entry<String, ZipEntry> entry : orderedRelevant.entrySet())
+         for (Map.Entry<String, ZipEntry> entry : orderedRelevant.entrySet())
          {
             ZipEntry ent = entry.getValue();
             String fullName = ent.getName().substring(rootEntryPath.length());
 
-            String [] split = splitParentChild(fullName);
+            String[] split = splitParentChild(fullName);
             String parentPath = split[0];
             String name = split[1];
 
@@ -495,13 +495,13 @@ public class ZipEntryContext extends AbstractVFSContext
             if ("".equals(name) == false)
             {
                ei = entries.get(parentPath);
-               if(ei == null)
+               if (ei == null)
                   ei = makeDummyParent(parentPath);
             }
             AbstractVirtualFileHandler parent = ei != null ? ei.handler : null;
 
             // it's a nested jar
-            if(ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
+            if (ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
             {
                boolean useCopyMode = forceCopy;
                if (useCopyMode == false)
@@ -621,13 +621,16 @@ public class ZipEntryContext extends AbstractVFSContext
    /**
     * Reset init status.
     */
-   void resetInitStatus()
+   synchronized void resetInitStatus()
    {
-      EntryInfo rootInfo = entries.get("");
-      entries = new ConcurrentHashMap<String, EntryInfo>();
-      entries.put("", rootInfo);
+      if (initStatus != InitializationStatus.NOT_INITIALIZED)
+      {
+         EntryInfo rootInfo = entries.get("");
+         entries = new ConcurrentHashMap<String, EntryInfo>();
+         entries.put("", rootInfo);
 
-      initStatus = InitializationStatus.NOT_INITIALIZED;
+         initStatus = InitializationStatus.NOT_INITIALIZED;
+      }
    }
 
    /**
