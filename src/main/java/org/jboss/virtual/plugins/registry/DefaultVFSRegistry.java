@@ -78,13 +78,14 @@ public class DefaultVFSRegistry extends VFSRegistry
             if (relativePath.startsWith(path))
             {
                String subpath = relativePath.substring(path.length());
-               VirtualFileHandler child = findHandler(ti.getHandler(), subpath);
-               return child.getVirtualFile();
+               VirtualFileHandler child = findHandler(ti.getHandler(), subpath, true);
+               if (child != null)
+                  return child.getVirtualFile();
             }
          }
 
          VirtualFileHandler root = context.getRoot();
-         VirtualFileHandler child = findHandler(root, relativePath);
+         VirtualFileHandler child = findHandler(root, relativePath, false);
          return child.getVirtualFile();
       }
       return null;
@@ -96,12 +97,13 @@ public class DefaultVFSRegistry extends VFSRegistry
     * @param root the root
     * @param path the path
     * @return child handler
+    * @param allowNotFound do we allow not found
     * @throws IOException for any error
     */
-   protected VirtualFileHandler findHandler(VirtualFileHandler root, String path) throws IOException
+   protected VirtualFileHandler findHandler(VirtualFileHandler root, String path, boolean allowNotFound) throws IOException
    {
       VirtualFileHandler child = root.getChild(path);
-      if (child == null)
+      if (child == null && allowNotFound == false)
       {
          List<VirtualFileHandler> children = root.getChildren(true);
          throw new IOException("Child not found " + path + " for " + root + ", available children: " + children);
