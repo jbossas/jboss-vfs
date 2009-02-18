@@ -98,7 +98,7 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
       }
       catch (Exception e)
       {
-         super.tearDown();
+         tearDown();
          throw e;
       }
    }
