@@ -82,7 +82,7 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
       File fp = new File(file);
       if (fp.exists())
       {
-         vfsurl = fp.getParentFile().toURL();
+         vfsurl = fp.getParentFile().toURI().toURL();
          relative = fp.getName();
       }
       else
@@ -93,7 +93,7 @@ public abstract class AbstractVFSHandler extends URLStreamHandler
          {
             if (curr.exists())
             {
-               vfsurl = curr.toURL();
+               vfsurl = curr.toURI().toURL();
                break;
             }
             else

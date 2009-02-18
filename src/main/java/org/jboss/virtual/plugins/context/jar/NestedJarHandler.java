@@ -130,7 +130,7 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
    protected NestedJarHandler(VFSContext context, VirtualFileHandler parent, JarFile parentJar, ZipEntry entry, URL original, File temp, String entryName)
       throws IOException
    {
-      super(context, parent, temp.toURL(), createTempJar(temp, parentJar, entry), entry, entryName);
+      super(context, parent, temp.toURI().toURL(), createTempJar(temp, parentJar, entry), entry, entryName);
 
       try
       {

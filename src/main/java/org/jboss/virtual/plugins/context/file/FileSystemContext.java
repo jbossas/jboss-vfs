@@ -238,7 +238,7 @@ public class FileSystemContext extends AbstractVFSContext
          {
             try
             {
-               return new JarHandler(this, parent, file, file.toURL(), name);
+               return new JarHandler(this, parent, file, file.toURI().toURL(), name);
             }
             catch(IOException e)
             {
@@ -273,7 +273,7 @@ public class FileSystemContext extends AbstractVFSContext
    protected DelegatingHandler mountZipFS(VirtualFileHandler parent, String name, File file) throws IOException, URISyntaxException
    {
       DelegatingHandler delegator = new DelegatingHandler(this, parent, name);
-      URL fileUrl = file.toURL();
+      URL fileUrl = file.toURI().toURL();
       URL delegatorUrl = fileUrl;
 
       if (parent != null)

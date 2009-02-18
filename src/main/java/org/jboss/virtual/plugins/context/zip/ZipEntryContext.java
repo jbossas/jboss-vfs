@@ -319,7 +319,7 @@ public class ZipEntryContext extends AbstractVFSContext
    {
       File file = null;
       String relative = null;
-      File fp = new File(rootPath);
+      File fp = new File(VFSUtils.decode(rootPath));
       if (fp.exists())
       {
          file = fp;
@@ -646,7 +646,7 @@ public class ZipEntryContext extends AbstractVFSContext
    protected DelegatingHandler mountZipFile(VirtualFileHandler parent, String name, File file) throws IOException, URISyntaxException
    {
       DelegatingHandler delegator = new DelegatingHandler(this, parent, name);
-      URL fileUrl = file.toURL();
+      URL fileUrl = file.toURI().toURL();
       URL delegatorUrl = fileUrl;
 
       if (parent != null)
@@ -1402,7 +1402,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       RealURLInfo(File file) throws MalformedURLException
       {
-         String url = file.toURL().toExternalForm();
+         String url = file.toURI().toURL().toExternalForm();
          if (url.endsWith("/"))
             url = url.substring(0, url.length()-1);
          rootURL = "jar:" + url + "!/";
