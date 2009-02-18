@@ -80,17 +80,18 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
          field.set(null, null);
 
          String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
-         String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir")) + GUID.asString();
+         String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir"));
 
          tempDir =  new File(tempDirString);
+         tempDir = new File(tempDir, GUID.asString());
          tempDir.deleteOnExit();
          if (tempDir.exists())
          {
             deleteTempDir();
          }
-         assertTrue(tempDir.mkdir());
+         assertTrue("mkdir " + tempDir, tempDir.mkdir());
 
-         System.setProperty("jboss.server.temp.dir", tempDirString);
+         System.setProperty("jboss.server.temp.dir", tempDir.getCanonicalPath());
 
          VFSCache cache = new LRUVFSCache(2, 5);
          cache.start();
