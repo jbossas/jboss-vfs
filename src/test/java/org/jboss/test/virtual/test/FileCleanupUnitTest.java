@@ -82,8 +82,7 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
          String tempDirKey = System.getProperty("vfs.temp.dir", "jboss.server.temp.dir");
          String tempDirString = System.getProperty(tempDirKey, System.getProperty("java.io.tmpdir"));
 
-         tempDir =  new File(tempDirString);
-         tempDir = new File(tempDir, GUID.asString());
+         tempDir = new File(new File(tempDirString), GUID.asString());
          tempDir.deleteOnExit();
          if (tempDir.exists())
          {
