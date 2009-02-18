@@ -303,6 +303,7 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
 
       VirtualFile o2sub = o2.getChild("test2.txt");
       VirtualFile l2sub = l2.getChild("test2.txt");
+      assertTrue(l2sub.isLeaf());
       assertEquals(o2sub.toURL(), l2sub.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/test2.txt", l2sub.toURL().toExternalForm());
 
@@ -314,6 +315,7 @@ public abstract class FileCleanupUnitTest extends AbstractVFSRegistryTest
 
       VirtualFile o3sub = o3.getChild("test3.txt");
       VirtualFile l3sub = l3.getChild("test3.txt");
+      assertTrue(l3sub.isLeaf());
       assertEquals(o3sub.toURL(), l3sub.toURL());
       assertEquals(getProtocol() + urlString + "level1.zip/level2.zip/level3.zip/test3.txt", l3sub.toURL().toExternalForm());
 
