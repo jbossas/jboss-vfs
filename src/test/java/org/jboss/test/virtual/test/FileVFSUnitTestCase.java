@@ -48,9 +48,10 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.jboss.test.virtual.support.ClassPathIterator;
-import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.test.virtual.support.MetaDataMatchFilter;
+import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
@@ -130,12 +131,12 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertTrue(outerJar.getAbsolutePath()+" exists", outerJar.exists());
       JarFile jf = new JarFile(outerJar);
 
-      URL rootURL = outerJar.getParentFile().toURL();
+      URL rootURL = outerJar.getParentFile().toURI().toURL();
       VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURL);
       VFSContext context = factory.getVFS(rootURL);
 
       JarEntry jar1 = jf.getJarEntry("jar1.jar");
-      URL jar1URL = new URL(outerJar.toURL(), "jar1.jar");
+      URL jar1URL = new URL(outerJar.toURI().toURL(), "jar1.jar");
       VFSContextFactory pf1 = VFSContextFactoryLocator.getFactory(jar1URL);
       VFSContext parent1 = pf1.getVFS(jar1URL);
 
@@ -155,7 +156,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       njfs.close();
 
       JarEntry jar2 = jf.getJarEntry("jar2.jar");
-      URL jar2URL = new URL(outerJar.toURL(), "jar2.jar");
+      URL jar2URL = new URL(outerJar.toURI().toURL(), "jar2.jar");
       VFSContextFactory pf2 = VFSContextFactoryLocator.getFactory(jar2URL);
       VFSContext parent2 = pf2.getVFS(jar2URL);
 
@@ -778,7 +779,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       tmp.createNewFile();
       tmp.deleteOnExit();
       log.info("+++ testVFSerialization, tmp="+tmp.getCanonicalPath());
-      URL rootURL = tmpRoot.toURL();
+      URL rootURL = tmpRoot.toURI().toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild("vfs.ser");
       FileOutputStream fos = new FileOutputStream(tmp);
@@ -792,7 +793,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       String name = tmp.getName();
       String vfsPath = tmp.getPath();
       vfsPath = vfsPath.substring(tmpRoot.getPath().length()+1);
-      URL url = new URL("vfs" + tmp.toURL());
+      URL url = new URL("vfs" + tmp.toURI().toURL());
       log.debug("name: "+name);
       log.debug("vfsPath: "+vfsPath);
       log.debug("url: "+url);
@@ -860,7 +861,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       String name = tmpJar.getName();
       String vfsPath = tmpJar.getPath();
       vfsPath = vfsPath.substring(tmpRoot.getPath().length()+1);
-      URL url = new URL("vfs" + tmpJar.toURL() + "/");
+      URL url = new URL("vfs" + tmpJar.toURI().toURL() + "/");
       //url = JarUtils.createJarURL(url);
       log.debug("name: "+name);
       log.debug("vfsPath: "+vfsPath);
@@ -1404,13 +1405,39 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       is.close();
    }
 
-   public static void main(String[] args) throws Exception
+   public void testJarWithSpacesInContext() throws Exception
    {
-      File file = new File("C:\\Documents and Settings");
-      System.out.println(file.toURI());
-      System.out.println(file.toURL().getHost());
-      URI uri = new URI("file", null, "/Document and Settings", null);
-      System.out.println(uri);
+      URL rootURL = getResource("/vfs/test/path with spaces");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile tstear = vfs.getChild("spaces.ear");
+      assertNotNull("spaces.ear != null", tstear);
+      URI uri = tstear.toURI();
+      URI expectedURI = new URI("vfs"+rootURL.toString()+"/spaces.ear/");
+      assertEquals(expectedURI.getPath(), uri.getPath());
+      assertFalse(tstear.isLeaf());
+
+      InputStream is = uri.toURL().openStream();
+      is.close();
+
+      VirtualFile tstjar = tstear.getChild("spaces-ejb.jar");
+      assertNotNull("spaces-ejb.jar != null", tstjar);
+      uri = tstjar.toURI();
+      expectedURI = new URI("vfs"+rootURL.toString()+"/spaces.ear/spaces-ejb.jar/");
+      assertEquals(expectedURI.getPath(), uri.getPath());
+      assertFalse(tstjar.isLeaf());
+
+      is = uri.toURL().openStream();
+      is.close();
+
+      tstjar = tstear.getChild("spaces-lib.jar");
+      assertNotNull("spaces-lib.jar != null", tstjar);
+      uri = tstjar.toURI();
+      expectedURI = new URI("vfs"+rootURL.toString()+"/spaces.ear/spaces-lib.jar/");
+      assertEquals(expectedURI.getPath(), uri.getPath());
+      assertFalse(tstjar.isLeaf());
+
+      is = uri.toURL().openStream();
+      is.close();
    }
 
    /**
@@ -1503,7 +1530,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       File tmp = File.createTempFile("testFileExists", null, tmpRoot);
       log.info("+++ testFileExists, tmp="+tmp.getCanonicalPath());
 
-      URL rootURL = tmpRoot.toURL();
+      URL rootURL = tmpRoot.toURI().toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
@@ -1528,7 +1555,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertTrue(tmp+".mkdir()", tmp.mkdir());
       log.info("+++ testDirFileExists, tmp="+tmp.getCanonicalPath());
 
-      URL rootURL = tmpRoot.toURL();
+      URL rootURL = tmpRoot.toURI().toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
@@ -1559,7 +1586,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       jos.setLevel(0);
       jos.close();
 
-      URL rootURL = tmpRoot.toURL();
+      URL rootURL = tmpRoot.toURI().toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmpJar.getName());
       assertTrue(tmpVF.getPathName()+".exists()", tmpVF.exists());
@@ -1585,7 +1612,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertTrue(tmp+".mkdir()", tmp.mkdir());
       log.info("+++ testDirJarExists, tmp="+tmp.getCanonicalPath());
 
-      URL rootURL = tmpRoot.toURL();
+      URL rootURL = tmpRoot.toURI().toURL();
       VFS vfs = VFS.getVFS(rootURL);
       VirtualFile tmpVF = vfs.findChild(tmp.getName());
       log.info(tmpVF);
@@ -1604,7 +1631,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFileDelete() throws Exception
    {
       File tmpRoot = File.createTempFile("vfs", ".root");
-      VFS vfs = VFS.getVFS(tmpRoot.toURL());
+      VFS vfs = VFS.getVFS(tmpRoot.toURI().toURL());
       VirtualFile root = vfs.getRoot();
 
       // non-existent directory - exists() not

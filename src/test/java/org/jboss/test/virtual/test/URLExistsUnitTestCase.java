@@ -56,7 +56,7 @@ public class URLExistsUnitTestCase extends AbstractVFSTest
    public void testFileURLs() throws Exception
    {
       File tmp = File.createTempFile("testFileURLs", null);
-      URL tmpURL = tmp.toURL();
+      URL tmpURL = tmp.toURI().toURL();
       URLConnection conn = tmpURL.openConnection();
       InputStream in = conn.getInputStream();
       long lastModified;
@@ -92,7 +92,7 @@ public class URLExistsUnitTestCase extends AbstractVFSTest
       jos.setLevel(0);
       jos.close();
 
-      URL tmpURL = new URL("jar:"+tmp.toURL()+"!/");
+      URL tmpURL = new URL("jar:"+tmp.toURI().toURL()+"!/");
       URLConnection conn = tmpURL.openConnection();
       conn.setUseCaches(false);
 
@@ -111,7 +111,7 @@ public class URLExistsUnitTestCase extends AbstractVFSTest
       assertNotSame("lastModified", 0, lastModified);
       assertTrue(tmp.getAbsolutePath()+" deleted", tmp.delete());
 
-      tmpURL = new URL("jar:"+tmp.toURL()+"!/");
+      tmpURL = new URL("jar:"+tmp.toURI().toURL()+"!/");
       conn = tmpURL.openConnection();
       lastModified = conn.getLastModified();
       System.out.println("lastModified after delete, "+lastModified);

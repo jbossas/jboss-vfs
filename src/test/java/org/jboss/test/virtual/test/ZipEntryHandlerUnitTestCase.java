@@ -72,7 +72,7 @@ public class ZipEntryHandlerUnitTestCase extends JARVirtualFileHandlerUnitTestCa
       tmpRoot.mkdir();
 
       File tmp = File.createTempFile("testFileContextZipDelete", ".jar", tmpRoot);
-      VFS vfs = VFS.getVFS(tmpRoot.toURL());
+      VFS vfs = VFS.getVFS(tmpRoot.toURI().toURL());
 
       Manifest mf = new Manifest();
       mf.getMainAttributes().putValue("Created-By", getClass().getName() + "." + "testEntryModified");
@@ -155,7 +155,7 @@ public class ZipEntryHandlerUnitTestCase extends JARVirtualFileHandlerUnitTestCa
          jos.close();
       }
 
-      VFS vfs = VFS.getVFS(tmp.toURL());
+      VFS vfs = VFS.getVFS(tmp.toURI().toURL());
 
       // children() exist
       List<VirtualFile> children = vfs.getChildren();

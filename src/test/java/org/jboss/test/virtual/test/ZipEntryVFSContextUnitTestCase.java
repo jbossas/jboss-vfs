@@ -87,7 +87,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       OutputStream os = new FileOutputStream(tmpJar);
       VFSUtils.copyStreamAndClose(is, os);
 
-      ZipEntryContext context = new ZipEntryContext(tmpJar.toURL());
+      ZipEntryContext context = new ZipEntryContext(tmpJar.toURI().toURL());
       assertTrue("context.getRoot().exists()", context.getRoot().exists());
 
       boolean isDeleted = context.getRoot().delete(1000);

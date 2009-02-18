@@ -72,7 +72,7 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
 
       // Verify it via VFS
       File root = new File(".");
-      VirtualFile vf = VFS.getVirtualFile(root.toURL(), "test.jar");
+      VirtualFile vf = VFS.getVirtualFile(root.toURI().toURL(), "test.jar");
       {
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
          Manifest manifest = new Manifest(manifestFile.openStream());
@@ -111,7 +111,7 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
 
       // Verify again - through new context
       {
-         vf = VFS.getVirtualFile(root.toURL(), "test.jar");
+         vf = VFS.getVirtualFile(root.toURI().toURL(), "test.jar");
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
          Manifest manifest = new Manifest(manifestFile.openStream());
          String actual = manifest.getMainAttributes().getValue("test");
