@@ -180,6 +180,8 @@ public class VFSUtils
       if (paths == null)
          throw new IllegalArgumentException("Null paths");
 
+      boolean trace = log.isTraceEnabled();
+      
       Manifest manifest = getManifest(file);
       if (manifest == null)
          return;
@@ -189,7 +191,7 @@ public class VFSUtils
 
       if (classPath == null)
       {
-         if (log.isTraceEnabled())
+         if (trace)
             log.trace("Manifest has no Class-Path for " + file.getPathName());
          return;
       }
@@ -201,41 +203,16 @@ public class VFSUtils
          return;
       }
 
-      URL parentURL;
-      URL vfsRootURL;
-      int rootPathLength;
-      try
-      {
-         parentURL = parent.toURL();
-         vfsRootURL = file.getVFS().getRoot().toURL();
-         rootPathLength = vfsRootURL.getPath().length();
-      }
-      catch(URISyntaxException e)
-      {
-         log.debug("Failed to get parent URL for " + file + ", reason=" + e);
-         return;
-      }
-
-      String parentPath = parentURL.toString();
-      if(parentPath.endsWith("/") == false)
-         parentPath += "/";
-
+      if (trace)
+         log.trace("Parsing Class-Path: " + classPath + " for " + file.getName() + " parent=" + parent.getName());
+      
       StringTokenizer tokenizer = new StringTokenizer(classPath);
       while (tokenizer.hasMoreTokens())
       {
          String path = tokenizer.nextToken();
          try
          {
-            URL libURL = new URL(parentPath + path);
-            String libPath = libURL.getPath();
-            if(rootPathLength > libPath.length())
-            {
-               log.debug("Invalid rootPath: " + vfsRootURL + ", libPath: " + libPath);
-               continue;
-            }
-
-            String vfsLibPath = libPath.substring(rootPathLength);
-            VirtualFile vf = file.getVFS().getChild(vfsLibPath);
+            VirtualFile vf = parent.getChild(path);
             if(vf != null)
             {
                if(paths.contains(vf) == false)
@@ -244,7 +221,11 @@ public class VFSUtils
                   // Recursively process the jar
                   addManifestLocations(vf, paths);
                }
+               else if (trace)
+                  log.trace(vf.getName() + " from manifiest is already in the classpath " + paths);
             }
+            else if (trace)
+               log.trace("Unable to find " + path + " from " + parent.getName());
          }
          catch (IOException e)
          {
