@@ -182,7 +182,7 @@ public class DefaultOptions implements Options
       {
          if (option instanceof Boolean)
             return (Boolean)option;
-         else if (option instanceof String)
+         else
             return Boolean.parseBoolean(String.valueOf(option));
       }
       return false;
