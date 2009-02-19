@@ -178,6 +178,13 @@ public class DefaultOptions implements Options
    public boolean getBooleanOption(String name)
    {
       Object option = getOption(name);
-      return Boolean.parseBoolean(String.valueOf(option));
+      if (option != null)
+      {
+         if (option instanceof Boolean)
+            return (Boolean)option;
+         else if (option instanceof String)
+            return Boolean.parseBoolean(String.valueOf(option));
+      }
+      return false;
    }
 }

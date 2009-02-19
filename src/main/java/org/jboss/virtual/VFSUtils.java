@@ -559,7 +559,8 @@ public class VFSUtils
     */
    public static String getOption(VirtualFile file, String key)
    {
-      return getOption(file, key, String.class);
+      Object option = getOption(file, key, Object.class);
+      return option != null ? option.toString() : null;
    }
 
    /**
@@ -571,7 +572,8 @@ public class VFSUtils
     */
    public static String getOption(VFS vfs, String key)
    {
-      return getOption(vfs, key, String.class);
+      Object option = getOption(vfs, key, Object.class);
+      return option != null ? option.toString() : null;
    }
 
    /**
@@ -616,7 +618,7 @@ public class VFSUtils
       if (options == null)
          throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + file);
 
-      options.addOption(optionName, Boolean.TRUE.toString());
+      options.addOption(optionName, Boolean.TRUE);
    }
 
    /**
@@ -646,7 +648,7 @@ public class VFSUtils
       if (options == null)
          throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + vfs);
 
-      options.addOption(optionName, Boolean.TRUE.toString());
+      options.addOption(optionName, Boolean.TRUE);
    }
 
    /**
