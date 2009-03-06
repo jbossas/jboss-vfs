@@ -76,4 +76,10 @@ public class VFSInputSource extends InputSource
    {
       return new InputStreamReader(getByteStream());
    }
+
+   @Override
+   public String toString()
+   {
+      return file.getPathName();
+   }
 }
