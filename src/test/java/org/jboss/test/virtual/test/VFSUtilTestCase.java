@@ -27,6 +27,7 @@ import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -116,5 +117,20 @@ public class VFSUtilTestCase extends AbstractMockVFSTest
 	   realURL = VFSUtils.getRealURL(regularFile);
       // TODO - JBVFS-77 --> do proper tests!
 	   assertTrue(realURL.toExternalForm().startsWith("file:"));
+   }
+   
+   public void testStripProtocol() throws Exception
+   {
+      URL url = getResource("/vfs/test/jar1.jar");
+      
+      VirtualFile manifest = VFS.getRoot(url).getChild("META-INF/MANIFEST.MF");
+      String expected = VFSUtils.stripProtocol(manifest.toURI());
+      
+      URL manifestURL = new URL("jar:" + url.toExternalForm() + "!/META-INF/MANIFEST.MF");
+      System.out.println(manifestURL);
+      System.out.println(manifestURL.toURI());
+      String actual = VFSUtils.stripProtocol(manifestURL.toURI());
+      
+      assertEquals("path from jar:file: url is not usable", expected, actual);
    }
 }
