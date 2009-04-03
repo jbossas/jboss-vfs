@@ -40,7 +40,14 @@ public class Handler extends URLStreamHandler
    {
       String urlString = u.toString();
       int index = urlString.indexOf("!/");
-      String file = urlString.substring(3, index + 2); // strip out vfs
+      // because we trim the url in JarContext.createVirtualFileHandler we can
+      // actually end up with a vfsjar:file: URL which does not point to an entry.
+      String file;
+      // strip out vfs
+      if(index == -1)
+         file = urlString.substring(3);
+      else
+         file = urlString.substring(3, index + 2);
       String path = urlString.substring(index + 2);
       URL url = new URL(file);
       return new VirtualFileURLConnection(u, url, path);
