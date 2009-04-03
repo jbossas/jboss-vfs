@@ -22,6 +22,8 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
+import java.util.Map;
+import java.lang.reflect.Field;
 
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
@@ -63,6 +65,21 @@ public abstract class AbstractVFSTest extends BaseTestCase
       super(name);
       this.forceCopy = forceCopy;
       this.forceNoReaper = forceNoReaper;
+   }
+
+   @SuppressWarnings("unchecked")
+   protected static Map<String, VFSContextFactory> getFactoryByProtocol()
+   {
+      try
+      {
+         Field field = VFSContextFactoryLocator.class.getDeclaredField("factoryByProtocol");
+         field.setAccessible(true);
+         return (Map<String, VFSContextFactory>) field.get(null);
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    protected void setUp() throws Exception
