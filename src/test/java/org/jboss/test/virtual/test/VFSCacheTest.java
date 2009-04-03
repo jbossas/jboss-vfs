@@ -21,14 +21,20 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.context.jar.JarContextFactory;
 import org.jboss.virtual.spi.VFSContext;
+import org.jboss.virtual.spi.VFSContextFactory;
+import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
@@ -58,6 +64,32 @@ public abstract class VFSCacheTest extends AbstractVFSRegistryTest
          cache.stop();
    }
 
+   private static Map<String, VFSContextFactory> getFactoryByProtocol()
+   {
+      try
+      {
+         Field field = VFSContextFactoryLocator.class.getDeclaredField("factoryByProtocol");
+         field.setAccessible(true);
+         return (Map<String, VFSContextFactory>) field.get(null);
+      }
+      catch (SecurityException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (NoSuchFieldException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (IllegalArgumentException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+   
    @SuppressWarnings("deprecation")
    public void testCache() throws Exception
    {
@@ -191,6 +223,70 @@ public abstract class VFSCacheTest extends AbstractVFSRegistryTest
       }
    }
 
+   public void testJarPath() throws Exception
+   {
+      // to circumvent another bug in VFS
+      Map<String, VFSContextFactory> factoryByProtocol = getFactoryByProtocol();
+      VFSContextFactory oldFactory = factoryByProtocol.put("jar", new JarContextFactory());
+      
+      VFSCache cache = createCache();
+      cache.start();
+      try
+      {
+         VFSCacheFactory.setInstance(cache);
+         try
+         {
+            configureCache(cache);
+
+            URL url = getResource("/vfs/test/jar1.jar");
+            URL manifestURL = new URL("jar:" + url.toExternalForm() + "!/META-INF/MANIFEST.MF");
+            
+            // first we ask for a jar:file: resource
+            
+            VirtualFile manifest = VFS.getRoot(manifestURL);
+
+            assertNotNull(manifest);
+            
+            // then we ask for a file: resource
+            
+            VirtualFile jar = VFS.getRoot(url);
+            
+            assertNotNull(jar);
+         }
+         catch(IOException e)
+         {
+            fail("failed to get the proper files: " + e.getMessage());
+         }
+         finally
+         {
+            VFSCacheFactory.setInstance(null);
+         }
+      }
+      finally
+      {
+         factoryByProtocol.put("jar", oldFactory);
+         
+         stopCache(cache);
+      }
+   }
+   
+   /**
+    * VFSCache assumes that VFSUtils.stripProtocol gives out usable paths
+    * to key upon.
+    */
+   public void testVFSUtilsStripProtocol() throws Exception
+   {
+      URL url = getResource("/vfs/test/jar1.jar");
+      
+      VirtualFile manifest = VFS.getRoot(url).getChild("META-INF/MANIFEST.MF");
+      String expected = VFSUtils.stripProtocol(manifest.toURI());
+      
+      URL manifestURL = new URL("jar:" + url.toExternalForm() + "!/META-INF/MANIFEST.MF");
+      String actual = VFSUtils.stripProtocol(manifestURL.toURI());
+      
+      assertEquals("path from jar:file: url is not usable", expected, actual);
+   }
+   
    private class WrapperVFSCache implements VFSCache
    {
       private VFSCache delegate;
