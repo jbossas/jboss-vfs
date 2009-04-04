@@ -194,6 +194,11 @@ public abstract class VFSCacheTest extends AbstractVFSRegistryTest
       }
    }
 
+   /**
+    * Test jar path.
+    *
+    * @throws Exception for any error
+    */
    public void testJarPath() throws Exception
    {
       // to circumvent another bug in VFS
