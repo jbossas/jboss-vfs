@@ -69,6 +69,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(CopyJAREntryTestCase.suite());
       suite.addTest(ZipEntryHandlerUnitTestCase.suite());
       suite.addTest(ZipEntryVFSContextUnitTestCase.suite());
+      suite.addTest(JarOverrideTestCase.suite());
       // contexts
       suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());
