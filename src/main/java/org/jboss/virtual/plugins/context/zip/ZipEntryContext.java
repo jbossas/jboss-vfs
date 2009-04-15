@@ -94,6 +94,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
+ * @author <a href="david.lloyd@jboss.com">David M. Lloyd</a>
  * @version $Revision: 1.0 $
  */
 public class ZipEntryContext extends AbstractVFSContext
@@ -113,6 +114,9 @@ public class ZipEntryContext extends AbstractVFSContext
       if (forceCopy)
          log.info("VFS force nested jars copy-mode is enabled.");
    }
+
+   /** The empty bytes const */
+   private static final byte[] NO_BYTES = new byte[0];
 
    /** Abstracted access to zip archive - either ZipFileWrapper or ZipStreamWrapper */
    private ZipWrapper zipSource;
@@ -1028,8 +1032,6 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       return false;
    }
-
-   private static final byte[] NO_BYTES = new byte[0];
 
    /**
     * Contents of the file represented by a given handler

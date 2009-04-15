@@ -31,6 +31,7 @@ import java.util.List;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="david.lloyd@jboss.com">David M. Lloyd</a>
  * @version $Revision: 1.1 $
  */
 @SuppressWarnings({"StringEquality"})
@@ -47,6 +48,12 @@ public class PathTokenizer
 
    /** Flag permission */
    private static Permission flagPermission = new RuntimePermission(PathTokenizer.class.getName() + ".setErrorOnSuspiciousTokens");
+
+   /** Token states */
+   private static final int STATE_INITIAL = 0;
+   private static final int STATE_NORMAL = 1;
+   private static final int STATE_MAYBE_CURRENT_PATH = 2;
+   private static final int STATE_MAYBE_REVERSE_PATH = 3;
 
    /**
     * Utility class
@@ -83,11 +90,6 @@ public class PathTokenizer
       buffer.append(tokens.get(end-1));
       return buffer.toString();
    }
-
-   private static final int STATE_INITIAL = 0;
-   private static final int STATE_NORMAL = 1;
-   private static final int STATE_MAYBE_CURRENT_PATH = 2;
-   private static final int STATE_MAYBE_REVERSE_PATH = 3;
 
    /**
     * Get the tokens that comprise this path.
@@ -174,7 +176,6 @@ public class PathTokenizer
                         throw new IllegalArgumentException("Illegal suspicious token in path: " + path);
                      }
                      state = STATE_NORMAL;
-                     continue;
                   }
                }
             }
