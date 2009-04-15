@@ -32,7 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -103,7 +103,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    private transient String localVfsPath;
 
    /** The reference count */
-   private transient AtomicInteger references = new AtomicInteger(0);
+   private transient volatile int references;
+
+   /** The reference count updater */
+   private static final AtomicIntegerFieldUpdater<AbstractVirtualFileHandler> referencesUpdater = AtomicIntegerFieldUpdater.newUpdater(AbstractVirtualFileHandler.class, "references");
 
    /** The cached last modified */
    protected transient long cachedLastModified;
@@ -538,7 +541,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected int increment()
    {
-      return references.incrementAndGet();
+      return referencesUpdater.incrementAndGet(this);
    }
 
    /**
@@ -548,7 +551,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected int decrement()
    {
-      return references.decrementAndGet();
+      return referencesUpdater.decrementAndGet(this);
    }
 
    /**
@@ -558,7 +561,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected void checkClosed() throws IllegalStateException 
    {
-      if (references.get() < 0)
+      if (references < 0)
          throw new IllegalStateException("Closed " + toStringLocal());
    }
 
@@ -569,7 +572,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     */
    protected int getReferences()
    {
-      return references.get();
+      return references;
    }
 
    public void cleanup()
@@ -596,7 +599,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       }
       finally
       {
-         references.decrementAndGet();   
+         referencesUpdater.decrementAndGet(this);
       }
    }
 
@@ -833,7 +836,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       this.name = (String) fields.get("name", null);
       VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
       this.context = factory.getVFS(rootURI);
-      this.references = new AtomicInteger(0);
+      this.references = 0;
       this.vfsUrl = (URL)fields.get("vfsUrl", null);
    }
 }
