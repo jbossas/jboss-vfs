@@ -41,8 +41,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -1029,6 +1029,8 @@ public class ZipEntryContext extends AbstractVFSContext
       return false;
    }
 
+   private static final byte[] NO_BYTES = new byte[0];
+
    /**
     * Contents of the file represented by a given handler
     *
@@ -1063,7 +1065,7 @@ public class ZipEntryContext extends AbstractVFSContext
       }
 
       if(ei.entry == null)
-         return new ByteArrayInputStream(new byte[0]);
+         return new ByteArrayInputStream(NO_BYTES);
 
       return getZipSource().openStream(ei.entry);
    }
@@ -1171,7 +1173,7 @@ public class ZipEntryContext extends AbstractVFSContext
       private ZipEntry entry;
 
       /** a list of children */
-      private List<AbstractVirtualFileHandler> children;
+      private Map<String, AbstractVirtualFileHandler> children;
 
       /**
        * EntryInfo constructor
@@ -1195,7 +1197,7 @@ public class ZipEntryContext extends AbstractVFSContext
          if (children == null)
             return Collections.emptyList();
 
-         return new LinkedList<VirtualFileHandler>(children);
+         return new ArrayList<VirtualFileHandler>(children.values());
       }
 
       /**
@@ -1208,15 +1210,9 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          if (children != null)
          {
-            int i = 0;
-            for (AbstractVirtualFileHandler child : children)
-            {
-               if (child.getName().equals(original.getName()))
-               {
-                  children.set(i, replacement);
-                  break;
-               }
-               i++;
+            final String name = original.getName();
+            if (children.containsKey(name)) {
+               children.put(name, replacement);
             }
          }
       }
@@ -1239,24 +1235,9 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          if (children == null)
          {
-            children = new LinkedList<AbstractVirtualFileHandler>();
+            children = new LinkedHashMap<String, AbstractVirtualFileHandler>();
          }
-         else
-         {
-            // if a child exists with this name already, remove it
-            Iterator<AbstractVirtualFileHandler> it = children.iterator();
-            while (it.hasNext())
-            {
-               AbstractVirtualFileHandler handler = it.next();
-               if (handler.getName().equals(child.getName()))
-               {
-                  it.remove();
-                  break;
-               }
-            }
-         }
-
-         children.add(child);
+         children.put(child.getName(), child);
       }
    }
 
