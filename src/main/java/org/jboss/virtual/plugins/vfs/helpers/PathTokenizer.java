@@ -84,6 +84,11 @@ public class PathTokenizer
       return buffer.toString();
    }
 
+   private static final int STATE_INITIAL = 0;
+   private static final int STATE_NORMAL = 1;
+   private static final int STATE_MAYBE_CURRENT_PATH = 2;
+   private static final int STATE_MAYBE_REVERSE_PATH = 3;
+
    /**
     * Get the tokens
     * 
@@ -96,73 +101,91 @@ public class PathTokenizer
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
-      char[] chars = path.toCharArray();
-      StringBuilder buffer = new StringBuilder();
+      int start = -1, length = path.length(), state = STATE_INITIAL;
+      char ch;
       List<String> list = new ArrayList<String>();
-      String specialToken = null;
 
-      for (int index=0; index < chars.length; index++)
-      {
-         char ch = chars[index];
-
-         if (ch == '/')
-         {
-            if (index > 0)
-            {
-               if (buffer.length() == 0 && specialToken == null)
-                  continue;
-
-               if (specialToken != null)
-                  list.add(specialToken);
-               else
-                  list.add(buffer.toString());
-
-               // reset
-               buffer.setLength(0);
-               specialToken = null;
+      for (int index = 0; index < length; index ++) {
+         ch = path.charAt(index);
+         switch (ch) {
+            case '/': {
+               switch (state) {
+                  case STATE_INITIAL: {
+                     // skip extra leading /
+                     continue;
+                  }
+                  case STATE_MAYBE_CURRENT_PATH: {
+                     // it's '.'
+                     list.add(CURRENT_PATH);
+                     state = STATE_INITIAL;
+                     continue;
+                  }
+                  case STATE_MAYBE_REVERSE_PATH: {
+                     // it's '..'
+                     list.add(REVERSE_PATH);
+                     state = STATE_INITIAL;
+                     continue;
+                  }
+                  case STATE_NORMAL: {
+                     // it's just a normal path segment
+                     list.add(path.substring(start, index));
+                     state = STATE_INITIAL;
+                     continue;
+                  }
+               }
+               continue;
             }
-         }
-         else if (ch == '.')
-         {
-            int bufferLength = buffer.length();
-
-            if (specialToken == null && bufferLength == 0)
-               specialToken = CURRENT_PATH;
-            else if (specialToken == CURRENT_PATH && bufferLength == 0)
-               specialToken = REVERSE_PATH;
-            else if (specialToken == REVERSE_PATH && bufferLength == 0)
-            {
-               if (errorOnSuspiciousTokens)
-                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
-
-               buffer.append(specialToken).append(ch);
-               specialToken = null;
+            case '.': {
+               switch (state) {
+                  case STATE_INITIAL: {
+                     // . is the first char; might be a special token
+                     state = STATE_MAYBE_CURRENT_PATH;
+                     start = index;
+                     continue;
+                  }
+                  case STATE_MAYBE_CURRENT_PATH: {
+                     // the second . in a row...
+                     state = STATE_MAYBE_REVERSE_PATH;
+                     continue;
+                  }
+                  case STATE_MAYBE_REVERSE_PATH: {
+                     // the third . in a row, guess it's just a weird path name
+                     state = STATE_NORMAL;
+                     continue;
+                  }
+               }
+               continue;
             }
-            else
-               buffer.append(ch);
-         }
-         else
-         {
-            // token starts with '.' or '..', but also has some path after that
-            if (specialToken != null)
-            {
-               // we don't allow tokens after '..'
-               if (errorOnSuspiciousTokens && specialToken == REVERSE_PATH)
-                  throw new IllegalArgumentException("Illegal token (" + specialToken + ch + ") in path: " + path);
-
-               // after '.' more path is legal == unix hidden directories
-               buffer.append(specialToken);
-               specialToken = null;
+            default: {
+               switch (state) {
+                  case STATE_INITIAL: {
+                     state = STATE_NORMAL;
+                     start = index;
+                     continue;
+                  }
+               }
             }
-            buffer.append(ch);
          }
       }
-
-      // add last token
-      if (specialToken != null)
-         list.add(specialToken);
-      else if (buffer.length() > 0)
-         list.add(buffer.toString());
+      // handle the last token
+      switch (state) {
+         case STATE_INITIAL: {
+            // trailing /
+            break;
+         }
+         case STATE_MAYBE_CURRENT_PATH: {
+            list.add(CURRENT_PATH);
+            break;
+         }
+         case STATE_MAYBE_REVERSE_PATH: {
+            list.add(REVERSE_PATH);
+            break;
+         }
+         case STATE_NORMAL: {
+            list.add(path.substring(start));
+            break;
+         }
+      }
 
       return list;
    }
