@@ -90,11 +90,13 @@ public class PathTokenizer
    private static final int STATE_MAYBE_REVERSE_PATH = 3;
 
    /**
-    * Get the tokens
+    * Get the tokens that comprise this path.
     * 
     * @param path the path
     * @return the tokens or null if the path is empty
-    * @throws IllegalArgumentException if the path is null, it is empty or it is a relative path
+    * @throws IllegalArgumentException if the path is null, or if this class is configured to reject
+    *    so-called "suspicious" tokens (files that start with "." which are not one of the two special
+    *    directories "." or "..")
     */
    public static List<String> getTokens(String path)
    {
