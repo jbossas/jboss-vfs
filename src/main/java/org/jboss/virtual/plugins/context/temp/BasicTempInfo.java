@@ -65,9 +65,16 @@ public class BasicTempInfo implements TempInfo
    public void cleanup()
    {
       if (handler != null)
+      {
          handler.cleanup();
+      }
       else if (file != null && file.exists())
+      {
          Files.delete(file);
+      }
+      // release
+      handler = null;
+      file = null;
    }
 
    public VirtualFileHandler getHandler()

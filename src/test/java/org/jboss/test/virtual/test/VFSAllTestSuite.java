@@ -58,6 +58,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(FileVFSContextUnitTestCase.suite());
       suite.addTest(FileVirtualFileHandlerUnitTestCase.suite());
       // jars
+      suite.addTest(JarFileURLTestCase.suite());
       suite.addTest(JARCacheUnitTestCase.suite());
       suite.addTest(CopyJARCacheUnitTestCase.suite());
       suite.addTest(JARVFSContextUnitTestCase.suite());

@@ -48,6 +48,7 @@ public class Handler extends URLStreamHandler
          file = urlString.substring(3);
       else
          file = urlString.substring(3, index + 2);
+      
       String path = urlString.substring(index + 2);
       URL url = new URL(file);
       return new VirtualFileURLConnection(u, url, path);

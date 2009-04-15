@@ -520,8 +520,10 @@ public class ZipEntryContext extends AbstractVFSContext
                   {
                      path = getPath(context, entryName);
                      TempInfo ti = context.getTempInfo(path);
-                     if (ti != null)
+                     if (ti != null && ti.isValid())
+                     {
                         dest = ti.getTempFile();
+                     }
                   }
 
                   boolean createNewTempInfo = (dest == null || dest.exists() == false);

@@ -24,6 +24,7 @@ package org.jboss.test.virtual.test;
 import java.io.InputStream;
 import java.net.URL;
 
+import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
@@ -38,7 +39,12 @@ public class JarFileURLTestCase extends AbstractVFSTest
       super(name);
    }
 
-   public void test1() throws Exception
+   public static Test suite()
+   {
+      return suite(JarFileURLTestCase.class);
+   }
+
+   public void testStreamDirectAndURL() throws Exception
    {
       URL url = getResource("/vfs/test/jar1.jar");
       URL manifestURL = new URL("jar:" + url.toExternalForm() + "!/META-INF/MANIFEST.MF");

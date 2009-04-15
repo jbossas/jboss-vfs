@@ -124,6 +124,12 @@ public class JarContext extends AbstractVFSContext
       return entryName;
    }
 
+   /**
+    * Extract jar name.
+    *
+    * @param urlStr the url string
+    * @return jar name
+    */
    public static String extractJarName(String urlStr)
    {
       String jarName = urlStr;
