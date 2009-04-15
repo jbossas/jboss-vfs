@@ -150,6 +150,9 @@ public class PathTokenizer
                   }
                   case STATE_MAYBE_REVERSE_PATH: {
                      // the third . in a row, guess it's just a weird path name
+                     if (errorOnSuspiciousTokens) {
+                        throw new IllegalArgumentException("Illegal suspicious token in path: " + path);
+                     }
                      state = STATE_NORMAL;
                      continue;
                   }
@@ -161,6 +164,14 @@ public class PathTokenizer
                   case STATE_INITIAL: {
                      state = STATE_NORMAL;
                      start = index;
+                     continue;
+                  }
+                  case STATE_MAYBE_CURRENT_PATH:
+                  case STATE_MAYBE_REVERSE_PATH: {
+                     if (errorOnSuspiciousTokens) {
+                        throw new IllegalArgumentException("Illegal suspicious token in path: " + path);
+                     }
+                     state = STATE_NORMAL;
                      continue;
                   }
                }
