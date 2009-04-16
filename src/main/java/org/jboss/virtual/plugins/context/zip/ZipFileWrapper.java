@@ -328,7 +328,7 @@ class ZipFileWrapper extends ZipWrapper
             catch (InterruptedException e)
             {
                interrupted = true;
-               return ! file.exists() || file.delete() && ! file.exists();
+               return file.exists() == false || file.delete();
             }
          }
          while(System.currentTimeMillis() < endOfGrace);
@@ -339,8 +339,7 @@ class ZipFileWrapper extends ZipWrapper
             Thread.currentThread().interrupt();
       }
 
-      file.delete();
-      return file.exists() == false;
+      return file.delete();
    }
 
    protected synchronized void recomposeZip(OutputStream baos, String path) throws IOException
