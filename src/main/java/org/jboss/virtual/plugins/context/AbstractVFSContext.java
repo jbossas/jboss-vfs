@@ -27,11 +27,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
@@ -72,7 +74,7 @@ public abstract class AbstractVFSContext implements VFSContext
    private VirtualFileHandler rootPeer;
 
    /** The temp handlers */
-   private Map<String, TempInfo> tempInfos = new ConcurrentHashMap<String, TempInfo>();
+   private final Map<String, List<TempInfo>> tempInfos = Collections.synchronizedMap(new HashMap<String, List<TempInfo>>());
 
    /**
     * Create a new AbstractVFSContext.
@@ -378,39 +380,72 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public void addTempInfo(TempInfo tempInfo)
    {
-      tempInfos.put(tempInfo.getPath(), tempInfo);
+      String key = tempInfo.getPath();
+      List<TempInfo> list;
+      synchronized (tempInfos)
+      {
+         list = tempInfos.get(key);
+         if (list == null)
+         {
+            list = new CopyOnWriteArrayList<TempInfo>();
+            tempInfos.put(key, list);
+         }
+      }
+      list.add(tempInfo);
    }
 
    public TempInfo getTempInfo(String path)
    {
-      TempInfo tempInfo = tempInfos.get(path);
-      if (tempInfo == null)
+      TempInfo result = null;
+      List<TempInfo> list = tempInfos.get(path);
+      if (list != null && list.isEmpty())
       {
-         return null;
+         Iterator<TempInfo> iter = list.iterator();
+         while(iter.hasNext())
+         {
+            TempInfo ti = iter.next();
+            if (ti.isValid() == false)
+            {
+               iter.remove();
+            }
+            else if (result == null)
+            {
+               result = ti;
+            }
+         }
       }
-      else if (tempInfo.isValid() == false)
-      {
-         tempInfos.remove(path);
-         return null;
-      }
-      else
-      {
-         return tempInfo;
-      }
+      return result;
    }
 
    public Iterable<TempInfo> getTempInfos()
    {
       Map<String, TempInfo> result = new TreeMap<String, TempInfo>();
-      Iterator<Map.Entry<String, TempInfo>> iter = tempInfos.entrySet().iterator();
+      Iterator<Map.Entry<String, List<TempInfo>>> iter = tempInfos.entrySet().iterator();
       while(iter.hasNext())
       {
-         Map.Entry<String, TempInfo> entry = iter.next();
-         if (entry.getValue().isValid())
+         Map.Entry<String, List<TempInfo>> entry = iter.next();
+         List<TempInfo> list = entry.getValue();
+         if (list != null && list.isEmpty() == false)
          {
-            result.put(entry.getKey(), entry.getValue());
+            Iterator<TempInfo> listIter = list.iterator();
+            while(listIter.hasNext())
+            {
+               TempInfo ti = listIter.next();
+               if (ti.isValid())
+               {
+                  String path = ti.getPath();
+                  if (result.containsKey(path) == false)
+                  {
+                     result.put(path, ti);
+                  }
+               }
+               else
+               {
+                  listIter.remove();
+               }
+            }
          }
-         else
+         if (list == null || list.isEmpty())
          {
             iter.remove();
          }
@@ -423,26 +458,32 @@ public abstract class AbstractVFSContext implements VFSContext
       boolean trace = log.isTraceEnabled();
       List<String> info = null;
 
-      Iterator<Map.Entry<String, TempInfo>> iter = tempInfos.entrySet().iterator();
+      Iterator<Map.Entry<String, List<TempInfo>>> iter = tempInfos.entrySet().iterator();
       while (iter.hasNext())
       {
-         Map.Entry<String, TempInfo> entry = iter.next();
+         Map.Entry<String, List<TempInfo>> entry = iter.next();
          if (entry.getKey().startsWith(path))
          {
+            List<TempInfo> list = entry.getValue();
+
             if (trace)
             {
                if (info == null)
                   info = new ArrayList<String>();
-               
-               info.add(entry.getValue().toString());
+
+               if (list != null && list.isEmpty() == false)
+                  info.add(list.toString());
             }
-            
-            try
+
+            for (TempInfo ti : list)
             {
-               entry.getValue().cleanup();
-            }
-            catch (Throwable ignored)
-            {
+               try
+               {
+                  ti.cleanup();                  
+               }
+               catch (Throwable ignored)
+               {
+               }
             }
             iter.remove();
          }

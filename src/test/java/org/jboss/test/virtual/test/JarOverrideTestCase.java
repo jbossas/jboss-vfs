@@ -21,7 +21,16 @@
  */
 package org.jboss.test.virtual.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URL;
+
 import junit.framework.Test;
+import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VirtualFile;
 
 /**
  * Test jar file override.
@@ -32,12 +41,7 @@ public class JarOverrideTestCase extends AbstractVFSTest
 {
    public JarOverrideTestCase(String name)
    {
-      super(name, false, false);
-   }
-
-   protected JarOverrideTestCase(String name, boolean forceCopy)
-   {
-      super(name, forceCopy, false);
+      super(name, true, false);
    }
 
    public static Test suite()
@@ -45,8 +49,48 @@ public class JarOverrideTestCase extends AbstractVFSTest
       return suite(JarOverrideTestCase.class);
    }
 
+   @SuppressWarnings("deprecation")
    public void testOverride() throws Exception
    {
-      // TODO - cleanup, override code
+      URL topURL = getResource("/vfs/test/nested/nested.jar");
+      URI topURI = topURL.toURI();
+      File source = new File(topURI);
+
+      // create temp so we can override it, not worrying about other tests
+      File tempDest = File.createTempFile("nested", "-temp.jar");
+      tempDest.deleteOnExit();
+      copy(source, tempDest);
+      long ts1 = tempDest.lastModified();
+
+      VirtualFile nested = VFS.createNewRoot(tempDest.toURI());
+      VirtualFile complex = nested.findChild("complex.jar");
+      // mock war unjaring
+      VirtualFile unjared = VFSUtils.unjar(complex);
+      assertNotSame(complex, unjared);
+
+      // override
+      copy(source, tempDest);
+      long ts2 = tempDest.lastModified();
+      // was it really overridden
+      assertFalse(ts1 == ts2);
+
+      // undeploy
+      nested.cleanup();
+      complex.cleanup();
+      // check we really deleted unjared temp
+      URL url = VFSUtils.getRealURL(unjared);
+      File unjaredTemp = new File(url.toURI());
+      assertFalse(unjaredTemp.exists());
+
+      // 2nd pass to mock
+      complex = nested.findChild("complex.jar");
+      // this is where JBAS-6715 fails
+      unjared = VFSUtils.unjar(complex);
+      assertNotSame(complex, unjared);
+   }
+
+   protected void copy(File source, File dest) throws Exception
+   {
+      VFSUtils.copyStreamAndClose(new FileInputStream(source), new FileOutputStream(dest));
    }
 }
