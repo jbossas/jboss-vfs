@@ -68,6 +68,9 @@ public class JarOverrideTestCase extends AbstractVFSTest
       VirtualFile unjared = VFSUtils.unjar(complex);
       assertNotSame(complex, unjared);
 
+      // wait 1sec+
+      Thread.sleep(1500l);
+
       // override
       copy(source, tempDest);
       long ts2 = tempDest.lastModified();
