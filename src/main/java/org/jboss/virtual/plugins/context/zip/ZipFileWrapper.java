@@ -310,26 +310,34 @@ class ZipFileWrapper extends ZipWrapper
       if (exists == false)
          return false;
 
-      long endOfGrace = System.currentTimeMillis() + gracePeriod;
-      do
+      boolean interrupted = Thread.interrupted();
+      try
       {
-         closeZipFile();
-         ZipFileLockReaper.getInstance().deleteFile(this);
-         try
+         long endOfGrace = System.currentTimeMillis() + gracePeriod;
+         do
          {
-            if (file.exists() && file.delete() == false)
-               Thread.sleep(100);
-            else
-               return true;
+            closeZipFile();
+            ZipFileLockReaper.getInstance().deleteFile(this);
+            try
+            {
+               if (file.exists() && file.delete() == false)
+                  Thread.sleep(100);
+               else
+                  return true;
+            }
+            catch (InterruptedException e)
+            {
+               interrupted = true;
+               return ! file.exists() || file.delete() && ! file.exists();
+            }
          }
-         catch (InterruptedException e)
-         {
-            IOException ioe = new IOException("Interrupted: " + e);
-            ioe.initCause(e);
-            throw ioe;
-         }
+         while(System.currentTimeMillis() < endOfGrace);
       }
-      while(System.currentTimeMillis() < endOfGrace);
+      finally
+      {
+         if (interrupted)
+            Thread.currentThread().interrupt();
+      }
 
       file.delete();
       return file.exists() == false;
