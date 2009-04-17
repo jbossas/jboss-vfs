@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.logging.Logger;
@@ -427,6 +429,7 @@ public abstract class AbstractVFSContext implements VFSContext
          List<TempInfo> list = entry.getValue();
          if (list != null && list.isEmpty() == false)
          {
+            Set<TempInfo> invalidTempInfos = new HashSet<TempInfo>();
             Iterator<TempInfo> listIter = list.iterator();
             while(listIter.hasNext())
             {
@@ -441,8 +444,11 @@ public abstract class AbstractVFSContext implements VFSContext
                }
                else
                {
-                  listIter.remove();
+                  invalidTempInfos.add(ti);
                }
+            }
+            for (TempInfo ti : invalidTempInfos) {
+               list.remove(ti);
             }
          }
          if (list == null || list.isEmpty())
