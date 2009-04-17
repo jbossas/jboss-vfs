@@ -58,6 +58,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(FileVFSContextUnitTestCase.suite());
       suite.addTest(FileVirtualFileHandlerUnitTestCase.suite());
       // jars
+      suite.addTest(JarFileURLTestCase.suite());
       suite.addTest(JARCacheUnitTestCase.suite());
       suite.addTest(CopyJARCacheUnitTestCase.suite());
       suite.addTest(JARVFSContextUnitTestCase.suite());
@@ -68,6 +69,7 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(CopyJAREntryTestCase.suite());
       suite.addTest(ZipEntryHandlerUnitTestCase.suite());
       suite.addTest(ZipEntryVFSContextUnitTestCase.suite());
+      suite.addTest(JarOverrideTestCase.suite());
       // contexts
       suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());

@@ -49,9 +49,9 @@ import org.jboss.virtual.plugins.copy.TempCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
 import org.jboss.virtual.spi.LinkInfo;
+import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
@@ -1087,6 +1087,12 @@ public class VFSUtils
    public static String stripProtocol(URI uri)
    {
       String path = uri.getPath();
+      if(path == null)
+      {
+         String s = uri.toString();
+         if(s.startsWith("jar:file:"))
+            path = s.substring("jar:file:".length()).replaceFirst("!/", "/") + "/";
+      }
       if (path != null && path.length() > 0)
       {
          StringBuilder sb = new StringBuilder(path);

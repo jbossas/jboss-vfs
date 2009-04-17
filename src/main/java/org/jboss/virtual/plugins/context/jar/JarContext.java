@@ -87,6 +87,12 @@ public class JarContext extends AbstractVFSContext
       String jarName = extractJarName(urlStr);
       String entryPath = urlStr;
       entryPath = entryPath(entryPath);
+      // make sure that JarHandler.initJar works on the jar itself
+      if(entryPath != null)
+      {
+         String s = url.toExternalForm();
+         url = new URL(s.substring(0, s.length() - entryPath.length()));
+      }
       JarHandler jar =  new JarHandler(this, parent, url, jarName);
       if (entryPath == null)
          return jar;
@@ -118,6 +124,12 @@ public class JarContext extends AbstractVFSContext
       return entryName;
    }
 
+   /**
+    * Extract jar name.
+    *
+    * @param urlStr the url string
+    * @return jar name
+    */
    public static String extractJarName(String urlStr)
    {
       String jarName = urlStr;
