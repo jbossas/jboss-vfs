@@ -156,6 +156,7 @@ public interface VFSContext
     *
     * Ex. if there is /a/b, /a/b/c, and /a/b/c/d, you get /a/b.
     *
+    * @param path the path to match
     * @return the furthest parent
     */
    TempInfo getFurthestParentTemp(String path);

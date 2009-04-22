@@ -359,7 +359,7 @@ public abstract class AbstractVFSContext implements VFSContext
 
          // Recurse when asked
          VirtualFile file = child.getVirtualFile();
-         if ( isLeaf == false && recurseFilter != null && recurseFilter.accepts(file))
+         if (isLeaf == false && recurseFilter != null && recurseFilter.accepts(file))
          {
             try
             {
@@ -426,7 +426,7 @@ public abstract class AbstractVFSContext implements VFSContext
          if (this == o)
             return true;
 
-         if (!(o instanceof TempInfoKey))
+         if (o instanceof TempInfoKey == false)
             return false;
 
          TempInfoKey other = (TempInfoKey)o;
@@ -456,7 +456,7 @@ public abstract class AbstractVFSContext implements VFSContext
       while (iter.hasNext())
       {
          Entry<TempInfoKey, TempInfo> entry = iter.next();
-         if (! entry.getKey().originalPath.equals(path))
+         if (entry.getKey().originalPath.equals(path) == false)
             return null;
 
          TempInfo value = entry.getValue();
@@ -499,7 +499,7 @@ public abstract class AbstractVFSContext implements VFSContext
       {
          Entry<TempInfoKey, TempInfo> entry = iter.next();
 
-         if (! entry.getKey().originalPath.startsWith(path))
+         if (entry.getKey().originalPath.startsWith(path) == false)
             break;
 
          TempInfo ti = entry.getValue();
@@ -520,9 +520,11 @@ public abstract class AbstractVFSContext implements VFSContext
          }
          iter.remove();
       }
-      if (trace)
-         log.trace("Removing temp info for path: '" + path + "', temps: " + info);
 
+      if (trace)
+      {
+         log.trace("Removing temp info for path: '" + path + "', temps: " + info);
+      }
    }
 
    public Iterable<TempInfo> getTempInfos()
