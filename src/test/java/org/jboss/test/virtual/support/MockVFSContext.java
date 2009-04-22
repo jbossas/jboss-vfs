@@ -34,24 +34,24 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * MockVFSContext.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
 public class MockVFSContext extends AbstractVFSContext
 {
    /** The root handler */
-   private VirtualFileHandler root;
-   
+   private volatile VirtualFileHandler root;
+
    /** The root virtual file */
-   private VirtualFile rootFile;
-   
+   private volatile VirtualFile rootFile;
+
    /** When to throw an IOException */
-   private String ioException = "";
-   
+   private volatile String ioException = "";
+
    /**
     * Create a root mock uri
-    * 
+    *
     * @param name the name
     * @return the uri
     */
@@ -66,10 +66,10 @@ public class MockVFSContext extends AbstractVFSContext
          throw new UnexpectedThrowable("Unexpected", e);
       }
    }
-   
+
    /**
     * Create mock URL
-    * 
+    *
     * @param uri the uri
     * @return the url
     * @throws MalformedURLException for any error
@@ -78,10 +78,10 @@ public class MockVFSContext extends AbstractVFSContext
    {
       return new URL(uri.getScheme(), uri.getHost(), uri.getPort(), uri.getRawPath(), MockURLStreamHandler.INSTANCE);
    }
-   
+
    /**
     * Create a new MockVFSContext.
-    * 
+    *
     * @param name the name
     */
    public MockVFSContext(String name)
@@ -96,7 +96,7 @@ public class MockVFSContext extends AbstractVFSContext
 
    /**
     * Set the ioException.
-    * 
+    *
     * @param ioException the ioException.
     */
    public void setIOException(String ioException)
@@ -106,7 +106,7 @@ public class MockVFSContext extends AbstractVFSContext
 
    /**
     * Check whether we should throw an IOException
-    * 
+    *
     * @param when when to throw
     * @throws IOException when requested
     */
@@ -115,13 +115,13 @@ public class MockVFSContext extends AbstractVFSContext
       if (ioException.equals(when))
          throw new IOException("Throwing IOException from " + when);
    }
-   
+
    public VirtualFileHandler getRoot() throws IOException
    {
       throwIOException("getRoot");
       return root;
    }
-   
+
    public AbstractMockVirtualFileHandler getMockRoot() throws IOException
    {
       return (AbstractMockVirtualFileHandler) root;
@@ -129,7 +129,7 @@ public class MockVFSContext extends AbstractVFSContext
 
    /**
     * Set the root.
-    * 
+    *
     * @param root the root.
     */
    public void setRoot(VirtualFileHandler root)
@@ -138,7 +138,7 @@ public class MockVFSContext extends AbstractVFSContext
       if (root != null)
          rootFile = root.getVirtualFile();
    }
-   
+
    @Override
    protected void finalize() throws Throwable
    {
@@ -146,10 +146,10 @@ public class MockVFSContext extends AbstractVFSContext
          rootFile.close();
       super.finalize();
    }
-   
+
    /**
     * Get the root URL
-    * 
+    *
     * @return the url
     * @throws MalformedURLException for any error
     */

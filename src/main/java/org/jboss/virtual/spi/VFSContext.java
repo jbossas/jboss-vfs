@@ -27,9 +27,9 @@ import java.util.List;
 
 import org.jboss.virtual.VFS;
 
-/** 
+/**
  * A virtual file context
- * 
+ *
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
  * @author ales.justin@jboss.org
@@ -46,21 +46,21 @@ public interface VFSContext
 
    /**
     * Get the root uri
-    * 
+    *
     * @return the root uri
     */
    URI getRootURI();
 
    /**
     * Get the VFS for this context
-    * 
+    *
     * @return the vfs
     */
    VFS getVFS();
-   
+
    /**
     * Return the root virtual file
-    * 
+    *
     * @return the root
     * @throws IOException for any problem accessing the VFS
     */
@@ -83,7 +83,7 @@ public interface VFSContext
 
    /**
     * Get the children
-    * 
+    *
     * @param parent the parent
     * @param ignoreErrors whether to ignore errors
     * @return the children
@@ -91,7 +91,7 @@ public interface VFSContext
     * @throws IllegalArgumentException for a null parent
     */
    List<VirtualFileHandler> getChildren(VirtualFileHandler parent, boolean ignoreErrors) throws IOException;
-   
+
    /**
     * Get a child
     *
@@ -105,7 +105,7 @@ public interface VFSContext
 
    /**
     * Visit the virtual file system
-    * 
+    *
     * @param handler the reference handler
     * @param visitor the visitor
     * @throws IOException for any error
@@ -146,9 +146,19 @@ public interface VFSContext
     * Iterate over all temp infos.
     * This should return lexicographically ordered temp infos.
     *
+    * @deprecated
     * @return ordered temp infos
     */
    Iterable<TempInfo> getTempInfos();
+
+   /**
+    * Retrieve the furthest (outter most) temp which contains this path.
+    *
+    * Ex. if there is /a/b, /a/b/c, and /a/b/c/d, you get /a/b.
+    *
+    * @return the furthest parent
+    */
+   TempInfo getFurthestParentTemp(String path);
 
    /**
     * Cleanup all temp infos under path param.

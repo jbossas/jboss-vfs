@@ -68,14 +68,17 @@ public class DefaultOptions implements Options
          throw new IllegalArgumentException("Null exact type");
 
       Map<String, T> result = new HashMap<String,T>();
-      if (options != null && options.isEmpty() == false)
+      synchronized (this)
       {
-         for (Map.Entry<String, Object> entry : options.entrySet())
+         if (options != null && options.isEmpty() == false)
          {
-            Object value = entry.getValue();
-            if (exactType.isInstance(value))
+            for (Map.Entry<String, Object> entry : options.entrySet())
             {
-               result.put(entry.getKey(), exactType.cast(value));
+               Object value = entry.getValue();
+               if (exactType.isInstance(value))
+               {
+                  result.put(entry.getKey(), exactType.cast(value));
+               }
             }
          }
       }
@@ -172,7 +175,7 @@ public class DefaultOptions implements Options
       Object result = getOption(name);
       if (result == null)
          return null;
-      return expectedType.cast(result);      
+      return expectedType.cast(result);
    }
 
    public boolean getBooleanOption(String name)

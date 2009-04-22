@@ -119,25 +119,25 @@ public class ZipEntryContext extends AbstractVFSContext
    private static final byte[] NO_BYTES = new byte[0];
 
    /** Abstracted access to zip archive - either ZipFileWrapper or ZipStreamWrapper */
-   private ZipWrapper zipSource;
+   private volatile ZipWrapper zipSource;
 
    /** Entry path representing a context root - archive root is not necessarily a context root */
-   private String rootEntryPath = "";
+   private volatile String rootEntryPath = "";
 
    /** path to zip file - used for lazy ZipWrapper initialization */
-   private String filePath = null;
+   private volatile String filePath = null;
 
    /** AutoClean signals if zip archive should be deleted after closing the context - true for nested archives */
-   private boolean autoClean = false;
+   private final boolean autoClean;
 
    /** Registry of everything that zipSource contains */
-   private Map<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>();
+   private final Map<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>(16,.75f,4);
 
    /** Have zip entries been navigated yet */
-   private InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
+   private volatile InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
 
    /** RealURL of this context */
-   private URL realURL;
+   private volatile URL realURL;
 
    /**
     * Create a new ZipEntryContext
@@ -237,7 +237,7 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          zipSource = zipWrapper;
       }
-      
+
       setRootPeer(peer);
       String name = getRootURI().getPath();
       int toPos = name.length();
@@ -249,7 +249,7 @@ public class ZipEntryContext extends AbstractVFSContext
       // name is last path component
       int namePos = name.lastIndexOf("/", toPos-1);
       name = name.substring(namePos+1, toPos);
-      
+
       // cut off any ending exclamation
       if(name.length() != 0 && name.charAt(name.length()-1) == '!')
          name = name.substring(0, name.length()-1);
@@ -594,7 +594,7 @@ public class ZipEntryContext extends AbstractVFSContext
       String thisString = VFSUtils.stripProtocol(getRootURI());
       return thisString.substring(peerString.length()) + entryName;
    }
-   
+
    /**
     * Perform initialization only if it hasn't been done yet
     */
@@ -632,7 +632,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (initStatus != InitializationStatus.NOT_INITIALIZED)
       {
          EntryInfo rootInfo = entries.get("");
-         entries = new ConcurrentHashMap<String, EntryInfo>();
+         entries.clear();
          entries.put("", rootInfo);
 
          initStatus = InitializationStatus.NOT_INITIALIZED;
@@ -765,7 +765,7 @@ public class ZipEntryContext extends AbstractVFSContext
       else if (initStatus == InitializationStatus.INITIALIZED && getZipSource().hasBeenModified())
       {
          EntryInfo rootInfo = entries.get("");
-         entries = new ConcurrentHashMap<String, EntryInfo>();
+         entries.clear();
          entries.put("", rootInfo);
 
          if (getZipSource().exists())
@@ -841,7 +841,7 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             if (parentEntry.handler instanceof DelegatingHandler)
                return parentEntry.handler.getChildren(ignoreErrors);
-            
+
             return parentEntry.getChildren();
          }
       }
@@ -954,7 +954,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       if (getRoot().equals(handler) == false)
          checkIfModified();
-      
+
       EntryInfo ei = entries.get(handler.getLocalPathName());
       if (ei == null || ei.entry == null)
          return false;
@@ -1283,7 +1283,7 @@ public class ZipEntryContext extends AbstractVFSContext
    {
       if (pathName.startsWith("/"))
          pathName = pathName.substring(1);
-      
+
       if(pathName.length() == 0)
          return new String [] {null, pathName};
 
@@ -1348,7 +1348,7 @@ public class ZipEntryContext extends AbstractVFSContext
          File tmpDir = new File(getTempDir());
          File [] files = tmpDir.listFiles();
          if (files != null && files.length > 0)
-         {            
+         {
             for (File file : files)
             {
                if (file.isDirectory() == false && file.isHidden() == false)
