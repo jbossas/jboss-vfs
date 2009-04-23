@@ -56,7 +56,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  *
  * Case sesitivity can be turned on for all context URLs by setting system property
  * <em>jboss.vfs.forceCaseSensitive=true</em>.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
@@ -86,18 +86,18 @@ public class FileSystemContext extends AbstractVFSContext
    }
 
    /** The temp file */
-   private transient File file;
+   private transient volatile File file;
 
    /** The root file */
-   private VirtualFileHandler root;
+   private volatile VirtualFileHandler root;
 
    /**
     * Get the file for a url
-    * 
+    *
     * @param uri the url
     * @return the file
     * @throws IOException for any error accessing the file system
-    * @throws URISyntaxException if cannot create URI 
+    * @throws URISyntaxException if cannot create URI
     * @throws IllegalArgumentException for a null url
     */
    private static File getFile(URI uri) throws IOException, URISyntaxException
@@ -112,7 +112,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /**
     * Get the url for a file
-    * 
+    *
     * @param file the file
     * @return the url
     * @throws IOException for any error accessing the file system
@@ -144,10 +144,10 @@ public class FileSystemContext extends AbstractVFSContext
          throw new IllegalStateException("Failed to convert file.toURI", e);
       }
    }
-   
+
    /**
     * Create a new FileSystemContext.
-    * 
+    *
     * @param rootURL the root url
     * @throws IOException for an error accessing the file system
     * @throws URISyntaxException for an error parsing the uri
@@ -159,7 +159,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /**
     * Create a new FileSystemContext.
-    * 
+    *
     * @param rootURI the root uri
     * @throws IOException for an error accessing the file system
     * @throws URISyntaxException if cannot create URI
@@ -168,10 +168,10 @@ public class FileSystemContext extends AbstractVFSContext
    {
       this(rootURI, getFile(rootURI));
    }
-   
+
    /**
     * Create a new FileSystemContext.
-    * 
+    *
     * @param file the root file
     * @throws IOException for an error accessing the file system
     * @throws IllegalArgumentException for a null file
@@ -184,7 +184,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /**
     * Create a new FileSystemContext.
-    * 
+    *
     * @param rootURI the root uri
     * @param file the file
     * @throws IOException for an error accessing the file system
@@ -216,7 +216,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /**
     * Create a new virtual file handler
-    * 
+    *
     * @param parent the parent
     * @param file the file
     * @return the handler
@@ -227,7 +227,7 @@ public class FileSystemContext extends AbstractVFSContext
    {
       if (file == null)
          throw new IllegalArgumentException("Null file");
-      
+
       String name = file.getName();
       if (file.isFile() && JarUtils.isArchive(name))
       {
@@ -290,7 +290,7 @@ public class FileSystemContext extends AbstractVFSContext
 
    /**
     * Create a new virtual file handler
-    * 
+    *
     * @param parent the parent
     * @param file the file
     * @param uri the uri

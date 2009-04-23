@@ -35,9 +35,9 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class BasicTempInfo implements TempInfo
 {
-   private String path;
-   private File file;
-   private VirtualFileHandler handler;
+   private final String path;
+   private volatile File file;
+   private volatile VirtualFileHandler handler;
 
    public BasicTempInfo(String path, File file, VirtualFileHandler handler)
    {

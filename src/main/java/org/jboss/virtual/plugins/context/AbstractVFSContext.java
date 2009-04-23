@@ -27,15 +27,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map.Entry;
 
 import org.jboss.logging.Logger;
+import org.jboss.util.collection.ConcurrentNavigableMap;
+import org.jboss.util.collection.ConcurrentSkipListMap;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -50,35 +49,36 @@ import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
 
 /**
  * AbstractVFSContext.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author Jason T. Greene
  * @version $Revision: 1.1 $
  */
 public abstract class AbstractVFSContext implements VFSContext
 {
    /** The log */
    protected final Logger log = Logger.getLogger(getClass());
-   
+
    /** The VFS wrapper */
-   private VFS vfs;
-   
+   private final VFS vfs = new VFS(this);
+
    /** The root url */
    private final URI rootURI;
 
    /** Options associated with the root URL */
-   private Options options = createNewOptions();
+   private final Options options = createNewOptions();
 
    /** Root's peer within another context */
-   private VirtualFileHandler rootPeer;
+   private volatile VirtualFileHandler rootPeer;
 
    /** The temp handlers */
-   private final Map<String, List<TempInfo>> tempInfos = Collections.synchronizedMap(new HashMap<String, List<TempInfo>>());
+   private final ConcurrentNavigableMap<TempInfoKey, TempInfo> tempInfos = new ConcurrentSkipListMap<TempInfoKey, TempInfo>();
 
    /**
     * Create a new AbstractVFSContext.
-    * 
+    *
     * @param rootURI the root url
     * @throws IllegalArgumentException if rootURI is null
     */
@@ -94,7 +94,7 @@ public abstract class AbstractVFSContext implements VFSContext
 
    /**
     * Create a new AbstractVFSContext.
-    * 
+    *
     * @param rootURL the root url
     * @throws URISyntaxException for illegal URL
     * @throws IllegalArgumentException if rootURI is null
@@ -116,8 +116,6 @@ public abstract class AbstractVFSContext implements VFSContext
 
    public VFS getVFS()
    {
-      if (vfs == null)
-         vfs = new VFS(this);
       return vfs;
    }
 
@@ -202,7 +200,7 @@ public abstract class AbstractVFSContext implements VFSContext
          sb.append(ent.getKey()).append("=").append(ent.getValue());
          i++;
       }
-      
+
       return new URL(sb.toString());
    }
 
@@ -231,7 +229,7 @@ public abstract class AbstractVFSContext implements VFSContext
     * @throws IOException for any error
     */
    public URL getChildURL(VirtualFileHandler parent, String name) throws IOException
-   {      
+   {
       if(parent != null)
       {
          VFSContext parentCtx = parent.getVFSContext();
@@ -271,7 +269,7 @@ public abstract class AbstractVFSContext implements VFSContext
          if (urlStr.charAt( urlStr.length()-1) != '/')
             urlStr.append("/");
 
-         String pPathName = parent.getPathName();         
+         String pPathName = parent.getPathName();
          if(pPathName.length() != 0)
             urlStr.append(pPathName);
 
@@ -290,7 +288,7 @@ public abstract class AbstractVFSContext implements VFSContext
          throw new IllegalArgumentException("Null handler");
       if (visitor == null)
          throw new IllegalArgumentException("Null visitor");
-      
+
       VisitorAttributes attributes = visitor.getAttributes();
       boolean includeRoot = attributes.isIncludeRoot();
       boolean leavesOnly = attributes.isLeavesOnly();
@@ -303,7 +301,7 @@ public abstract class AbstractVFSContext implements VFSContext
    /**
     * Visit. the file system, recursive death checking is left to the visitor
     * or otherwise a stack overflow.
-    * 
+    *
     * @param handler the reference handler
     * @param visitor the visitor
     * @param includeRoot whether to visit the root
@@ -321,7 +319,7 @@ public abstract class AbstractVFSContext implements VFSContext
       // Visit the root when asked
       if (includeRoot)
          visitor.visit(handler);
-      
+
       // Visit the children
       boolean trace = log.isTraceEnabled();
       List<VirtualFileHandler> children;
@@ -337,7 +335,7 @@ public abstract class AbstractVFSContext implements VFSContext
             log.trace("Ignored: " + e);
          return;
       }
-      
+
       // Look through each child
       for (VirtualFileHandler child : children)
       {
@@ -348,7 +346,7 @@ public abstract class AbstractVFSContext implements VFSContext
                log.trace("Ignoring hidden file: "+child);
             continue;
          }
-         
+
          // Visit the leaf or non-leaves when asked
          boolean isLeaf = child.isLeaf();
          if (leavesOnly == false || isLeaf)
@@ -360,7 +358,7 @@ public abstract class AbstractVFSContext implements VFSContext
 
          // Recurse when asked
          VirtualFile file = child.getVirtualFile();
-         if ( isLeaf == false && recurseFilter != null && recurseFilter.accepts(file))
+         if (isLeaf == false && recurseFilter != null && recurseFilter.accepts(file))
          {
             try
             {
@@ -378,118 +376,159 @@ public abstract class AbstractVFSContext implements VFSContext
       }
    }
 
+   private final static class TempInfoKey implements Comparable<TempInfoKey>
+   {
+      private static String LAST = "---@@@LAST@@@---";
+	   private final String originalPath;
+	   private final String tempPath;
+	   private int hashCode;
+
+	   static TempInfoKey last(String path)
+	   {
+	      return new TempInfoKey(path, LAST);
+	   }
+
+	   private TempInfoKey(TempInfo ti)
+	   {
+		   this(ti.getPath(), ti.getTempFile().getAbsolutePath());
+	   }
+
+	   private TempInfoKey(String path)
+      {
+         this(path, "");
+      }
+
+	   private TempInfoKey(String path, String tempPath)
+	   {
+	      if (path == null)
+	         throw new IllegalArgumentException("Path can not be null!");
+
+	      if (path == null)
+	         throw new IllegalArgumentException("Temp path can not be null!");
+
+
+	      this.originalPath = path;
+	      this.tempPath = tempPath;
+	   }
+
+      public int compareTo(TempInfoKey o)
+      {
+         int result = originalPath.compareTo(o.originalPath);
+         if (result == 0)
+            result = tempPath == LAST ? 1 : tempPath.compareTo(o.tempPath);
+
+         return result;
+      }
+
+      public boolean equals(Object o)
+      {
+         if (this == o)
+            return true;
+
+         if (o instanceof TempInfoKey == false)
+            return false;
+
+         TempInfoKey other = (TempInfoKey)o;
+
+         return originalPath.equals(other.originalPath) && tempPath.equals(other.tempPath);
+      }
+
+      public int hashCode()
+      {
+         // Safe race
+         if (hashCode != 0)
+            return hashCode;
+
+         return hashCode = originalPath.hashCode() ^ tempPath.hashCode();
+      }
+   }
+
    public void addTempInfo(TempInfo tempInfo)
    {
-      String key = tempInfo.getPath();
-      List<TempInfo> list;
-      synchronized (tempInfos)
-      {
-         list = tempInfos.get(key);
-         if (list == null)
-         {
-            list = new CopyOnWriteArrayList<TempInfo>();
-            tempInfos.put(key, list);
-         }
-      }
-      list.add(tempInfo);
+      TempInfoKey tempInfoKey = new TempInfoKey(tempInfo);
+      tempInfos.put(tempInfoKey, tempInfo);
    }
 
    public TempInfo getTempInfo(String path)
    {
-      TempInfo result = null;
-      List<TempInfo> list = tempInfos.get(path);
-      if (list != null && list.isEmpty())
+      Iterator<Map.Entry<TempInfoKey, TempInfo>> iter = tempInfos.tailMap(new TempInfoKey(path)).entrySet().iterator();
+      while (iter.hasNext())
       {
-         Iterator<TempInfo> iter = list.iterator();
-         while(iter.hasNext())
-         {
-            TempInfo ti = iter.next();
-            if (ti.isValid() == false)
-            {
-               iter.remove();
-            }
-            else if (result == null)
-            {
-               result = ti;
-            }
-         }
+         Entry<TempInfoKey, TempInfo> entry = iter.next();
+         if (entry.getKey().originalPath.equals(path) == false)
+            return null;
+
+         TempInfo value = entry.getValue();
+         if (value.isValid())
+            return value;
+
+         // Not valid, eager clean
+         iter.remove();
       }
-      return result;
+
+      return null;
    }
 
-   public Iterable<TempInfo> getTempInfos()
+   public TempInfo getFurthestParentTemp(String path)
    {
-      Map<String, TempInfo> result = new TreeMap<String, TempInfo>();
-      Iterator<Map.Entry<String, List<TempInfo>>> iter = tempInfos.entrySet().iterator();
-      while(iter.hasNext())
+      // Start at the last possible matching entry, and scan upwards until the first matching
+      // entry is found. Alternatively, path could be broken up by the separation delimiter,
+      // and each lookup done from there.
+      Entry<TempInfoKey, TempInfo> floor = tempInfos.floorEntry(TempInfoKey.last(path));
+      TempInfo result = null;
+      while (floor != null && path.startsWith(floor.getKey().originalPath))
       {
-         Map.Entry<String, List<TempInfo>> entry = iter.next();
-         List<TempInfo> list = entry.getValue();
-         if (list != null && list.isEmpty() == false)
-         {
-            Iterator<TempInfo> listIter = list.iterator();
-            while(listIter.hasNext())
-            {
-               TempInfo ti = listIter.next();
-               if (ti.isValid())
-               {
-                  String path = ti.getPath();
-                  if (result.containsKey(path) == false)
-                  {
-                     result.put(path, ti);
-                  }
-               }
-               else
-               {
-                  listIter.remove();
-               }
-            }
-         }
-         if (list == null || list.isEmpty())
-         {
-            iter.remove();
-         }
+         TempInfo value = floor.getValue();
+         if (value.isValid())
+            result = value;
+
+         floor = tempInfos.lowerEntry(floor.getKey());
       }
-      return result.values();
+
+      return result;
    }
 
    public void cleanupTempInfo(String path)
    {
       boolean trace = log.isTraceEnabled();
       List<String> info = null;
-
-      Iterator<Map.Entry<String, List<TempInfo>>> iter = tempInfos.entrySet().iterator();
+      ConcurrentNavigableMap<TempInfoKey, TempInfo> tailMap = tempInfos.tailMap(new TempInfoKey(path));
+      Iterator<Map.Entry<TempInfoKey, TempInfo>> iter = tailMap.entrySet().iterator();
       while (iter.hasNext())
       {
-         Map.Entry<String, List<TempInfo>> entry = iter.next();
-         if (entry.getKey().startsWith(path))
+         Entry<TempInfoKey, TempInfo> entry = iter.next();
+
+         if (entry.getKey().originalPath.startsWith(path) == false)
+            break;
+
+         TempInfo ti = entry.getValue();
+         if (trace)
          {
-            List<TempInfo> list = entry.getValue();
+            if (info == null)
+               info = new ArrayList<String>();
 
-            if (trace)
-            {
-               if (info == null)
-                  info = new ArrayList<String>();
-
-               if (list != null && list.isEmpty() == false)
-                  info.add(list.toString());
-            }
-
-            for (TempInfo ti : list)
-            {
-               try
-               {
-                  ti.cleanup();                  
-               }
-               catch (Throwable ignored)
-               {
-               }
-            }
-            iter.remove();
+            info.add(ti.toString());
          }
+
+         try
+         {
+            ti.cleanup();
+         }
+         catch (Throwable ignored)
+         {
+         }
+         iter.remove();
       }
+
       if (trace)
+      {
          log.trace("Removing temp info for path: '" + path + "', temps: " + info);
+      }
+   }
+
+   public Iterable<TempInfo> getTempInfos()
+   {
+      return new ArrayList<TempInfo>(tempInfos.values());
    }
 
    public ExceptionHandler getExceptionHandler()
@@ -514,7 +553,7 @@ public abstract class AbstractVFSContext implements VFSContext
       buffer.append(']');
       return buffer.toString();
    }
-   
+
    @Override
    public int hashCode()
    {

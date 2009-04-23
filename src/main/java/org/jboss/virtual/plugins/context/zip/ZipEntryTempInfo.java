@@ -34,7 +34,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryTempInfo extends BasicTempInfo
 {
-   private ZipEntryContext context;
+   private volatile ZipEntryContext context;
 
    public ZipEntryTempInfo(String path, File file, VirtualFileHandler handler, ZipEntryContext context)
    {

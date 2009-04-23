@@ -37,7 +37,7 @@ import org.jboss.virtual.plugins.context.AbstractVFSContext;
  */
 public class AssembledContext extends AbstractVFSContext
 {
-   private String name;
+   private final String name;
    /** The root file */
    private final AssembledDirectoryHandler root;
 
