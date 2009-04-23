@@ -139,18 +139,6 @@ public class VFS
 
       try
       {
-         // just to make sure the ref is removed
-         VirtualFileHandler parent = fileHandler.getParent();
-         if (parent != null)
-            parent.removeChild(fileHandler.getName());
-      }
-      catch (Exception e)
-      {
-         log.debug("Exception removing child, file=" + file, e);
-      }
-
-      try
-      {
          VirtualFileHandler contextHandler = context.getRoot();
          // the file is the context root, hence possible registry candidate
          if (fileHandler.equals(contextHandler))

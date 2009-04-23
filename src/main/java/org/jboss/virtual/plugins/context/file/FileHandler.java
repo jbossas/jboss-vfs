@@ -283,8 +283,9 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       VirtualFileHandler handler = childCache.get(name);
       // if a child has already been created use that
       // if the child has been modified on disk then create a new handler
-      if (handler != null && handler.hasBeenModified())
+      if (handler != null && (handler.hasBeenModified() || handler.exists() == false))
       {
+         childCache.remove(name);
          handler = null;
       }
       if (handler == null)
