@@ -26,13 +26,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.TempInfo;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextConstraints;
+import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.registry.VFSRegistry;
@@ -54,9 +55,21 @@ public class DefaultVFSRegistry extends VFSRegistry
       return VFSCacheFactory.getInstance();
    }
 
+   /**
+    * Is the vfs context cacheable.
+    *
+    * @param context the vfs context
+    * @return true if context is cacheable, false otherwise
+    */
+   protected boolean isCacheable(VFSContext context)
+   {
+      Set<VFSContextConstraints> constraints = context.getConstraints();
+      return constraints != null && constraints.contains(VFSContextConstraints.CACHEABLE);
+   }
+
    public void addContext(VFSContext context)
    {
-      if (context.getConstraints().contains(VFSContextConstraints.CACHEABLE))
+      if (isCacheable(context))
       {
          getCache().putContext(context);
       }
@@ -64,7 +77,7 @@ public class DefaultVFSRegistry extends VFSRegistry
 
    public void removeContext(VFSContext context)
    {
-      if (context.getConstraints().contains(VFSContextConstraints.CACHEABLE))
+      if (isCacheable(context))
       {
          getCache().removeContext(context);
       }
