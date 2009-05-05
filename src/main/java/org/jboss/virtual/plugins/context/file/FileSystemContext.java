@@ -29,8 +29,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -40,6 +42,7 @@ import org.jboss.virtual.plugins.context.jar.JarHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.spi.LinkInfo;
+import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -84,6 +87,9 @@ public class FileSystemContext extends AbstractVFSContext
       if (forceCaseSensitive)
          staticLog.debug("VFS forced case sensitivity is enabled.");
    }
+
+   /** The constraints set */
+   private static final Set<VFSContextConstraints> CONSTRAINTS = Collections.singleton(VFSContextConstraints.CACHEABLE);
 
    /** The temp file */
    private transient volatile File file;
@@ -193,6 +199,11 @@ public class FileSystemContext extends AbstractVFSContext
    {
       super(rootURI);
       this.file = file;
+   }
+
+   public Set<VFSContextConstraints> getConstraints()
+   {
+      return CONSTRAINTS;
    }
 
    public String getName()

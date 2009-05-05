@@ -32,6 +32,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.TempInfo;
+import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.registry.VFSRegistry;
@@ -55,12 +56,18 @@ public class DefaultVFSRegistry extends VFSRegistry
 
    public void addContext(VFSContext context)
    {
-      getCache().putContext(context);
+      if (context.getConstraints().contains(VFSContextConstraints.CACHEABLE))
+      {
+         getCache().putContext(context);
+      }
    }
 
    public void removeContext(VFSContext context)
    {
-      getCache().removeContext(context);
+      if (context.getConstraints().contains(VFSContextConstraints.CACHEABLE))
+      {
+         getCache().removeContext(context);
+      }
    }
 
    public VirtualFile getFile(URI uri) throws IOException

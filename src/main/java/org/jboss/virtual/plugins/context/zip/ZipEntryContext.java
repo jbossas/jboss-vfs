@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -64,6 +65,7 @@ import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSContextConstraints;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -117,6 +119,9 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /** The empty bytes const */
    private static final byte[] NO_BYTES = new byte[0];
+
+   /** The constraints set */
+   private static final Set<VFSContextConstraints> CONSTRAINTS = Collections.singleton(VFSContextConstraints.CACHEABLE);
 
    /** Abstracted access to zip archive - either ZipFileWrapper or ZipStreamWrapper */
    private volatile ZipWrapper zipSource;
@@ -438,6 +443,11 @@ public class ZipEntryContext extends AbstractVFSContext
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
+   }
+
+   public Set<VFSContextConstraints> getConstraints()
+   {
+      return CONSTRAINTS;
    }
 
    /**

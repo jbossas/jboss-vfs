@@ -24,6 +24,7 @@ package org.jboss.virtual.spi;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.virtual.VFS;
 
@@ -37,6 +38,13 @@ import org.jboss.virtual.VFS;
  */
 public interface VFSContext
 {
+   /**
+    * Get context's constraints.
+    *
+    * @return the constraints
+    */
+   Set<VFSContextConstraints> getConstraints();
+
    /**
     * Get the name.
     *

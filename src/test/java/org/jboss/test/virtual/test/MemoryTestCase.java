@@ -394,6 +394,15 @@ public class MemoryTestCase extends AbstractVFSTest
          VirtualFile file = VFS.getRoot(url);
          assertNotNull(file);
       }
+
+      // duplicate resources call, after contexts have been populated
+      urls = cl.getResources("");
+      while (urls.hasMoreElements())
+      {
+         URL url = urls.nextElement();
+         VirtualFile file = VFS.getRoot(url);
+         assertNotNull(file);
+      }
    }
 
    protected void setUp() throws Exception
