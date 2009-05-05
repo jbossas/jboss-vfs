@@ -25,20 +25,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
 import junit.framework.Test;
+import org.jboss.util.collection.Iterators;
 import org.jboss.util.id.GUID;
+import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextHandler;
+import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.cache.VFSCache;
+import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Memory vfs tests.
@@ -324,7 +330,72 @@ public class MemoryTestCase extends AbstractVFSTest
       URL rootD = new URL("vfsmemory", guid, "/classes");
       assertEquals(rootC, rootD);
    }
-   
+
+   public void testClassLoaderNoCache() throws Exception
+   {
+      doTestClassLoader();
+   }
+
+   public void testClassLoaderCache() throws Exception
+   {
+      VFSCache cache = new IterableTimedVFSCache();
+      cache.start();
+      VFSCacheFactory.setInstance(cache);
+      try
+      {
+         doTestClassLoader();
+      }
+      finally
+      {
+         VFSCacheFactory.setInstance(null);
+         cache.stop();         
+      }
+   }
+
+   @SuppressWarnings({"unchecked", "deprecation"})
+   private void doTestClassLoader() throws IOException
+   {
+      URL root = getResource("/vfs/test/nested/nested.jar");
+      final VirtualFile nested = VFS.createNewRoot(root);
+
+      // flush - so we only get in-memory contexts (if they exist)
+      VFSCacheFactory.getInstance().flush();
+
+      root = new URL("vfsmemory://aopdomain");
+      final VFS vfs = MemoryFileFactory.createRoot(root);
+      URL leaf = new URL("vfsmemory://aopdomain/org/acme/leaf");
+      MemoryFileFactory.putFile(leaf, new byte[]{'a', 'b', 'c'});
+
+      ClassLoader cl = new ClassLoader()
+      {
+         @Override
+         public Enumeration<URL> getResources(String name) throws IOException
+         {
+            try
+            {
+               List<URL> urls = new ArrayList<URL>();
+               urls.add(nested.findChild(name).toURL());
+               urls.add(vfs.findChild(name).toURL());
+               return Iterators.toEnumeration(urls.iterator());
+            }
+            catch (Exception e)
+            {
+               IOException ioe = new IOException();
+               ioe.initCause(e);
+               throw ioe;
+            }
+         }
+      };
+
+      Enumeration<URL> urls = cl.getResources("");
+      while (urls.hasMoreElements())
+      {
+         URL url = urls.nextElement();
+         VirtualFile file = VFS.getRoot(url);
+         assertNotNull(file);
+      }
+   }
+
    protected void setUp() throws Exception
    {
       super.setUp();
