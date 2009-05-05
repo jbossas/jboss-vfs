@@ -336,7 +336,7 @@ public class MemoryTestCase extends AbstractVFSTest
       doTestClassLoader();
    }
 
-   public void testClassLoaderCache() throws Exception
+   public void testClassLoaderWithCache() throws Exception
    {
       VFSCache cache = new IterableTimedVFSCache();
       cache.start();
