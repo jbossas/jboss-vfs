@@ -39,6 +39,7 @@ import org.jboss.virtual.spi.VFSContextFactory;
  * The roots are indexed as the 'host' part of the URLs they are stored under 
  * 
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class MemoryContextFactory implements VFSContextFactory
@@ -102,7 +103,8 @@ public class MemoryContextFactory implements VFSContextFactory
 
    /**
     * Creates a new root MemoryContext, or returns an already exixting one of one already 
-    * exists for the name
+    * exists for the name.
+    *
     * @param url The url of the root, we use the 'host' part of the name for indexing the context  
     * @return The found or created context
     * @throws IllegalArgumentException If the url parameter contains a path
@@ -135,7 +137,8 @@ public class MemoryContextFactory implements VFSContextFactory
    }
 
    /**
-    * Creates a 'directory' within the context determined by the url host part
+    * Creates a 'directory' within the context determined by the url host part.
+    *
     * @param url The url of the directory we want to create
     * @return The created directory
     * @throws IllegalArgumentException if there is no root matching the host part of the url 
@@ -151,7 +154,8 @@ public class MemoryContextFactory implements VFSContextFactory
    }
    
    /**
-    * Creates a 'file' within the context determined by the url host part
+    * Creates a 'file' within the context determined by the url host part.
+    *
     * @param url The url of the directory we want to create
     * @param contents The contents of the file
     * @return The created file
@@ -168,7 +172,8 @@ public class MemoryContextFactory implements VFSContextFactory
    }
    
    /**
-    * Deletes a root MemoryContext 
+    * Deletes a root MemoryContext.
+    *
     * @param url of the root context we want to delete
     * @return true if we deleted a root MemoryContext, false otherwise
     * @throws IllegalArgumentException If the url parameter contains a path
@@ -183,7 +188,8 @@ public class MemoryContextFactory implements VFSContextFactory
    }
 
    /**
-    * Deletes a 'file' or a 'directory' 
+    * Deletes a 'file' or a 'directory'.
+    *
     * @param url of the 'file' or 'directory' we want to delete 
     * @return true if we deleted a 'file' or 'directory', false otherwise
     */

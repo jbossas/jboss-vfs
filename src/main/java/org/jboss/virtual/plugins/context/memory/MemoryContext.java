@@ -48,14 +48,10 @@ public class MemoryContext extends AbstractVFSContext implements Serializable
    /** The root file */
    private final MemoryContextHandler root;
    
-   /** A reference to the virtual file of the root to stop it getting closed */
-   private final VirtualFile rootFile;
-
    protected MemoryContext(URL url) throws URISyntaxException
    {
       super(url);
       root = new MemoryContextHandler(this, null, url, url.getFile());
-      rootFile = root.getVirtualFile();
    }
 
    public String getName()
