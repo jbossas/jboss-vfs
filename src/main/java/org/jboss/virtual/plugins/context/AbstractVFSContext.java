@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collections;
 import java.util.Map.Entry;
 
 import org.jboss.logging.Logger;
@@ -46,6 +48,7 @@ import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
+import org.jboss.virtual.spi.VFSContextConstraints;
 
 /**
  * AbstractVFSContext.
@@ -102,6 +105,11 @@ public abstract class AbstractVFSContext implements VFSContext
    protected AbstractVFSContext(URL rootURL) throws URISyntaxException
    {
       this(rootURL.toURI());
+   }
+
+   public Set<VFSContextConstraints> getConstraints()
+   {
+      return Collections.emptySet();
    }
 
    /**
