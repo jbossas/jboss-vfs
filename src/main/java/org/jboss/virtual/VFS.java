@@ -81,7 +81,7 @@ public class VFS
          pkgs = "org.jboss.virtual.protocol";
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
-      else if (!pkgs.contains("org.jboss.virtual.protocol"))
+      else if (pkgs.contains("org.jboss.virtual.protocol") == false)
       {
          pkgs += "|org.jboss.virtual.protocol";
          System.setProperty("java.protocol.handler.pkgs", pkgs);
