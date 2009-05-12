@@ -13,9 +13,9 @@
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/trunk</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</developerConnection>
-    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_2_1</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_2_1</developerConnection>
+    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_2_1</url>
   </scm>
   <licenses>
     <license>
