@@ -47,7 +47,8 @@ public class JZipFileZipEntryProvider implements ZipEntryProvider
       if (is == null)
          throw new IllegalArgumentException("Null input stream");
 
-      final File tempFile = File.createTempFile("jzfzep", "zip");
+      final File tempFile = File.createTempFile("jboss-vfs-jzfzep-", ".zip");
+      tempFile.deleteOnExit();
       final FileOutputStream os = new FileOutputStream(tempFile);
       VFSUtils.copyStreamAndClose(is, os);
 
