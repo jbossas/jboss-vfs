@@ -77,7 +77,7 @@ public class JZipFileZipEntry implements ZipEntry
 
    public long getCrc()
    {
-      return entry.getCrc32();
+      return entry.getCrc32() & 0xffffffffL;
    }
 
    public void setCrc(long crc)
