@@ -24,7 +24,8 @@ package org.jboss.virtual.plugins.context.jar;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.HashSet;
+import java.util.Collections;
 
 /**
  * JarUtils.
@@ -34,20 +35,26 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class JarUtils
 {
-   /** The jar suffixes */
-   private static Set<String> jarSuffixes = new CopyOnWriteArraySet<String>();
+   /** The jar suffixes (immutable, do not update unless updateLock is held) */
+   private static volatile Set<String> jarSuffixes;
+   /** The lock to hold in order to update jarSuffixes */
+   private static final Object updateLock = new Object();
 
    // Initialise known suffixes
    static
    {
-      jarSuffixes.add(".zip");
-      jarSuffixes.add(".ear");
-      jarSuffixes.add(".jar");
-      jarSuffixes.add(".rar");
-      jarSuffixes.add(".war");
-      jarSuffixes.add(".sar");
-      jarSuffixes.add(".har");
-      jarSuffixes.add(".aop");
+      final HashSet<String> set = new HashSet<String>();
+      set.add(".zip");
+      set.add(".ear");
+      set.add(".jar");
+      set.add(".rar");
+      set.add(".war");
+      set.add(".sar");
+      set.add(".har");
+      set.add(".aop");
+      synchronized (updateLock) {
+         jarSuffixes = set;
+      }
    }
 
    /**
@@ -60,7 +67,11 @@ public class JarUtils
    {
       if (suffixes == null)
          throw new IllegalArgumentException("Null suffix");
-      jarSuffixes = suffixes;
+
+      synchronized (updateLock)
+      {
+         jarSuffixes = new HashSet<String>(suffixes);
+      }
    }
 
    /**
@@ -74,7 +85,19 @@ public class JarUtils
    {
       if (suffix == null)
          throw new IllegalArgumentException("Null suffix");
-      return jarSuffixes.add(suffix);
+
+      synchronized (updateLock)
+      {
+         if (jarSuffixes.contains(suffix))
+            return false;
+         else
+         {
+            final HashSet<String> newSet = new HashSet<String>(jarSuffixes);
+            newSet.add(suffix);
+            jarSuffixes = Collections.unmodifiableSet(newSet);
+            return true;
+         }
+      }
    }
 
    /**
@@ -88,13 +111,28 @@ public class JarUtils
    {
       if (suffix == null)
          throw new IllegalArgumentException("Null suffix");
-      return jarSuffixes.remove(suffix);
+
+      synchronized (updateLock)
+      {
+         if (jarSuffixes.contains(suffix))
+         {
+            final HashSet<String> newSet = new HashSet<String>(jarSuffixes);
+            newSet.remove(suffix);
+            if (newSet.isEmpty())
+               jarSuffixes = Collections.emptySet();
+            else
+               jarSuffixes = Collections.unmodifiableSet(newSet);
+            return true;
+         }
+         else
+            return false;
+      }
    }
    
    /**
-    * Get the lis of jar suffixes
+    * Get the set of jar suffixes
     * 
-    * @return the list of suffixes
+    * @return the set of suffixes
     */
    public static Set<String> getSuffixes()
    {
@@ -102,12 +140,13 @@ public class JarUtils
    }
 
    /**
-    * Clear the list of suffixes
-    * 
+    * Clear the set of suffixes
     */
    public static void clearSuffixes()
    {
-      jarSuffixes.clear();
+      synchronized (updateLock) {
+         jarSuffixes = Collections.emptySet();
+      }
    }
 
    /**
