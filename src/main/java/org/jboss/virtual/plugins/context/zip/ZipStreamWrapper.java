@@ -21,9 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.logging.Logger;
-import org.jboss.virtual.VFSUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -36,9 +33,14 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.jboss.logging.Logger;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import org.jboss.virtual.spi.zip.ZipFactory;
+import org.jboss.virtual.spi.zip.ZipUtils;
 
 /**
  * ZipStreamWrapper - for abstracted access to in-memory zip file
@@ -81,7 +83,8 @@ class ZipStreamWrapper extends ZipBytesWrapper
    {
       super(zipStream, name, lastModified);
 
-      ZipInputStream zis = new ZipInputStream(super.getRootAsStream());
+      ZipFactory factory = ZipUtils.getFactory();     
+      ZipEntryProvider zis = factory.createProvider(super.getRootAsStream());
       ZipEntry ent = zis.getNextEntry();
       while (ent != null)
       {
@@ -89,7 +92,7 @@ class ZipStreamWrapper extends ZipBytesWrapper
          if (ent.isDirectory() == false)
          {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            VFSUtils.copyStream(zis, baos);
+            VFSUtils.copyStream(zis.currentStream(), baos);
             fileBytes = baos.toByteArray();
             ent.setSize(fileBytes.length);
          }
@@ -177,7 +180,7 @@ class ZipStreamWrapper extends ZipBytesWrapper
             if(newName.length() == 0)
                continue;
 
-            ZipEntry newEntry = new ZipEntry(newName);
+            java.util.zip.ZipEntry newEntry = new java.util.zip.ZipEntry(newName);
             newEntry.setComment(oldEntry.getComment());
             newEntry.setTime(oldEntry.getTime());
             newEntry.setSize(oldEntry.getSize());

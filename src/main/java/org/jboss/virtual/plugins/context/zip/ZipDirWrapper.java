@@ -21,12 +21,15 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
+import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import org.jboss.virtual.spi.zip.ZipFactory;
+import org.jboss.virtual.spi.zip.ZipUtils;
 
 /**
  * ZipDirWrapper - for abstracted access to in-memory directory
@@ -57,11 +60,13 @@ class ZipDirWrapper extends ZipBytesWrapper
    {
       zisCopy.reset();
       // TODO - optimize this
-      ZipInputStream zis = new ZipInputStream(zisCopy);
+      ZipFactory factory = ZipUtils.getFactory();
+      ZipEntryProvider zis = factory.createProvider(zisCopy);
       ZipEntry entry = zis.getNextEntry();
       while (entry != null && entry.getName().equals(ent.getName()) == false)
          entry = zis.getNextEntry();
-      return zis;
+
+      return zis.currentStream();
    }
 
    Enumeration<? extends ZipEntry> entries() throws IOException
@@ -75,12 +80,13 @@ class ZipDirWrapper extends ZipBytesWrapper
     */
    private class DirEnumeration implements Enumeration<ZipEntry>
    {
-      private ZipInputStream zis;
+      private ZipEntryProvider zis;
       private ZipEntry entry;
 
-      private DirEnumeration()
+      private DirEnumeration() throws IOException
       {
-         this.zis = new ZipInputStream(zisCopy);
+         ZipFactory factory = ZipUtils.getFactory();
+         this.zis = factory.createProvider(zisCopy);
       }
 
       public boolean hasMoreElements()

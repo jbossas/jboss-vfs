@@ -31,12 +31,14 @@ import java.net.URI;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.virtual.spi.zip.ZipFile;
+import org.jboss.virtual.spi.zip.ZipUtils;
+import org.jboss.virtual.spi.zip.ZipFactory;
 
 /**
  * ZipFileWrapper - for abstracted access to zip files on disk
@@ -172,7 +174,8 @@ class ZipFileWrapper extends ZipWrapper
    {
       if (zipFile == null)
       {
-         zipFile = new ZipFile(file);
+         ZipFactory factory = ZipUtils.getFactory();
+         zipFile = factory.createFile(file);
          if (forceNoReaper == false && noReaperOverride == false)
             ZipFileLockReaper.getInstance().register(this);
       }
@@ -358,7 +361,7 @@ class ZipFileWrapper extends ZipWrapper
             if(newName.length() == 0)
                continue;
 
-            ZipEntry newEntry = new ZipEntry(newName);
+            java.util.zip.ZipEntry newEntry = new java.util.zip.ZipEntry(newName);
             newEntry.setComment(oldEntry.getComment());
             newEntry.setTime(oldEntry.getTime());
             newEntry.setSize(oldEntry.getSize());

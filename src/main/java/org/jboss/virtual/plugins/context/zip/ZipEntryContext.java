@@ -37,20 +37,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -64,8 +62,12 @@ import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VFSContextConstraints;
+import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import org.jboss.virtual.spi.zip.ZipUtils;
+import org.jboss.virtual.spi.zip.ZipFactory;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -388,8 +390,10 @@ public class ZipEntryContext extends AbstractVFSContext
       VFSUtils.copyStreamAndClose(is, baos);
       ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
+      ZipFactory factory = ZipUtils.getFactory();
+
       // first we need to find best/longest name
-      ZipInputStream zis = new ZipInputStream(bais);
+      ZipEntryProvider zis = factory.createProvider(bais);
       ZipEntry entry;
       String longestNameMatch = null;
       while((entry = zis.getNextEntry()) != null)
@@ -406,15 +410,15 @@ public class ZipEntryContext extends AbstractVFSContext
                if (entry.isDirectory())
                {
                   this.rootEntryPath = relative;
-                  return new ZipDirWrapper(zis, entryName, System.currentTimeMillis(), bais);
+                  return new ZipDirWrapper(zis.currentStream(), entryName, System.currentTimeMillis(), bais);
                }
                else if (JarUtils.isArchive(match) == false)
                {
-                  return new ZipEntryWrapper(zis, entryName, System.currentTimeMillis());
+                  return new ZipEntryWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
                }
                else
                {
-                  return new ZipStreamWrapper(zis, entryName, System.currentTimeMillis());
+                  return new ZipStreamWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
                }
             }
 
@@ -429,7 +433,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       // do recursion on relative
       bais.reset();
-      zis = new ZipInputStream(bais);
+      zis = factory.createProvider(bais);
       while((entry = zis.getNextEntry()) != null)
       {
          String entryName = entry.getName();
@@ -439,7 +443,7 @@ public class ZipEntryContext extends AbstractVFSContext
                urlInfo.relativePath = longestNameMatch;
 
             relative = relative.substring(longestNameMatch.length() + 1);
-            return findEntry(zis, relative, null);
+            return findEntry(zis.currentStream(), relative, null);
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);

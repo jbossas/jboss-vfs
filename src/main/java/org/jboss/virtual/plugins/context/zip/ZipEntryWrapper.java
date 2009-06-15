@@ -24,7 +24,8 @@ package org.jboss.virtual.plugins.context.zip;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
-import java.util.zip.ZipEntry;
+
+import org.jboss.virtual.spi.zip.ZipEntry;
 
 /**
  * ZipEntryWrapper - for abstracted access to in-memory entry
