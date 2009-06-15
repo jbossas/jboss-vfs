@@ -29,6 +29,7 @@ import java.util.Iterator;
 
 import org.jboss.jzipfile.Zip;
 import org.jboss.jzipfile.ZipCatalog;
+import org.jboss.jzipfile.ZipEntryType;
 import org.jboss.virtual.spi.zip.ZipEntry;
 import org.jboss.virtual.spi.zip.ZipEntryProvider;
 import org.jboss.virtual.VFSUtils;
@@ -68,10 +69,18 @@ public class JZipFileZipEntryProvider implements ZipEntryProvider
       }
    }
 
+   private static final InputStream EMPTY_STREAM = new InputStream()
+   {
+      public int read() throws IOException
+      {
+         return -1;
+      }
+   };
+
    public InputStream currentStream() throws IOException
    {
       final org.jboss.jzipfile.ZipEntry current = this.current;
-      return current == null ? null : Zip.openEntry(tempFile, current);
+      return current == null ? null : current.getEntryType() == ZipEntryType.FILE ? Zip.openEntry(tempFile, current) : EMPTY_STREAM;
    }
 
    public void close() throws IOException
