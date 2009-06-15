@@ -61,6 +61,7 @@ public class JZipFileZipEntryProvider implements ZipEntryProvider
       if (entries.hasNext()) {
          return new JZipFileZipEntry(current = entries.next());
       } else {
+         current = null;
          tempFile.delete();
          return null;
       }
@@ -68,6 +69,7 @@ public class JZipFileZipEntryProvider implements ZipEntryProvider
 
    public InputStream currentStream() throws IOException
    {
-      return Zip.openEntry(tempFile, current);
+      final org.jboss.jzipfile.ZipEntry current = this.current;
+      return current == null ? null : Zip.openEntry(tempFile, current);
    }
 }
