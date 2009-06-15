@@ -391,60 +391,74 @@ public class ZipEntryContext extends AbstractVFSContext
       ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
       ZipFactory factory = ZipUtils.getFactory();
+      ZipEntry entry;
+      String longestNameMatch = null;
 
       // first we need to find best/longest name
       ZipEntryProvider zis = factory.createProvider(bais);
-      ZipEntry entry;
-      String longestNameMatch = null;
-      while((entry = zis.getNextEntry()) != null)
+      try
       {
-         String entryName = entry.getName();
-         String match = entryName;
-         if (entry.isDirectory())
-            match = match.substring(0, match.length() - 1);
-
-         if (relative.startsWith(match))
+         while((entry = zis.getNextEntry()) != null)
          {
-            if (match.equals(relative))
-            {
-               if (entry.isDirectory())
-               {
-                  this.rootEntryPath = relative;
-                  return new ZipDirWrapper(zis.currentStream(), entryName, System.currentTimeMillis(), bais);
-               }
-               else if (JarUtils.isArchive(match) == false)
-               {
-                  return new ZipEntryWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
-               }
-               else
-               {
-                  return new ZipStreamWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
-               }
-            }
+            String entryName = entry.getName();
+            String match = entryName;
+            if (entry.isDirectory())
+               match = match.substring(0, match.length() - 1);
 
-            if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
+            if (relative.startsWith(match))
             {
-               longestNameMatch = entryName; // keep entry name
+               if (match.equals(relative))
+               {
+                  if (entry.isDirectory())
+                  {
+                     this.rootEntryPath = relative;
+                     return new ZipDirWrapper(zis.currentStream(), entryName, System.currentTimeMillis(), bais);
+                  }
+                  else if (JarUtils.isArchive(match) == false)
+                  {
+                     return new ZipEntryWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
+                  }
+                  else
+                  {
+                     return new ZipStreamWrapper(zis.currentStream(), entryName, System.currentTimeMillis());
+                  }
+               }
+
+               if (longestNameMatch == null || longestNameMatch.length() < entryName.length())
+               {
+                  longestNameMatch = entryName; // keep entry name
+               }
             }
          }
+         if (longestNameMatch == null)
+            throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
       }
-      if (longestNameMatch == null)
-         throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
+      finally
+      {
+         zis.close();
+      }
 
       // do recursion on relative
       bais.reset();
       zis = factory.createProvider(bais);
-      while((entry = zis.getNextEntry()) != null)
+      try
       {
-         String entryName = entry.getName();
-         if (entryName.equals(longestNameMatch))
+         while((entry = zis.getNextEntry()) != null)
          {
-            if (urlInfo != null)
-               urlInfo.relativePath = longestNameMatch;
+            String entryName = entry.getName();
+            if (entryName.equals(longestNameMatch))
+            {
+               if (urlInfo != null)
+                  urlInfo.relativePath = longestNameMatch;
 
-            relative = relative.substring(longestNameMatch.length() + 1);
-            return findEntry(zis.currentStream(), relative, null);
+               relative = relative.substring(longestNameMatch.length() + 1);
+               return findEntry(zis.currentStream(), relative, null);
+            }
          }
+      }
+      finally
+      {
+         zis.close();
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
    }

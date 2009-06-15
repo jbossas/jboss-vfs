@@ -85,24 +85,31 @@ class ZipStreamWrapper extends ZipBytesWrapper
 
       ZipFactory factory = ZipUtils.getFactory();     
       ZipEntryProvider zis = factory.createProvider(super.getRootAsStream());
-      ZipEntry ent = zis.getNextEntry();
-      while (ent != null)
+      try
       {
-         byte [] fileBytes;
-         if (ent.isDirectory() == false)
+         ZipEntry ent = zis.getNextEntry();
+         while (ent != null)
          {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            VFSUtils.copyStream(zis.currentStream(), baos);
-            fileBytes = baos.toByteArray();
-            ent.setSize(fileBytes.length);
-         }
-         else
-         {
-            fileBytes = new byte[0];
-         }
+            byte [] fileBytes;
+            if (ent.isDirectory() == false)
+            {
+               ByteArrayOutputStream baos = new ByteArrayOutputStream();
+               VFSUtils.copyStreamAndClose(zis.currentStream(), baos);
+               fileBytes = baos.toByteArray();
+               ent.setSize(fileBytes.length);
+            }
+            else
+            {
+               fileBytes = new byte[0];
+            }
 
-         inMemoryFiles.put(ent.getName(), new InMemoryFile(ent, fileBytes));
-         ent = zis.getNextEntry();
+            inMemoryFiles.put(ent.getName(), new InMemoryFile(ent, fileBytes));
+            ent = zis.getNextEntry();
+         }
+      }
+      finally
+      {
+         zis.close();
       }
 
       if (optimizeForMemory) {

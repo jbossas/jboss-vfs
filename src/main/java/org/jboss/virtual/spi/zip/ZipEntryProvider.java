@@ -34,4 +34,6 @@ public interface ZipEntryProvider
    ZipEntry getNextEntry() throws IOException;
 
    InputStream currentStream() throws IOException;
+
+   void close() throws IOException;
 }

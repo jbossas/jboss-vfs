@@ -51,6 +51,74 @@ public class JDKZipProvider implements ZipEntryProvider
 
    public InputStream currentStream()
    {
-      return zis;
+      return new IgnoreCloseInputStream(zis);
+   }
+
+   public void close() throws IOException
+   {
+      zis.close();
+   }
+
+   private static class IgnoreCloseInputStream extends InputStream
+   {
+      private InputStream delegate;
+
+      private IgnoreCloseInputStream(InputStream zis)
+      {
+         this.delegate = zis;
+      }
+
+      public int read() throws IOException
+      {
+         return delegate.read();
+      }
+
+      @Override
+      public boolean markSupported()
+      {
+         return delegate.markSupported();
+      }
+
+      @Override
+      public void reset() throws IOException
+      {
+         delegate.reset();
+      }
+
+      @Override
+      public void mark(int readlimit)
+      {
+         delegate.mark(readlimit);
+      }
+
+      @Override
+      public void close() throws IOException
+      {
+         // no-op
+      }
+
+      @Override
+      public int available() throws IOException
+      {
+         return delegate.available();
+      }
+
+      @Override
+      public long skip(long n) throws IOException
+      {
+         return delegate.skip(n);
+      }
+
+      @Override
+      public int read(byte[] b, int off, int len) throws IOException
+      {
+         return delegate.read(b, off, len);
+      }
+
+      @Override
+      public int read(byte[] b) throws IOException
+      {
+         return delegate.read(b);
+      }
    }
 }

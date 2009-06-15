@@ -73,4 +73,9 @@ public class JZipFileZipEntryProvider implements ZipEntryProvider
       final org.jboss.jzipfile.ZipEntry current = this.current;
       return current == null ? null : Zip.openEntry(tempFile, current);
    }
+
+   public void close() throws IOException
+   {
+      current = null;
+   }
 }
