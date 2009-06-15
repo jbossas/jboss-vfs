@@ -21,41 +21,71 @@
  */
 package org.jboss.virtual.spi.zip.jdk;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipInputStream;
-
-import org.jboss.virtual.spi.zip.ZipEntry;
-import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class JDKZipProvider implements ZipEntryProvider
+class IgnoreCloseInputStream extends InputStream
 {
-   private ZipInputStream zis;
+   private InputStream delegate;
 
-   public JDKZipProvider(ZipInputStream zis)
+   IgnoreCloseInputStream(InputStream zis)
    {
-      if (zis == null)
-         throw new IllegalArgumentException("Null Zip input stream.");        
-
-      this.zis = zis;
+      this.delegate = zis;
    }
 
-   public ZipEntry getNextEntry() throws IOException
+   public int read() throws IOException
    {
-      java.util.zip.ZipEntry entry = zis.getNextEntry();
-      return entry != null ? new JDKZipEntry(entry) : null;
+      return delegate.read();
    }
 
-   public InputStream currentStream()
+   @Override
+   public boolean markSupported()
    {
-      return new IgnoreCloseInputStream(zis);
+      return delegate.markSupported();
    }
 
+   @Override
+   public void reset() throws IOException
+   {
+      delegate.reset();
+   }
+
+   @Override
+   public void mark(int readlimit)
+   {
+      delegate.mark(readlimit);
+   }
+
+   @Override
    public void close() throws IOException
    {
-      zis.close();
+      // no-op
+   }
+
+   @Override
+   public int available() throws IOException
+   {
+      return delegate.available();
+   }
+
+   @Override
+   public long skip(long n) throws IOException
+   {
+      return delegate.skip(n);
+   }
+
+   @Override
+   public int read(byte[] b, int off, int len) throws IOException
+   {
+      return delegate.read(b, off, len);
+   }
+
+   @Override
+   public int read(byte[] b) throws IOException
+   {
+      return delegate.read(b);
    }
 }

@@ -368,7 +368,17 @@ class ZipFileWrapper extends ZipWrapper
             newEntry.setCrc(oldEntry.getCrc());
             zout.putNextEntry(newEntry);
             if (oldEntry.isDirectory() == false)
-               VFSUtils.copyStream(zipFile.getInputStream(oldEntry), zout);
+            {
+               InputStream is = zipFile.getInputStream(oldEntry);
+               try
+               {
+                  VFSUtils.copyStream(is, zout);
+               }
+               finally
+               {
+                  is.close();
+               }
+            }
          }
       }
       zout.close();

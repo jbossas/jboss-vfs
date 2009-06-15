@@ -46,7 +46,8 @@ public class JDKZipFile implements ZipFile
    public InputStream getInputStream(ZipEntry entry) throws IOException
    {
       Object unwrap = entry.unwrap();
-      return file.getInputStream(java.util.zip.ZipEntry.class.cast(unwrap));
+      InputStream delegate = file.getInputStream(java.util.zip.ZipEntry.class.cast(unwrap));
+      return new IgnoreCloseInputStream(delegate);
    }
 
    public void close() throws IOException
