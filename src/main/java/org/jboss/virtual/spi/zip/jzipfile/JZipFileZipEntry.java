@@ -22,6 +22,7 @@
 package org.jboss.virtual.spi.zip.jzipfile;
 
 import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.jzipfile.ZipEntryType;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
@@ -44,7 +45,7 @@ public class JZipFileZipEntry implements ZipEntry
 
    public boolean isDirectory()
    {
-      return false; // TODO
+      return entry.getEntryType() == ZipEntryType.DIRECTORY;
    }
 
    public long getTime()
