@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VFSUtils;
 
 /**
  * Test the caching strategy of VFS with jar files.
@@ -75,7 +76,7 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
       VirtualFile vf = VFS.getVirtualFile(root.toURI().toURL(), "test.jar");
       {
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
-         Manifest manifest = new Manifest(manifestFile.openStream());
+         Manifest manifest = VFSUtils.readManifest(manifestFile);
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("v1", actual);
       }
@@ -104,7 +105,7 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
       // Verify the manifest the VFS way
       {
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
-         Manifest manifest = new Manifest(manifestFile.openStream());
+         Manifest manifest = VFSUtils.readManifest(manifestFile);
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("VFS found the wrong manifest", "v2", actual);
       }
@@ -113,7 +114,7 @@ public class JARCacheUnitTestCase extends AbstractVFSTest
       {
          vf = VFS.getVirtualFile(root.toURI().toURL(), "test.jar");
          VirtualFile manifestFile = vf.findChild("META-INF/MANIFEST.MF");
-         Manifest manifest = new Manifest(manifestFile.openStream());
+         Manifest manifest = VFSUtils.readManifest(manifestFile);
          String actual = manifest.getMainAttributes().getValue("test");
          assertEquals("VFS found the wrong manifest", "v2", actual);
       }
