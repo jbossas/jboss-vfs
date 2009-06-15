@@ -23,10 +23,9 @@ package org.jboss.virtual.spi.zip.jzipfile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Iterator;
 
 import org.jboss.jzipfile.Zip;
 import org.jboss.jzipfile.ZipCatalog;
@@ -39,36 +38,36 @@ import org.jboss.virtual.VFSUtils;
  */
 public class JZipFileZipEntryProvider implements ZipEntryProvider
 {
-   private InputStream copy;
-   private List<org.jboss.jzipfile.ZipEntry> entries;
-   private int index;
-   private int size;
+   private Iterator<org.jboss.jzipfile.ZipEntry> entries;
+   private File tempFile;
+   private org.jboss.jzipfile.ZipEntry current;
 
    public JZipFileZipEntryProvider(InputStream is) throws IOException
    {
       if (is == null)
          throw new IllegalArgumentException("Null input stream");
 
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      VFSUtils.copyStreamAndClose(is, baos);
-      copy = new ByteArrayInputStream(baos.toByteArray());
+      final File tempFile = File.createTempFile("jzfzep", "zip");
+      final FileOutputStream os = new FileOutputStream(tempFile);
+      VFSUtils.copyStreamAndClose(is, os);
 
-      ZipCatalog catalog = Zip.readCatalog(is);
-      entries = new ArrayList<org.jboss.jzipfile.ZipEntry>(catalog.allEntries());
-      size = entries.size();
+      ZipCatalog catalog = Zip.readCatalog(tempFile);
+      entries = catalog.allEntries().iterator();
+      this.tempFile = tempFile;
    }
 
    public ZipEntry getNextEntry() throws IOException
    {
-      if (index >= size)
+      if (entries.hasNext()) {
+         return new JZipFileZipEntry(current = entries.next());
+      } else {
+         tempFile.delete();
          return null;
-
-      org.jboss.jzipfile.ZipEntry entry = entries.get(index++);
-      return new JZipFileZipEntry(entry);
+      }
    }
 
    public InputStream currentStream() throws IOException
    {
-      return Zip.openEntry(copy, entries.get(index));
+      return Zip.openEntry(tempFile, current);
    }
 }
