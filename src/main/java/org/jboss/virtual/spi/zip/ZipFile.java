@@ -32,9 +32,30 @@ import java.util.Enumeration;
  */
 public interface ZipFile
 {
+
+   /**
+    * Get the input stream for a specific entry.  The caller <b>must</b> close the input stream or
+    * file locking/cleanup issues may ensue.
+    *
+    * @param entry the zip entry
+    * @return the input stream
+    * @throws IOException if an I/O error occurs
+    */
    InputStream getInputStream(ZipEntry entry) throws IOException;
 
+   /**
+    * Close the zip file.  May or may not close any {@code InputStream}s associated with this zip file; to be
+    * safe, any outstanding {@code InputStream}s returned by {@link #getInputStream(ZipEntry)} must be closed
+    * explicitly.
+    *
+    * @throws IOException if an I/O error occurs
+    */
    void close() throws IOException;
 
+   /**
+    * Get an enumeration over all the entries.  May fail if the zip file has been closed.
+    *
+    * @return the enumeration
+    */
    Enumeration<? extends ZipEntry> entries();
 }
