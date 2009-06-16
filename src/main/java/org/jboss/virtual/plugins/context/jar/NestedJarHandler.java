@@ -34,6 +34,7 @@ import java.util.zip.ZipEntry;
 
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.VFSUtils;
 
 /**
  * Nested Jar Handler.
@@ -78,18 +79,12 @@ public class NestedJarHandler extends AbstractStructuredJarHandler<Object>
          }
          finally
          {
-            outputStream.close();
+            VFSUtils.safeClose(outputStream);
          }
       }
       finally
       {
-         try
-         {
-            inputStream.close();
-         }
-         catch (IOException ignored)
-         {
-         }
+         VFSUtils.safeClose(inputStream);
       }
       
       return new JarFile(temp);

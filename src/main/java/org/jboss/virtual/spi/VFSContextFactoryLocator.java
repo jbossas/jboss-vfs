@@ -43,6 +43,7 @@ import org.jboss.virtual.plugins.context.jar.JarContextFactory;
 import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContextFactory;
 import org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.util.file.ArchiveBrowser;
 
 /**
@@ -290,10 +291,11 @@ public class VFSContextFactoryLocator
                      temp.add(factory);
                }
             }
+            is.close();
          }
          finally
          {
-            is.close();
+            VFSUtils.safeClose(is);
          }
       }
       catch(Exception e)

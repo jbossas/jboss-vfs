@@ -318,10 +318,11 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       try
       {
          JarUtils.unjar(in, copy);
+         in.close();
       }
       finally
       {
-         in.close();
+         VFSUtils.safeClose(in);
       }
    }
 
@@ -335,33 +336,29 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
    protected static void rewrite(VirtualFileHandler handler, File file) throws IOException
    {
       OutputStream out = new FileOutputStream(file);
-      InputStream in = handler.openStream();
       try
       {
-         byte[] bytes = new byte[1024];
-         while (in.available() > 0)
+         InputStream in = handler.openStream();
+         try
          {
-            int length = in.read(bytes);
-            if (length > 0)
-               out.write(bytes, 0, length);
+            byte[] bytes = new byte[1024];
+            while (in.available() > 0)
+            {
+               int length = in.read(bytes);
+               if (length > 0)
+                  out.write(bytes, 0, length);
+            }
+            in.close();
+            out.close();
+         }
+         finally
+         {
+            VFSUtils.safeClose(in);
          }
       }
       finally
       {
-         try
-         {
-            in.close();
-         }
-         catch (IOException ignored)
-         {
-         }
-         try
-         {
-            out.close();
-         }
-         catch (IOException ignored)
-         {
-         }
+         VFSUtils.safeClose(out);
       }
    }
 }

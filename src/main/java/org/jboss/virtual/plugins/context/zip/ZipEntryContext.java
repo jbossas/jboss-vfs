@@ -432,10 +432,11 @@ public class ZipEntryContext extends AbstractVFSContext
          }
          if (longestNameMatch == null)
             throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
+         zis.close();
       }
       finally
       {
-         zis.close();
+         VFSUtils.safeClose(zis);
       }
 
       // do recursion on relative
@@ -455,10 +456,11 @@ public class ZipEntryContext extends AbstractVFSContext
                return findEntry(zis.currentStream(), relative, null);
             }
          }
+         zis.close();
       }
       finally
       {
-         zis.close();
+         VFSUtils.safeClose(zis);
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
    }

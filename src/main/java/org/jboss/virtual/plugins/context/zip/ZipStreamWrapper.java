@@ -106,10 +106,11 @@ class ZipStreamWrapper extends ZipBytesWrapper
             inMemoryFiles.put(ent.getName(), new InMemoryFile(ent, fileBytes));
             ent = zis.getNextEntry();
          }
+         zis.close();
       }
       finally
       {
-         zis.close();
+         VFSUtils.safeClose(zis);
       }
 
       if (optimizeForMemory) {

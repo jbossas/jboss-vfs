@@ -372,14 +372,7 @@ public class FileSystemContext extends AbstractVFSContext
       }
       finally
       {
-         try
-         {
-            fis.close();
-         }
-         catch(IOException e)
-         {
-            log.debug("Exception closing file input stream: " + fis, e);
-         }
+         VFSUtils.safeClose(fis);
       }
       return handler;
    }

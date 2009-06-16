@@ -260,19 +260,7 @@ public class VirtualFile implements Serializable
          return;
 
       // Close the streams
-      for (InputStream stream : streams)
-      {
-         if (stream != null)
-         {
-            try
-            {
-               stream.close();
-            }
-            catch (IOException ignored)
-            {
-            }
-         }
-      }
+      VFSUtils.safeClose(streams);
       streams.clear();
    }
 

@@ -118,7 +118,7 @@ public abstract class AbstractURLHandler extends AbstractVirtualFileHandler
       try
       {
          if (c instanceof JarURLConnection == false)
-            c.getInputStream().close();
+            VFSUtils.safeClose(c.getInputStream());
       }
       catch (Exception ex)
       {

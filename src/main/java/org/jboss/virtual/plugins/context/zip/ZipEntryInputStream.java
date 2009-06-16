@@ -21,6 +21,8 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
+import org.jboss.virtual.VFSUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -228,13 +230,7 @@ public class ZipEntryInputStream extends InputStream
     */
    protected void finalize() throws Throwable
    {
-      try
-      {
-         close();
-      }
-      catch(IOException ignored)
-      {
-      }
+      VFSUtils.safeClose(this);
       super.finalize();
    }
 

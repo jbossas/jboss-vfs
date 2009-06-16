@@ -373,10 +373,11 @@ class ZipFileWrapper extends ZipWrapper
                try
                {
                   VFSUtils.copyStream(is, zout);
+                  is.close();
                }
                finally
                {
-                  is.close();
+                  VFSUtils.safeClose(is);
                }
             }
          }

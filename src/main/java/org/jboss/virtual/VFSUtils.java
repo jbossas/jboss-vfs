@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Closeable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -278,13 +279,7 @@ public class VFSUtils
       }
       finally
       {
-         try
-         {
-            stream.close();
-         }
-         catch (IOException ignored)
-         {
-         }
+         safeClose(stream);
       }
    }
 
@@ -902,18 +897,8 @@ public class VFSUtils
       }
       finally
       {
-         if (is != null)
-         {
-            try
-            {
-               is.close();
-            }
-            catch(IOException ignored)
-            {
-            }
-         }
-         if (os != null)
-            os.close();
+         safeClose(is);
+         safeClose(os);
       }
    }
 
@@ -1116,5 +1101,34 @@ public class VFSUtils
    {
       URI uri = context.getRootURI();
       return stripProtocol(uri);
+   }
+
+   /**
+    * Safely close some resource without throwing an exception.  Any exception will be logged at TRACE level.
+    *
+    * @param c the resource
+    */
+   public static void safeClose(final Closeable c)
+   {
+      if (c != null) try {
+         c.close();
+      }
+      catch (Exception e)
+      {
+         log.trace("Failed to close resource", e);
+      }
+   }
+
+   /**
+    * Safely close some resources without throwing an exception.  Any exception will be logged at TRACE level.
+    *
+    * @param ci the resources
+    */
+   public static void safeClose(final Iterable<? extends Closeable> ci)
+   {
+      if (ci != null) for (Closeable closeable : ci)
+      {
+         safeClose(closeable);
+      }
    }
 }
