@@ -932,20 +932,14 @@ public class VFSUtils
       if (os == null)
          throw new IllegalArgumentException("output stream is null");
 
-      try
+      byte [] buff = new byte[65536];
+      int rc = is.read(buff);
+      while (rc != -1)
       {
-         byte [] buff = new byte[65536];
-         int rc = is.read(buff);
-         while (rc != -1)
-         {
-            os.write(buff, 0, rc);
-            rc = is.read(buff);
-         }
+         os.write(buff, 0, rc);
+         rc = is.read(buff);
       }
-      finally
-      {
-         os.flush();
-      }
+      os.flush();
    }
 
    /**
