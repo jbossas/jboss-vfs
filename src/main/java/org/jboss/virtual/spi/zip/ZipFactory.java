@@ -32,7 +32,6 @@ import java.io.IOException;
  */
 public interface ZipFactory
 {
-
    /**
     * Create a zip entry provider for an input stream.  The provider will provide the means to iterate over a zip
     * file one entry at a time.  The returned provider <b>must</b> be closed or else file locking or cleanup issues

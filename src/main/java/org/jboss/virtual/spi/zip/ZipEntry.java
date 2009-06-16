@@ -28,7 +28,6 @@ package org.jboss.virtual.spi.zip;
  */
 public interface ZipEntry
 {
-
    /**
     * Get the full name of the entry.
     *

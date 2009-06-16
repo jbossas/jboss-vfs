@@ -32,7 +32,6 @@ import java.io.Closeable;
  */
 public interface ZipEntryProvider extends Closeable
 {
-
    /**
     * Get the next entry in the stream.  This method may render the results of {@link #currentStream()} useless;
     * such streams should be closed before invoking this method.

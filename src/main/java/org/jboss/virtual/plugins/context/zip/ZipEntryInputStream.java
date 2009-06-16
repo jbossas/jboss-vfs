@@ -21,10 +21,10 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.virtual.VFSUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.jboss.virtual.VFSUtils;
 
 /**
  * ZipEntryInputStream is part of ZipFileWrapper implementation.
@@ -33,9 +33,9 @@ import java.io.InputStream;
  * and releases the underlying ZipFileWrapper when detecting end of use.
  *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.0 $
  */
-
 public class ZipEntryInputStream extends InputStream
 {
    /** Underlying input stream */
@@ -44,8 +44,11 @@ public class ZipEntryInputStream extends InputStream
    /** Underlying zip source */
    private ZipFileWrapper zipWrapper;
 
-   /** Is stream closed */
-   private boolean closed;
+   /** Is stream released */
+   private volatile boolean released;
+
+   /** Is stream delegate closed */
+   private volatile boolean closed;
 
    /**
     * ZipEntryInputStream constructor.
@@ -65,13 +68,15 @@ public class ZipEntryInputStream extends InputStream
    }
 
    /**
-    * Close this stream and release zipWrapper
+    * Release this stream and release zipWrapper
+    *
+    * @param doRelease should we release
     */
-   private void streamClosed(boolean doClose)
+   private void streamReleased(boolean doRelease)
    {
-      if (closed == false && doClose)
+      if (released == false && doRelease)
       {
-         closed = true;
+         released = true;
          zipWrapper.release();
       }
    }
@@ -93,7 +98,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(rc < 0);
+         streamReleased(rc < 0);
       }
    }
 
@@ -116,7 +121,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(rc < 0);
+         streamReleased(rc < 0);
       }
    }
 
@@ -140,7 +145,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(rc < 0);
+         streamReleased(rc < 0);
       }
    }
 
@@ -157,7 +162,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(ok == false);
+         streamReleased(ok == false);
       }
    }
 
@@ -174,7 +179,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(ok == false);
+         streamReleased(ok == false);
       }
    }
 
@@ -192,7 +197,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(ok == false);
+         streamReleased(ok == false);
       }
    }
 
@@ -210,7 +215,7 @@ public class ZipEntryInputStream extends InputStream
       }
       finally
       {
-         streamClosed(ok == false);
+         streamReleased(ok == false);
       }
    }
 
@@ -221,8 +226,18 @@ public class ZipEntryInputStream extends InputStream
     */
    public void close() throws IOException
    {
-      streamClosed(true);
-      super.close();
+      try
+      {
+         streamReleased(true);
+      }
+      finally
+      {
+         if (closed == false)
+         {
+            closed = true;
+            VFSUtils.safeClose(delegate);
+         }
+      }
    }
 
    /**
@@ -232,6 +247,16 @@ public class ZipEntryInputStream extends InputStream
    {
       VFSUtils.safeClose(this);
       super.finalize();
+   }
+
+   /**
+    * isReleased.
+    *
+    * @return returns true if released
+    */
+   boolean isReleased()
+   {
+      return released;
    }
 
    /**

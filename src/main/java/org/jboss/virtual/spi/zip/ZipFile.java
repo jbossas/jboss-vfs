@@ -33,7 +33,6 @@ import java.util.Enumeration;
  */
 public interface ZipFile extends Closeable
 {
-
    /**
     * Get the input stream for a specific entry.  The caller <b>must</b> close the input stream or
     * file locking/cleanup issues may ensue.

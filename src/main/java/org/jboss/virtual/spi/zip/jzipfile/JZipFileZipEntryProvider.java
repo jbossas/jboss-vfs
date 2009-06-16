@@ -21,18 +21,18 @@
  */
 package org.jboss.virtual.spi.zip.jzipfile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 
 import org.jboss.jzipfile.Zip;
 import org.jboss.jzipfile.ZipCatalog;
 import org.jboss.jzipfile.ZipEntryType;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.spi.zip.ZipEntry;
 import org.jboss.virtual.spi.zip.ZipEntryProvider;
-import org.jboss.virtual.VFSUtils;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
