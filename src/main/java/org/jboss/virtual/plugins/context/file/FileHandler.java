@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.InterruptedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -203,7 +204,8 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             }
             catch (InterruptedException e)
             {
-               IOException ioe = new IOException("Interrupted: " + e);
+               Thread.currentThread().interrupt();
+               IOException ioe = new InterruptedIOException("Interrupted: " + e);
                ioe.initCause(e);
                throw ioe;
             }
