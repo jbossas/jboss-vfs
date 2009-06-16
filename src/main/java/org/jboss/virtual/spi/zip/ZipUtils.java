@@ -22,6 +22,7 @@
 package org.jboss.virtual.spi.zip;
 
 import org.jboss.virtual.spi.zip.jdk.JDKZipFactory;
+import org.jboss.virtual.spi.zip.jzipfile.JZipFileZipFactory;
 
 /**
  * Zip utils.
@@ -30,8 +31,8 @@ import org.jboss.virtual.spi.zip.jdk.JDKZipFactory;
  */
 public class ZipUtils
 {
-   //private static ZipFactory factory = new JZipFileZipFactory();
-   private static ZipFactory factory = new JDKZipFactory();
+   private static ZipFactory factory = new JZipFileZipFactory();
+//   private static ZipFactory factory = new JDKZipFactory();
 
    public static ZipFactory getFactory()
    {

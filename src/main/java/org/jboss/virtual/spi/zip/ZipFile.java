@@ -23,6 +23,7 @@ package org.jboss.virtual.spi.zip;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.Closeable;
 import java.util.Enumeration;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Enumeration;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public interface ZipFile
+public interface ZipFile extends Closeable
 {
 
    /**

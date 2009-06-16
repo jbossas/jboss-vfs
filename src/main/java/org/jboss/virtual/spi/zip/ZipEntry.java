@@ -28,25 +28,83 @@ package org.jboss.virtual.spi.zip;
  */
 public interface ZipEntry
 {
+
+   /**
+    * Get the full name of the entry.
+    *
+    * @return the full name
+    */
    String getName();
 
+   /**
+    * Determine whether this entry is a directory.
+    *
+    * @return {@code true} if the entry is a directory
+    */
    boolean isDirectory();
 
+   /**
+    * Get the modification time of this entry in milliseconds as per {@link System#currentTimeMillis()}.
+    *
+    * @return the modification time
+    */
    long getTime();
 
+   /**
+    * Set the modification time.
+    *
+    * @param time the modification time
+    */
    void setTime(long time);
 
+   /**
+    * Get the uncompressed size of the data referred to by this entry object.
+    *
+    * @return the size
+    */
    long getSize();
 
+   /**
+    * Set the uncompressed size.
+    *
+    * @param size the size
+    */
    void setSize(long size);
 
+   /**
+    * Get the zip file entry comment.  May not be available if this object was acquired from a {@link ZipEntryProvider},
+    * since the comment information is present only in the Zip directory, and the {@code ZipEntryProvider} uses only
+    * local file headers to gather its information.
+    *
+    * @return the comment string
+    */
    String getComment();
 
+   /**
+    * Set the zip file entry comment.
+    *
+    * @param comment the comment string
+    */
    void setComment(String comment);
 
+   /**
+    * Get the 32-bit unsigned CRC value.
+    *
+    * @return the CRC value
+    */
    long getCrc();
 
+   /**
+    * Set the CRC value.
+    *
+    * @param crc the CRC value
+    */
    void setCrc(long crc);
 
+   /**
+    * Get the implementation object.
+    *
+    * @return the implementation object
+    */
    Object unwrap();
 }

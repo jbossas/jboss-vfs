@@ -26,13 +26,32 @@ import java.io.InputStream;
 import java.io.IOException;
 
 /**
- * Zip factory.
+ * Zip factory.  This is the main entry point into the Zip abstraction layer.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public interface ZipFactory
 {
+
+   /**
+    * Create a zip entry provider for an input stream.  The provider will provide the means to iterate over a zip
+    * file one entry at a time.  The returned provider <b>must</b> be closed or else file locking or cleanup issues
+    * may ensue.
+    *
+    * @param is the input stream to read
+    * @return the zip entry provider.
+    * @throws IOException if an I/O error occurs
+    */
    ZipEntryProvider createProvider(InputStream is) throws IOException;
 
+   /**
+    * Create a handle to a randomly-accessible zip file.  The zip file will allow entries to be accessed at random
+    * and possibly in parallel.  The returned object <b>must</b> be closed or else file locking or cleanup issues
+    * may ensue.
+    *
+    * @param file the file to read
+    * @return the zip file handle
+    * @throws IOException if an I/O error occurs
+    */
    ZipFile createFile(File file) throws IOException;
 }
