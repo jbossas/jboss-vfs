@@ -21,21 +21,98 @@
  */
 package org.jboss.virtual.spi.zip;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jboss.logging.Logger;
 import org.jboss.virtual.spi.zip.jdk.JDKZipFactory;
-import org.jboss.virtual.spi.zip.jzipfile.JZipFileZipFactory;
 
 /**
  * Zip utils.
+ * This is the entry point to the ZipFactory.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public class ZipUtils
 {
-   private static ZipFactory factory = new JZipFileZipFactory();
-//   private static ZipFactory factory = new JDKZipFactory();
+   private static final Logger log = Logger.getLogger(ZipUtils.class);
+   public static final String KEY = ZipFactory.class.getName();
 
+   private static final Map<String, String> mappings;
+   private static ZipFactory factory;
+
+   static
+   {
+      mappings = new HashMap<String, String>();
+      mappings.put("jzipfile", "org.jboss.virtual.spi.zip.jzipfile.JZipFileZipFactory");
+      mappings.put("truezip", "org.jboss.virtual.spi.zip.truezip.TrueZipFactory");
+   }
+
+   /**
+    * Get the zip factory.
+    *
+    * @return the zip factory
+    */
    public static ZipFactory getFactory()
    {
+      if (factory == null)
+         init();
+
       return factory;
+   }
+
+   /**
+    * Initialize zip factory.
+    */
+   private static void init()
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm == null)
+      {
+         factory = createZipFactory();
+      }
+      else
+      {
+         PrivilegedAction<ZipFactory> action = new PrivilegedAction<ZipFactory>()
+         {
+            public ZipFactory run()
+            {
+               return createZipFactory();
+            }
+         };
+         factory = AccessController.doPrivileged(action);
+      }
+   }
+
+   /**
+    * Instantiate zip factory.
+    *
+    * @return the zip factory
+    */
+   private static ZipFactory createZipFactory()
+   {
+      String factoryClass = System.getProperty(KEY);
+      if (factoryClass != null)
+      {
+         String mappingClass = mappings.get(factoryClass);
+         if (mappingClass != null)
+            factoryClass = mappingClass;
+
+         try
+         {
+            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(factoryClass);
+            Object result = clazz.newInstance();
+            log.debug("Using custom ZipFactory - " + result.getClass().getName());
+            return ZipFactory.class.cast(result);
+         }
+         catch (Exception e)
+         {
+            log.warn("Exception instantiating ZipFactory: " + e);
+         }
+      }
+      log.debug("Using default ZipFactory - " + JDKZipFactory.class.getName());
+      return new JDKZipFactory();
    }
 }
