@@ -23,13 +23,13 @@ package org.jboss.virtual.spi.zip.truezip;
 
 import java.util.zip.ZipInputStream;
 
-import org.jboss.virtual.spi.zip.jdk.JDKZipProvider;
+import org.jboss.virtual.spi.zip.jdk.JDKZipEntryProvider;
 import org.jboss.virtual.spi.zip.ZipEntry;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class TrueZipEntryProvider extends JDKZipProvider
+public class TrueZipEntryProvider extends JDKZipEntryProvider
 {
    public TrueZipEntryProvider(ZipInputStream zis)
    {

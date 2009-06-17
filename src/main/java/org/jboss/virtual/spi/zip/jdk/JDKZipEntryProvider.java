@@ -31,11 +31,11 @@ import org.jboss.virtual.spi.zip.ZipEntryProvider;
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class JDKZipProvider implements ZipEntryProvider
+public class JDKZipEntryProvider implements ZipEntryProvider
 {
    private ZipInputStream zis;
 
-   public JDKZipProvider(ZipInputStream zis)
+   public JDKZipEntryProvider(ZipInputStream zis)
    {
       if (zis == null)
          throw new IllegalArgumentException("Null Zip input stream.");        

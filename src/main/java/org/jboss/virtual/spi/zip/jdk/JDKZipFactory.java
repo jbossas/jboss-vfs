@@ -38,7 +38,7 @@ public class JDKZipFactory implements ZipFactory
    public ZipEntryProvider createProvider(InputStream is)
    {
       ZipInputStream zis = new ZipInputStream(is);
-      return new JDKZipProvider(zis);
+      return new JDKZipEntryProvider(zis);
    }
 
    public ZipFile createFile(File file) throws IOException
