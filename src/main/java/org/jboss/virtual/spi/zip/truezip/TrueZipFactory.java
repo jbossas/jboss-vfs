@@ -19,54 +19,31 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.virtual.spi.zip.jdk;
+package org.jboss.virtual.spi.zip.truezip;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.File;
 import java.util.zip.ZipInputStream;
 
-import org.jboss.virtual.spi.zip.ZipEntry;
+import org.jboss.virtual.spi.zip.ZipFactory;
 import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import org.jboss.virtual.spi.zip.ZipFile;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class JDKZipProvider implements ZipEntryProvider
+public class TrueZipFactory implements ZipFactory
 {
-   private ZipInputStream zis;
-
-   public JDKZipProvider(ZipInputStream zis)
+   public ZipEntryProvider createProvider(InputStream is) throws IOException
    {
-      if (zis == null)
-         throw new IllegalArgumentException("Null Zip input stream.");        
-
-      this.zis = zis;
+      ZipInputStream zis = new ZipInputStream(is);
+      return new TrueZipEntryProvider(zis);
    }
 
-   public ZipEntry getNextEntry() throws IOException
+   public ZipFile createFile(File file) throws IOException
    {
-      java.util.zip.ZipEntry entry = zis.getNextEntry();
-      return entry != null ? wrap(entry) : null;
-   }
-
-   /**
-    * Wrap the entry.
-    *
-    * @param entry the entry
-    * @return wrapped entry
-    */
-   protected ZipEntry wrap(java.util.zip.ZipEntry entry)
-   {
-      return new JDKZipEntry(entry);
-   }
-
-   public InputStream currentStream() throws IOException
-   {
-      return new IgnoreCloseInputStream(zis);
-   }
-
-   public void close() throws IOException
-   {
-      zis.close();
+      de.schlichtherle.util.zip.ZipFile zipFile = new de.schlichtherle.util.zip.ZipFile(file);
+      return new TrueZipFile(zipFile);
    }
 }

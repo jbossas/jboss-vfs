@@ -19,54 +19,56 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.virtual.spi.zip.jdk;
+package org.jboss.virtual.spi.zip.truezip;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipInputStream;
+import java.util.Enumeration;
 
 import org.jboss.virtual.spi.zip.ZipEntry;
-import org.jboss.virtual.spi.zip.ZipEntryProvider;
+import org.jboss.virtual.spi.zip.ZipFile;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class JDKZipProvider implements ZipEntryProvider
+public class TrueZipFile implements ZipFile
 {
-   private ZipInputStream zis;
+   private de.schlichtherle.util.zip.ZipFile file;
 
-   public JDKZipProvider(ZipInputStream zis)
+   public TrueZipFile(de.schlichtherle.util.zip.ZipFile file)
    {
-      if (zis == null)
-         throw new IllegalArgumentException("Null Zip input stream.");        
-
-      this.zis = zis;
+      if (file == null)
+         throw new IllegalArgumentException("Null file");
+      this.file = file;
    }
 
-   public ZipEntry getNextEntry() throws IOException
+   public InputStream getInputStream(ZipEntry entry) throws IOException
    {
-      java.util.zip.ZipEntry entry = zis.getNextEntry();
-      return entry != null ? wrap(entry) : null;
-   }
-
-   /**
-    * Wrap the entry.
-    *
-    * @param entry the entry
-    * @return wrapped entry
-    */
-   protected ZipEntry wrap(java.util.zip.ZipEntry entry)
-   {
-      return new JDKZipEntry(entry);
-   }
-
-   public InputStream currentStream() throws IOException
-   {
-      return new IgnoreCloseInputStream(zis);
+      Object unwraped = entry.unwrap();
+      return file.getInputStream(de.schlichtherle.util.zip.ZipEntry.class.cast(unwraped));
    }
 
    public void close() throws IOException
    {
-      zis.close();
+      file.close();
+   }
+
+   public Enumeration<? extends ZipEntry> entries()
+   {
+      @SuppressWarnings("unchecked")
+      final Enumeration<? extends de.schlichtherle.util.zip.ZipEntry> entries = file.entries();
+      return new Enumeration<ZipEntry>()
+      {
+         public boolean hasMoreElements()
+         {
+            return entries.hasMoreElements();
+         }
+
+         public ZipEntry nextElement()
+         {
+            de.schlichtherle.util.zip.ZipEntry entry = entries.nextElement();
+            return entry != null ? new TrueZipEntry(entry) : null;
+         }
+      };
    }
 }

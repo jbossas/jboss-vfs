@@ -19,54 +19,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.virtual.spi.zip.jdk;
+package org.jboss.virtual.spi.zip.truezip;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.ZipInputStream;
 
+import org.jboss.virtual.spi.zip.jdk.JDKZipProvider;
 import org.jboss.virtual.spi.zip.ZipEntry;
-import org.jboss.virtual.spi.zip.ZipEntryProvider;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class JDKZipProvider implements ZipEntryProvider
+public class TrueZipEntryProvider extends JDKZipProvider
 {
-   private ZipInputStream zis;
-
-   public JDKZipProvider(ZipInputStream zis)
+   public TrueZipEntryProvider(ZipInputStream zis)
    {
-      if (zis == null)
-         throw new IllegalArgumentException("Null Zip input stream.");        
-
-      this.zis = zis;
+      super(zis);
    }
 
-   public ZipEntry getNextEntry() throws IOException
-   {
-      java.util.zip.ZipEntry entry = zis.getNextEntry();
-      return entry != null ? wrap(entry) : null;
-   }
-
-   /**
-    * Wrap the entry.
-    *
-    * @param entry the entry
-    * @return wrapped entry
-    */
+   @Override
    protected ZipEntry wrap(java.util.zip.ZipEntry entry)
    {
-      return new JDKZipEntry(entry);
-   }
+      de.schlichtherle.util.zip.ZipEntry zipEntry = new de.schlichtherle.util.zip.ZipEntry(entry.getName());
+      zipEntry.setComment(entry.getComment());
+      zipEntry.setCompressedSize(entry.getCompressedSize());
+      zipEntry.setCrc(entry.getCrc());
+      zipEntry.setExtra(entry.getExtra());
+      zipEntry.setMethod(entry.getMethod());
+      zipEntry.setSize(entry.getSize());
+      zipEntry.setTime(entry.getTime());
 
-   public InputStream currentStream() throws IOException
-   {
-      return new IgnoreCloseInputStream(zis);
-   }
-
-   public void close() throws IOException
-   {
-      zis.close();
+      TrueZipEntry trueZipEntry = new TrueZipEntry(zipEntry);
+      trueZipEntry.setDirectory(entry.isDirectory());
+      return trueZipEntry;
    }
 }
