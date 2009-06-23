@@ -36,8 +36,6 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.plugins.context.jar.JarContext;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -48,9 +46,9 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
+public abstract class JARVFSContextUnitTestCase extends AbstractVFSContextTest
 {
-   public JARVFSContextUnitTestCase(String name)
+   protected JARVFSContextUnitTestCase(String name)
    {
       super(name);
    }
@@ -62,12 +60,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return new TestSuite(JARVFSContextUnitTestCase.class);
    }
 
-   protected VFSContext getVFSContext(String name) throws Exception
-   {
-      URL url = getResource("/vfs/context/jar/" + name + ".jar");
-      url = JarUtils.createJarURL(url);
-      return new JarContext(url);
-   }
+   protected abstract VFSContext getVFSContext(String name) throws Exception;
 
    protected VFSContext getParentVFSContext() throws Exception
    {
@@ -82,12 +75,7 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
     * @return new vfs context
     * @throws Exception for any error
     */
-   protected VFSContext createVSFContext(URL url) throws Exception
-   {
-      if (url.toExternalForm().startsWith("jar") == false)
-         url = JarUtils.createJarURL(url);
-      return new JarContext(url);
-   }
+   protected abstract VFSContext createVSFContext(URL url) throws Exception;
 
    protected String getSuffix()
    {

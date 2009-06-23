@@ -41,10 +41,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.zip.ZipInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -58,10 +56,8 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.plugins.context.jar.NestedJarFromStream;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter;
 import org.jboss.virtual.spi.LinkInfo;
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -116,64 +112,6 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VFS rootVFS1 = VFS.getVFS(root0.toURI());
       VirtualFile root1 = rootVFS1.getRoot();
       assertEquals(root0, root1);
-   }
-
-   /**
-    * Test that NestedJarFromStream can provide access to nested jar content
-    * @throws Exception
-    */
-   public void testNestedJarFromStream()
-      throws Exception
-   {
-      URL outer = getResource("/vfs/test/outer.jar");
-      String path = outer.getPath();
-      File outerJar = new File(path);
-      assertTrue(outerJar.getAbsolutePath()+" exists", outerJar.exists());
-      JarFile jf = new JarFile(outerJar);
-
-      URL rootURL = outerJar.getParentFile().toURI().toURL();
-      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURL);
-      VFSContext context = factory.getVFS(rootURL);
-
-      JarEntry jar1 = jf.getJarEntry("jar1.jar");
-      URL jar1URL = new URL(outerJar.toURI().toURL(), "jar1.jar");
-      VFSContextFactory pf1 = VFSContextFactoryLocator.getFactory(jar1URL);
-      VFSContext parent1 = pf1.getVFS(jar1URL);
-
-      ZipInputStream jis1 = new ZipInputStream(jf.getInputStream(jar1));
-      NestedJarFromStream njfs = new NestedJarFromStream(context, parent1.getRoot(), jis1, jar1URL, jf, jar1, "jar1.jar");
-      VirtualFileHandler e1 = njfs.getChild("org/jboss/test/vfs/support/jar1/ClassInJar1.class");
-      assertNotNull(e1);
-      log.info("org/jboss/test/vfs/support/CommonClass.class: "+e1);
-      VirtualFileHandler mfe1 = njfs.getChild("META-INF/MANIFEST.MF");
-      assertNotNull("jar1!/META-INF/MANIFEST.MF", mfe1);
-      InputStream mfIS = mfe1.openStream();
-      Manifest mf = new Manifest(mfIS);
-      Attributes mainAttrs = mf.getMainAttributes();
-      String title1 = mainAttrs.getValue(Attributes.Name.SPECIFICATION_TITLE);
-      assertEquals("jar1", title1);
-      mfIS.close();
-      njfs.close();
-
-      JarEntry jar2 = jf.getJarEntry("jar2.jar");
-      URL jar2URL = new URL(outerJar.toURI().toURL(), "jar2.jar");
-      VFSContextFactory pf2 = VFSContextFactoryLocator.getFactory(jar2URL);
-      VFSContext parent2 = pf2.getVFS(jar2URL);
-
-      ZipInputStream jis2 = new ZipInputStream(jf.getInputStream(jar2));
-      NestedJarFromStream njfs2 = new NestedJarFromStream(context, parent2.getRoot(), jis2, jar2URL, jf, jar2, "jar2.jar");
-      VirtualFileHandler e2 = njfs2.getChild("org/jboss/test/vfs/support/jar2/ClassInJar2.class");
-      assertNotNull(e2);
-      log.info("org/jboss/test/vfs/support/CommonClass.class: "+e2);
-      VirtualFileHandler mfe2 = njfs2.getChild("META-INF/MANIFEST.MF");
-      assertNotNull("jar2!/META-INF/MANIFEST.MF", mfe2);
-      InputStream mf2IS = mfe2.openStream();
-      Manifest mf2 = new Manifest(mf2IS);
-      Attributes mainAttrs2 = mf2.getMainAttributes();
-      String title2 = mainAttrs2.getValue(Attributes.Name.SPECIFICATION_TITLE);
-      assertEquals("jar2", title2);
-      mf2IS.close();
-      njfs2.close();
    }
 
    /**

@@ -29,7 +29,6 @@ import java.util.jar.JarFile;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.jboss.virtual.plugins.context.jar.JarContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -40,9 +39,9 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandlerTest
+public abstract class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandlerTest
 {
-   public JARVirtualFileHandlerUnitTestCase(String name)
+   protected JARVirtualFileHandlerUnitTestCase(String name)
    {
       super(name);
    }
@@ -75,12 +74,7 @@ public class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandle
       return jarFile.getJarEntry(path);
    }
    
-   protected VFSContext getVFSContext(String name) throws Exception
-   {
-      URL url = getRootResource(name);
-      url = JarUtils.createJarURL(url);
-      return new JarContext(url);
-   }
+   protected abstract VFSContext getVFSContext(String name) throws Exception;
 
    protected String getRootName(String name) throws Exception
    {

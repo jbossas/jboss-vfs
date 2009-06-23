@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
 import org.jboss.test.virtual.support.FileOAContextFactory;
-import org.jboss.test.virtual.support.JarOAContextFactory;
 import org.jboss.test.virtual.support.OptionsAwareURI;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -44,7 +43,6 @@ import org.jboss.virtual.spi.VFSContextFactoryLocator;
 public abstract class AbstractVFSTest extends BaseTestCase
 {
    private static final VFSContextFactory fileFactory = new FileOAContextFactory();
-   private static final VFSContextFactory jarFactory = new JarOAContextFactory();
 
    private boolean forceCopy;
    private boolean forceNoReaper;
@@ -99,7 +97,6 @@ public abstract class AbstractVFSTest extends BaseTestCase
 */
 
       VFSContextFactoryLocator.registerFactory(fileFactory);
-      VFSContextFactoryLocator.registerFactory(jarFactory);
 
       getLog().info("Force copy: " + forceCopy);
       if (forceCopy)
@@ -111,7 +108,6 @@ public abstract class AbstractVFSTest extends BaseTestCase
 
    protected void tearDown() throws Exception
    {
-      VFSContextFactoryLocator.unregisterFactory(jarFactory);
       VFSContextFactoryLocator.unregisterFactory(fileFactory);
 
       if (forceCopy)

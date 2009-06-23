@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.copy;
 
 import java.io.IOException;
 
-import org.jboss.virtual.plugins.context.jar.NestedJarHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
@@ -43,7 +42,7 @@ public class TempCopyMechanism extends ExactCopyMechanism
    protected boolean isAlreadyModified(VirtualFileHandler handler) throws IOException
    {
       // this is already a copy
-      return handler instanceof NestedJarHandler;
+      return false;
    }
 
    protected boolean replaceOldHandler(VirtualFileHandler parent, VirtualFileHandler oldHandler, VirtualFileHandler newHandler) throws IOException

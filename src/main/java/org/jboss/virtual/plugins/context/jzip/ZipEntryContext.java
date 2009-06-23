@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
+ * Copyright 2009, JBoss Inc., and individual contributors as indicated
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -19,47 +19,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.virtual.plugins.context.jar;
+
+package org.jboss.virtual.plugins.context.jzip;
+
+import org.jboss.virtual.plugins.context.AbstractVFSContext;
+import org.jboss.virtual.plugins.context.DelegatingHandler;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URISyntaxException;
 
-import org.jboss.virtual.plugins.context.AbstractContextFactory;
-import org.jboss.virtual.spi.VFSContext;
-
-/**
- * A jar context factory
- * 
- * @author Scott.Stark@jboss.org
- * @author adrian@jboss.org
- * @version $Revision: 44217 $
- */
-public class JarContextFactory extends AbstractContextFactory
+public final class ZipEntryContext extends AbstractVFSContext
 {
-   public JarContextFactory()
+
+   public ZipEntryContext(URL url) throws URISyntaxException
    {
-      super("jar", "vfsjar");
+      super(url);
    }
 
-   public VFSContext getVFS(URL root) throws IOException
+   public ZipEntryContext(URL delegatorUrl, DelegatingHandler delegator, URL fileUrl) throws URISyntaxException
    {
-      try
-      {
-         return new JarContext(fromVFS(root));
-      }
-      catch(URISyntaxException e)
-      {
-         MalformedURLException ex = new MalformedURLException("non-URI compliant URL");
-         ex.initCause(e);
-         throw ex;
-      }
+      super(delegatorUrl);
    }
 
-   public VFSContext getVFS(URI root) throws IOException
+   public String getName()
    {
-      return getVFS(root.toURL());
+      return null;
+   }
+
+   public VirtualFileHandler getRoot() throws IOException
+   {
+      return null;
    }
 }

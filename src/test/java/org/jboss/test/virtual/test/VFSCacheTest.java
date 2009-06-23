@@ -21,7 +21,6 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -29,9 +28,7 @@ import java.util.Map;
 
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.jar.JarContextFactory;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.cache.CacheStatistics;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
@@ -191,58 +188,6 @@ public abstract class VFSCacheTest extends AbstractVFSRegistryTest
       {
          stopCache(cache);
          VFSCacheFactory.setInstance(null);
-      }
-   }
-
-   /**
-    * Test jar path.
-    *
-    * @throws Exception for any error
-    */
-   public void testJarPath() throws Exception
-   {
-      // to circumvent another bug in VFS
-      Map<String, VFSContextFactory> factoryByProtocol = getFactoryByProtocol();
-      VFSContextFactory oldFactory = factoryByProtocol.put("jar", new JarContextFactory());
-      
-      VFSCache cache = createCache();
-      cache.start();
-      try
-      {
-         VFSCacheFactory.setInstance(cache);
-         try
-         {
-            configureCache(cache);
-
-            URL url = getResource("/vfs/test/jar1.jar");
-            URL manifestURL = new URL("jar:" + url.toExternalForm() + "!/META-INF/MANIFEST.MF");
-            
-            // first we ask for a jar:file: resource
-            
-            VirtualFile manifest = VFS.getRoot(manifestURL);
-
-            assertNotNull(manifest);
-            
-            // then we ask for a file: resource
-            
-            VirtualFile jar = VFS.getRoot(url);
-            
-            assertNotNull(jar);
-         }
-         catch(IOException e)
-         {
-            fail("failed to get the proper files: " + e.getMessage());
-         }
-         finally
-         {
-            VFSCacheFactory.setInstance(null);
-         }
-      }
-      finally
-      {
-         factoryByProtocol.put("jar", oldFactory);
-         
-         stopCache(cache);
       }
    }
 

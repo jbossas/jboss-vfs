@@ -36,7 +36,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
+import org.jboss.virtual.plugins.context.jzip.ZipEntryContext;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -87,7 +87,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
       OutputStream os = new FileOutputStream(tmpJar);
       VFSUtils.copyStreamAndClose(is, os);
 
-      ZipEntryContext context = new ZipEntryContext(tmpJar.toURI().toURL());
+      VFSContext context = new ZipEntryContext(tmpJar.toURI().toURL());
       assertTrue("context.getRoot().exists()", context.getRoot().exists());
 
       boolean isDeleted = context.getRoot().delete(1000);
@@ -189,7 +189,7 @@ public class ZipEntryVFSContextUnitTestCase extends JARVFSContextUnitTestCase
 
       // nested root test
       url = getResource("/vfs/test/");
-      ZipEntryContext zctx = new ZipEntryContext(new URL("vfszip:" + url.getPath() + "/level1.zip/level2.zip/level3.zip"));
+      VFSContext zctx = new ZipEntryContext(new URL("vfszip:" + url.getPath() + "/level1.zip/level2.zip/level3.zip"));
 
       VirtualFileHandler handler = zctx.getRoot();
       assertEquals("Nested root Real URL", jarURL, handler.getRealURL().toExternalForm());

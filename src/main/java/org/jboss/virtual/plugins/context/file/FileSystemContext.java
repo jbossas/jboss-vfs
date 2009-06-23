@@ -38,9 +38,8 @@ import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
-import org.jboss.virtual.plugins.context.jar.JarHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
+import org.jboss.virtual.plugins.context.jzip.ZipEntryContext;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -48,10 +47,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * FileSystemContext.
  *
- * Jar archives are processed through {@link org.jboss.virtual.plugins.context.zip.ZipEntryContext}.
- *
- * To switch back to {@link org.jboss.virtual.plugins.context.jar.JarHandler}
- * set a system property <em>jboss.vfs.forceVfsJar=true</em>
+ * Jar archives are processed through {@link org.jboss.virtual.plugins.context.jzip.ZipEntryContext}.
  *
  * Explicit case sensitive path checking can be turned on by adding an option parameter
  * <em>?caseSensitive=true<em> to context URL. This may be desired when native filesystem is not
@@ -69,19 +65,11 @@ public class FileSystemContext extends AbstractVFSContext
 {
    protected static final Logger staticLog = Logger.getLogger(FileSystemContext.class);
 
-   /** true if forcing fallback to vfsjar from default vfszip */
-   private static boolean forceVfsJar;
-
    /** true if case sensitivity should be enforced */
    private static boolean forceCaseSensitive;
 
    static
    {
-      forceVfsJar = AccessController.doPrivileged(new CheckForceVfsJar());
-
-      if (forceVfsJar)
-         staticLog.info("VFS forced fallback to vfsjar is enabled.");
-
       forceCaseSensitive = AccessController.doPrivileged(new CheckForceCaseSensitive());
 
       if (forceCaseSensitive)
@@ -245,27 +233,13 @@ public class FileSystemContext extends AbstractVFSContext
          if (exists(file) == false)
             return null;
 
-         if (forceVfsJar)
+         try
          {
-            try
-            {
-               return new JarHandler(this, parent, file, file.toURI().toURL(), name);
-            }
-            catch(IOException e)
-            {
-               log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
-            }
+            return mountZipFS(parent, name, file);
          }
-         else
+         catch (Exception e)
          {
-            try
-            {
-               return mountZipFS(parent, name, file);
-            }
-            catch (Exception e)
-            {
-               log.debug("IGNORING: Exception while trying to handle file (" + name + ") as a jar through ZipEntryContext: ", e);
-            }
+            log.debug("IGNORING: Exception while trying to handle file (" + name + ") as a jar through ZipEntryContext: ", e);
          }
       }
       return createVirtualFileHandler(parent, file, getFileURI(file));
@@ -408,15 +382,6 @@ public class FileSystemContext extends AbstractVFSContext
    public boolean isForcedCaseSensitive()
    {
       return forceCaseSensitive;
-   }
-
-   private static class CheckForceVfsJar implements PrivilegedAction<Boolean>
-   {
-      public Boolean run()
-      {
-         String forceString = System.getProperty(VFSUtils.FORCE_VFS_JAR_KEY, "false");
-         return Boolean.valueOf(forceString);
-      }
    }
 
    private static class CheckForceCaseSensitive implements PrivilegedAction<Boolean>
