@@ -25,20 +25,28 @@ package org.jboss.virtual.plugins.context.jzip;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VFS;
+import org.jboss.jzipfile.ZipCatalog;
 
 import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.net.URISyntaxException;
 
-public final class ZipEntryContext extends AbstractVFSContext
+public final class ZipFileContext extends AbstractVFSContext
 {
 
-   public ZipEntryContext(URL url) throws URISyntaxException
+   private final File zipFile;
+   private final ZipCatalog catalog;
+
+   public ZipFileContext(URL url) throws URISyntaxException
    {
       super(url);
+      zipFile = File.createTempFile("jboss-vfs-", ".zip", 
    }
 
-   public ZipEntryContext(URL delegatorUrl, DelegatingHandler delegator, URL fileUrl) throws URISyntaxException
+   public ZipFileContext(URL delegatorUrl, DelegatingHandler delegator, URL fileUrl) throws URISyntaxException
    {
       super(delegatorUrl);
    }

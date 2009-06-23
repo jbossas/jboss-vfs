@@ -24,6 +24,7 @@ package org.jboss.virtual.plugins.context.jzip;
 
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.jzipfile.ZipEntry;
 import org.jboss.jzipfile.Zip;
 
@@ -38,6 +39,11 @@ public final class ZipFileHandler extends AbstractVirtualFileHandler
 {
    private final File zipFile;
    private final ZipEntry zipEntry;
+
+   public ZipFileHandler(VFSContext context, VirtualFileHandler parent, String name)
+   {
+      super(context, parent, name);
+   }
 
    public URI toURI() throws URISyntaxException
    {

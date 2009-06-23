@@ -30,7 +30,7 @@ import java.util.List;
 
 import junit.framework.Test;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.jzip.ZipEntryContext;
+import org.jboss.virtual.plugins.context.jzip.ZipFileContext;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
@@ -57,7 +57,7 @@ public class ZipEntryHandlerUnitTestCase extends JARVirtualFileHandlerUnitTestCa
    {
       URL url = getRootResource(name);
       url = JarUtils.createJarURL(url);
-      return new ZipEntryContext(url);
+      return new ZipFileContext(url);
    }
 
    /**

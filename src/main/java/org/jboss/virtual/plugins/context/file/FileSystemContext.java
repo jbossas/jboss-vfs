@@ -39,7 +39,7 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractVFSContext;
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.jzip.ZipEntryContext;
+import org.jboss.virtual.plugins.context.jzip.ZipFileContext;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -47,7 +47,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 /**
  * FileSystemContext.
  *
- * Jar archives are processed through {@link org.jboss.virtual.plugins.context.jzip.ZipEntryContext}.
+ * Jar archives are processed through {@link org.jboss.virtual.plugins.context.jzip.ZipFileContext}.
  *
  * Explicit case sensitive path checking can be turned on by adding an option parameter
  * <em>?caseSensitive=true<em> to context URL. This may be desired when native filesystem is not
@@ -265,7 +265,7 @@ public class FileSystemContext extends AbstractVFSContext
          delegatorUrl = getChildURL(parent, name);
 
       delegatorUrl = setOptionsToURL(delegatorUrl);
-      ZipEntryContext ctx = new ZipEntryContext(delegatorUrl, delegator, fileUrl);
+      ZipFileContext ctx = new ZipFileContext(delegatorUrl, delegator, fileUrl);
 
       VirtualFileHandler handler = ctx.getRoot();
       delegator.setDelegate(handler);
