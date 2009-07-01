@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
-
 /**
  * Memory VFS API.
  *

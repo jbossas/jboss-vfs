@@ -34,9 +34,6 @@ import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jboss.util.UnexpectedThrowable;
-import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * AbstractMockVirtualFileHandler.

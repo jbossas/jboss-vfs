@@ -55,12 +55,7 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter;
-import org.jboss.virtual.spi.LinkInfo;
-import org.jboss.virtual.spi.VFSContextFactory;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * Tests of the VFS implementation

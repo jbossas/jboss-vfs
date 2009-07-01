@@ -22,8 +22,6 @@
 package org.jboss.test.virtual.test;
 
 import junit.framework.Test;
-import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
-import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * Iterable timed VFSCache Test.

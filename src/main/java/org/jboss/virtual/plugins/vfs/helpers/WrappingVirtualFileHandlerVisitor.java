@@ -24,8 +24,6 @@ package org.jboss.virtual.plugins.vfs.helpers;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileVisitor;
 import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
 
 /**
  * A handler visitor that wraps a normal file visitor

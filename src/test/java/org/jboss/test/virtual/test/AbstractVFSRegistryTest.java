@@ -23,8 +23,6 @@ package org.jboss.test.virtual.test;
 
 import java.lang.reflect.Field;
 
-import org.jboss.virtual.spi.registry.VFSRegistryBuilder;
-
 /**
  * Test vfs registry
  *

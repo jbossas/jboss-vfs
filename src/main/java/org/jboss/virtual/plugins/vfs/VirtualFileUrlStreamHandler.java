@@ -27,9 +27,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-
 /**
  * Used when creating VFS urls so we don't have to go through the handlers all the time
  *

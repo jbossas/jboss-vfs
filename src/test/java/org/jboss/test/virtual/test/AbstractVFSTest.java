@@ -31,8 +31,6 @@ import org.jboss.test.virtual.support.FileOAContextFactory;
 import org.jboss.test.virtual.support.OptionsAwareURI;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContextFactory;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
 
 /**
  * AbstractVFSTest.

@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * AbstractVirtualFileHandlerTest.

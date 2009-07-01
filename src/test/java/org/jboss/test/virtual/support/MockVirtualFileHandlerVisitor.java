@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.plugins.vfs.helpers.AbstractVirtualFileHandlerVisitor;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * MockVirtualFileHandlerVisitor.

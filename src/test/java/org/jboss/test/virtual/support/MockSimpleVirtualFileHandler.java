@@ -23,8 +23,6 @@ package org.jboss.test.virtual.support;
 
 import java.io.IOException;
 
-import org.jboss.virtual.spi.VirtualFileHandler;
-
 /**
  * MockSimpleVirtualFileHandler.
  * 

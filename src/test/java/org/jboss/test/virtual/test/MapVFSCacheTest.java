@@ -23,8 +23,6 @@ package org.jboss.test.virtual.test;
 
 import java.util.Map;
 
-import org.jboss.virtual.spi.VFSContext;
-
 /**
  * Map VFSCache Test.
  *

@@ -24,9 +24,6 @@ package org.jboss.test.virtual.test;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.jboss.virtual.plugins.cache.TimedVFSCache;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.VFSUtils;
 import junit.framework.Test;
 

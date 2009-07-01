@@ -33,11 +33,6 @@ import org.jboss.util.id.GUID;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.cache.LRUVFSCache;
-import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
-import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * Test file closing

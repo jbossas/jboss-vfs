@@ -28,12 +28,6 @@ import java.util.List;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
-import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * Virtual File System

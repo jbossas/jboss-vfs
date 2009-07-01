@@ -35,8 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.util.collection.WeakSet;
 
 /**

@@ -30,8 +30,6 @@ import java.util.jar.JarFile;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * JARVirtualFileHandlerUnitTestCase.

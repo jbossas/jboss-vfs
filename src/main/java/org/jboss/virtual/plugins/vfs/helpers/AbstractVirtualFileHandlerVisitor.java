@@ -22,7 +22,6 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
 
 /**
  * AbstractVirtualFileVisitor.

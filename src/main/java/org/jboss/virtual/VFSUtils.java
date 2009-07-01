@@ -44,16 +44,6 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.collection.CollectionsFactory;
-import org.jboss.virtual.plugins.copy.CopyMechanism;
-import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
-import org.jboss.virtual.plugins.copy.TempCopyMechanism;
-import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
-import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
-import org.jboss.virtual.spi.LinkInfo;
-import org.jboss.virtual.spi.Options;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * VFS Utilities

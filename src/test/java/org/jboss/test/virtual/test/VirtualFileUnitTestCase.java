@@ -37,7 +37,6 @@ import org.jboss.test.virtual.support.MockVirtualFileFilter;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * VirtualFileUnitTestCase.

@@ -21,8 +21,6 @@
 */
 package org.jboss.test.virtual.test;
 
-import org.jboss.virtual.spi.VFSContext;
-
 /**
  * Map VFSCache Test.
  *

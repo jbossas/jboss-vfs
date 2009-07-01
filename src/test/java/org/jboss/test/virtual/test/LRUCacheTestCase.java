@@ -27,8 +27,6 @@ import java.util.Map;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.plugins.cache.LRUVFSCache;
-import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * LRU VFSCache Test.

@@ -32,7 +32,6 @@ import java.util.WeakHashMap;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
-import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
  * VFS's file URL handler.

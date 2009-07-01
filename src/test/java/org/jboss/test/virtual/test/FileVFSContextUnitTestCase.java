@@ -26,9 +26,6 @@ import java.net.URL;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.jboss.virtual.plugins.context.file.FileSystemContext;
-import org.jboss.virtual.spi.VFSContext;
-
 /**
  * FileVFSContextUnitTestCase.
  * 

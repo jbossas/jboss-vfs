@@ -29,8 +29,6 @@ import java.net.URL;
 
 import org.jboss.util.UnexpectedThrowable;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.AbstractVFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * MockVFSContext.

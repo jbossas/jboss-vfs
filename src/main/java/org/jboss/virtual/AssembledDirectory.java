@@ -28,10 +28,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.vfs.AssembledContext;
-import org.jboss.virtual.plugins.context.vfs.AssembledDirectoryHandler;
-import org.jboss.virtual.plugins.context.vfs.AssembledFileHandler;
-import org.jboss.virtual.plugins.context.vfs.ByteArrayHandler;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
 

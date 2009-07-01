@@ -28,9 +28,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
-
 /**
  * MockVFSContextFactory.
  * 

@@ -32,9 +32,6 @@ import org.jboss.test.virtual.support.MockVFSContextFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
-import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * AbstractMockVFSTest.

@@ -25,9 +25,6 @@ import java.net.URL;
 import java.net.URI;
 import java.io.IOException;
 
-import org.jboss.virtual.plugins.context.file.FileSystemContextFactory;
-import org.jboss.virtual.spi.VFSContext;
-
 /**
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */

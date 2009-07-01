@@ -26,11 +26,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import junit.framework.Test;
-import org.jboss.virtual.plugins.cache.CombinedVFSCache;
-import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
-import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.cache.VFSCache;
 
 /**
  * Combined VFSCache Test.

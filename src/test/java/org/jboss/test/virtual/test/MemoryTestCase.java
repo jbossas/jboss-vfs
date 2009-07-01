@@ -36,15 +36,6 @@ import org.jboss.util.id.GUID;
 import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.memory.MemoryContextFactory;
-import org.jboss.virtual.plugins.context.memory.MemoryContextHandler;
-import org.jboss.virtual.plugins.cache.IterableTimedVFSCache;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextFactory;
-import org.jboss.virtual.spi.VFSContextFactoryLocator;
-import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.cache.VFSCache;
-import org.jboss.virtual.spi.cache.VFSCacheFactory;
 
 /**
  * Memory vfs tests.
