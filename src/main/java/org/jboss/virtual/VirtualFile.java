@@ -28,6 +28,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
@@ -217,14 +220,38 @@ public class VirtualFile implements Serializable
    }
 
    /**
-    * Get the children
+    * Get the children.  This is the combined list of real children within this directory, as well as virtual
+    * children created by submounts.
     *
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
     */
    public List<VirtualFile> getChildren() throws IOException
    {
-      return getChildren(null);
+      final ArrayList<VirtualFile> list = new ArrayList<VirtualFile>();
+      for (String name : getChildrenNames())
+      {
+         list.add(getChild(name));
+      }
+      return list;
+   }
+
+   private Set<String> getChildrenNames() throws IOException
+   {
+      // Add the files physically present
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      final Iterator<String> iter = mount.getFileSystem().getDirectoryEntries(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final Set<String> names = new HashSet<String>();
+      while (iter.hasNext()) {
+         names.add(iter.next());
+      }
+      // Add any mounts that are logically present
+      final Iterator<String> submounts = vfs.getSubmounts(tokens);
+      while (submounts.hasNext()) {
+         names.add(submounts.next());
+      }
+      return names;
    }
 
    /**
@@ -293,8 +320,23 @@ public class VirtualFile implements Serializable
     */
    public void visit(VirtualFileVisitor visitor) throws IOException
    {
-      if (! isDirectory() == false)
-         getVFS().visit(this, visitor);
+      final VisitorAttributes visitorAttributes = visitor.getAttributes();
+      if (isDirectory())
+      {
+         if (! visitorAttributes.isLeavesOnly())
+         {
+            visitor.visit(this);
+         }
+         if (visitorAttributes.isRecurse(this))
+         {
+            for (VirtualFile virtualFile : getChildren())
+            {
+               virtualFile.visit(visitor);
+            }
+         }
+      } else {
+         visitor.visit(this);
+      }
    }
 
    /**

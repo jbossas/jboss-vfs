@@ -26,10 +26,11 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.collection.ConcurrentNavigableMap;
-import org.jboss.util.collection.ConcurrentSkipListMap;
 import org.jboss.virtual.spi.RealFileSystem;
 import org.jboss.virtual.spi.FileSystem;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
@@ -47,7 +48,7 @@ public class VFS
    /** The log */
    private static final Logger log = Logger.getLogger(VFS.class);
 
-   private final ConcurrentNavigableMap<List<String>, Mount> activeMounts = new ConcurrentSkipListMap<List<String>, Mount>(LongestMatchComparator.<String, List<String>>create());
+   private final MountNode rootMountNode = new MountNode();
    private final VirtualFile rootVirtualFile;
    private static VFS instance = new VFS();
 
@@ -73,7 +74,7 @@ public class VFS
    {
       // By default, there's a root mount which points to the "real" FS
       final List<String> emptyList = Collections.<String>emptyList();
-      activeMounts.put(emptyList, new Mount(RealFileSystem.ROOT_INSTANCE, emptyList));
+      rootMountNode.mount = new Mount(rootMountNode, RealFileSystem.ROOT_INSTANCE, emptyList);
       //noinspection ThisEscapedInObjectConstruction
       rootVirtualFile = new VirtualFile(this, emptyList, "");
    }
@@ -92,7 +93,7 @@ public class VFS
       }
       else if (pkgs.contains("org.jboss.virtual.protocol") == false)
       {
-         pkgs += "|org.jboss.virtual.protocol";
+         pkgs = "org.jboss.virtual.protocol|" + pkgs;
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
 //      org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
@@ -114,12 +115,41 @@ public class VFS
     */
    public Closeable mount(String mountPoint, FileSystem fileSystem) throws IOException {
       final List<String> realMountPoint = PathTokenizer.applySpecialPaths(PathTokenizer.getTokens(mountPoint));
-      final Mount mount = new Mount(fileSystem, realMountPoint);
-      if (activeMounts.putIfAbsent(realMountPoint, mount) == null) {
-         throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
+      MountNode mountNode = rootMountNode;
+      for (String seg : realMountPoint)
+      {
+         synchronized (mountNode) {
+            Map<String, MountNode> childMap = mountNode.nodeMap;
+            MountNode subNode;
+            if (childMap == null) {
+               childMap = new HashMap<String, MountNode>();
+               subNode = new MountNode();
+               childMap.put(seg, subNode);
+               mountNode.nodeMap = childMap;
+               mountNode = subNode;
+            } else {
+               subNode = childMap.get(seg);
+               if (subNode != null) {
+                  mountNode = subNode;
+               } else {
+                  childMap = new HashMap<String, MountNode>(childMap);
+                  subNode = new MountNode();
+                  childMap.put(seg, subNode);
+                  mountNode.nodeMap = childMap;
+                  mountNode = subNode;
+               }
+            }
+         }
       }
-      log.debugf("Created mount %s for %s on %s at mount point '%s'", mount, fileSystem, this, mountPoint);
-      return mount;
+      synchronized (mountNode) {
+         if (mountNode.mount != null) {
+            throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
+         }
+         final Mount mount = new Mount(mountNode, fileSystem, realMountPoint);
+         mountNode.mount = mount;
+         log.debugf("Created mount %s for %s on %s at mount point '%s'", mount, fileSystem, this, mountPoint);
+         return mount;
+      }
    }
 
    /**
@@ -238,8 +268,51 @@ public class VFS
     */
    Mount getMount(List<String> pathTokens)
    {
-      final Map.Entry<List<String>, Mount> entry = activeMounts.floorEntry(pathTokens);
-      return entry.getValue();
+      MountNode mountNode = rootMountNode;
+      Mount mount = mountNode.mount;
+      for (String pathToken : pathTokens)
+      {
+         final Map<String, MountNode> childMap = mountNode.nodeMap;
+         if (childMap != null) {
+            mountNode = childMap.get(pathToken);
+            final Mount subMount = mountNode.mount;
+            if (subMount != null) {
+               mount = subMount;
+            }
+         } else {
+            break;
+         }
+      }
+      return mount;
+   }
+
+   /**
+    * Get all immediate submounts for a path.
+    *
+    * @param tokens the path tokens
+    * @return the collection of present mount (simple) names
+    */
+   Iterator<String> getSubmounts(List<String> tokens)
+   {
+      MountNode mountNode = rootMountNode;
+      for (String pathToken : tokens)
+      {
+         final Map<String, MountNode> childMap = mountNode.nodeMap;
+         if (childMap != null) {
+            mountNode = childMap.get(pathToken);
+         } else {
+            return Collections.<String>emptyList().iterator();
+         }
+      }
+      final List<String> list = new ArrayList<String>();
+      for (Map.Entry<String, MountNode> entry : mountNode.nodeMap.entrySet())
+      {
+         final MountNode subNode = entry.getValue();
+         if (subNode.mount != null) {
+            list.add(entry.getKey());
+         }
+      }
+      return list.iterator();
    }
 
    /**
@@ -248,19 +321,26 @@ public class VFS
     * only one {@code FileSystem} may be bound to a specific path at a time.
     */
    final class Mount implements Closeable {
+      private final MountNode mountNode;
       private final FileSystem fileSystem;
       private final List<String> realMountPoint;
 
-      private Mount(FileSystem fileSystem, List<String> realMountPoint)
+      private Mount(MountNode mountNode, FileSystem fileSystem, List<String> realMountPoint)
       {
+         this.mountNode = mountNode;
          this.fileSystem = fileSystem;
          this.realMountPoint = realMountPoint;
       }
 
       public void close() throws IOException
       {
-         if (activeMounts.remove(realMountPoint, this)) {
-            log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
+         final MountNode mountNode = this.mountNode;
+         synchronized (mountNode) {
+            if (mountNode.mount == this) {
+               mountNode.mount = null;
+               log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
+               
+            }
          }
       }
 
@@ -273,5 +353,21 @@ public class VFS
       {
          return realMountPoint;
       }
+   }
+
+   /**
+    * A mount point node.  These nodes form a tree of possible mount points.
+    */
+   private static final class MountNode {
+
+      /**
+       * The immutable node map.  Since the map is immutable, changes to this field must be accomplished by replacing
+       * the field value with a new map (copy on write).  Modifications to this field are protected by {@code this}.
+       */
+      private volatile Map<String, MountNode> nodeMap;
+      /**
+       * The current mount at this point.  Modifications to this field are protected by {@code this}.
+       */
+      private volatile Mount mount;
    }
 }

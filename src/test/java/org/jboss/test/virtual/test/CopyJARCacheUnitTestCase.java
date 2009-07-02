@@ -21,18 +21,7 @@
  */
 package org.jboss.test.virtual.test;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VirtualFile;
 
 /**
  * Test the caching strategy of VFS with jar files.

@@ -22,15 +22,9 @@
 package org.jboss.test.virtual.test;
 
 import java.net.URL;
-import java.util.Map;
-import java.lang.reflect.Field;
 
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
-import org.jboss.test.virtual.support.FileOAContextFactory;
-import org.jboss.test.virtual.support.OptionsAwareURI;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
 
 /**
  * AbstractVFSTest.
@@ -40,81 +34,18 @@ import org.jboss.virtual.VirtualFile;
  */
 public abstract class AbstractVFSTest extends BaseTestCase
 {
-   private static final VFSContextFactory fileFactory = new FileOAContextFactory();
-
-   private boolean forceCopy;
-   private boolean forceNoReaper;
-
    public AbstractVFSTest(String name)
    {
       super(name);
    }
 
-   public AbstractVFSTest(String name, boolean forceCopy)
-   {
-      super(name);
-      this.forceCopy = forceCopy;
-   }
-
-   public AbstractVFSTest(String name, boolean forceCopy, boolean forceNoReaper)
-   {
-      super(name);
-      this.forceCopy = forceCopy;
-      this.forceNoReaper = forceNoReaper;
-   }
-
-   @SuppressWarnings("unchecked")
-   protected static Map<String, VFSContextFactory> getFactoryByProtocol()
-   {
-      try
-      {
-         Field field = VFSContextFactoryLocator.class.getDeclaredField("factoryByProtocol");
-         field.setAccessible(true);
-         return (Map<String, VFSContextFactory>) field.get(null);
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
    protected void setUp() throws Exception
    {
       super.setUp();
-
-/*
-      // LRU
-      System.setProperty(VFSUtils.VFS_CACHE_KEY, LRUVFSCache.class.getName());
-      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.min", "2");
-      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".LRUPolicyCaching.max", "100");
-*/
-/*
-      // Timed
-      System.setProperty(VFSUtils.VFS_CACHE_KEY, TimedVFSCache.class.getName());
-      System.setProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", "60");
-*/
-
-      VFSContextFactoryLocator.registerFactory(fileFactory);
-
-      getLog().info("Force copy: " + forceCopy);
-      if (forceCopy)
-         OptionsAwareURI.set(OptionsAwareURI.Copy);
-
-      if (forceNoReaper)
-         OptionsAwareURI.set(OptionsAwareURI.NoReaper);
    }
 
    protected void tearDown() throws Exception
    {
-      VFSContextFactoryLocator.unregisterFactory(fileFactory);
-
-      if (forceCopy)
-         OptionsAwareURI.clear(OptionsAwareURI.Copy);
-
-      if (forceNoReaper)
-         OptionsAwareURI.clear(OptionsAwareURI.NoReaper);
-
-      super.tearDown();
    }
 
    // TODO move to AbstractTestCase
@@ -143,17 +74,5 @@ public abstract class AbstractVFSTest extends BaseTestCase
       {
          getLog().debug("Got expected " + expected.getName() + "(" + throwable + ")");
       }
-   }
-
-   /**
-    * Do we force copy handling of jars.
-    *
-    * @param file the virtual file
-    * @return true if we force copy handling
-    */
-   protected boolean isForceCopyEnabled(VirtualFile file)
-   {
-      boolean systemProperty = Boolean.parseBoolean(System.getProperty(VFSUtils.FORCE_COPY_KEY, "false"));
-      return systemProperty || VFSUtils.getOption(file, VFSUtils.FORCE_COPY_KEY) != null;
    }
 }

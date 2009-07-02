@@ -69,7 +69,6 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(ZipEntryVFSContextUnitTestCase.suite());
       suite.addTest(JarOverrideTestCase.suite());
       // contexts
-      suite.addTest(AssembledContextTestCase.suite());
       suite.addTest(MemoryTestCase.suite());
       suite.addTest(SundryVFSUnitTestCase.suite());
       // options / policy / path
@@ -93,7 +92,6 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(IterableTimedCacheTestCase.suite());
       suite.addTest(SoftRefCacheTestCase.suite());
       suite.addTest(WeakRefCacheTestCase.suite());
-      suite.addTest(CombinedVFSCacheTestCase.suite());
       // exception handler
       suite.addTest(ExceptionHandlerTestCase.suite());
       // operations

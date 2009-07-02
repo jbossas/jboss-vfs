@@ -58,13 +58,11 @@ public abstract class AbstractMockVFSTest extends AbstractVFSTest
    protected void setUp() throws Exception
    {
       super.setUp();
-      VFSContextFactoryLocator.registerFactory(mockVFSContextFactory);
    }
 
    protected void tearDown() throws Exception
    {
       mockVFSContextFactory.reset();
-      VFSContextFactoryLocator.unregisterFactory(mockVFSContextFactory);
       super.tearDown();
    }
    
