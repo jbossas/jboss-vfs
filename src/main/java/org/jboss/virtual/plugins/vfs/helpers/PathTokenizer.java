@@ -221,9 +221,8 @@ public class PathTokenizer
     *
     * @param path the path
     * @return simple path, containing no . or .. paths
-    * @throws IOException if reverse path goes over the top path
     */
-   public static String applySpecialPaths(String path) throws IOException
+   public static String applySpecialPaths(String path) throws IllegalArgumentException
    {
       List<String> tokens = getTokens(path);
       if (tokens == null)
@@ -242,7 +241,7 @@ public class PathTokenizer
             tokens.set(i++, token);
 
          if (i < 0)
-            throw new IOException("Using reverse path on top path: " + path);
+            throw new IllegalArgumentException(".. on root path");
       }
       return getRemainingPath(tokens, 0, i);
    }
@@ -252,9 +251,9 @@ public class PathTokenizer
     *
     * @param pathTokens the path tokens
     * @return the simple path tokens
-    * @throws IOException if reverse path goes over the top path
+    * @throws IllegalArgumentException if reverse path goes over the top path
     */
-   public static List<String> applySpecialPaths(List<String> pathTokens) throws IOException
+   public static List<String> applySpecialPaths(List<String> pathTokens) throws IllegalArgumentException
    {
       final ArrayList<String> newTokens = new ArrayList<String>();
       for (String pathToken : pathTokens)
@@ -262,7 +261,13 @@ public class PathTokenizer
          if (isCurrentToken(pathToken))
             continue;
          else if (isReverseToken(pathToken))
-            newTokens.remove(newTokens.size() - 1);
+         {
+            final int size = newTokens.size();
+            if (size == 0) {
+               throw new IllegalArgumentException(".. on root path");
+            }
+            newTokens.remove(size - 1);
+         }
          else
             newTokens.add(pathToken);
       }

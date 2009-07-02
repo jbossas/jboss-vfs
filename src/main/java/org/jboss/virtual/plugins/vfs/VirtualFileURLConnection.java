@@ -23,11 +23,15 @@ package org.jboss.virtual.plugins.vfs;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FilePermission;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.Permission;
 
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import sun.net.www.ParseUtil;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -39,20 +43,11 @@ import org.jboss.virtual.VirtualFile;
 public class VirtualFileURLConnection extends URLConnection
 {
    protected VirtualFile file;
-   protected URL vfsurl;
-   protected String relativePath;
 
-   public VirtualFileURLConnection(URL url, URL vfsurl, String relativePath)
+   public VirtualFileURLConnection(URL url) throws IOException
    {
       super(url);
-      this.vfsurl = vfsurl;
-      this.relativePath = relativePath;
-   }
-
-   public VirtualFileURLConnection(URL url, VirtualFile file)
-   {
-      super(url);
-      this.file = file;
+      file = VFS.getInstance().getChild(url.getPath());
    }
 
    public void connect() throws IOException
@@ -61,14 +56,15 @@ public class VirtualFileURLConnection extends URLConnection
 
    public VirtualFile getContent() throws IOException
    {
-      return getVirtualFile();
+      return file;
    }
 
    public int getContentLength()
    {
       try
       {
-         return (int)getVirtualFile().getSize();
+         final long size = file.getSize();
+         return size > (long)Integer.MAX_VALUE ? -1 : (int)size;
       }
       catch (IOException e)
       {
@@ -80,7 +76,7 @@ public class VirtualFileURLConnection extends URLConnection
    {
       try
       {
-         return getVirtualFile().getLastModified();
+         return file.getLastModified();
       }
       catch (IOException e)
       {
@@ -90,33 +86,16 @@ public class VirtualFileURLConnection extends URLConnection
 
    public InputStream getInputStream() throws IOException
    {
-      return getVirtualFile().openStream();
+      return file.openStream();
    }
 
-   @SuppressWarnings("deprecation")
-   protected static VirtualFile resolveCachedVirtualFile(URL vfsurl, String relativePath) throws IOException
-   {
-      return resolveVirtualFile(vfsurl, relativePath);
-   }
-
-   @SuppressWarnings("deprecation")
-   protected static VirtualFile resolveVirtualFile(URL vfsurl, String relativePath) throws IOException
-   {
-      VirtualFile file = VFS.getRoot(vfsurl);
-      return file.findChild(relativePath);
-   }
-
-   /**
-    * Get the virtual file.
-    *
-    * @return the underlying virtual file
-    * @throws IOException for any error
-    */
-   protected synchronized VirtualFile getVirtualFile() throws IOException
-   {
-      if (file == null)
-         file = resolveVirtualFile(vfsurl, relativePath);
-      
-      return file;
+   public Permission getPermission() throws IOException {
+      String decodedPath = ParseUtil.decode(url.getPath());
+      if (File.separatorChar == '/') {
+         return new FilePermission(decodedPath, "read");
+      } else {
+         return new FilePermission(
+               decodedPath.replace('/',File.separatorChar), "read");
+      }
    }
 }

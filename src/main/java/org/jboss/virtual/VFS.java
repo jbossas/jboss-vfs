@@ -23,8 +23,6 @@ package org.jboss.virtual;
 
 import java.io.IOException;
 import java.io.Closeable;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Collections;
 import java.util.Map;
@@ -51,18 +49,33 @@ public class VFS
 
    private final ConcurrentNavigableMap<List<String>, Mount> activeMounts = new ConcurrentSkipListMap<List<String>, Mount>(LongestMatchComparator.<String, List<String>>create());
    private final VirtualFile rootVirtualFile;
+   private static VFS instance = new VFS();
 
    static
    {
       init();
    }
 
+   /**
+    * Get the "global" instance.
+    *
+    * @return the VFS instance
+    */
+   public static VFS getInstance()
+   {
+      return instance;
+   }
+
+   /**
+    * Create a new instance.
+    */
    public VFS()
    {
       // By default, there's a root mount which points to the "real" FS
       final List<String> emptyList = Collections.<String>emptyList();
       activeMounts.put(emptyList, new Mount(RealFileSystem.ROOT_INSTANCE, emptyList));
-      rootVirtualFile = new VirtualFile(this, Collections.<String>emptyList(), "");
+      //noinspection ThisEscapedInObjectConstruction
+      rootVirtualFile = new VirtualFile(this, emptyList, "");
    }
 
    /**
@@ -105,6 +118,7 @@ public class VFS
       if (activeMounts.putIfAbsent(realMountPoint, mount) == null) {
          throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
       }
+      log.debugf("Created mount %s for %s on %s at mount point '%s'", mount, fileSystem, this, mountPoint);
       return mount;
    }
 
@@ -116,7 +130,7 @@ public class VFS
     * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
     */
-   public VirtualFile getChild(String path) throws IOException
+   public VirtualFile getChild(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
@@ -245,7 +259,9 @@ public class VFS
 
       public void close() throws IOException
       {
-         activeMounts.remove(realMountPoint, this);
+         if (activeMounts.remove(realMountPoint, this)) {
+            log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
+         }
       }
 
       FileSystem getFileSystem()
