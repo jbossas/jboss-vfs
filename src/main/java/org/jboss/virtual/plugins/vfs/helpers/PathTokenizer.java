@@ -22,7 +22,6 @@
 package org.jboss.virtual.plugins.vfs.helpers;
 
 import java.io.IOException;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +41,6 @@ public class PathTokenizer
 
    /** The reverse path const */
    private static final String REVERSE_PATH = "..";
-
-   /** Catch some suspicious tokens */
-   private static boolean errorOnSuspiciousTokens;
-
-   /** Flag permission */
-   private static Permission flagPermission = new RuntimePermission(PathTokenizer.class.getName() + ".setErrorOnSuspiciousTokens");
 
    /** Token states */
    private static final int STATE_INITIAL = 0;
@@ -96,19 +89,29 @@ public class PathTokenizer
     * 
     * @param path the path
     * @return the tokens or null if the path is empty
-    * @throws IllegalArgumentException if the path is null, or if this class is configured to reject
-    *    so-called "suspicious" tokens (files that start with "." which are not one of the two special
-    *    directories "." or "..")
+    * @throws IllegalArgumentException if the path is null
     */
    public static List<String> getTokens(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
+      List<String> list = new ArrayList<String>();
+      getTokens(list, path);
+      return list;
+   }
+
+   /**
+    * Get the tokens that comprise this path and append them to the list.
+    *
+    * @param path the path
+    * @return the tokens or null if the path is empty
+    * @throws IllegalArgumentException if the path is null
+    */
+   public static void getTokens(List<String> list, String path)
+   {
       int start = -1, length = path.length(), state = STATE_INITIAL;
       char ch;
-      List<String> list = new ArrayList<String>();
-
       for (int index = 0; index < length; index ++) {
          ch = path.charAt(index);
          switch (ch) {
@@ -154,9 +157,6 @@ public class PathTokenizer
                   }
                   case STATE_MAYBE_REVERSE_PATH: {
                      // the third . in a row, guess it's just a weird path name
-                     if (errorOnSuspiciousTokens) {
-                        throw new IllegalArgumentException("Illegal suspicious token in path: " + path);
-                     }
                      state = STATE_NORMAL;
                      continue;
                   }
@@ -172,9 +172,6 @@ public class PathTokenizer
                   }
                   case STATE_MAYBE_CURRENT_PATH:
                   case STATE_MAYBE_REVERSE_PATH: {
-                     if (errorOnSuspiciousTokens) {
-                        throw new IllegalArgumentException("Illegal suspicious token in path: " + path);
-                     }
                      state = STATE_NORMAL;
                   }
                }
@@ -200,10 +197,9 @@ public class PathTokenizer
             break;
          }
       }
-
-      return list;
+      return;
    }
-   
+
    /**
     * Get the remaining path from some tokens
     * 
@@ -252,6 +248,28 @@ public class PathTokenizer
    }
 
    /**
+    * Apply any . or .. paths in the pathTokens parameter, returning the minimal token list.
+    *
+    * @param pathTokens the path tokens
+    * @return the simple path tokens
+    * @throws IOException if reverse path goes over the top path
+    */
+   public static List<String> applySpecialPaths(List<String> pathTokens) throws IOException
+   {
+      final ArrayList<String> newTokens = new ArrayList<String>();
+      for (String pathToken : pathTokens)
+      {
+         if (isCurrentToken(pathToken))
+            continue;
+         else if (isReverseToken(pathToken))
+            newTokens.remove(newTokens.size() - 1);
+         else
+            newTokens.add(pathToken);
+      }
+      return newTokens;
+   }
+
+   /**
     * Is current token.
     *
     * @param token the token to check
@@ -271,19 +289,5 @@ public class PathTokenizer
    public static boolean isReverseToken(String token)
    {
       return REVERSE_PATH == token;
-   }
-
-   /**
-    * Set errorOnSuspiciousTokens flag.
-    *
-    * @param errorOnSuspiciousTokens the errorOnSuspiciousTokens flag
-    */
-   public static void setErrorOnSuspiciousTokens(boolean errorOnSuspiciousTokens)
-   {
-      SecurityManager sm = System.getSecurityManager();
-      if (sm != null)
-         sm.checkPermission(flagPermission);
-      
-      PathTokenizer.errorOnSuspiciousTokens = errorOnSuspiciousTokens;
    }
 }

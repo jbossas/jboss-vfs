@@ -27,7 +27,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
 
 /**

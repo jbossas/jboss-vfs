@@ -31,18 +31,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.collection.CollectionsFactory;
 
 /**
@@ -60,50 +57,6 @@ public class VFSUtils
    /** The default encoding */
    private static final String DEFAULT_ENCODING = "UTF-8";
 
-   /** The link */
-   public static final String VFS_LINK_INFIX = ".vfslink";
-
-   /** The link properties */
-   public static final String VFS_LINK_PROPERTIES_SUFFIX = ".vfslink.properties";
-
-   /** The link name */
-   public static final String VFS_LINK_NAME = "vfs.link.name";
-   /** The link target */
-   public static final String VFS_LINK_TARGET = "vfs.link.target";
-
-   /**
-    * The system no force copy key / query
-    */
-   public static final String FORCE_COPY_KEY = "jboss.vfs.forceCopy";
-   public static final String USE_COPY_QUERY = "useCopyJarHandler";
-
-   /**
-    * Key used to force fallback from vfszip (default) to vfsjar
-    */
-   public static final String FORCE_VFS_JAR_KEY = "jboss.vfs.forceVfsJar";
-
-   /**
-    * Key used to turn off reaper mode in vfszip - forcing synchronous (slower) handling of files
-    */
-   public static final String FORCE_NO_REAPER_KEY = "jboss.vfs.forceNoReaper";
-   public static final String NO_REAPER_QUERY = "noReaper";
-
-   /**
-    * Key used to force case sensitive path checking in vfsfile
-    */
-   public static final String FORCE_CASE_SENSITIVE_KEY = "jboss.vfs.forceCaseSensitive";
-   public static final String CASE_SENSITIVE_QUERY = "caseSensitive";
-
-   /**
-    * Key used to turn on memory optimizations - less cache use at the expense of performance
-    */
-   public static final String OPTIMIZE_FOR_MEMORY_KEY = "jboss.vfs.optimizeForMemory";
-
-   /**
-    * Key used to determine VFS Cache impl
-    */
-   public static final String VFS_CACHE_KEY = "jboss.vfs.cache";
-
    /**
     * Constant representing the URL file protocol
     */
@@ -112,15 +65,8 @@ public class VFSUtils
    /** Standard separator for JAR URL */
    public static final String JAR_URL_SEPARATOR = "!/";
 
-   /** The temp marker flag */
-   public static final String IS_TEMP_FILE = "IS_TEMP_FILE";
-
-   /**
-    * Stop cache.
-    */
-   public static void stopCache()
+   private VFSUtils()
    {
-      VFSCacheFactory.getInstance().stop();
    }
 
    /**
@@ -274,24 +220,6 @@ public class VFSUtils
    }
 
    /**
-     * Get a manifest from a virtual file system,
-     * assuming the root of the VFS is the root of an archive
-     *
-     * @param archive the vfs
-     * @return the manifest or null if not found
-     * @throws IOException if there is an error reading the manifest
-     * @throws IllegalArgumentException for a null archive
-     */
-    public static Manifest getManifest(VFS archive) throws IOException
-    {
-       if (archive == null)
-         throw new IllegalArgumentException("Null vfs archive");
-
-       VirtualFile root = archive.getRoot();
-       return getManifest(root);
-    }
-
-   /**
     * Fix a name (removes any trailing slash)
     *
     * @param name the name to fix
@@ -387,85 +315,6 @@ public class VFSUtils
    }
 
    /**
-    * Does a vf name contain the VFS link prefix
-    * @param name - the name portion of a virtual file
-    * @return true if the name starts with VFS_LINK_PREFIX, false otherwise
-    */
-   public static boolean isLink(String name)
-   {
-      if (name == null)
-         throw new IllegalArgumentException("Null name");
-
-      return name.indexOf(VFS_LINK_INFIX) >= 0;
-   }
-
-   /**
-    * Read the link information from the stream based on the type as determined
-    * from the name suffix.
-    *
-    * @param is - input stream to the link file contents
-    * @param name - the name of the virtual file representing the link
-    * @param props the propertes
-    * @return a list of the links read from the stream
-    * @throws IOException on failure to read/parse the stream
-    * @throws URISyntaxException for an error parsing a URI
-    */
-   public static List<LinkInfo> readLinkInfo(InputStream is, String name, Properties props)
-      throws IOException, URISyntaxException
-   {
-      if (name == null)
-         throw new IllegalArgumentException("Null name");
-
-      if(name.endsWith(VFS_LINK_PROPERTIES_SUFFIX))
-      {
-         List<LinkInfo> info = new ArrayList<LinkInfo>();
-         parseLinkProperties(is, info, props);
-         return info;
-      }
-      else
-         throw new UnsupportedEncodingException("Unknown link format: " + name);
-   }
-
-   /**
-    * Parse a properties link file
-    *
-    * @param is - input stream to the link file contents
-    * @param info the link infos
-    * @param props the propertes
-    * @throws IOException on failure to read/parse the stream
-    * @throws URISyntaxException for an error parsing a URI
-    */
-   public static void parseLinkProperties(InputStream is, List<LinkInfo> info, Properties props)
-      throws IOException, URISyntaxException
-   {
-      if (is == null)
-         throw new IllegalArgumentException("Null input stream");
-      if (info == null)
-         throw new IllegalArgumentException("Null info");
-      if (props == null)
-         throw new IllegalArgumentException("Null properties");
-
-      props.load(is);
-      // Iterate over the property tuples
-      for(int n = 0; ; n ++)
-      {
-         String nameKey = VFS_LINK_NAME + "." + n;
-         String name = props.getProperty(nameKey);
-         String uriKey = VFS_LINK_TARGET + "." + n;
-         String uri = props.getProperty(uriKey);
-         // End when the value is null since a link may not have a name
-         if (uri == null)
-         {
-            break;
-         }
-         // Replace any system property references
-         uri = StringPropertyReplacer.replaceProperties(uri);
-         LinkInfo link = new LinkInfo(name, new URI(uri));
-         info.add(link);
-      }
-   }
-
-   /**
     * Deal with urls that may include spaces.
     *
     * @param url the url
@@ -502,374 +351,6 @@ public class VFSUtils
    public static URL sanitizeURL(URL url) throws URISyntaxException, MalformedURLException
    {
       return toURI(url).toURL();
-   }
-
-   /**
-    * Get the options for this file.
-    *
-    * @param file the file
-    * @return options map
-    */
-   private static Options getOptions(VirtualFile file)
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-
-      VirtualFileHandler handler = file.getHandler();
-      VFSContext context = handler.getVFSContext();
-      return context.getOptions();
-   }
-
-   /**
-    * Get the options for this vfs.
-    *
-    * @param vfs the vfs
-    * @return options map
-    */
-   private static Options getOptions(VFS vfs)
-   {
-      if (vfs == null)
-         throw new IllegalArgumentException("Null vfs");
-
-      VFSContext context = vfs.getContext();
-      return context.getOptions();
-   }
-
-   /**
-    * Get the option.
-    *
-    * @param file the file
-    * @param key the option key
-    * @return key's option
-    */
-   public static String getOption(VirtualFile file, String key)
-   {
-      Object option = getOption(file, key, Object.class);
-      return option != null ? option.toString() : null;
-   }
-
-   /**
-    * Get the option.
-    *
-    * @param vfs the vfs
-    * @param key the option key
-    * @return key's option
-    */
-   public static String getOption(VFS vfs, String key)
-   {
-      Object option = getOption(vfs, key, Object.class);
-      return option != null ? option.toString() : null;
-   }
-
-   /**
-    * Get the option.
-    *
-    * @param <T> exact type
-    * @param file the file
-    * @param key the option key
-    * @param exactType the exact type
-    * @return key's option
-    */
-   public static <T> T getOption(VirtualFile file, String key, Class<T> exactType)
-   {
-      Options options = getOptions(file);
-      return options != null ? options.getOption(key, exactType) : null;
-   }
-
-   /**
-    * Get the option.
-    *
-    * @param <T> exact type
-    * @param vfs the vfs
-    * @param key the option key
-    * @param exactType the exact type
-    * @return key's option
-    */
-   public static <T> T getOption(VFS vfs, String key, Class<T> exactType)
-   {
-      Options options = getOptions(vfs);
-      return options != null ? options.getOption(key, exactType) : null;
-   }
-
-   /**
-    * Enable option.
-    *
-    * @param file the file
-    * @param optionName option name
-    */
-   protected static void enableOption(VirtualFile file, String optionName)
-   {
-      Options options = getOptions(file);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + file);
-
-      options.addOption(optionName, Boolean.TRUE);
-   }
-
-   /**
-    * Disable option.
-    *
-    * @param file the file
-    * @param optionName option name
-    */
-   protected static void disableOption(VirtualFile file, String optionName)
-   {
-      Options options = getOptions(file);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + file);
-
-      options.removeOption(optionName);
-   }
-
-   /**
-    * Enable option.
-    *
-    * @param vfs the vfs
-    * @param optionName option name
-    */
-   protected static void enableOption(VFS vfs, String optionName)
-   {
-      Options options = getOptions(vfs);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot enable " + optionName + " on null options: " + vfs);
-
-      options.addOption(optionName, Boolean.TRUE);
-   }
-
-   /**
-    * Disable option.
-    *
-    * @param vfs the vfs
-    * @param optionName option name
-    */
-   protected static void disableOption(VFS vfs, String optionName)
-   {
-      Options options = getOptions(vfs);
-      if (options == null)
-         throw new IllegalArgumentException("Cannot disable " + optionName + " on null options: " + vfs);
-
-      options.removeOption(optionName);
-   }
-
-   /**
-    * Enable copy for file param.
-    *
-    * @param file the file
-    */
-   public static void enableCopy(VirtualFile file)
-   {
-      enableOption(file, USE_COPY_QUERY);
-   }
-
-   /**
-    * Disable copy for file param.
-    *
-    * @param file the file
-    */
-   public static void disableCopy(VirtualFile file)
-   {
-      disableOption(file, USE_COPY_QUERY);
-   }
-
-   /**
-    * Enable copy for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void enableCopy(VFS vfs)
-   {
-      enableOption(vfs, USE_COPY_QUERY);
-   }
-
-   /**
-    * Disable copy for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void disableCopy(VFS vfs)
-   {
-      disableOption(vfs, USE_COPY_QUERY);
-   }
-
-   /**
-    * Enable reaper for file param.
-    *
-    * @param file the file
-    */
-   public static void enableNoReaper(VirtualFile file)
-   {
-      enableOption(file, NO_REAPER_QUERY);
-   }
-
-   /**
-    * Disable reaper for file param.
-    *
-    * @param file the file
-    */
-   public static void disableNoReaper(VirtualFile file)
-   {
-      disableOption(file, NO_REAPER_QUERY);
-   }
-
-   /**
-    * Enable reaper for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void enableNoReaper(VFS vfs)
-   {
-      enableOption(vfs, NO_REAPER_QUERY);
-   }
-
-   /**
-    * Disable reaper for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void disableNoReaper(VFS vfs)
-   {
-      disableOption(vfs, NO_REAPER_QUERY);
-   }
-
-   /**
-    * Enable case sensitive for file param.
-    *
-    * @param file the file
-    */
-   public static void enableCaseSensitive(VirtualFile file)
-   {
-      enableOption(file, CASE_SENSITIVE_QUERY);
-   }
-
-   /**
-    * Disable case sensitive for file param.
-    *
-    * @param file the file
-    */
-   public static void disableCaseSensitive(VirtualFile file)
-   {
-      disableOption(file, CASE_SENSITIVE_QUERY);
-   }
-
-   /**
-    * Enable case sensitive for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void enableCaseSensitive(VFS vfs)
-   {
-      enableOption(vfs, CASE_SENSITIVE_QUERY);
-   }
-
-   /**
-    * Disable case sensitive for vfs param.
-    *
-    * @param vfs the vfs
-    */
-   public static void disableCaseSensitive(VFS vfs)
-   {
-      disableOption(vfs, CASE_SENSITIVE_QUERY);
-   }
-
-   /**
-    * Is the virtual file temporary.
-    *
-    * @param file the file
-    * @return true if temporary, false otherwise
-    */
-   public static boolean isTemporaryFile(VirtualFile file)
-   {
-      Options options = getOptions(file);
-      return options.getBooleanOption(IS_TEMP_FILE);
-   }
-
-   /**
-    * Unpack the nested artifact under file param.
-    *
-    * @param file the file to unpack
-    * @return unpacked file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile unpack(VirtualFile file) throws IOException, URISyntaxException
-   {
-      log.warn("Using unpack modification is not yet fully supported - rewire-ing issues.");
-      return copy(file, UnpackCopyMechanism.INSTANCE);
-   }
-
-   /**
-    * Force explode.
-    * Explode archives or nested entries.
-    *
-    * @param file the file to explode
-    * @return exploded file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile explode(VirtualFile file) throws IOException, URISyntaxException
-   {
-      return copy(file, ExplodedCopyMechanism.INSTANCE);
-   }
-
-   /**
-    * Create temp.
-    *
-    * @param file the file to temp
-    * @return temp file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile temp(VirtualFile file) throws IOException, URISyntaxException
-   {
-      return copy(file, TempCopyMechanism.INSTANCE);
-   }
-
-   /**
-    * Unjar.
-    *
-    * @param file the file to unjar
-    * @return temp file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   public static VirtualFile unjar(VirtualFile file) throws IOException, URISyntaxException
-   {
-      return copy(file, UnjarCopyMechanism.INSTANCE);
-   }
-
-   /**
-    * Create temp.
-    *
-    * @param file the file to unpack/explode
-    * @param mechanism the copy mechanism
-    * @return temp file
-    * @throws IOException for any io error
-    * @throws URISyntaxException for any uri error
-    */
-   protected static VirtualFile copy(VirtualFile file, CopyMechanism mechanism) throws IOException, URISyntaxException
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-      if (mechanism == null)
-         throw new IllegalArgumentException("Null copy mechanism");
-
-      return mechanism.copy(file, file.getHandler());
-   }
-
-   /**
-    * Is file handle nested.
-    *
-    * @param file the file handle to check
-    * @return true if file/dir is nested otherwise false
-    * @throws IOException for any error
-    */
-   public static boolean isNestedFile(VirtualFile file) throws IOException
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-
-      VirtualFileHandler handler = file.getHandler();
-      return handler.isNested();
    }
 
    /**
@@ -918,179 +399,56 @@ public class VFSUtils
    }
 
    /**
-    * Get spec compatilbe url from virtual file.
+    * Get the virtual URL for a virtual file.  This URL can be used to access the virtual file; however, taking the
+    * file part of the URL and attempting to use it with the {@link java.io.File} class may fail if the file is not
+    * present on the physical filesystem, and in general should not be attempted.
     *
     * @param file the virtual file
-    * @return spec compatible url
-    * @throws Exception for any error
+    * @return the URL
+    * @throws MalformedURLException if the file cannot be coerced into a URL for some reason
     */
-   public static URL getCompatibleURL(VirtualFile file) throws Exception
+   public static URL getVirtualURL(VirtualFile file) throws MalformedURLException
    {
-      return getCompatibleResource(file, URL_CREATOR);
+      // todo: specify the URL handler directly as a minor optimization
+      return new URL("file", "", -1, file.getPathName());
    }
 
    /**
-    * Get spec compatilbe uri from virtual file.
+    * Get the virtual URI for a virtual file.
     *
     * @param file the virtual file
-    * @return spec compatible uri
-    * @throws Exception for any error
+    * @return the URI
+    * @throws URISyntaxException if the file cannot be coerced into a URI for some reason
     */
-   public static URI getCompatibleURI(VirtualFile file) throws Exception
+   public static URI getVirtualURI(VirtualFile file) throws URISyntaxException
    {
-      return getCompatibleResource(file, URI_CREATOR);
+      return new URI("file", "", file.getPathName(), null);
    }
 
    /**
-    * Create new compatible resource.
+    * Get a physical URL for a virtual file.  See the warnings on the {@link VirtualFile#getPhysicalFile()} method
+    * before using this method.
     *
     * @param file the virtual file
-    * @param creator resoruce creator
-    * @return new resource
-    * @throws Exception for any error
-    * @param <T> exact resource type
+    * @return the physical file URL
+    * @throws IOException if an I/O error occurs getting the physical file
     */
-   private static <T> T getCompatibleResource(VirtualFile file, ResourceCreator<T> creator) throws Exception
+   public static URL getPhysicalURL(VirtualFile file) throws IOException
    {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
-      if (creator == null)
-         throw new IllegalArgumentException("Null creator");
-
-      if (isNestedFile(file))
-      {
-         return creator.getNestedResource(file);
-      }
-      else
-      {
-         // is not nested, so direct VFS resource is not an option
-         return creator.getRealResource(file);
-      }
+      return getPhysicalURI(file).toURL();
    }
 
    /**
-    * @param <T> exact resource type
-    */
-   private static interface ResourceCreator<T>
-   {
-      /**
-       * Get resource from virtual file.
-       *
-       * @param file the virtual file
-       * @return resource instance from file
-       * @throws Exception for any error
-       */
-      T getNestedResource(VirtualFile file) throws Exception;
-
-      /**
-       * Get real resource from virtual file.
-       *
-       * @param file the virtual file
-       * @return resource instance from file
-       * @throws Exception for any error
-       */
-      T getRealResource(VirtualFile file) throws Exception;
-   }
-
-   private static final ResourceCreator<URL> URL_CREATOR = new ResourceCreator<URL>()
-   {
-      public URL getNestedResource(VirtualFile file) throws Exception
-      {
-         return file.toURL();
-      }
-
-      public URL getRealResource(VirtualFile file) throws Exception
-      {
-         return getRealURL(file);
-      }
-   };
-
-   private static final ResourceCreator<URI> URI_CREATOR = new ResourceCreator<URI>()
-   {
-      public URI getNestedResource(VirtualFile file) throws Exception
-      {
-         return file.toURI();
-      }
-
-      public URI getRealResource(VirtualFile file) throws Exception
-      {
-         return toURI(getRealURL(file));
-      }
-   };
-
-   /**
-    * Get real url.
-    * The closest thing that doesn't need the vfs url handlers.
+    * Get a physical URI for a virtual file.  See the warnings on the {@link VirtualFile#getPhysicalFile()} method
+    * before using this method.
     *
     * @param file the virtual file
-    * @return real url
-    * @throws IOException for any error
-    * @throws URISyntaxException for any uri syntac error
+    * @return the physical file URL
+    * @throws IOException if an I/O error occurs getting the physical file
     */
-   public static URL getRealURL(VirtualFile file) throws IOException, URISyntaxException
+   public static URI getPhysicalURI(VirtualFile file) throws IOException
    {
-      VirtualFileHandler handler = file.getHandler();
-      return handler.getRealURL();
-   }
-
-   /**
-    * Get relative path.
-    *
-    * @param context the vfs context
-    * @param uri the uri
-    * @return uri's relative path to context's root
-    */
-   public static String getRelativePath(VFSContext context, URI uri)
-   {
-      String uriPath = stripProtocol(uri);
-      String contextKey = getKey(context);
-      return uriPath.substring(contextKey.length());
-   }
-
-   /**
-    * Strip protocol from url string.
-    *
-    * @param uri the uri
-    * @return uri's path string
-    */
-   public static String stripProtocol(URI uri)
-   {
-      String path = uri.getPath();
-      if(path == null)
-      {
-         String s = uri.toString();
-         if(s.startsWith("jar:file:"))
-            path = s.substring("jar:file:".length()).replaceFirst("!/", "/") + "/";
-      }
-      if (path != null && path.length() > 0)
-      {
-         StringBuilder sb = new StringBuilder(path);
-
-         if (sb.charAt(0) != '/')
-            sb.insert(0, '/');
-         if (sb.charAt(sb.length() - 1) != '/')
-            sb.append('/');
-
-         path = sb.toString();
-      }
-      else
-      {
-         path = "/";
-      }
-
-      return path;
-   }
-
-   /**
-    * Get path key.
-    *
-    * @param context the vfs context
-    * @return contex's root path w/o protocol
-    */
-   public static String getKey(VFSContext context)
-   {
-      URI uri = context.getRootURI();
-      return stripProtocol(uri);
+      return file.getPhysicalFile().toURI();
    }
 
    /**

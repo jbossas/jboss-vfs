@@ -22,12 +22,19 @@
 package org.jboss.virtual;
 
 import java.io.IOException;
+import java.io.Closeable;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 import org.jboss.logging.Logger;
-import org.jboss.virtual.plugins.vfs.helpers.WrappingVirtualFileHandlerVisitor;
+import org.jboss.util.collection.ConcurrentNavigableMap;
+import org.jboss.util.collection.ConcurrentSkipListMap;
+import org.jboss.virtual.spi.RealFileSystem;
+import org.jboss.virtual.spi.FileSystem;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Virtual File System
@@ -42,25 +49,20 @@ public class VFS
    /** The log */
    private static final Logger log = Logger.getLogger(VFS.class);
 
-   /** The VFS Context */
-   private final VFSContext context;
+   private final ConcurrentNavigableMap<List<String>, Mount> activeMounts = new ConcurrentSkipListMap<List<String>, Mount>(LongestMatchComparator.<String, List<String>>create());
+   private final VirtualFile rootVirtualFile;
 
    static
    {
       init();
    }
 
-   /**
-    * Create a new VFS.
-    *
-    * @param context the context
-    * @throws IllegalArgumentException for a null context
-    */
-   public VFS(VFSContext context)
+   public VFS()
    {
-      if (context == null)
-         throw new IllegalArgumentException("Null name");
-      this.context = context;
+      // By default, there's a root mount which points to the "real" FS
+      final List<String> emptyList = Collections.<String>emptyList();
+      activeMounts.put(emptyList, new Mount(RealFileSystem.ROOT_INSTANCE, emptyList));
+      rootVirtualFile = new VirtualFile(this, Collections.<String>emptyList(), "");
    }
 
    /**
@@ -80,255 +82,59 @@ public class VFS
          pkgs += "|org.jboss.virtual.protocol";
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
-      org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
-      // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
-      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsfile", factory);
-      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfszip", factory);
-      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsjar", factory);
-      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfs", factory);
+//      org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
+//      // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
+//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsfile", factory);
+//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfszip", factory);
+//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsjar", factory);
+//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfs", factory);
    }
 
    /**
-    * Get the vfs context.
+    * Mount a filesystem on a mount point in the VFS.  The mount point is any valid file name, existant or non-existant.
+    * If a relative path is given, it will be treated as relative to the VFS root.
     *
-    * This is package protected method.
-    * Same as VirtualFile::getHandler. 
-    *
-    * @return the vfs context
+    * @param mountPoint the mount point
+    * @param fileSystem the file system to mount
+    * @return a handle which can be used to unmount the filesystem
+    * @throws IOException if an I/O error occurs, such as a filesystem already being mounted at the given mount point
     */
-   VFSContext getContext()
-   {
-      return context;
-   }
-
-   /**
-    * Set exception handler.
-    *
-    * @param exceptionHandler the exception handler.
-    */
-   public void setExceptionHandler(ExceptionHandler exceptionHandler)
-   {
-      context.setExceptionHandler(exceptionHandler);
-   }
-
-   /**
-    * Cleanup any resources tied to this file.
-    * e.g. vfs cache
-    *
-    * @param file the file
-    */
-   static void cleanup(VirtualFile file)
-   {
-      VirtualFileHandler fileHandler = file.getHandler();
-      VFSContext context = fileHandler.getVFSContext();
-
-      try
-      {
-         context.cleanupTempInfo(fileHandler.getPathName());
+   public Closeable mount(String mountPoint, FileSystem fileSystem) throws IOException {
+      final List<String> realMountPoint = PathTokenizer.applySpecialPaths(PathTokenizer.getTokens(mountPoint));
+      final Mount mount = new Mount(fileSystem, realMountPoint);
+      if (activeMounts.putIfAbsent(realMountPoint, mount) == null) {
+         throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
       }
-      catch (Exception e)
-      {
-         log.debug("Exception cleaning temp info, file=" + file, e);
-      }
-
-      try
-      {
-         VirtualFileHandler contextHandler = context.getRoot();
-         // the file is the context root, hence possible registry candidate
-         if (fileHandler.equals(contextHandler))
-         {
-            VFSRegistry registry = VFSRegistry.getInstance();
-            registry.removeContext(context);
-         }
-      }
-      catch (Exception e)
-      {
-         log.debug("Exception removing cached context, file=" + file, e);
-      }
+      return mount;
    }
 
    /**
-    * Get the virtual file system for a root uri
-    * 
-    * @param rootURI the root URI
-    * @return the virtual file system
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL is null
-    */
-   public static VFS getVFS(URI rootURI) throws IOException
-   {
-      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
-      if (factory == null)
-         throw new IOException("No context factory for " + rootURI);
-
-      VFSContext context = factory.getVFS(rootURI);
-      VFSRegistry.getInstance().addContext(context);
-      return context.getVFS();
-   }
-
-   /**
-    * Create new root
-    *
-    * @param rootURI the root url
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL
-    */
-   public static VirtualFile createNewRoot(URI rootURI) throws IOException
-   {
-      VFS vfs = getVFS(rootURI);
-      return vfs.getRoot();
-   }
-
-   /**
-    * Get the root virtual file
-    * 
-    * @param rootURI the root uri
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL is null
-    */
-   public static VirtualFile getRoot(URI rootURI) throws IOException
-   {
-      VFSRegistry registry = VFSRegistry.getInstance();
-      VirtualFile file = registry.getFile(rootURI);
-      return (file != null) ? file : createNewRoot(rootURI);
-   }
-
-   /**
-    * Get a virtual file
-    * 
-    * @param rootURI the root uri
-    * @param name the path name
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL or name is null
-    */
-   @SuppressWarnings("deprecation")
-   public static VirtualFile getVirtualFile(URI rootURI, String name) throws IOException
-   {
-      VirtualFile root = getRoot(rootURI);
-      return root.findChild(name);
-   }
-
-   /**
-    * Get the virtual file system for a root url
-    * 
-    * @param rootURL the root url
-    * @return the virtual file system
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL is null
-    */
-   public static VFS getVFS(URL rootURL) throws IOException
-   {
-      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURL);
-      if (factory == null)
-         throw new IOException("No context factory for " + rootURL);
-
-      VFSContext context = factory.getVFS(rootURL);
-      VFSRegistry.getInstance().addContext(context);
-      return context.getVFS();
-   }
-
-   /**
-    * Create new root
-    * 
-    * @param rootURL the root url
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL
-    */
-   public static VirtualFile createNewRoot(URL rootURL) throws IOException
-   {
-      VFS vfs = getVFS(rootURL);
-      return vfs.getRoot();
-   }
-
-   /**
-    * Get the root virtual file
-    *
-    * @param rootURL the root url
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL
-    */
-   public static VirtualFile getRoot(URL rootURL) throws IOException
-   {
-      VFSRegistry registry = VFSRegistry.getInstance();
-      VirtualFile file = registry.getFile(rootURL);
-      return (file != null) ? file : createNewRoot(rootURL);
-   }
-
-   /**
-    * Get a virtual file
-    * 
-    * @param rootURL the root url
-    * @param name the path name
-    * @return the virtual file
-    * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL or name is null
-    */
-   @SuppressWarnings("deprecation")
-   public static VirtualFile getVirtualFile(URL rootURL, String name) throws IOException
-   {
-      VirtualFile root = getRoot(rootURL);
-      return root.findChild(name);
-   }
-
-   /**
-    * Get the root file of this VFS
-    * 
-    * @return the root
-    * @throws IOException for any problem accessing the VFS
-    */
-   public VirtualFile getRoot() throws IOException
-   {
-      VirtualFileHandler handler = context.getRoot();
-      return handler.getVirtualFile();
-   }
-   
-   /**
-    * Find a child from the root
+    * Find a virtual file.
     *
     * @param path the child path
     * @return the child
-    * @throws IOException for any problem accessing the VFS (including the child does not exist)
+    * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
-    * @deprecated use getChild, and handle null if not found
     */
-   @Deprecated
-   public VirtualFile findChild(String path) throws IOException
-   {
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-      
-      VirtualFileHandler handler = context.getRoot();
-      VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
-      if (result == null)
-      {
-         List<VirtualFileHandler> children = handler.getChildren(true);
-         throw new IOException("Child not found " + path + " for " + handler + ", available children: " + children);
-      }
-      return result.getVirtualFile();
-   }
-   
-   /**
-   * Get a child
-   *
-   * @param path the child path
-   * @return the child or <code>null</code> if not found
-   * @throws IOException if a real problem occurs
-   */
    public VirtualFile getChild(String path) throws IOException
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
-
-      VirtualFileHandler handler = context.getRoot();
-      VirtualFileHandler result = context.getChild(handler, VFSUtils.fixName(path));
-      return result != null ? result.getVirtualFile() : null;
+      final List<String> realPath = PathTokenizer.applySpecialPaths(PathTokenizer.getTokens(path));
+      final String realPathString = PathTokenizer.getRemainingPath(realPath, 0);
+      return new VirtualFile(this, realPath, realPathString);
    }
-   
+
+   /**
+    * Get the root virtual file for this VFS instance.
+    *
+    * @return the root virtual file
+    */
+   public VirtualFile getRootVirtualFile()
+   {
+      return rootVirtualFile;
+   }
+
    /**
     * Get the children
     * 
@@ -337,7 +143,7 @@ public class VFS
     */
    public List<VirtualFile> getChildren() throws IOException
    {
-      return getRoot().getChildren(null);
+      return getRootVirtualFile().getChildren(null);
    }
 
    /**
@@ -349,7 +155,7 @@ public class VFS
     */
    public List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException
    {
-      return getRoot().getChildren(filter);
+      return getRootVirtualFile().getChildren(filter);
    }
    
    /**
@@ -362,7 +168,7 @@ public class VFS
     */
    public List<VirtualFile> getChildrenRecursively() throws IOException
    {
-      return getRoot().getChildrenRecursively(null);
+      return getRootVirtualFile().getChildrenRecursively(null);
    }
    
    /**
@@ -376,7 +182,7 @@ public class VFS
     */
    public List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException
    {
-      return getRoot().getChildrenRecursively(filter);
+      return getRootVirtualFile().getChildrenRecursively(filter);
    }
    
    /**
@@ -388,12 +194,7 @@ public class VFS
     */
    public void visit(VirtualFileVisitor visitor) throws IOException
    {
-      VirtualFileHandler handler = context.getRoot();
-      if (handler.isLeaf() == false)
-      {
-         WrappingVirtualFileHandlerVisitor wrapper = new WrappingVirtualFileHandlerVisitor(visitor);
-         context.visit(handler, wrapper);
-      }
+      visitor.visit(rootVirtualFile);
    }
 
    /**
@@ -409,32 +210,52 @@ public class VFS
       if (file == null)
          throw new IllegalArgumentException("Null file");
 
-      VirtualFileHandler handler = file.getHandler();
-      WrappingVirtualFileHandlerVisitor wrapper = new WrappingVirtualFileHandlerVisitor(visitor);
-      VFSContext handlerContext = handler.getVFSContext();
-      handlerContext.visit(handler, wrapper);
+      if (file.getVFS() != this)
+         throw new IllegalArgumentException("Virtual file from foreign VFS");
+
+      visitor.visit(file);
    }
 
-   @Override
-   public String toString()
+   /**
+    * Get the enclosing mounted FileSystem for the given path.
+    *
+    * @param pathTokens the path tokens
+    * @return the filesystem
+    */
+   Mount getMount(List<String> pathTokens)
    {
-      return context.toString();
+      final Map.Entry<List<String>, Mount> entry = activeMounts.floorEntry(pathTokens);
+      return entry.getValue();
    }
 
-   @Override
-   public int hashCode()
-   {
-      return context.hashCode();
-   }
-   
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == this)
-         return true;
-      if (obj == null || obj instanceof VFS == false)
-         return false;
-      VFS other = (VFS) obj;
-      return context.equals(other.context);
+   /**
+    * The mount representation.  This instance represents a binding between a position in the virtual filesystem and
+    * the backing filesystem implementation; the same {@code FileSystem} may be mounted in more than one place, however
+    * only one {@code FileSystem} may be bound to a specific path at a time.
+    */
+   final class Mount implements Closeable {
+      private final FileSystem fileSystem;
+      private final List<String> realMountPoint;
+
+      private Mount(FileSystem fileSystem, List<String> realMountPoint)
+      {
+         this.fileSystem = fileSystem;
+         this.realMountPoint = realMountPoint;
+      }
+
+      public void close() throws IOException
+      {
+         activeMounts.remove(realMountPoint, this);
+      }
+
+      FileSystem getFileSystem()
+      {
+         return fileSystem;
+      }
+
+      List<String> getRealMountPoint()
+      {
+         return realMountPoint;
+      }
    }
 }

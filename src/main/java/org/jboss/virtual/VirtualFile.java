@@ -19,26 +19,24 @@
   * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
   * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   */
-package org.jboss.virtual ;
+package org.jboss.virtual;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
-import org.jboss.util.collection.WeakSet;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
- * A virtual file as seen by the user
+ * A virtual file.  This is a symbolic reference to a location in the virtual file system hierarchy.  Holding a
+ * {@code VirtualFile} instance gives no guarantees as to the presence or immutability of the referenced file or
+ * any of its parent path elements.
  *
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
@@ -48,90 +46,38 @@ import org.jboss.util.collection.WeakSet;
 public class VirtualFile implements Serializable
 {
    private static final long serialVersionUID = 1L;
+   private final String path;
+   private final String name;
+   private final List<String> tokens;
+   private final VFS vfs;
 
-   /** The virtual file handler */
-   private final VirtualFileHandler handler;
-
-   /** Whether we are closed */
-   private final AtomicBoolean closed = new AtomicBoolean(false);
-
-   /** The open streams */
-   private transient Set<InputStream> streams;
-
-   /**
-    * Create a new VirtualFile.
-    *
-    * @param handler the handler
-    * @throws IllegalArgumentException if the handler is null
-    */
-   public VirtualFile(VirtualFileHandler handler)
+   VirtualFile(VFS vfs, List<String> realPath, String realPathString)
    {
-      if (handler == null)
-         throw new IllegalArgumentException("Null handler");
-
-      this.handler = handler;
-   }
-
-   /**
-    * Get the virtual file handler
-    *
-    * @return the handler
-    * @throws IllegalStateException if the file is closed or cleaned
-    */
-   VirtualFileHandler getHandler()
-   {
-      if (closed.get())
-         throw new IllegalStateException("The virtual file is closed");
-
-      return handler;
+      path = realPathString;
+      final int size = realPath.size();
+      name = size == 0 ? "" : realPath.get(size - 1);
+      tokens = realPath;
+      this.vfs = vfs;
    }
 
    /**
     * Get the simple VF name (X.java)
     *
     * @return the simple file name
-    * @throws IllegalStateException if the file is closed
     */
    public String getName()
    {
-      return getHandler().getName();
+      return name;
    }
 
    /**
     * Get the VFS relative path name (org/jboss/X.java)
     *
     * @return the VFS relative path name
-    * @throws IllegalStateException if the file is closed
     */
    public String getPathName()
    {
-      return getHandler().getPathName();
-   }
-
-   /**
-    * Get the VF URL (file://root/org/jboss/X.java)
-    *
-    * @return the full URL to the VF in the VFS.
-    * @throws MalformedURLException if a url cannot be parsed
-    * @throws URISyntaxException if a uri cannot be parsed
-    * @throws IllegalStateException if the file is closed
-    */
-   public URL toURL() throws MalformedURLException, URISyntaxException
-   {
-      return getHandler().toVfsUrl();
-   }
-
-   /**
-    * Get the VF URI (file://root/org/jboss/X.java)
-    *
-    * @return the full URI to the VF in the VFS.
-    * @throws URISyntaxException if a uri cannot be parsed
-    * @throws IllegalStateException if the file is closed
-    * @throws MalformedURLException for a bad url
-    */
-   public URI toURI() throws MalformedURLException, URISyntaxException
-   {
-      return VFSUtils.toURI(toURL());
+      return path;
    }
 
    /**
@@ -139,23 +85,12 @@ public class VirtualFile implements Serializable
     *
     * @return the last modified time
     * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
     */
    public long getLastModified() throws IOException
    {
-      return getHandler().getLastModified();
-   }
-
-   /**
-    * Returns true if the file has been modified since this method was last called
-    * Last modified time is initialized at handler instantiation.
-    *
-    * @return true if modifed, false otherwise
-    * @throws IOException for any error
-    */
-   public boolean hasBeenModified() throws IOException
-   {
-      return getHandler().hasBeenModified();
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().getLastModified(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
@@ -163,11 +98,12 @@ public class VirtualFile implements Serializable
     *
     * @return the size
     * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
     */
    public long getSize() throws IOException
    {
-      return getHandler().getSize();
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().getSize(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
@@ -177,7 +113,9 @@ public class VirtualFile implements Serializable
     */
    public boolean exists() throws IOException
    {
-      return getHandler().exists();      
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().exists(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
@@ -186,34 +124,25 @@ public class VirtualFile implements Serializable
     *
     * @return true if a simple file.
     * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
+    * @deprecated use {@link #isDirectory()} instead
     */
+   @Deprecated
    public boolean isLeaf() throws IOException
    {
-      return getHandler().isLeaf();
+      return ! isDirectory();
    }
 
    /**
-    * Is the file archive.
-    * 
-    * @return true if archive, false otherwise
-    * @throws IOException for any error
-    */
-   public boolean isArchive() throws IOException
-   {
-      return getHandler().isArchive();
-   }
-
-   /**
-    * Whether it is hidden
+    * Determine whether the named virtual file is a directory.
     *
-    * @return true when hidden
-    * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
+    * @return {@code true} if it is a directory, {@code false} otherwise
+    * @throws IOException if an I/O error occurs
     */
-   public boolean isHidden() throws IOException
+   public boolean isDirectory() throws IOException
    {
-      return getHandler().isHidden();
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().isDirectory(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
@@ -221,73 +150,12 @@ public class VirtualFile implements Serializable
     *
     * @return an InputStream for the file contents.
     * @throws IOException for any error accessing the file system
-    * @throws IllegalStateException if the file is closed
     */
    public InputStream openStream() throws IOException
    {
-      InputStream result = getHandler().openStream();
-      checkStreams();
-      streams.add(result);
-      return result;
-   }
-
-   /**
-    * Check if streams set exist.
-    */
-   @SuppressWarnings("unchecked")
-   protected void checkStreams()
-   {
-      if (streams == null)
-      {
-         synchronized (closed)
-         {
-            // double null check, so that possible
-            // waiting threads don't override streams
-            if (streams == null)
-               streams = Collections.synchronizedSet(new WeakSet());
-         }
-      }
-   }
-
-   /**
-    * Close the streams
-    */
-   public void closeStreams()
-   {
-      if (streams == null)
-         return;
-
-      // Close the streams
-      VFSUtils.safeClose(streams);
-      streams.clear();
-   }
-
-   /**
-    * Do file cleanup.
-    * e.g. delete temp files
-    */
-   public void cleanup()
-   {
-      try
-      {
-         getHandler().cleanup();
-      }
-      finally
-      {
-         VFS.cleanup(this);
-      }
-   }
-
-   /**
-    * Close the file resources (stream, etc.)
-    */
-   public void close()
-   {
-      if (closed.getAndSet(true) == false)
-      {
-         closeStreams();
-         handler.close();
-      }
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().openInputStream(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
@@ -298,47 +166,54 @@ public class VirtualFile implements Serializable
     */
    public boolean delete() throws IOException
    {
-      // gracePeriod of 2 seconds
-      return getHandler().delete(2000);
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().delete(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
-    * Delete this virtual file
+    * Get a physical file for this virtual file.  Depending on the underlying file system type, this may simply return
+    * an already-existing file; it may create a copy of a file; or it may reuse a preexisting copy of the file.  Furthermore,
+    * the retured file may or may not have any relationship to other files from the same or any other virtual
+    * directory.
     *
-    * @param gracePeriod max time to wait for any locks (in milliseconds)
-    * @return true if file was deleted
-    * @throws IOException if an error occurs
+    * @return the physical file
+    * @throws IOException if an I/O error occurs while producing the physical file
     */
-   public boolean delete(int gracePeriod) throws IOException
+   public File getPhysicalFile() throws IOException
    {
-      return getHandler().delete(gracePeriod);
+      final List<String> tokens = this.tokens;
+      final VFS.Mount mount = vfs.getMount(tokens);
+      return mount.getFileSystem().getFile(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
    }
 
    /**
     * Get the VFS instance for this virtual file
     *
     * @return the VFS
-    * @throws IllegalStateException if the file is closed
     */
    public VFS getVFS()
    {
-      VFSContext context = getHandler().getVFSContext();
-      return context.getVFS();
+      return vfs;
    }
 
    /**
-    * Get the parent
+    * Get a {@code VirtualFile} which represents the parent of this instance.
     *
-    * @return the parent or null if there is no parent
+    * @return the parent or {@code null} if there is no parent
     * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
     */
    public VirtualFile getParent() throws IOException
    {
-      VirtualFileHandler parent = getHandler().getParent();
-      if (parent != null)
-         return parent.getVirtualFile();
-      return null;
+      final List<String> tokens = this.tokens;
+      final String path = this.path;
+      final int size = tokens.size();
+      if (size == 0)
+         return null;
+      else if (size == 1)
+         return vfs.getRootVirtualFile();
+      else
+         return new VirtualFile(vfs, tokens.subList(0, size - 1), path.substring(0, path.lastIndexOf('/')));
    }
 
    /**
@@ -346,7 +221,6 @@ public class VirtualFile implements Serializable
     *
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
-    * @throws IllegalStateException if the file is closed
     */
    public List<VirtualFile> getChildren() throws IOException
    {
@@ -363,7 +237,7 @@ public class VirtualFile implements Serializable
     */
    public List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException
    {
-      if (isLeaf())
+      if (! isDirectory())
          return Collections.emptyList();
 
       if (filter == null)
@@ -399,7 +273,7 @@ public class VirtualFile implements Serializable
     */
    public List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException
    {
-      if (isLeaf())
+      if (! isDirectory())
          return Collections.emptyList();
 
       if (filter == null)
@@ -419,75 +293,56 @@ public class VirtualFile implements Serializable
     */
    public void visit(VirtualFileVisitor visitor) throws IOException
    {
-      if (isLeaf() == false)
+      if (! isDirectory() == false)
          getVFS().visit(this, visitor);
    }
 
    /**
-    * Find a child
+    * Get a child virtual file.
     *
     * @param path the path
-    * @return the child
-    * @throws IOException for any problem accessing the VFS (including the child does not exist)
-    * @throws IllegalArgumentException if the path is null
-    * @throws IllegalStateException if the file is closed or it is a leaf node
-    * @deprecated use getChild, and handle null if not found
-    */
-   @Deprecated
-   public VirtualFile findChild(String path) throws IOException
-   {
-      if (path == null)
-         throw new IllegalArgumentException("Null path");
-
-      VirtualFileHandler handler = getHandler();      
-      VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
-      if (child == null)
-      {
-         List<VirtualFileHandler> children = handler.getChildren(true);
-         throw new IOException("Child not found " + path + " for " + handler + ", available children: " + children);
-      }
-      return child.getVirtualFile();
-   }
-
-   /**
-    * Get a child
-    *
-    * @param path the path
-    * @return the child or <code>null</code> if not found
+    * @return the child or {@code null} if not found
     * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
-    * @throws IllegalStateException if the file is closed or it is a leaf node
     */
    public VirtualFile getChild(String path) throws IOException
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
-      VirtualFileHandler handler = getHandler();
-      VirtualFileHandler child = handler.getChild(VFSUtils.fixName(path));
-      return child != null ? child.getVirtualFile() : null;
+      final List<String> newPathTokens = new ArrayList<String>();
+      newPathTokens.addAll(tokens);
+      PathTokenizer.getTokens(newPathTokens, path);
+      final List<String> childPath = PathTokenizer.applySpecialPaths(newPathTokens);
+      return new VirtualFile(vfs, newPathTokens, PathTokenizer.getRemainingPath(childPath, 0));
    }
 
    @Override
    public String toString()
    {
-      return handler.toString();
+      return "Virtual file \"" + path + "\" for " + vfs;
+   }
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+         return true;
+      if (! (o instanceof VirtualFile))
+         return false;
+      VirtualFile that = (VirtualFile) o;
+      if (! path.equals(that.path))
+         return false;
+      if (vfs != that.vfs)
+         return false;
+      return true;
    }
 
    @Override
    public int hashCode()
    {
-      return handler.hashCode();
-   }
-
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == this)
-         return true;
-      if (obj == null || obj instanceof VirtualFile == false)
-         return false;
-      VirtualFile other = (VirtualFile) obj;
-      return handler.equals(other.handler);
+      int result = path.hashCode();
+      result = 31 * result + vfs.hashCode();
+      return result;
    }
 }

@@ -33,7 +33,6 @@ import java.util.List;
 import junit.framework.Test;
 import org.jboss.util.collection.Iterators;
 import org.jboss.util.id.GUID;
-import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
