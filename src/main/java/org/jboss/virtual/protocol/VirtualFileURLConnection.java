@@ -19,7 +19,7 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.vfs;
+package org.jboss.virtual.protocol;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +40,7 @@ import sun.net.www.ParseUtil;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class VirtualFileURLConnection extends URLConnection
+class VirtualFileURLConnection extends URLConnection
 {
    protected VirtualFile file;
 

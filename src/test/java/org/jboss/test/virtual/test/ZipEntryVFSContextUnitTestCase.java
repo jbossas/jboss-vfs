@@ -34,7 +34,6 @@ import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
 
 /**
  * ZipEntryVFSContextUnitTestCase.

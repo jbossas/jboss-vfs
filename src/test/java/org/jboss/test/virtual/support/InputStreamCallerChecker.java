@@ -40,7 +40,7 @@ public class InputStreamCallerChecker extends InputStream
          "java.lang.Thread",
          "org.jboss.virtual.InputStreamDelegate",
          "org.jboss.virtual.VirtualFile",
-         "org.jboss.virtual.plugins.vfs.VirtualFileURLConnection",
+         "org.jboss.virtual.protocol.file.VirtualFileURLConnection",
          "java.net.URL",
          "org.jboss.deployers.vfs.spi.deployer.SecurityActions",
          "org.jboss.deployers.vfs.spi.deployer.SecurityActions$FileActions$1",

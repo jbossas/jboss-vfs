@@ -35,7 +35,7 @@ import java.util.zip.ZipInputStream;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.protocol.file.VirtualFileURLConnection;
 
 /**
  * ClassPathIterator logic used by UCL package mapping

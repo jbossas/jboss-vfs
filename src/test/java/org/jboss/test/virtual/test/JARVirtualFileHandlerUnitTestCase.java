@@ -29,7 +29,6 @@ import java.util.jar.JarFile;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
 
 /**
  * JARVirtualFileHandlerUnitTestCase.

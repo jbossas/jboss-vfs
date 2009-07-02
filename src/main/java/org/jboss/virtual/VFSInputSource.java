@@ -50,7 +50,7 @@ public class VFSInputSource extends InputSource
    {
       try
       {
-         return file.toURI().toString();
+         return VFSUtils.getVirtualURI(file).toString();
       }
       catch (Exception e)
       {

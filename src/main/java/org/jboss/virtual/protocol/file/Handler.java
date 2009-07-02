@@ -22,55 +22,11 @@
 
 package org.jboss.virtual.protocol.file;
 
-import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
-
-import java.net.URLStreamHandler;
-import java.net.URLConnection;
-import java.net.URL;
-import java.net.Proxy;
-import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
+import org.jboss.virtual.protocol.VirtualFileURLStreamHandler;
 
 /**
- * The VFS URL stream handler.
+ * Stub handler class.
  */
-public final class Handler extends URLStreamHandler
+public final class Handler extends VirtualFileURLStreamHandler
 {
-   private static final Set<String> locals;
-
-   static {
-      Set<String> set = new HashSet<String>();
-      set.add(null);
-      set.add("");
-      set.add("~");
-      set.add("localhost");
-      locals = set;
-   }
-
-   protected URLConnection openConnection(URL u) throws IOException
-   {
-      if (locals.contains(toLower(u.getHost())))
-      {
-         // the URL is a valid local URL
-         return new VirtualFileURLConnection(u);
-      }
-
-      throw new IOException("Remote host access not supported for URLs of type \"" + u.getProtocol() + "\"");
-   }
-
-   protected URLConnection openConnection(URL u, Proxy p) throws IOException
-   {
-      return openConnection(u);
-   }
-
-   @Override
-   protected boolean hostsEqual(URL url1, URL url2)
-   {
-      return locals.contains(toLower(url1.getHost())) && locals.contains(toLower(url2.getHost())) || super.hostsEqual(url1, url2);
-   }
-
-   private static String toLower(String str) {
-      return str == null ? null : str.toLowerCase();
-   }
 }

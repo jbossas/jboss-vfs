@@ -27,7 +27,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.plugins.context.jar.JarUtils;
 
 /**
  * SundryVFSTests.
