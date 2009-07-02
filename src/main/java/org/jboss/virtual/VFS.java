@@ -48,7 +48,7 @@ public class VFS
    /** The log */
    private static final Logger log = Logger.getLogger(VFS.class);
 
-   private final MountNode rootMountNode = new MountNode(null);
+   private final MountNode rootMountNode = new MountNode();
    private final VirtualFile rootVirtualFile;
    private static VFS instance = new VFS();
 
@@ -74,7 +74,7 @@ public class VFS
    {
       // By default, there's a root mount which points to the "real" FS
       final List<String> emptyList = Collections.<String>emptyList();
-      rootMountNode.mount = new Mount(rootMountNode, RealFileSystem.ROOT_INSTANCE, emptyList);
+      rootMountNode.mount = new Mount(RealFileSystem.ROOT_INSTANCE, emptyList);
       //noinspection ThisEscapedInObjectConstruction
       rootVirtualFile = new VirtualFile(this, emptyList, "");
    }
@@ -123,7 +123,7 @@ public class VFS
             MountNode subNode;
             if (childMap == null) {
                childMap = new HashMap<String, MountNode>();
-               subNode = new MountNode(mountNode);
+               subNode = new MountNode();
                childMap.put(seg, subNode);
                mountNode.nodeMap = childMap;
                mountNode = subNode;
@@ -133,7 +133,7 @@ public class VFS
                   mountNode = subNode;
                } else {
                   childMap = new HashMap<String, MountNode>(childMap);
-                  subNode = new MountNode(mountNode);
+                  subNode = new MountNode();
                   childMap.put(seg, subNode);
                   mountNode.nodeMap = childMap;
                   mountNode = subNode;
@@ -145,7 +145,7 @@ public class VFS
          if (mountNode.mount != null) {
             throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
          }
-         final Mount mount = new Mount(mountNode, fileSystem, realMountPoint);
+         final Mount mount = new Mount(fileSystem, realMountPoint);
          mountNode.mount = mount;
          log.debugf("Created mount %s for %s on %s at mount point '%s'", mount, fileSystem, this, mountPoint);
          return mount;
@@ -321,13 +321,11 @@ public class VFS
     * only one {@code FileSystem} may be bound to a specific path at a time.
     */
    final class Mount implements Closeable {
-      private final MountNode mountNode;
       private final FileSystem fileSystem;
       private final List<String> realMountPoint;
 
-      private Mount(MountNode mountNode, FileSystem fileSystem, List<String> realMountPoint)
+      private Mount(FileSystem fileSystem, List<String> realMountPoint)
       {
-         this.mountNode = mountNode;
          this.fileSystem = fileSystem;
          this.realMountPoint = realMountPoint;
       }
@@ -400,7 +398,6 @@ public class VFS
     */
    private static final class MountNode {
 
-      private final MountNode parent;
       /**
        * The immutable node map.  Since the map is immutable, changes to this field must be accomplished by replacing
        * the field value with a new map (copy on write).  Modifications to this field are protected by {@code this}.
@@ -411,9 +408,8 @@ public class VFS
        */
       private volatile Mount mount;
 
-      private MountNode(MountNode parent)
+      private MountNode()
       {
-         this.parent = parent;
       }
    }
 }
