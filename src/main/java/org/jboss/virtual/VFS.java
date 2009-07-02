@@ -48,7 +48,7 @@ public class VFS
    /** The log */
    private static final Logger log = Logger.getLogger(VFS.class);
 
-   private final MountNode rootMountNode = new MountNode();
+   private final MountNode rootMountNode = new MountNode(null);
    private final VirtualFile rootVirtualFile;
    private static VFS instance = new VFS();
 
@@ -123,7 +123,7 @@ public class VFS
             MountNode subNode;
             if (childMap == null) {
                childMap = new HashMap<String, MountNode>();
-               subNode = new MountNode();
+               subNode = new MountNode(mountNode);
                childMap.put(seg, subNode);
                mountNode.nodeMap = childMap;
                mountNode = subNode;
@@ -133,7 +133,7 @@ public class VFS
                   mountNode = subNode;
                } else {
                   childMap = new HashMap<String, MountNode>(childMap);
-                  subNode = new MountNode();
+                  subNode = new MountNode(mountNode);
                   childMap.put(seg, subNode);
                   mountNode.nodeMap = childMap;
                   mountNode = subNode;
@@ -334,12 +334,52 @@ public class VFS
 
       public void close() throws IOException
       {
-         final MountNode mountNode = this.mountNode;
-         synchronized (mountNode) {
-            if (mountNode.mount == this) {
-               mountNode.mount = null;
-               log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
-               
+         unmountFrom(rootMountNode, realMountPoint.iterator());
+      }
+
+      private boolean unmountFrom(MountNode node, Iterator<String> iter)
+      {
+         synchronized (node) {
+            final Map<String, MountNode> nodeMap = node.nodeMap;
+            if (iter.hasNext()) {
+               if (nodeMap != null) {
+                  final String key = iter.next();
+                  final MountNode nextNode = nodeMap.get(key);
+                  if (nextNode == null) {
+                     return nodeMap.isEmpty();
+                  }
+                  final boolean emptySubNode = unmountFrom(nextNode, iter);
+                  if (emptySubNode) {
+                     final boolean otherChildren = nodeMap.size() > 1;
+                     // subnode is dead; remove it from our map
+                     if (otherChildren) {
+                        // there's other children; not dead yet
+                        final HashMap<String, MountNode> newMap = new HashMap<String, MountNode>(nodeMap);
+                        newMap.remove(key);
+                        node.nodeMap = newMap;
+                        return false;
+                     } else {
+                        // no other children; dead if there's no mount here
+                        node.nodeMap = null;
+                        return node.mount == null;
+                     }
+                  }
+                  // subnode isn't empty; not dead
+                  return false;
+               } else {
+                  // dead node if there's no mount here
+                  return node.mount == null;
+               }
+            } else {
+               if (node.mount == this) {
+                  node.mount = null;
+                  log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
+                  // the node is dead if there are no children
+                  return nodeMap == null;
+               } else {
+                  // Node must be already unmounted; do cleanup work anyway.
+                  return node.mount == null && nodeMap == null;
+               }
             }
          }
       }
@@ -360,6 +400,7 @@ public class VFS
     */
    private static final class MountNode {
 
+      private final MountNode parent;
       /**
        * The immutable node map.  Since the map is immutable, changes to this field must be accomplished by replacing
        * the field value with a new map (copy on write).  Modifications to this field are protected by {@code this}.
@@ -369,5 +410,10 @@ public class VFS
        * The current mount at this point.  Modifications to this field are protected by {@code this}.
        */
       private volatile Mount mount;
+
+      private MountNode(MountNode parent)
+      {
+         this.parent = parent;
+      }
    }
 }
