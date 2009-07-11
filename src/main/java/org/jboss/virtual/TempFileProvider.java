@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * A provider for temporary physical files and directories.
@@ -42,10 +44,10 @@ public final class TempFileProvider implements Closeable
       final String configTmpDir = System.getProperty(TMP_DIR_PROPERTY);
       try
       {
-         TMP_ROOT = configTmpDir == null ? File.createTempFile("jboss-vfs-temp", "") : new File(configTmpDir, "vfs");
+         TMP_ROOT = new File(configTmpDir, "vfs");
          TMP_ROOT.mkdirs();
       }
-      catch (IOException e)
+      catch (Exception e)
       {
          throw new RuntimeException("Can't set up temp file provider", e);
       }
@@ -60,7 +62,7 @@ public final class TempFileProvider implements Closeable
     */
    public static TempFileProvider create(String providerType, ScheduledExecutorService executor) throws IOException
    {
-      return new TempFileProvider(File.createTempFile(providerType, "", TMP_ROOT), 0, executor);
+      return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), 0, executor);
    }
 
    /**
@@ -74,7 +76,7 @@ public final class TempFileProvider implements Closeable
     */
    public static TempFileProvider create(String providerType, int hashDepth, ScheduledExecutorService executor) throws IOException
    {
-      return new TempFileProvider(File.createTempFile(providerType, "", TMP_ROOT), hashDepth, executor);
+      return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), hashDepth, executor);
    }
 
    private final File providerRoot;
@@ -118,7 +120,7 @@ public final class TempFileProvider implements Closeable
          root.mkdir();
          hashCode >>= 7;
       }
-      return File.createTempFile("", "-" + originalName, root);
+      return createTempFile("tmp", "-" + originalName, root);
    }
 
    /**
@@ -150,6 +152,38 @@ public final class TempFileProvider implements Closeable
             tempFile.delete();
          }
       }
+   }
+
+   private static final Random rng = new SecureRandom();
+
+   private static File createTempDir(String prefix, String suffix, File root) throws IOException
+   {
+      for (int i = 0; i < 100; i ++) {
+         final File f = new File(root, createTempName(prefix, suffix));
+         if (f.mkdir())
+            return f;
+      }
+      final IOException eo = new IOException("Could not create directory after 100 attempts");
+      throw eo;
+   }
+
+   private static File createTempFile(String prefix, String suffix, File root) throws IOException
+   {
+      IOException e = null;
+      for (int i = 0; i < 100; i ++) try {
+         final File f = new File(root, createTempName(prefix, suffix));
+         f.createNewFile();
+         return f;
+      } catch (IOException e2) {
+         e = e2;
+      }
+      final IOException eo = new IOException("Could not create file after 100 attempts");
+      eo.initCause(e);
+      throw eo;
+   }
+
+   private static String createTempName(String prefix, String suffix) {
+      return prefix + Long.toHexString(rng.nextLong()) + suffix;
    }
 
    /**

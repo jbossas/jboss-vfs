@@ -305,7 +305,11 @@ public class VFS
          }
       }
       final List<String> list = new ArrayList<String>();
-      for (Map.Entry<String, MountNode> entry : mountNode.nodeMap.entrySet())
+      final Map<String, MountNode> childMap = mountNode.nodeMap;
+      if (childMap == null) {
+         return Collections.<String>emptySet().iterator();
+      }
+      for (Map.Entry<String, MountNode> entry : childMap.entrySet())
       {
          final MountNode subNode = entry.getValue();
          if (subNode.mount != null) {

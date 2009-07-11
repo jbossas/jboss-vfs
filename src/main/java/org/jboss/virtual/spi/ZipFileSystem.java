@@ -218,12 +218,36 @@ public final class ZipFileSystem implements FileSystem
 
    public Iterator<String> getDirectoryEntries(List<String> directoryPathComponents) throws IOException
    {
-      return null;
+      final ZipNode zipNode = rootNode.find(directoryPathComponents.iterator());
+      if (zipNode != null) {
+         final Map<String, ZipNode> children = zipNode.children;
+         if (children != null) {
+            final Iterator<ZipNode> it = children.values().iterator();
+            return new Iterator<String>()
+            {
+               public boolean hasNext()
+               {
+                  return it.hasNext();
+               }
+
+               public String next()
+               {
+                  return it.next().name;
+               }
+
+               public void remove()
+               {
+                  throw new UnsupportedOperationException();
+               }
+            };
+         }
+      }
+      throw new FileNotFoundException(join(directoryPathComponents));
    }
 
    public void close() throws IOException
    {
-      
+      tempFileProvider.close();
    }
 
    private static final class ZipNode {
