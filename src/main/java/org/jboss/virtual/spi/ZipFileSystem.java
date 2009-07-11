@@ -72,7 +72,7 @@ public final class ZipFileSystem implements FileSystem
       this.tempFileProvider = tempFileProvider;
       final ZipCatalog catalog = Zip.readCatalog(zipFile);
       final Collection<ZipEntry> entries = catalog.allEntries();
-      final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), null);
+      final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), null, "");
       FILES: for (ZipEntry zipEntry : entries)
       {
          final List<String> tokens = PathTokenizer.getTokens(zipEntry.getName());
@@ -86,11 +86,11 @@ public final class ZipFileSystem implements FileSystem
                // todo - log bad zip entry
                continue FILES;
             }
-            ZipNode child = children.get(token);
+            ZipNode child = children.get(token.toLowerCase());
             if (child == null)
             {
-               child = it.hasNext() || zipEntry.getEntryType() == ZipEntryType.DIRECTORY ? new ZipNode(new HashMap<String, ZipNode>(), null) : new ZipNode(null, zipEntry);
-               children.put(token, child);
+               child = it.hasNext() || zipEntry.getEntryType() == ZipEntryType.DIRECTORY ? new ZipNode(new HashMap<String, ZipNode>(), null, token) : new ZipNode(null, zipEntry, token);
+               children.put(token.toLowerCase(), child);
             }
             node = child;
          }
@@ -229,18 +229,20 @@ public final class ZipFileSystem implements FileSystem
    private static final class ZipNode {
       private final Map<String, ZipNode> children;
       private final ZipEntry entry;
+      private final String name;
       private volatile File cachedFile;
 
-      private ZipNode(Map<String, ZipNode> children, ZipEntry entry)
+      private ZipNode(Map<String, ZipNode> children, ZipEntry entry, String name)
       {
          this.children = children;
          this.entry = entry;
+         this.name = name;
       }
 
       private ZipNode find(Iterator<String> node) {
          if (node.hasNext())
          {
-            final ZipNode next = children.get(node.next());
+            final ZipNode next = children.get(node.next().toLowerCase());
             return next == null ? null : next.find(node);
          }
          else
