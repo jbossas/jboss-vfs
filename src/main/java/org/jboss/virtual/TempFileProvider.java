@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Random;
 import java.security.SecureRandom;
 
@@ -39,6 +40,7 @@ public final class TempFileProvider implements Closeable
 {
    private static final String TMP_DIR_PROPERTY = "jboss.server.temp.dir";
    private static final File TMP_ROOT;
+   private final AtomicBoolean open = new AtomicBoolean(true);
 
    static {
       final String configTmpDir = System.getProperty(TMP_DIR_PROPERTY);
@@ -113,6 +115,9 @@ public final class TempFileProvider implements Closeable
     * @throws IOException if an error occurs
     */
    public File createTempFile(String originalName, int hashCode) throws IOException {
+      if (! open.get()) {
+         throw new IOException("Temp file provider closed");
+      }
       File root = providerRoot;
       for (int i = 0; i < hashDepth; i ++) {
          final int dc = hashCode & 0x7f;
@@ -134,6 +139,9 @@ public final class TempFileProvider implements Closeable
     * @throws IOException if an error occurs
     */
    public File createTempFile(String originalName, int hashCode, InputStream sourceData) throws IOException {
+      if (! open.get()) {
+         throw new IOException("Temp file provider closed");
+      }
       final File tempFile = createTempFile(originalName, hashCode);
       boolean ok = false;
       try {
@@ -191,16 +199,23 @@ public final class TempFileProvider implements Closeable
     */
    public void close() throws IOException
    {
-      final Runnable task = new Runnable()
-      {
-         public void run()
+      if (open.getAndSet(false)) {
+         final Runnable task = new Runnable()
          {
-            if (! recursiveDelete(providerRoot)) {
-               executor.schedule(this, 30L, TimeUnit.SECONDS);
+            public void run()
+            {
+               if (! recursiveDelete(providerRoot)) {
+                  executor.schedule(this, 30L, TimeUnit.SECONDS);
+               }
             }
-         }
-      };
-      task.run();
+         };
+         task.run();
+      }
+   }
+
+   protected void finalize()
+   {
+      VFSUtils.safeClose(this);
    }
 
    private static boolean recursiveDelete(File root) {
