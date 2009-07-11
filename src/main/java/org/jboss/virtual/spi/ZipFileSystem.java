@@ -73,7 +73,7 @@ public final class ZipFileSystem implements FileSystem
       final ZipCatalog catalog = Zip.readCatalog(zipFile);
       final Collection<ZipEntry> entries = catalog.allEntries();
       final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), null);
-      for (ZipEntry zipEntry : entries)
+      FILES: for (ZipEntry zipEntry : entries)
       {
          final List<String> tokens = PathTokenizer.getTokens(zipEntry.getName());
          ZipNode node = rootNode;
@@ -82,11 +82,17 @@ public final class ZipFileSystem implements FileSystem
          {
             String token = it.next();
             final Map<String, ZipNode> children = node.children;
+            if (children == null) {
+               // todo - log bad zip entry
+               continue FILES;
+            }
             ZipNode child = children.get(token);
             if (child == null)
             {
                child = it.hasNext() || zipEntry.getEntryType() == ZipEntryType.DIRECTORY ? new ZipNode(new HashMap<String, ZipNode>(), null) : new ZipNode(null, zipEntry);
+               children.put(token, child);
             }
+            node = child;
          }
       }
       this.rootNode = rootNode;
@@ -151,9 +157,25 @@ public final class ZipFileSystem implements FileSystem
    {
       final ZipNode zipNode = rootNode.find(pathComponents.iterator());
       if (zipNode == null) {
-         throw new FileNotFoundException();
+         throw new FileNotFoundException(join(pathComponents));
       }
       return zipNode;
+   }
+
+   private static String join(List<String> pathComponents)
+   {
+      int l = 0;
+      for (String pathComponent : pathComponents)
+      {
+         l += pathComponent.length();
+      }
+      final StringBuilder sb = new StringBuilder(l);
+      for (String pathComponent : pathComponents)
+      {
+         sb.append('/');
+         sb.append(pathComponent);
+      }
+      return sb.toString();
    }
 
    public boolean isReadOnly()
