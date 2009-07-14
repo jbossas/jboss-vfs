@@ -22,54 +22,29 @@
 
 package org.jboss.virtual.spi;
 
+import org.jboss.virtual.VirtualFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.util.List;
-import java.util.Iterator;
 import java.util.Arrays;
-import java.util.Collections;
 
 public final class RealFileSystem implements FileSystem
 {
-   public static final RealFileSystem ROOT_INSTANCE = new RealFileSystem(Collections.<String>emptyList());
+   public static final RealFileSystem ROOT_INSTANCE = new RealFileSystem(new File(""));
 
-   private final String base;
+   private final File realRoot;
 
-   private RealFileSystem(List<String> baseComponents)
+   private RealFileSystem(File realRoot)
    {
-      base = implode("", baseComponents) + File.separator;
+      this.realRoot = realRoot;
    }
 
-   public File getFile(List<String> pathComponents) throws IOException
+   public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return new File(implode(base, pathComponents));
-   }
-
-   private static String implode(String base, List<String> pathComponents)
-   {
-      int l = 0;
-      for (String s : pathComponents)
-      {
-         l += s.length() + 1;
-      }
-      if (l == 0) {
-         return base;
-      }
-      final StringBuilder builder = new StringBuilder(l + base.length());
-      builder.append(base);
-      for (String s : pathComponents)
-      {
-         builder.append(File.separatorChar);
-         builder.append(s);
-      }
-      return builder.toString();
-   }
-
-   public InputStream openInputStream(List<String> pathComponents) throws IOException
-   {
-      return new FileInputStream(getFile(pathComponents));
+      return new FileInputStream(getFile(mountPoint, target));
    }
 
    public boolean isReadOnly()
@@ -77,34 +52,43 @@ public final class RealFileSystem implements FileSystem
       return false;
    }
 
-   public boolean delete(List<String> pathComponents) throws IOException
+   public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return getFile(pathComponents).delete();
+      if (mountPoint == target) {
+         return realRoot;
+      } else {
+         return new File(getFile(mountPoint, target.getParent()), target.getName());
+      }
    }
 
-   public long getSize(List<String> pathComponents) throws IOException
+   public boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return getFile(pathComponents).length();
+      return getFile(mountPoint, target).delete();
    }
 
-   public long getLastModified(List<String> pathComponents) throws IOException
+   public long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return getFile(pathComponents).lastModified();
+      return getFile(mountPoint, target).length();
    }
 
-   public boolean exists(List<String> pathComponents) throws IOException
+   public long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return getFile(pathComponents).exists();
+      return getFile(mountPoint, target).lastModified();
    }
 
-   public boolean isDirectory(List<String> pathComponents) throws IOException
+   public boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return getFile(pathComponents).isDirectory();
+      return getFile(mountPoint, target).exists();
    }
 
-   public Iterator<String> getDirectoryEntries(List<String> directoryPathComponents) throws IOException
+   public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return Arrays.asList(getFile(directoryPathComponents).list()).iterator();
+      return getFile(mountPoint, target).isDirectory();
+   }
+
+   public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException
+   {
+      return Arrays.asList(getFile(mountPoint, target).list());
    }
 
    public void close() throws IOException

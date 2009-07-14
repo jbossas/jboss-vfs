@@ -22,6 +22,8 @@
 
 package org.jboss.virtual.spi;
 
+import org.jboss.virtual.VirtualFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Closeable;
@@ -43,20 +45,22 @@ public interface FileSystem extends Closeable
     * on the file type, the real path of the returned {@code File} may or may not bear a relationship to the virtual path
     * provided; if such a relationship is required, it must be negotiated at the time the filesystem is mounted.
     *
-    * @param pathComponents the relative path components
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
     * @return the file instance
     * @throws IOException if an I/O error occurs
     */
-   File getFile(List<String> pathComponents) throws IOException;
+   File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
     * Open an input stream for the file at the given relative path.
     *
-    * @param pathComponents the relative path components
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
     * @return the input stream
     * @throws IOException if an I/O error occurs
     */
-   InputStream openInputStream(List<String> pathComponents) throws IOException;
+   InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
     * Determine whether this filesystem is read-only.  A read-only filesystem prohibits file modification or
@@ -67,24 +71,25 @@ public interface FileSystem extends Closeable
     */
    boolean isReadOnly();
 
-   boolean delete(List<String> pathComponents) throws IOException;
+   boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
-   long getSize(List<String> pathComponents) throws IOException;
+   long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
-   long getLastModified(List<String> pathComponents) throws IOException;
+   long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
-   boolean exists(List<String> pathComponents) throws IOException;
+   boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
-   boolean isDirectory(List<String> pathComponents) throws IOException;
+   boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
     * Read a directory.  Returns all the simple path names (excluding "." and "..").
     *
-    * @param directoryPathComponents the relative path components for the directory
-    * @return the directory entries, or {@code null} if the specified path does not refer to a directory
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return the collection of children names
     * @throws IOException if an I/O error occurs
     */
-   Iterator<String> getDirectoryEntries(List<String> directoryPathComponents) throws IOException;
+   List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
     * Destroy this filesystem instance.  After this method is called, the filesystem may not be used in any way.  This

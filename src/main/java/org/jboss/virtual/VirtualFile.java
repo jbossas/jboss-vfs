@@ -28,9 +28,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
@@ -49,18 +47,21 @@ import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 public class VirtualFile implements Serializable
 {
    private static final long serialVersionUID = 1L;
-   private final String path;
    private final String name;
-   private final List<String> tokens;
+   private final String lcname;
    private final VFS vfs;
+   private final VirtualFile parent;
+   private final int hashCode;
 
-   VirtualFile(VFS vfs, List<String> realPath, String realPathString)
+   VirtualFile(VFS vfs, String name, VirtualFile parent)
    {
-      path = realPathString;
-      final int size = realPath.size();
-      name = size == 0 ? "" : realPath.get(size - 1);
-      tokens = realPath;
+      this.name = name;
+      lcname = name.toLowerCase();
       this.vfs = vfs;
+      this.parent = parent;
+      int result = parent == null ? vfs.hashCode() : parent.hashCode();
+      result = 31 * result + name.hashCode();
+      hashCode = result;
    }
 
    /**
@@ -73,14 +74,30 @@ public class VirtualFile implements Serializable
       return name;
    }
 
+   public String getLowerCaseName()
+   {
+      return lcname;
+   }
+
    /**
-    * Get the VFS relative path name (org/jboss/X.java)
+    * Get the absolute VFS full path name (/xxx/yyy/foo.ear/baz.jar/org/jboss/X.java)
     *
     * @return the VFS relative path name
     */
    public String getPathName()
    {
-      return path;
+      final StringBuilder builder = new StringBuilder(160);
+      final VirtualFile parent = this.parent;
+      if (parent == null) {
+         return "/";
+      } else {
+         builder.append(parent.getPathName());
+         if (parent.parent != null) {
+            builder.append('/');
+         }
+         builder.append(name);
+      }
+      return builder.toString();
    }
 
    /**
@@ -91,9 +108,8 @@ public class VirtualFile implements Serializable
     */
    public long getLastModified() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().getLastModified(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().getLastModified(mount.getMountPoint(), this);
    }
 
    /**
@@ -104,9 +120,8 @@ public class VirtualFile implements Serializable
     */
    public long getSize() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().getSize(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().getSize(mount.getMountPoint(), this);
    }
 
    /**
@@ -116,9 +131,8 @@ public class VirtualFile implements Serializable
     */
    public boolean exists() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().exists(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().exists(mount.getMountPoint(), this);
    }
 
    /**
@@ -143,9 +157,8 @@ public class VirtualFile implements Serializable
     */
    public boolean isDirectory() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().isDirectory(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().isDirectory(mount.getMountPoint(), this);
    }
 
    /**
@@ -156,9 +169,8 @@ public class VirtualFile implements Serializable
     */
    public InputStream openStream() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().openInputStream(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
    }
 
    /**
@@ -169,9 +181,8 @@ public class VirtualFile implements Serializable
     */
    public boolean delete() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().delete(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().delete(mount.getMountPoint(), this);
    }
 
    /**
@@ -185,9 +196,8 @@ public class VirtualFile implements Serializable
     */
    public File getPhysicalFile() throws IOException
    {
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      return mount.getFileSystem().getFile(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
+      final VFS.Mount mount = vfs.getMount(this);
+      return mount.getFileSystem().getFile(mount.getMountPoint(), this);
    }
 
    /**
@@ -206,17 +216,24 @@ public class VirtualFile implements Serializable
     * @return the parent or {@code null} if there is no parent
     * @throws IOException for any problem accessing the virtual file system
     */
-   public VirtualFile getParent() throws IOException
+   public VirtualFile getParent()
    {
-      final List<String> tokens = this.tokens;
-      final String path = this.path;
-      final int size = tokens.size();
-      if (size == 0)
-         return null;
-      else if (size == 1)
-         return vfs.getRootVirtualFile();
-      else
-         return new VirtualFile(vfs, tokens.subList(0, size - 1), path.substring(0, path.lastIndexOf('/')));
+      return parent;
+   }
+
+   public VirtualFile[] getParentFiles() {
+      return getParentFiles(0);
+   }
+
+   private VirtualFile[] getParentFiles(int idx) {
+      final VirtualFile[] array;
+      if (parent == null) {
+         array = new VirtualFile[idx + 1];
+      } else {
+         array = parent.getParentFiles(idx + 1);
+      }
+      array[idx] = this;
+      return array;
    }
 
    /**
@@ -228,30 +245,17 @@ public class VirtualFile implements Serializable
     */
    public List<VirtualFile> getChildren() throws IOException
    {
-      final ArrayList<VirtualFile> list = new ArrayList<VirtualFile>();
-      for (String name : getChildrenNames())
+      final VFS.Mount mount = vfs.getMount(this);
+      final Set<String> submounts = vfs.getSubmounts(this);
+      final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
+      final List<VirtualFile> virtualFiles = new ArrayList<VirtualFile>(names.size() + submounts.size());
+      for (String name : names)
       {
-         list.add(getChild(name));
+         final VirtualFile child = new VirtualFile(vfs, name, this);
+         virtualFiles.add(child);
+         submounts.remove(name);
       }
-      return list;
-   }
-
-   private Set<String> getChildrenNames() throws IOException
-   {
-      // Add the files physically present
-      final List<String> tokens = this.tokens;
-      final VFS.Mount mount = vfs.getMount(tokens);
-      final Iterator<String> iter = mount.getFileSystem().getDirectoryEntries(tokens.subList(mount.getRealMountPoint().size(), tokens.size()));
-      final Set<String> names = new HashSet<String>();
-      while (iter.hasNext()) {
-         names.add(iter.next());
-      }
-      // Add any mounts that are logically present
-      final Iterator<String> submounts = vfs.getSubmounts(tokens);
-      while (submounts.hasNext()) {
-         names.add(submounts.next());
-      }
-      return names;
+      return virtualFiles;
    }
 
    /**
@@ -347,25 +351,31 @@ public class VirtualFile implements Serializable
     * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
     */
-   public VirtualFile getChild(String path) throws IOException
+   public VirtualFile getChild(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
-
-      final List<String> newPathTokens = new ArrayList<String>();
-      newPathTokens.addAll(tokens);
-      PathTokenizer.getTokens(newPathTokens, path);
-      final List<String> childPath = PathTokenizer.applySpecialPaths(newPathTokens);
-      return new VirtualFile(vfs, newPathTokens, PathTokenizer.getRemainingPath(childPath, 0));
+      final List<String> pathParts = PathTokenizer.getTokens(path);
+      VirtualFile current = this;
+      for (String part : pathParts)
+      {
+         if (PathTokenizer.isCurrentToken(part)) {
+            continue;
+         } else if (PathTokenizer.isReverseToken(part)) {
+            final VirtualFile parent = current.parent;
+            current = parent == null ? current : parent;
+         } else {
+            current = new VirtualFile(vfs, part, current);
+         }
+      }
+      return current;
    }
 
-   @Override
    public String toString()
    {
-      return "Virtual file \"" + path + "\" for " + vfs;
+      return "Virtual file \"" + getPathName() + "\" for " + vfs;
    }
 
-   @Override
    public boolean equals(Object o)
    {
       if (this == o)
@@ -373,18 +383,21 @@ public class VirtualFile implements Serializable
       if (! (o instanceof VirtualFile))
          return false;
       VirtualFile that = (VirtualFile) o;
-      if (! path.equals(that.path))
+      if (hashCode != that.hashCode)
+         return false;
+      if (! name.equals(that.name))
          return false;
       if (vfs != that.vfs)
          return false;
-      return true;
+      final VirtualFile parent = this.parent;
+      if (parent == null)
+         return that.parent == null;
+      else
+         return parent.equals(that.parent);
    }
 
-   @Override
    public int hashCode()
    {
-      int result = path.hashCode();
-      result = 31 * result + vfs.hashCode();
-      return result;
+      return hashCode;
    }
 }

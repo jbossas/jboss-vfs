@@ -26,14 +26,17 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Collection;
+import java.util.AbstractSet;
 import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.logging.Logger;
 import org.jboss.virtual.spi.RealFileSystem;
 import org.jboss.virtual.spi.FileSystem;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Virtual File System
@@ -45,12 +48,13 @@ import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
  */
 public class VFS
 {
-   /** The log */
-   private static final Logger log = Logger.getLogger(VFS.class);
-
-   private final MountNode rootMountNode = new MountNode();
+   private final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
    private final VirtualFile rootVirtualFile;
+   private final Mount rootMount;
    private static VFS instance = new VFS();
+
+   // todo - LRU VirtualFiles?
+   // todo - LRU String intern?
 
    static
    {
@@ -73,10 +77,9 @@ public class VFS
    public VFS()
    {
       // By default, there's a root mount which points to the "real" FS
-      final List<String> emptyList = Collections.<String>emptyList();
-      rootMountNode.mount = new Mount(RealFileSystem.ROOT_INSTANCE, emptyList);
       //noinspection ThisEscapedInObjectConstruction
-      rootVirtualFile = new VirtualFile(this, emptyList, "");
+      rootVirtualFile = new VirtualFile(this, "", null);
+      rootMount = new Mount(RealFileSystem.ROOT_INSTANCE, rootVirtualFile);
    }
 
    /**
@@ -113,42 +116,32 @@ public class VFS
     * @return a handle which can be used to unmount the filesystem
     * @throws IOException if an I/O error occurs, such as a filesystem already being mounted at the given mount point
     */
-   public Closeable mount(String mountPoint, FileSystem fileSystem) throws IOException {
-      final List<String> realMountPoint = PathTokenizer.applySpecialPaths(PathTokenizer.getTokens(mountPoint));
-      MountNode mountNode = rootMountNode;
-      for (String seg : realMountPoint)
-      {
-         synchronized (mountNode) {
-            Map<String, MountNode> childMap = mountNode.nodeMap;
-            MountNode subNode;
-            if (childMap == null) {
-               childMap = new HashMap<String, MountNode>();
-               subNode = new MountNode();
-               childMap.put(seg, subNode);
-               mountNode.nodeMap = childMap;
-               mountNode = subNode;
-            } else {
-               subNode = childMap.get(seg);
-               if (subNode != null) {
-                  mountNode = subNode;
-               } else {
-                  childMap = new HashMap<String, MountNode>(childMap);
-                  subNode = new MountNode();
-                  childMap.put(seg, subNode);
-                  mountNode.nodeMap = childMap;
-                  mountNode = subNode;
-               }
+   public Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
+      if (mountPoint.getVFS() != this) {
+         throw new IOException("VirtualFile does not match VFS instance");
+      }
+      final VirtualFile parent = mountPoint.getParent();
+      if (parent == null) {
+         throw new IOException("Root filsystem already mounted");
+      }
+      final String name = mountPoint.getName();
+      final Mount mount = new Mount(fileSystem, mountPoint);
+      for (;;) {
+         Map<String, Mount> childMountMap = mounts.get(parent);
+         Map<String, Mount> newMap;
+         if (childMountMap == null) {
+            childMountMap = mounts.putIfAbsent(parent, Collections.singletonMap(name, mount));
+            if (childMountMap == null) {
+               return mount;
             }
          }
-      }
-      synchronized (mountNode) {
-         if (mountNode.mount != null) {
+         newMap = new HashMap<String, Mount>(childMountMap);
+         if (newMap.put(name, mount) != null) {
             throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
          }
-         final Mount mount = new Mount(fileSystem, realMountPoint);
-         mountNode.mount = mount;
-         log.debugf("Created mount %s for %s on %s at mount point '%s'", mount, fileSystem, this, mountPoint);
-         return mount;
+         if (mounts.replace(parent, childMountMap, newMap)) {
+            return mount;
+         }
       }
    }
 
@@ -164,9 +157,7 @@ public class VFS
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
-      final List<String> realPath = PathTokenizer.applySpecialPaths(PathTokenizer.getTokens(path));
-      final String realPathString = PathTokenizer.getRemainingPath(realPath, 0);
-      return new VirtualFile(this, realPath, realPathString);
+      return rootVirtualFile.getChild(path);
    }
 
    /**
@@ -260,63 +251,75 @@ public class VFS
       visitor.visit(file);
    }
 
-   /**
-    * Get the enclosing mounted FileSystem for the given path.
-    *
-    * @param pathTokens the path tokens
-    * @return the filesystem
-    */
-   Mount getMount(List<String> pathTokens)
-   {
-      MountNode mountNode = rootMountNode;
-      Mount mount = mountNode.mount;
-      for (String pathToken : pathTokens)
-      {
-         final Map<String, MountNode> childMap = mountNode.nodeMap;
-         if (childMap != null) {
-            mountNode = childMap.get(pathToken);
-            final Mount subMount = mountNode.mount;
-            if (subMount != null) {
-               mount = subMount;
-            }
+   Mount getMount(VirtualFile virtualFile) {
+      final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
+      for (;;) {
+         final VirtualFile parent = virtualFile.getParent();
+         if (parent == null) {
+            return rootMount;
+         }
+         final Map<String, Mount> parentMounts = mounts.get(parent);
+         if (parentMounts == null) {
+            virtualFile = parent;
          } else {
-            break;
+            final Mount mount = parentMounts.get(virtualFile.getName());
+            if (mount == null) {
+               virtualFile = parent;
+            } else {
+               return mount;
+            }
          }
       }
-      return mount;
    }
 
    /**
     * Get all immediate submounts for a path.
     *
-    * @param tokens the path tokens
+    * @param virtualFile the path
     * @return the collection of present mount (simple) names
     */
-   Iterator<String> getSubmounts(List<String> tokens)
+   Set<String> getSubmounts(VirtualFile virtualFile)
    {
-      MountNode mountNode = rootMountNode;
-      for (String pathToken : tokens)
+      final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
+      final Map<String, Mount> mountMap = mounts.get(virtualFile);
+      if (mountMap == null) {
+         return emptyRemovableSet();
+      }
+      return new HashSet<String>(mountMap.keySet());
+   }
+
+   @SuppressWarnings({ "unchecked" })
+   private static <E> Set<E> emptyRemovableSet() {
+      return EMPTY_REMOVABLE_SET;
+   }
+
+   private static final Set EMPTY_REMOVABLE_SET = new EmptyRemovableSet();
+
+   private static final class EmptyRemovableSet<E> extends AbstractSet<E> {
+
+      public boolean remove(Object o)
       {
-         final Map<String, MountNode> childMap = mountNode.nodeMap;
-         if (childMap != null) {
-            mountNode = childMap.get(pathToken);
-         } else {
-            return Collections.<String>emptyList().iterator();
-         }
+         return false;
       }
-      final List<String> list = new ArrayList<String>();
-      final Map<String, MountNode> childMap = mountNode.nodeMap;
-      if (childMap == null) {
-         return Collections.<String>emptySet().iterator();
-      }
-      for (Map.Entry<String, MountNode> entry : childMap.entrySet())
+
+      public boolean retainAll(Collection<?> c)
       {
-         final MountNode subNode = entry.getValue();
-         if (subNode.mount != null) {
-            list.add(entry.getKey());
-         }
+         return false;
       }
-      return list.iterator();
+
+      public void clear()
+      {
+      }
+
+      public Iterator<E> iterator()
+      {
+         return Collections.<E>emptySet().iterator();
+      }
+
+      public int size()
+      {
+         return 0;
+      }
    }
 
    /**
@@ -326,61 +329,50 @@ public class VFS
     */
    final class Mount implements Closeable {
       private final FileSystem fileSystem;
-      private final List<String> realMountPoint;
+      private final VirtualFile mountPoint;
 
-      private Mount(FileSystem fileSystem, List<String> realMountPoint)
+      Mount(FileSystem fileSystem, VirtualFile mountPoint)
       {
          this.fileSystem = fileSystem;
-         this.realMountPoint = realMountPoint;
+         this.mountPoint = mountPoint;
       }
 
       public void close() throws IOException
       {
-         unmountFrom(rootMountNode, realMountPoint.iterator());
-      }
-
-      private boolean unmountFrom(MountNode node, Iterator<String> iter)
-      {
-         synchronized (node) {
-            final Map<String, MountNode> nodeMap = node.nodeMap;
-            if (iter.hasNext()) {
-               if (nodeMap != null) {
-                  final String key = iter.next();
-                  final MountNode nextNode = nodeMap.get(key);
-                  if (nextNode == null) {
-                     return nodeMap.isEmpty();
-                  }
-                  final boolean emptySubNode = unmountFrom(nextNode, iter);
-                  if (emptySubNode) {
-                     final boolean otherChildren = nodeMap.size() > 1;
-                     // subnode is dead; remove it from our map
-                     if (otherChildren) {
-                        // there's other children; not dead yet
-                        final HashMap<String, MountNode> newMap = new HashMap<String, MountNode>(nodeMap);
-                        newMap.remove(key);
-                        node.nodeMap = newMap;
-                        return false;
-                     } else {
-                        // no other children; dead if there's no mount here
-                        node.nodeMap = null;
-                        return node.mount == null;
-                     }
-                  }
-                  // subnode isn't empty; not dead
-                  return false;
+         final String name = mountPoint.getName();
+         final VirtualFile parent = mountPoint.getParent();
+         final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.this.mounts;
+         for (;;) {
+            final Map<String, Mount> parentMounts = mounts.get(parent);
+            if (parentMounts == null) {
+               return;
+            }
+            final VFS.Mount mount = parentMounts.get(name);
+            if (mount != this) {
+               return;
+            }
+            final Map<String, Mount> newParentMounts;
+            if (parentMounts.size() == 2) {
+               final Iterator<Map.Entry<String, Mount>> ei = parentMounts.entrySet().iterator();
+               final Map.Entry<String, Mount> e1 = ei.next();
+               if (e1.getKey().equals(name)) {
+                  final Map.Entry<String, Mount> e2 = ei.next();
+                  newParentMounts = Collections.singletonMap(e2.getKey(), e2.getValue());
                } else {
-                  // dead node if there's no mount here
-                  return node.mount == null;
+                  newParentMounts = Collections.singletonMap(e1.getKey(), e1.getValue());
+               }
+               if (mounts.replace(parent, parentMounts, newParentMounts)) {
+                  return;
+               }
+            } else if (parentMounts.size() == 1) {
+               if (mounts.remove(parent, parentMounts)) {
+                  return;
                }
             } else {
-               if (node.mount == this) {
-                  node.mount = null;
-                  log.debugf("Unmounted %s for %s on %s", this, fileSystem, this);
-                  // the node is dead if there are no children
-                  return nodeMap == null;
-               } else {
-                  // Node must be already unmounted; do cleanup work anyway.
-                  return node.mount == null && nodeMap == null;
+               newParentMounts = new HashMap<String, Mount>(parentMounts);
+               newParentMounts.remove(name);
+               if (mounts.replace(parent, parentMounts, newParentMounts)) {
+                  return;
                }
             }
          }
@@ -391,29 +383,9 @@ public class VFS
          return fileSystem;
       }
 
-      List<String> getRealMountPoint()
+      VirtualFile getMountPoint()
       {
-         return realMountPoint;
-      }
-   }
-
-   /**
-    * A mount point node.  These nodes form a tree of possible mount points.
-    */
-   private static final class MountNode {
-
-      /**
-       * The immutable node map.  Since the map is immutable, changes to this field must be accomplished by replacing
-       * the field value with a new map (copy on write).  Modifications to this field are protected by {@code this}.
-       */
-      private volatile Map<String, MountNode> nodeMap;
-      /**
-       * The current mount at this point.  Modifications to this field are protected by {@code this}.
-       */
-      private volatile Mount mount;
-
-      private MountNode()
-      {
+         return mountPoint;
       }
    }
 }
