@@ -21,13 +21,16 @@
   */
 package org.jboss.virtual;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
@@ -214,7 +217,6 @@ public class VirtualFile implements Serializable
     * Get a {@code VirtualFile} which represents the parent of this instance.
     *
     * @return the parent or {@code null} if there is no parent
-    * @throws IOException for any problem accessing the virtual file system
     */
    public VirtualFile getParent()
    {
@@ -348,27 +350,50 @@ public class VirtualFile implements Serializable
     *
     * @param path the path
     * @return the child or {@code null} if not found
-    * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
     */
    public VirtualFile getChild(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
+
       final List<String> pathParts = PathTokenizer.getTokens(path);
       VirtualFile current = this;
       for (String part : pathParts)
       {
-         if (PathTokenizer.isCurrentToken(part)) {
-            continue;
-         } else if (PathTokenizer.isReverseToken(part)) {
+         if (PathTokenizer.isReverseToken(part))
+         {
             final VirtualFile parent = current.parent;
             current = parent == null ? current : parent;
-         } else {
+         }
+         else if (PathTokenizer.isCurrentToken(part) == false)
+         {
             current = new VirtualFile(vfs, part, current);
          }
       }
       return current;
+   }
+
+   /**
+    * Get file's URL.
+    *
+    * @return the url
+    * @throws IOException for any io error
+    */
+   public URL toURL() throws IOException
+   {
+      return VFSUtils.getVirtualURL(this);
+   }
+
+   /**
+    * Get file's URI.
+    *
+    * @return the uri
+    * @throws URISyntaxException for any error
+    */
+   public URI toURI() throws URISyntaxException
+   {
+      return VFSUtils.getVirtualURI(this);
    }
 
    public String toString()
