@@ -21,22 +21,24 @@
 */
 package org.jboss.virtual;
 
-import java.io.IOException;
 import java.io.Closeable;
-import java.util.List;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Collection;
-import java.util.AbstractSet;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import org.jboss.virtual.spi.RealFileSystem;
 import org.jboss.virtual.spi.FileSystem;
+import org.jboss.virtual.spi.RealFileSystem;
 
 /**
  * Virtual File System
@@ -83,6 +85,30 @@ public class VFS
    }
 
    /**
+    * Get file.
+    * Backcompatibility method.
+    *
+    * @param url the url
+    * @return the file matching url
+    */
+   public static VirtualFile getRoot(URL url)
+   {
+      return getInstance().getChild(url.getPath());
+   }
+
+   /**
+    * Get file.
+    * Backcompatibility method.
+    * 
+    * @param uri the uri
+    * @return the file matching uri
+    */
+   public static VirtualFile getRoot(URI uri)
+   {
+      return getInstance().getChild(uri.getPath());
+   }
+
+   /**
     * Initialize VFS protocol handlers package property. 
     */
    @SuppressWarnings({"deprecation", "unchecked"})
@@ -99,12 +125,6 @@ public class VFS
          pkgs = "org.jboss.virtual.protocol|" + pkgs;
          System.setProperty("java.protocol.handler.pkgs", pkgs);
       }
-//      org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory factory = org.jboss.virtual.plugins.context.VfsArchiveBrowserFactory.INSTANCE;
-//      // keep this until AOP and HEM uses VFS internally instead of the stupid ArchiveBrowser crap.
-//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsfile", factory);
-//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfszip", factory);
-//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfsjar", factory);
-//      org.jboss.util.file.ArchiveBrowser.factoryFinder.put("vfs", factory);
    }
 
    /**
