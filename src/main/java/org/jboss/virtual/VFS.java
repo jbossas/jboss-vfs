@@ -25,6 +25,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -90,10 +91,20 @@ public class VFS
     *
     * @param url the url
     * @return the file matching url
+    * @throws IOException if there is a problem accessing the VFS
     */
-   public static VirtualFile getRoot(URL url)
+   public static VirtualFile getRoot(URL url) throws IOException
    {
-      return getInstance().getChild(url.getPath());
+      try
+      {
+         return getRoot(url.toURI());
+      }
+      catch (URISyntaxException e)
+      {
+         IOException ioe = new IOException();
+         ioe.initCause(e);
+         throw ioe;
+      }
    }
 
    /**
@@ -102,8 +113,9 @@ public class VFS
     * 
     * @param uri the uri
     * @return the file matching uri
+    * @throws IOException if there is a problem accessing the VFS
     */
-   public static VirtualFile getRoot(URI uri)
+   public static VirtualFile getRoot(URI uri) throws IOException
    {
       return getInstance().getChild(uri.getPath());
    }
@@ -170,13 +182,13 @@ public class VFS
     *
     * @param path the child path
     * @return the child
-    * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the path is null
     */
    public VirtualFile getChild(String path)
    {
       if (path == null)
          throw new IllegalArgumentException("Null path");
+
       return rootVirtualFile.getChild(path);
    }
 
