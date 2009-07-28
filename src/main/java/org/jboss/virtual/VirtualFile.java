@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
@@ -236,6 +237,16 @@ public class VirtualFile implements Serializable
     */
    public VirtualFile[] getParentFiles() {
       return getParentFiles(0);
+   }
+
+   /**
+    * Get the all the parent files of this virtual file from this file to the root as a list.  The leafmost file will be at
+    * the start of the list, and the rootmost will be at the end.
+    *
+    * @return the list of parent files
+    */
+   public List<VirtualFile> getParentFileList() {
+      return Arrays.asList(getParentFiles());
    }
 
    private VirtualFile[] getParentFiles(int idx) {
