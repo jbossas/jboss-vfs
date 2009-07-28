@@ -77,6 +77,11 @@ public class VirtualFile implements Serializable
       return name;
    }
 
+   /**
+    * Get the simple VF name mapped to lowercase (x.java) (used by case-insensitive filesystems like ZIP).
+    *
+    * @return the lowercase simple file name
+    */
    public String getLowerCaseName()
    {
       return lcname;
@@ -223,6 +228,12 @@ public class VirtualFile implements Serializable
       return parent;
    }
 
+   /**
+    * Get the all the parent files of this virtual file from this file to the root.  The leafmost file will be at
+    * the start of the array, and the rootmost will be at the end.
+    *
+    * @return the array of parent files
+    */
    public VirtualFile[] getParentFiles() {
       return getParentFiles(0);
    }
@@ -396,11 +407,23 @@ public class VirtualFile implements Serializable
       return VFSUtils.getVirtualURI(this);
    }
 
+   /**
+    * Get a human-readable (but non-canonical) representation of this virtual file.
+    *
+    * @return the string
+    */
    public String toString()
    {
       return "Virtual file \"" + getPathName() + "\" for " + vfs;
    }
 
+   /**
+    * Determine whether the given object is equal to this one.  Returns true if the argument is a {@code VirtualFile}
+    * from the same {@code VFS} instance with the same name.
+    *
+    * @param o the other object
+    * @return {@code true} if they are equal
+    */
    public boolean equals(Object o)
    {
       if (this == o)
@@ -421,6 +444,11 @@ public class VirtualFile implements Serializable
          return parent.equals(that.parent);
    }
 
+   /**
+    * Get a hashcode for this virtual file.
+    *
+    * @return the hash code
+    */
    public int hashCode()
    {
       return hashCode;
