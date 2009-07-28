@@ -23,6 +23,9 @@ package org.jboss.virtual;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
@@ -35,11 +38,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Enumeration;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jboss.virtual.spi.FileSystem;
 import org.jboss.virtual.spi.RealFileSystem;
+import org.jboss.virtual.spi.JavaZipFileSystem;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Virtual File System
@@ -318,6 +326,270 @@ public class VFS
          return emptyRemovableSet();
       }
       return new HashSet<String>(mountMap.keySet());
+   }
+
+   private static Closeable doMount(final FileSystem fileSystem, final VirtualFile mountPoint) throws IOException
+   {
+      boolean ok = false;
+      try {
+         final Closeable mountHandle = getInstance().mount(mountPoint, fileSystem);
+         final Closeable closeable = new Closeable()
+         {
+            public void close() throws IOException
+            {
+               VFSUtils.safeClose(mountHandle);
+               VFSUtils.safeClose(fileSystem);
+            }
+         };
+         return closeable;
+      } finally {
+         if (! ok) {
+            VFSUtils.safeClose(fileSystem);
+         }
+      }
+   }
+
+   /**
+    * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
+    * system when closed.
+    *
+    * @param zipFile the zip file to mount
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      boolean ok = false;
+      final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
+      try {
+         final Closeable closeable = doMount(new JavaZipFileSystem(zipFile, tempDir), mountPoint);
+         ok = true;
+         return closeable;
+      } finally {
+         if (! ok) {
+            VFSUtils.safeClose(tempDir);
+         }
+      }
+   }
+
+   /**
+    * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
+    * system when closed.
+    *
+    * @param zipData an input stream containing the zip data
+    * @param zipName the name of the archive
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      boolean ok = false;
+      try {
+         final TempDir tempDir = tempFileProvider.createTempDir(zipName);
+         try {
+            final Closeable closeable = doMount(new JavaZipFileSystem(zipName, zipData, tempDir), mountPoint);
+            ok = true;
+            return closeable;
+         } finally {
+            if (! ok) {
+               VFSUtils.safeClose(tempDir);
+            }
+         }
+      } finally {
+         VFSUtils.safeClose(zipData);
+      }
+   }
+
+   /**
+    * Create and mount a real file system, returning a single handle which will unmount and close the filesystem when
+    * closed.
+    *
+    * @param realRoot the real filesystem root
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountReal(File realRoot, VirtualFile mountPoint) throws IOException
+   {
+      return doMount(new RealFileSystem(realRoot), mountPoint);
+   }
+
+   /**
+    * Create and mount a temporary file system, returning a single handle which will unmount and close the filesystem
+    * when closed.
+    *
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      boolean ok = false;
+      final TempDir tempDir = tempFileProvider.createTempDir("tmpfs");
+      try {
+         final Closeable closeable = doMount(new RealFileSystem(tempDir.getRoot()), mountPoint);
+         ok = true;
+         return new Closeable()
+         {
+            public void close() throws IOException
+            {
+               VFSUtils.safeClose(closeable);
+               VFSUtils.safeClose(tempDir);
+            }
+         };
+      } finally {
+         if (! ok) {
+            VFSUtils.safeClose(tempDir);
+         }
+      }
+   }
+
+   /**
+    * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
+    * close the filesystem when closed.
+    *
+    * @param zipFile the zip file to mount
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      boolean ok = false;
+      final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
+      try {
+         final File rootFile = tempDir.getRoot();
+         unzip(zipFile, rootFile);
+         final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
+         ok = true;
+         return new Closeable()
+         {
+            public void close() throws IOException
+            {
+               VFSUtils.safeClose(closeable);
+               VFSUtils.safeClose(tempDir);
+            }
+         };
+      } finally {
+         if (! ok) {
+            VFSUtils.safeClose(tempDir);
+         }
+      }
+   }
+
+   /**
+    * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
+    * close the filesystem when closed.  The given zip data stream is closed.
+    *
+    * @param zipData an input stream containing the zip data
+    * @param zipName the name of the archive
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      try {
+         boolean ok = false;
+         final TempDir tempDir = tempFileProvider.createTempDir(zipName);
+         try {
+            final File zipFile = File.createTempFile(zipName + "-", ".tmp");
+            try {
+               final FileOutputStream os = new FileOutputStream(zipFile);
+               try {
+                  // allow an error on close to terminate the unzip
+                  VFSUtils.copyStream(zipData, os);
+                  zipData.close();
+                  os.close();
+               } finally {
+                  VFSUtils.safeClose(zipData);
+                  VFSUtils.safeClose(os);
+               }
+               final File rootFile = tempDir.getRoot();
+               unzip(zipFile, rootFile);
+               final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
+               ok = true;
+               return new Closeable()
+               {
+                  public void close() throws IOException
+                  {
+                     VFSUtils.safeClose(closeable);
+                     VFSUtils.safeClose(tempDir);
+                  }
+               };
+            } finally {
+               zipFile.delete();
+            }
+         } finally {
+            if (! ok) {
+               VFSUtils.safeClose(tempDir);
+            }
+         }
+      } finally {
+         VFSUtils.safeClose(zipData);
+      }
+   }
+
+   /**
+    * Expand a zip file to a destination directory.  The directory must exist.  If an error occurs, the destination
+    * directory may contain a partially-extracted archive, so cleanup is up to the caller.
+    *
+    * @param zipFile the zip file
+    * @param destDir the destination directory
+    * @throws IOException if an error occurs
+    */
+   public static void unzip(File zipFile, File destDir) throws IOException
+   {
+      final ZipFile zip = new ZipFile(zipFile);
+      try {
+         final Set<File> createdDirs = new HashSet<File>();
+         final Enumeration<? extends ZipEntry> entries = zip.entries();
+         FILES_LOOP: while (entries.hasMoreElements()) {
+            final ZipEntry zipEntry = entries.nextElement();
+            final String name = zipEntry.getName();
+            final List<String> tokens = PathTokenizer.getTokens(name);
+            File current = destDir;
+            for (Iterator<String> it = tokens.iterator(); it.hasNext();)
+            {
+               String token = it.next();
+               if (PathTokenizer.isCurrentToken(token) || PathTokenizer.isReverseToken(token))
+               {
+                  // invalid file; skip it!
+                  continue FILES_LOOP;
+               }
+               current = new File(current, token);
+               if ((it.hasNext() || zipEntry.isDirectory()) && createdDirs.add(current))
+               {
+                  current.mkdir();
+               }
+            }
+            if (! zipEntry.isDirectory()) {
+               final InputStream is = zip.getInputStream(zipEntry);
+               try {
+                  final FileOutputStream os = new FileOutputStream(current);
+                  try {
+                     VFSUtils.copyStream(is, os);
+                     // allow an error on close to terminate the unzip
+                     is.close();
+                     os.close();
+                  } finally {
+                     VFSUtils.safeClose(os);
+                  }
+               } finally {
+                  VFSUtils.safeClose(is);
+               }
+            }
+         }
+      } finally {
+         VFSUtils.safeClose(zip);
+      }
    }
 
    @SuppressWarnings({ "unchecked" })

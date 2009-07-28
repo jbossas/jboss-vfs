@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.zip.ZipFile;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -477,6 +478,22 @@ public class VFSUtils
       if (ci != null) for (Closeable closeable : ci)
       {
          safeClose(closeable);
+      }
+   }
+
+   /**
+    * Safely close some resource without throwing an exception.  Any exception will be logged at TRACE level.
+    *
+    * @param zipFile the resource
+    */
+   public static void safeClose(final ZipFile zipFile)
+   {
+      if (zipFile != null) try {
+         zipFile.close();
+      }
+      catch (Exception e)
+      {
+         log.trace("Failed to close resource", e);
       }
    }
 }
