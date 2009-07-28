@@ -25,8 +25,6 @@ package org.jboss.virtual;
 import java.io.File;
 import java.io.IOException;
 import java.io.Closeable;
-import java.io.InputStream;
-import java.io.FileOutputStream;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,6 +38,7 @@ public final class TempFileProvider implements Closeable
 {
    private static final String TMP_DIR_PROPERTY = "jboss.server.temp.dir";
    private static final File TMP_ROOT;
+   private static final int RETRIES = 10;
    private final AtomicBoolean open = new AtomicBoolean(true);
 
    static {
@@ -64,133 +63,53 @@ public final class TempFileProvider implements Closeable
     */
    public static TempFileProvider create(String providerType, ScheduledExecutorService executor) throws IOException
    {
-      return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), 0, executor);
-   }
-
-   /**
-    * Create a temporary file provider for a given type and hash depth.  The hash depth is used to limit the number
-    * of files in a single directory.
-    *
-    * @param providerType the provider type string (used as a prefix in the temp file dir name)
-    * @param hashDepth the hash directory tree depth
-    * @return the new provider
-    * @throws IOException if an I/O error occurs
-    */
-   public static TempFileProvider create(String providerType, int hashDepth, ScheduledExecutorService executor) throws IOException
-   {
-      return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), hashDepth, executor);
+      return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), executor);
    }
 
    private final File providerRoot;
-   private final int hashDepth;
    private final ScheduledExecutorService executor;
 
-   private TempFileProvider(File providerRoot, int hashDepth, ScheduledExecutorService executor)
+   private TempFileProvider(File providerRoot, ScheduledExecutorService executor)
    {
       this.providerRoot = providerRoot;
       this.executor = executor;
-      if (hashDepth < 0 || hashDepth > 4) {
-         throw new IllegalArgumentException("Bad hashDepth");
-      }
-      this.hashDepth = hashDepth;
    }
 
    /**
-    * Create a temp file within this provider.
+    * Create a temp directory, into which temporary files may be placed.
     *
     * @param originalName the original file name
-    * @return the temporary file
-    * @throws IOException if an error occurs
+    * @return the temp directory
+    * @throws IOException
     */
-   public File createTempFile(String originalName) throws IOException {
-      return createTempFile(originalName, originalName.hashCode());
-   }
-
-   /**
-    * Create a temp file within this provider, using an alternate hash code.
-    *
-    * @param originalName the original file name
-    * @param hashCode the hash code to use
-    * @return the temporary file
-    * @throws IOException if an error occurs
-    */
-   public File createTempFile(String originalName, int hashCode) throws IOException {
+   public TempDir createTempDir(String originalName) throws IOException {
       if (! open.get()) {
          throw new IOException("Temp file provider closed");
       }
-      File root = providerRoot;
-      for (int i = 0; i < hashDepth; i ++) {
-         final int dc = hashCode & 0x7f;
-         root = new File(root, dc < 16 ? "0" + Integer.toHexString(dc) : Integer.toHexString(dc));
-         root.mkdir();
-         hashCode >>= 7;
+      final String name = createTempName(originalName + "-", "");
+      final File f = new File(providerRoot, name);
+      for (int i = 0; i < RETRIES; i ++) {
+         if (f.mkdir())
+            return new TempDir(this, f);
       }
-      return createTempFile("tmp", "-" + originalName, root);
-   }
-
-   /**
-    * Create a temp file within this provider, using an alternate hash code, and prepopulating the file from the given
-    * input stream.
-    *
-    * @param originalName the original file name
-    * @param hashCode the hash code to use
-    * @param sourceData the source input stream to use
-    * @return the temporary file
-    * @throws IOException if an error occurs
-    */
-   public File createTempFile(String originalName, int hashCode, InputStream sourceData) throws IOException {
-      if (! open.get()) {
-         throw new IOException("Temp file provider closed");
-      }
-      final File tempFile = createTempFile(originalName, hashCode);
-      boolean ok = false;
-      try {
-         final FileOutputStream fos = new FileOutputStream(tempFile);
-         try {
-            VFSUtils.copyStream(sourceData, fos);
-            fos.close();
-            sourceData.close();
-            return tempFile;
-         } finally {
-            VFSUtils.safeClose(fos);
-         }
-      } finally {
-         VFSUtils.safeClose(sourceData);
-         if (! ok) {
-            tempFile.delete();
-         }
-      }
+      final IOException eo = new IOException("Could not create directory after " + RETRIES + " attempts");
+      throw eo;
    }
 
    private static final Random rng = new SecureRandom();
 
    private static File createTempDir(String prefix, String suffix, File root) throws IOException
    {
-      for (int i = 0; i < 100; i ++) {
+      for (int i = 0; i < RETRIES; i ++) {
          final File f = new File(root, createTempName(prefix, suffix));
          if (f.mkdir())
             return f;
       }
-      final IOException eo = new IOException("Could not create directory after 100 attempts");
+      final IOException eo = new IOException("Could not create directory after " + RETRIES + " attempts");
       throw eo;
    }
 
-   private static File createTempFile(String prefix, String suffix, File root) throws IOException
-   {
-      IOException e = null;
-      for (int i = 0; i < 100; i ++) try {
-         final File f = new File(root, createTempName(prefix, suffix));
-         f.createNewFile();
-         return f;
-      } catch (IOException e2) {
-         e = e2;
-      }
-      final IOException eo = new IOException("Could not create file after 100 attempts");
-      eo.initCause(e);
-      throw eo;
-   }
-
-   private static String createTempName(String prefix, String suffix) {
+   static String createTempName(String prefix, String suffix) {
       return prefix + Long.toHexString(rng.nextLong()) + suffix;
    }
 
@@ -200,16 +119,7 @@ public final class TempFileProvider implements Closeable
    public void close() throws IOException
    {
       if (open.getAndSet(false)) {
-         final Runnable task = new Runnable()
-         {
-            public void run()
-            {
-               if (! recursiveDelete(providerRoot)) {
-                  executor.schedule(this, 30L, TimeUnit.SECONDS);
-               }
-            }
-         };
-         task.run();
+         new DeleteTask(providerRoot).run();
       }
    }
 
@@ -231,5 +141,22 @@ public final class TempFileProvider implements Closeable
          ok &= root.delete() || ! root.exists();
       }
       return ok;
+   }
+
+   class DeleteTask implements Runnable
+   {
+      private final File root;
+
+      public DeleteTask(File root)
+      {
+         this.root = root;
+      }
+
+      public void run()
+      {
+         if (! recursiveDelete(root)) {
+            executor.schedule(this, 30L, TimeUnit.SECONDS);
+         }
+      }
    }
 }

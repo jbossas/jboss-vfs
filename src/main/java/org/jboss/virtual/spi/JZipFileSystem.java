@@ -28,8 +28,8 @@ import org.jboss.jzipfile.ZipCatalog;
 import org.jboss.jzipfile.ZipEntryType;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.TempFileProvider;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,24 +56,31 @@ public final class JZipFileSystem implements FileSystem
    private final File zipFile;
    private final long zipTime;
    private final ZipNode rootNode;
-   private final TempFileProvider tempFileProvider;
+   private final TempDir tempDir;
+   private final File contentsDir;
 
    /**
     * Create a new instance.
     *
     * @param name the name of the source archive
     * @param inputStream an input stream from the source archive
-    * @param tempFileProvider the temp file provider to use
+    * @param tempDir the temp dir into which zip information is stored
     * @throws java.io.IOException if an I/O error occurs
     */
-   public JZipFileSystem(String name, InputStream inputStream, TempFileProvider tempFileProvider) throws IOException {
-      this(tempFileProvider.createTempFile(name, name.hashCode(), inputStream), tempFileProvider);
+   public JZipFileSystem(String name, InputStream inputStream, TempDir tempDir) throws IOException {
+      this(tempDir.createFile(name, inputStream), tempDir);
    }
 
-   public JZipFileSystem(File zipFile, TempFileProvider tempFileProvider) throws IOException
+   /**
+    * Create a new instance.
+    *
+    * @param zipFile the original archive file
+    * @param tempDir the temp dir into which zip information is stored
+    * @throws java.io.IOException if an I/O error occurs
+    */
+   public JZipFileSystem(File zipFile, TempDir tempDir) throws IOException
    {
       zipTime = zipFile.lastModified();
-      this.tempFileProvider = tempFileProvider;
       this.zipFile = zipFile;
       final ZipCatalog catalog = Zip.readCatalog(zipFile);
       final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), "", null);
@@ -106,6 +113,9 @@ public final class JZipFileSystem implements FileSystem
          }
       }
       this.rootNode = rootNode;
+      this.tempDir = tempDir;
+      contentsDir = tempDir.getFile("contents");
+      contentsDir.mkdir();
    }
 
    public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException
@@ -127,7 +137,7 @@ public final class JZipFileSystem implements FileSystem
          // nope, create a cached temp
          final ZipEntry entry = getNodeEntry(zipNode);
          final String name = entry.getName();
-         cachedFile = tempFileProvider.createTempFile(name, entry.hashCode());
+         cachedFile = new File(contentsDir, name);
          VFSUtils.copyStreamAndClose(Zip.openEntry(zipFile, entry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
          zipNode.cachedFile = cachedFile;
          return cachedFile;
@@ -228,7 +238,7 @@ public final class JZipFileSystem implements FileSystem
 
    public void close() throws IOException
    {
-      tempFileProvider.close();
+      tempDir.close();
    }
 
    private static final class ZipNode {
