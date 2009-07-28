@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Iterator;
 
 /**
  * A file system which is mounted in to the VFS.  This is the driver class for a given virtual file system type.  An
@@ -71,14 +70,54 @@ public interface FileSystem extends Closeable
     */
    boolean isReadOnly();
 
+   /**
+    * Attempt to delete a virtual file within this filesystem.
+    *
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return {@code true} if the file was deleted, {@code false} if it failed for any reason
+    * @throws IOException if an I/O error occurs
+    */
    boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
+   /**
+    * Get the size of a virtual file within this filesystem.
+    *
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return the size, in bytes
+    * @throws IOException if an I/O error occurs
+    */
    long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
+   /**
+    * Get the last modification time of a virtual file within this filesystem.
+    *
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return the modification time in milliseconds
+    * @throws IOException if an I/O error occurs
+    */
    long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
+   /**
+    * Ascertain the existance of a virtual file within this filesystem.
+    *
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return {@code true} if the file exists, {@code false} otherwise
+    * @throws IOException if an I/O error occurs
+    */
    boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
+   /**
+    * Ascertain whether a virtual file within this filesystem is a directory.
+    *
+    * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+    * @param target the virtual file to act upon
+    * @return {@code true} if the file exists and is a directory, {@code false} otherwise
+    * @throws IOException if an I/O error occurs
+    */
    boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
