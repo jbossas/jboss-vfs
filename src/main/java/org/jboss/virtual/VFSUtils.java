@@ -26,6 +26,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -397,6 +400,26 @@ public class VFSUtils
          rc = is.read(buff);
       }
       os.flush();
+   }
+
+   /**
+    * Write the given bytes to the given virtual file, replacing its current contents (if any) or creating a new
+    * file if one does not exist.
+    *
+    * @param virtualFile the virtual file to write
+    * @param bytes the bytes
+    * @throws IOException if an error occurs
+    */
+   public static void writeFile(VirtualFile virtualFile, byte[] bytes) throws IOException
+   {
+      final File file = virtualFile.getPhysicalFile();
+      final FileOutputStream fos = new FileOutputStream(file);
+      try {
+         fos.write(bytes);
+         fos.close();
+      } finally {
+         safeClose(fos);
+      }
    }
 
    /**
