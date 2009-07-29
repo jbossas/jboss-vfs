@@ -413,6 +413,7 @@ public class VFSUtils
    public static void writeFile(VirtualFile virtualFile, byte[] bytes) throws IOException
    {
       final File file = virtualFile.getPhysicalFile();
+      file.getParentFile().mkdirs();
       final FileOutputStream fos = new FileOutputStream(file);
       try {
          fos.write(bytes);
