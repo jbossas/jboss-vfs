@@ -269,6 +269,9 @@ public class VirtualFile implements Serializable
     */
    public List<VirtualFile> getChildren() throws IOException
    {
+      if (! isDirectory())
+         return Collections.emptyList();
+
       final VFS.Mount mount = vfs.getMount(this);
       final Set<String> submounts = vfs.getSubmounts(this);
       final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
@@ -295,11 +298,18 @@ public class VirtualFile implements Serializable
       if (! isDirectory())
          return Collections.emptyList();
 
-      if (filter == null)
-         filter = MatchAllVirtualFileFilter.INSTANCE;
-      FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, null);
-      visit(visitor);
-      return visitor.getMatched();
+      final VFS.Mount mount = vfs.getMount(this);
+      final Set<String> submounts = vfs.getSubmounts(this);
+      final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
+      final List<VirtualFile> virtualFiles = new ArrayList<VirtualFile>(names.size() + submounts.size());
+      for (String name : names)
+      {
+         final VirtualFile child = new VirtualFile(vfs, name, this);
+         if (filter.accepts(child))
+            virtualFiles.add(child);
+         submounts.remove(name);
+      }
+      return virtualFiles;
    }
 
    /**
@@ -348,10 +358,15 @@ public class VirtualFile implements Serializable
     */
    public void visit(VirtualFileVisitor visitor) throws IOException
    {
+      visit(visitor, true);
+   }
+
+   private void visit(VirtualFileVisitor visitor, boolean root) throws IOException
+   {
       final VisitorAttributes visitorAttributes = visitor.getAttributes();
       if (isDirectory())
       {
-         if (! visitorAttributes.isLeavesOnly())
+         if (! visitorAttributes.isLeavesOnly() || visitorAttributes.isIncludeRoot() && root)
          {
             visitor.visit(this);
          }
@@ -359,7 +374,7 @@ public class VirtualFile implements Serializable
          {
             for (VirtualFile virtualFile : getChildren())
             {
-               virtualFile.visit(visitor);
+               virtualFile.visit(visitor, false);
             }
          }
       } else {
