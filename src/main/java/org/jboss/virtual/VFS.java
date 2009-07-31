@@ -420,6 +420,21 @@ public class VFS
    }
 
    /**
+    * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
+    * system when closed.
+    *
+    * @param zipFile a zip file in the VFS
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      return mountZip(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
+   }
+
+   /**
     * Create and mount a real file system, returning a single handle which will unmount and close the filesystem when
     * closed.
     *
@@ -550,6 +565,21 @@ public class VFS
       } finally {
          VFSUtils.safeClose(zipData);
       }
+   }
+
+   /**
+    * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
+    * close the filesystem when closed.  The given zip data stream is closed.
+    *
+    * @param zipFile a zip file in the VFS
+    * @param mountPoint the point at which the filesystem should be mounted
+    * @param tempFileProvider the temporary file provider
+    * @return a handle
+    * @throws IOException if an error occurs
+    */
+   public static Closeable mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException
+   {
+      return mountZipExpanded(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
    }
 
    /**
