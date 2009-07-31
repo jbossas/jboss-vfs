@@ -601,8 +601,9 @@ public class VFS
             final ZipEntry zipEntry = entries.nextElement();
             final String name = zipEntry.getName();
             final List<String> tokens = PathTokenizer.getTokens(name);
+            final Iterator<String> it = tokens.iterator();
             File current = destDir;
-            for (Iterator<String> it = tokens.iterator(); it.hasNext();)
+            while (it.hasNext())
             {
                String token = it.next();
                if (PathTokenizer.isCurrentToken(token) || PathTokenizer.isReverseToken(token))
