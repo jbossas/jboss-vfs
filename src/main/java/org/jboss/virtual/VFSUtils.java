@@ -28,7 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,6 +67,9 @@ public class VFSUtils
    
    /** Standard separator for JAR URL */
    public static final String JAR_URL_SEPARATOR = "!/";
+
+   /** The default buffer size to use for copies */
+   public static final int DEFAULT_BUFFER_SIZE = 65536;
 
    private VFSUtils()
    {
@@ -366,12 +368,30 @@ public class VFSUtils
     */
    public static void copyStreamAndClose(InputStream is, OutputStream os) throws IOException
    {
+      copyStreamAndClose(is, os, DEFAULT_BUFFER_SIZE);
+   }
+
+   /**
+    * Copy input stream to output stream and close them both
+    *
+    * @param is input stream
+    * @param os output stream
+    * @param bufferSize the buffer size to use
+    * @throws IOException for any error
+    */
+   public static void copyStreamAndClose(InputStream is, OutputStream os, int bufferSize)
+         throws IOException
+   {
       try
       {
-         copyStream(is, os);
+         copyStream(is, os, bufferSize);
+         // throw an exception if the close fails since some data might be lost
+         is.close();
+         os.close();
       }
       finally
       {
+         // ...but still guarantee that they're both closed
          safeClose(is);
          safeClose(os);
       }
@@ -387,18 +407,28 @@ public class VFSUtils
     */
    public static void copyStream(InputStream is, OutputStream os) throws IOException
    {
+      copyStream(is, os, DEFAULT_BUFFER_SIZE);
+   }
+
+   /**
+    * Copy input stream to output stream without closing streams.
+    * Flushes output stream when done.
+    *
+    * @param is input stream
+    * @param os output stream
+    * @param bufferSize the buffer size to use
+    * @throws IOException for any error
+    */
+   public static void copyStream(InputStream is, OutputStream os, int bufferSize)
+         throws IOException
+   {
       if (is == null)
          throw new IllegalArgumentException("input stream is null");
       if (os == null)
          throw new IllegalArgumentException("output stream is null");
-
-      byte [] buff = new byte[65536];
-      int rc = is.read(buff);
-      while (rc != -1)
-      {
-         os.write(buff, 0, rc);
-         rc = is.read(buff);
-      }
+      byte [] buff = new byte[bufferSize];
+      int rc;
+      while ((rc = is.read(buff)) != -1) os.write(buff, 0, rc);
       os.flush();
    }
 
