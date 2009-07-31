@@ -530,7 +530,7 @@ public class VFS
          boolean ok = false;
          final TempDir tempDir = tempFileProvider.createTempDir(zipName);
          try {
-            final File zipFile = File.createTempFile(zipName + "-", ".tmp");
+            final File zipFile = File.createTempFile(zipName + "-", ".tmp", tempDir.getRoot());
             try {
                final FileOutputStream os = new FileOutputStream(zipFile);
                try {
