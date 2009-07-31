@@ -356,6 +356,7 @@ public class VFS
                VFSUtils.safeClose(fileSystem);
             }
          };
+         ok = true;
          return closeable;
       } finally {
          if (! ok) {
