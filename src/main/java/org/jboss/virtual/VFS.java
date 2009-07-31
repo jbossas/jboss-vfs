@@ -115,7 +115,10 @@ public class VFS
     * @param url the url
     * @return the file matching url
     * @throws IOException if there is a problem accessing the VFS
+    * @deprecated use {@link #getChild(URL)} instead
     */
+   @Deprecated
+   @SuppressWarnings("deprecation")
    public static VirtualFile getRoot(URL url) throws IOException
    {
       try
@@ -137,7 +140,9 @@ public class VFS
     * @param uri the uri
     * @return the file matching uri
     * @throws IOException if there is a problem accessing the VFS
+    * @deprecated use {@link #getChild(URI)} instead
     */
+   @Deprecated
    public static VirtualFile getRoot(URI uri) throws IOException
    {
       return getInstance().getChild(uri.getPath());
@@ -198,6 +203,30 @@ public class VFS
             return mount;
          }
       }
+   }
+
+   /**
+    * Find a virtual file.
+    *
+    * @param url the URL whose path component is the child path
+    * @return the child
+    * @throws IllegalArgumentException if the path is null
+    */
+   public VirtualFile getChild(URL url) throws URISyntaxException
+   {
+      return getChild(url.toURI());
+   }
+
+   /**
+    * Find a virtual file.
+    *
+    * @param uri the URI whose path component is the child path
+    * @return the child
+    * @throws IllegalArgumentException if the path is null
+    */
+   public VirtualFile getChild(URI uri)
+   {
+      return getChild(uri.getPath());
    }
 
    /**
