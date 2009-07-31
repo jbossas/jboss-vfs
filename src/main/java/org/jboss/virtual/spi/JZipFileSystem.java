@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * {@inheritDoc}
@@ -202,6 +203,9 @@ public final class JZipFileSystem implements FileSystem
    {
       final ZipNode zipNode = getExistingZipNode(mountPoint, target);
       final Map<String, ZipNode> children = zipNode.children;
+      if (children == null) {
+         return Collections.emptyList();
+      }
       final Collection<ZipNode> values = children.values();
       final List<String> names = new ArrayList<String>(values.size());
       for (ZipNode node : values)

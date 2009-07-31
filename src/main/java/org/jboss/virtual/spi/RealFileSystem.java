@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * A real filesystem.
@@ -109,7 +110,8 @@ public final class RealFileSystem implements FileSystem
    /** {@inheritDoc} */
    public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      return Arrays.asList(getFile(mountPoint, target).list());
+      final String[] names = getFile(mountPoint, target).list();
+      return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
    }
 
    /** {@inheritDoc} */

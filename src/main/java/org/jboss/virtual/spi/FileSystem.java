@@ -121,7 +121,8 @@ public interface FileSystem extends Closeable
    boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException;
 
    /**
-    * Read a directory.  Returns all the simple path names (excluding "." and "..").
+    * Read a directory.  Returns all the simple path names (excluding "." and "..").  The returned list will be
+    * empty if the node is not a directory.
     *
     * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
     * @param target the virtual file to act upon
