@@ -92,6 +92,7 @@ public final class TempDir implements Closeable
             VFSUtils.copyStream(sourceData, fos);
             fos.close();
             sourceData.close();
+            ok = true;
             return tempFile;
          } finally {
             VFSUtils.safeClose(fos);
