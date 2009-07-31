@@ -43,11 +43,15 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.jboss.virtual.spi.FileSystem;
 import org.jboss.virtual.spi.RealFileSystem;
 import org.jboss.virtual.spi.JavaZipFileSystem;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.logging.Logger;
 
 /**
  * Virtual File System
@@ -59,6 +63,10 @@ import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
  */
 public class VFS
 {
+   private static final Logger log = Logger.getLogger(VFS.class);
+
+   public static final boolean LEAK_DEBUGGING;
+
    private final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
    private final VirtualFile rootVirtualFile;
    private final Mount rootMount;
@@ -70,6 +78,13 @@ public class VFS
    static
    {
       init();
+      LEAK_DEBUGGING = AccessController.doPrivileged(new PrivilegedAction<Boolean>()
+      {
+         public Boolean run()
+         {
+            return Boolean.valueOf(System.getProperty("jboss.vfs.leakDebugging", "true"));
+         }
+      }).booleanValue();
    }
 
    /**
@@ -634,15 +649,21 @@ public class VFS
    final class Mount implements Closeable {
       private final FileSystem fileSystem;
       private final VirtualFile mountPoint;
+      private final StackTraceElement[] allocationPoint;
+      private final AtomicBoolean closed = new AtomicBoolean(false);
 
       Mount(FileSystem fileSystem, VirtualFile mountPoint)
       {
          this.fileSystem = fileSystem;
          this.mountPoint = mountPoint;
+         allocationPoint = Thread.currentThread().getStackTrace();
       }
 
       public void close() throws IOException
       {
+         if (closed.getAndSet(true)) {
+            return;
+         }
          final String name = mountPoint.getName();
          final VirtualFile parent = mountPoint.getParent();
          final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.this.mounts;
@@ -690,6 +711,30 @@ public class VFS
       VirtualFile getMountPoint()
       {
          return mountPoint;
+      }
+
+      protected void finalize() throws IOException
+      {
+         if (! closed.get()) {
+            final StackTraceElement[] allocationPoint = this.allocationPoint;
+            if (allocationPoint != null) {
+               final LeakDescriptor t = new LeakDescriptor();
+               t.setStackTrace(allocationPoint);
+               log.warnf(t, "A VFS mount (%s) was leaked!", mountPoint);
+            } else {
+               log.warnf("A VFS mount (%s) was leaked!", mountPoint);
+            }
+            close();
+         }
+      }
+   }
+
+   private static final class LeakDescriptor extends Throwable {
+      private static final long serialVersionUID = 6034058126740270584L;
+
+      public String toString()
+      {
+         return "Allocation stack trace:";
       }
    }
 }
