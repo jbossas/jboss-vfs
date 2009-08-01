@@ -401,7 +401,17 @@ public class VirtualFile implements Serializable
             current = new VirtualFile(vfs, part, current);
          }
       }
-      return current;
+      try
+      {
+         if (current.exists())
+            return current;
+      }
+      catch (IOException e)
+      {
+         // Fall-through
+      }
+
+      return null;
    }
 
    /**
