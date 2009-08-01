@@ -298,18 +298,11 @@ public class VirtualFile implements Serializable
       if (! isDirectory())
          return Collections.emptyList();
 
-      final VFS.Mount mount = vfs.getMount(this);
-      final Set<String> submounts = vfs.getSubmounts(this);
-      final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
-      final List<VirtualFile> virtualFiles = new ArrayList<VirtualFile>(names.size() + submounts.size());
-      for (String name : names)
-      {
-         final VirtualFile child = new VirtualFile(vfs, name, this);
-         if (filter.accepts(child))
-            virtualFiles.add(child);
-         submounts.remove(name);
-      }
-      return virtualFiles;
+      if (filter == null)
+         filter = MatchAllVirtualFileFilter.INSTANCE;
+      FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, null);
+      visit(visitor);
+      return visitor.getMatched();
    }
 
    /**
@@ -364,21 +357,21 @@ public class VirtualFile implements Serializable
    private void visit(VirtualFileVisitor visitor, boolean root) throws IOException
    {
       final VisitorAttributes visitorAttributes = visitor.getAttributes();
-      if (isDirectory())
-      {
-         if (! visitorAttributes.isLeavesOnly() || visitorAttributes.isIncludeRoot() && root)
-         {
-            visitor.visit(this);
-         }
-         if (visitorAttributes.isRecurse(this))
-         {
-            for (VirtualFile virtualFile : getChildren())
-            {
-               virtualFile.visit(visitor, false);
-            }
-         }
-      } else {
+
+      if (root && visitorAttributes.isIncludeRoot())
          visitor.visit(this);
+
+      if (! isDirectory())
+         return;
+
+      for (VirtualFile child : getChildren())
+      {
+         // Always visit a leaf, and visit directories when leaves only is false
+         if (!child.isDirectory() || !visitorAttributes.isLeavesOnly())
+            visitor.visit(child);
+
+         if (child.isDirectory() && visitorAttributes.isRecurse(child))
+            child.visit(visitor, false);
       }
    }
 
