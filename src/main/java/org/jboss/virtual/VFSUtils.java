@@ -64,7 +64,7 @@ public class VFSUtils
     * Constant representing the URL file protocol
     */
    public static final String FILE_PROTOCOL = "file";
-   
+
    /** Standard separator for JAR URL */
    public static final String JAR_URL_SEPARATOR = "!/";
 
@@ -124,7 +124,7 @@ public class VFSUtils
          throw new IllegalArgumentException("Null paths");
 
       boolean trace = log.isTraceEnabled();
-      
+
       Manifest manifest = getManifest(file);
       if (manifest == null)
          return;
@@ -148,7 +148,7 @@ public class VFSUtils
 
       if (trace)
          log.trace("Parsing Class-Path: " + classPath + " for " + file.getName() + " parent=" + parent.getName());
-      
+
       StringTokenizer tokenizer = new StringTokenizer(classPath);
       while (tokenizer.hasMoreTokens())
       {
@@ -465,7 +465,7 @@ public class VFSUtils
    public static URL getVirtualURL(VirtualFile file) throws MalformedURLException
    {
       // todo: specify the URL handler directly as a minor optimization
-      return new URL("file", "", -1, file.getPathName());
+      return new URL("file", "", -1, file.getPathName(true));
    }
 
    /**
@@ -477,7 +477,7 @@ public class VFSUtils
     */
    public static URI getVirtualURI(VirtualFile file) throws URISyntaxException
    {
-      return new URI("file", "", file.getPathName(), null);
+      return new URI("file", "", file.getPathName(true), null);
    }
 
    /**

@@ -91,9 +91,21 @@ public class VirtualFile implements Serializable
    /**
     * Get the absolute VFS full path name (/xxx/yyy/foo.ear/baz.jar/org/jboss/X.java)
     *
-    * @return the VFS relative path name
+    * @return the VFS full path name
     */
    public String getPathName()
+   {
+      return getPathName(false);
+   }
+
+   /**
+    * Get the absolute VFS full path name. If this is a URL then directory entries will
+    * have a trailing slash.
+    *
+    * @param url whether or not this path is being used for a URL
+    * @return the VFS full path name
+    */
+   String getPathName(boolean url)
    {
       final StringBuilder builder = new StringBuilder(160);
       final VirtualFile parent = this.parent;
@@ -106,6 +118,18 @@ public class VirtualFile implements Serializable
          }
          builder.append(name);
       }
+
+      try
+      {
+         // Perhaps this should be cached to avoid the fs stat call?
+         if (url && isDirectory())
+            builder.append("/");
+      }
+      catch (IOException e)
+      {
+         // Don't care
+      }
+
       return builder.toString();
    }
 

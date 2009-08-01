@@ -55,10 +55,10 @@ import org.jboss.logging.Logger;
 
 /**
  * Virtual File System
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
- * @author <a href="ales.justin@jboss.com">Ales Justin</a> 
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class VFS
@@ -136,7 +136,7 @@ public class VFS
    /**
     * Get file.
     * Backcompatibility method.
-    * 
+    *
     * @param uri the uri
     * @return the file matching uri
     * @throws IOException if there is a problem accessing the VFS
@@ -149,11 +149,14 @@ public class VFS
    }
 
    /**
-    * Initialize VFS protocol handlers package property. 
+    * Initialize VFS protocol handlers package property.
     */
    @SuppressWarnings({"deprecation", "unchecked"})
    public static void init()
    {
+      // A small hack that allows us to replace file for now
+      URL.setURLStreamHandlerFactory(null);
+
       String pkgs = System.getProperty("java.protocol.handler.pkgs");
       if (pkgs == null || pkgs.trim().length() == 0)
       {
@@ -256,7 +259,7 @@ public class VFS
 
    /**
     * Get the children
-    * 
+    *
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
     */
@@ -267,7 +270,7 @@ public class VFS
 
    /**
     * Get the children
-    * 
+    *
     * @param filter to filter the children
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
@@ -276,12 +279,12 @@ public class VFS
    {
       return getRootVirtualFile().getChildren(filter);
    }
-   
+
    /**
     * Get all the children recursively<p>
-    * 
+    *
     * This always uses {@link VisitorAttributes#RECURSE}
-    * 
+    *
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
     */
@@ -289,12 +292,12 @@ public class VFS
    {
       return getRootVirtualFile().getChildrenRecursively(null);
    }
-   
+
    /**
     * Get all the children recursively<p>
-    * 
+    *
     * This always uses {@link VisitorAttributes#RECURSE}
-    * 
+    *
     * @param filter to filter the children
     * @return the children
     * @throws IOException for any problem accessing the virtual file system
@@ -303,10 +306,10 @@ public class VFS
    {
       return getRootVirtualFile().getChildrenRecursively(filter);
    }
-   
+
    /**
     * Visit the virtual file system from the root
-    * 
+    *
     * @param visitor the visitor
     * @throws IOException for any problem accessing the VFS
     * @throws IllegalArgumentException if the visitor is null
@@ -318,7 +321,7 @@ public class VFS
 
    /**
     * Visit the virtual file system
-    * 
+    *
     * @param file the file
     * @param visitor the visitor
     * @throws IOException for any problem accessing the VFS

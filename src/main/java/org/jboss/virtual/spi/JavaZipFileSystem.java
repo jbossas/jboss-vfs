@@ -55,6 +55,7 @@ import java.util.zip.ZipEntry;
 public final class JavaZipFileSystem implements FileSystem
 {
    private final ZipFile zipFile;
+   private final File archiveFile;
    private final long zipTime;
    private final ZipNode rootNode;
    private final TempDir tempDir;
@@ -84,9 +85,11 @@ public final class JavaZipFileSystem implements FileSystem
       zipTime = archiveFile.lastModified();
       final ZipFile zipFile;
       this.zipFile = zipFile = new ZipFile(archiveFile);
+      this.archiveFile = archiveFile;
       this.tempDir = tempDir;
       final Enumeration<? extends ZipEntry> entries = zipFile.entries();
       final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), "", null);
+
       FILES: for (ZipEntry entry : iter(entries))
       {
          final String name = entry.getName();
@@ -159,6 +162,10 @@ public final class JavaZipFileSystem implements FileSystem
       if (cachedFile != null) {
          return new FileInputStream(cachedFile);
       }
+      if (rootNode == zipNode) {
+         return new FileInputStream(archiveFile);
+      }
+
       final ZipEntry entry = zipNode.entry;
       if (entry == null) {
          throw new IOException("Not a file: \"" + target.getPathName() + "\"");
@@ -178,6 +185,11 @@ public final class JavaZipFileSystem implements FileSystem
       final ZipNode zipNode = getExistingZipNode(mountPoint, target);
       final File cachedFile = zipNode.cachedFile;
       final ZipEntry entry = zipNode.entry;
+
+      if (zipNode == rootNode) {
+         return archiveFile.length();
+      }
+
       return cachedFile != null ? cachedFile.length() : entry == null ? 0L : entry.getSize();
    }
 
