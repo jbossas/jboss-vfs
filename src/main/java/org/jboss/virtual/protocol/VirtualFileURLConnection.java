@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FilePermission;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.security.Permission;
 
 import org.jboss.virtual.VFS;
@@ -47,7 +48,7 @@ class VirtualFileURLConnection extends URLConnection
    public VirtualFileURLConnection(URL url) throws IOException
    {
       super(url);
-      file = VFS.getInstance().getChild(url.getPath());
+      file = VFS.getInstance().getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
    }
 
    public void connect() throws IOException
