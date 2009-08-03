@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.virtual.support;
+package org.jboss.test.vfs.support;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,11 +36,10 @@ import java.util.zip.ZipInputStream;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
-import org.jboss.virtual.protocol.file.VirtualFileURLConnection;
 
 /**
  * ClassPathIterator logic used by UCL package mapping
- * 
+ *
  * @author Scott.Stark@jboss.org
  * @version $Revision:$
  */
@@ -58,25 +58,10 @@ public class ClassPathIterator
       if( protocol == null )
       {
       }
-      else if( protocol.equals("file") )
+      else if( protocol.equals("file") || protocol.startsWith("vfs"))
       {
-         File tmp = new File(url.getFile());
-         if( tmp.isDirectory() )
-         {
-            rootLength = tmp.getPath().length() + 1;
-            fileIter = new FileIterator(tmp);
-         }
-         else
-         {
-            // Assume this is a jar archive
-            InputStream is = new FileInputStream(tmp);
-            zis = new ZipInputStream(is);
-         }
-      }
-      else if( protocol.startsWith("vfs") )
-      {
-         VirtualFileURLConnection conn = (VirtualFileURLConnection)url.openConnection();
-         vf = conn.getContent();
+         URLConnection conn = url.openConnection();
+         vf = (VirtualFile) conn.getContent();
          rootLength = vf.getPathName().length() + 1;
          vfIter = new VirtualFileIterator(vf);
       }

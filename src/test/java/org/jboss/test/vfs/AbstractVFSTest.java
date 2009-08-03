@@ -19,7 +19,7 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.test.virtual.test;
+package org.jboss.test.vfs;
 
 import java.net.URL;
 
@@ -28,7 +28,7 @@ import org.jboss.test.BaseTestCase;
 
 /**
  * AbstractVFSTest.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
