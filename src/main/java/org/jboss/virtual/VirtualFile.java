@@ -53,7 +53,6 @@ public class VirtualFile implements Serializable
    private static final long serialVersionUID = 1L;
    private final String name;
    private final String lcname;
-   private final VFS vfs;
    private final VirtualFile parent;
    private final int hashCode;
 
@@ -61,7 +60,6 @@ public class VirtualFile implements Serializable
    {
       this.name = name;
       lcname = name.toLowerCase();
-      this.vfs = vfs;
       this.parent = parent;
       int result = parent == null ? vfs.hashCode() : parent.hashCode();
       result = 31 * result + name.hashCode();
@@ -141,7 +139,7 @@ public class VirtualFile implements Serializable
     */
    public long getLastModified() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().getLastModified(mount.getMountPoint(), this);
    }
 
@@ -153,7 +151,7 @@ public class VirtualFile implements Serializable
     */
    public long getSize() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().getSize(mount.getMountPoint(), this);
    }
 
@@ -164,7 +162,7 @@ public class VirtualFile implements Serializable
     */
    public boolean exists() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().exists(mount.getMountPoint(), this);
    }
 
@@ -190,7 +188,7 @@ public class VirtualFile implements Serializable
     */
    public boolean isDirectory() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().isDirectory(mount.getMountPoint(), this);
    }
 
@@ -202,7 +200,7 @@ public class VirtualFile implements Serializable
     */
    public InputStream openStream() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
    }
 
@@ -214,7 +212,7 @@ public class VirtualFile implements Serializable
     */
    public boolean delete() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().delete(mount.getMountPoint(), this);
    }
 
@@ -229,7 +227,7 @@ public class VirtualFile implements Serializable
     */
    public File getPhysicalFile() throws IOException
    {
-      final VFS.Mount mount = vfs.getMount(this);
+      final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().getFile(mount.getMountPoint(), this);
    }
 
@@ -240,7 +238,7 @@ public class VirtualFile implements Serializable
     */
    public VFS getVFS()
    {
-      return vfs;
+      return VFS.instance;
    }
 
    /**
@@ -296,6 +294,7 @@ public class VirtualFile implements Serializable
       if (! isDirectory())
          return Collections.emptyList();
 
+      VFS vfs = VFS.instance;
       final VFS.Mount mount = vfs.getMount(this);
       final Set<String> submounts = vfs.getSubmounts(this);
       final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
@@ -411,6 +410,8 @@ public class VirtualFile implements Serializable
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
+      VFS vfs = VFS.instance;
+
       final List<String> pathParts = PathTokenizer.getTokens(path);
       VirtualFile current = this;
       for (String part : pathParts)
@@ -467,7 +468,7 @@ public class VirtualFile implements Serializable
     */
    public String toString()
    {
-      return "Virtual file \"" + getPathName() + "\" for " + vfs;
+      return "Virtual file \"" + getPathName() + "\" for " + VFS.instance;
    }
 
    /**
@@ -487,8 +488,6 @@ public class VirtualFile implements Serializable
       if (hashCode != that.hashCode)
          return false;
       if (! name.equals(that.name))
-         return false;
-      if (vfs != that.vfs)
          return false;
       final VirtualFile parent = this.parent;
       if (parent == null)

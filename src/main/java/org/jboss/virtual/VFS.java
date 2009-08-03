@@ -70,7 +70,8 @@ public class VFS
    private final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
    private final VirtualFile rootVirtualFile;
    private final Mount rootMount;
-   private static VFS instance = new VFS();
+
+   static VFS instance = new VFS();
 
    // todo - LRU VirtualFiles?
    // todo - LRU String intern?

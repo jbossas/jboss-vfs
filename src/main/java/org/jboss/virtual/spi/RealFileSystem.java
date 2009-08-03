@@ -70,7 +70,7 @@ public final class RealFileSystem implements FileSystem
    /** {@inheritDoc} */
    public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException
    {
-      if (mountPoint == target) {
+      if (mountPoint.equals(target)) {
          return realRoot;
       } else {
          return new File(getFile(mountPoint, target.getParent()), target.getName());
