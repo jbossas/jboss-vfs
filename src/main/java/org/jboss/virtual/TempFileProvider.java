@@ -36,13 +36,17 @@ import java.security.SecureRandom;
  */
 public final class TempFileProvider implements Closeable
 {
-   private static final String TMP_DIR_PROPERTY = "jboss.server.temp.dir";
+   private static final String JBOSS_TMP_DIR_PROPERTY = "jboss.server.temp.dir";
+   private static final String JVM_TMP_DIR_PROPERTY = "java.io.tmpdir";
    private static final File TMP_ROOT;
    private static final int RETRIES = 10;
    private final AtomicBoolean open = new AtomicBoolean(true);
 
    static {
-      final String configTmpDir = System.getProperty(TMP_DIR_PROPERTY);
+      String configTmpDir = System.getProperty(JBOSS_TMP_DIR_PROPERTY);
+      if (configTmpDir == null)
+         configTmpDir = System.getProperty(JVM_TMP_DIR_PROPERTY);
+
       try
       {
          TMP_ROOT = new File(configTmpDir, "vfs");
