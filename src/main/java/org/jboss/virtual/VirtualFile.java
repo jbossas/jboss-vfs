@@ -116,18 +116,9 @@ public class VirtualFile implements Serializable
          }
          builder.append(name);
       }
-
-      try
-      {
-         // Perhaps this should be cached to avoid the fs stat call?
-         if (url && isDirectory())
-            builder.append("/");
-      }
-      catch (IOException e)
-      {
-         // Don't care
-      }
-
+      // Perhaps this should be cached to avoid the fs stat call?
+      if (url && isDirectory())
+         builder.append("/");
       return builder.toString();
    }
 
