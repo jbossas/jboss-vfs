@@ -68,7 +68,7 @@ public final class RealFileSystem implements FileSystem
    }
 
    /** {@inheritDoc} */
-   public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException
+   public File getFile(VirtualFile mountPoint, VirtualFile target)
    {
       if (mountPoint.equals(target)) {
          return realRoot;
@@ -102,7 +102,7 @@ public final class RealFileSystem implements FileSystem
    }
 
    /** {@inheritDoc} */
-   public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException
+   public boolean isDirectory(VirtualFile mountPoint, VirtualFile target)
    {
       return getFile(mountPoint, target).isDirectory();
    }

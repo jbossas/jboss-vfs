@@ -193,7 +193,7 @@ public final class JZipFileSystem implements FileSystem
       }
    }
 
-   public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException
+   public boolean isDirectory(VirtualFile mountPoint, VirtualFile target)
    {
       final ZipNode zipNode = rootNode.find(mountPoint, target);
       return zipNode != null && zipNode.entry == null;

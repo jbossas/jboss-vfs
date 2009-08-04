@@ -557,11 +557,34 @@ public class VFSUtils
     * @param root the real file to delete
     * @return {@code true} if the file was deleted
     */
-   public static boolean recursiveDelete(File root) {
+   public static boolean recursiveDelete(File root)
+   {
       boolean ok = true;
       if (root.isDirectory()) {
          final File[] files = root.listFiles();
          for (File file : files)
+         {
+            ok &= recursiveDelete(file);
+         }
+         return ok && (root.delete() || ! root.exists());
+      } else {
+         ok &= root.delete() || ! root.exists();
+      }
+      return ok;
+   }
+
+   /**
+    * Attempt to recursively delete a virtual file.
+    *
+    * @param root the virtual file to delete
+    * @return {@code true} if the file was deleted
+    */
+   public static boolean recursiveDelete(VirtualFile root) throws IOException
+   {
+      boolean ok = true;
+      if (root.isDirectory()) {
+         final List<VirtualFile> files = root.getChildren();
+         for (VirtualFile file : files)
          {
             ok &= recursiveDelete(file);
          }

@@ -186,7 +186,7 @@ public class VirtualFile implements Serializable
     * @return {@code true} if it is a directory, {@code false} otherwise
     * @throws IOException if an I/O error occurs
     */
-   public boolean isDirectory() throws IOException
+   public boolean isDirectory()
    {
       final VFS.Mount mount = VFS.instance.getMount(this);
       return mount.getFileSystem().isDirectory(mount.getMountPoint(), this);

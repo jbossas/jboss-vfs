@@ -118,7 +118,7 @@ public interface FileSystem extends Closeable
     * @return {@code true} if the file exists and is a directory, {@code false} otherwise
     * @throws IOException if an I/O error occurs
     */
-   boolean isDirectory(VirtualFile mountPoint, VirtualFile target) throws IOException;
+   boolean isDirectory(VirtualFile mountPoint, VirtualFile target);
 
    /**
     * Read a directory.  Returns all the simple path names (excluding "." and "..").  The returned list will be
