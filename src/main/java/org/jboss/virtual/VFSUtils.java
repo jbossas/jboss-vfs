@@ -550,4 +550,19 @@ public class VFSUtils
          log.trace("Failed to close resource", e);
       }
    }
+
+   public static boolean recursiveDelete(File root) {
+      boolean ok = true;
+      if (root.isDirectory()) {
+         final File[] files = root.listFiles();
+         for (File file : files)
+         {
+            ok &= recursiveDelete(file);
+         }
+         return ok && (root.delete() || ! root.exists());
+      } else {
+         ok &= root.delete() || ! root.exists();
+      }
+      return ok;
+   }
 }

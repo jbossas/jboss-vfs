@@ -132,21 +132,6 @@ public final class TempFileProvider implements Closeable
       VFSUtils.safeClose(this);
    }
 
-   private static boolean recursiveDelete(File root) {
-      boolean ok = true;
-      if (root.isDirectory()) {
-         final File[] files = root.listFiles();
-         for (File file : files)
-         {
-            ok &= recursiveDelete(file);
-         }
-         return ok && (root.delete() || ! root.exists());
-      } else {
-         ok &= root.delete() || ! root.exists();
-      }
-      return ok;
-   }
-
    class DeleteTask implements Runnable
    {
       private final File root;
@@ -158,7 +143,7 @@ public final class TempFileProvider implements Closeable
 
       public void run()
       {
-         if (! recursiveDelete(root)) {
+         if (! VFSUtils.recursiveDelete(root)) {
             executor.schedule(this, 30L, TimeUnit.SECONDS);
          }
       }
