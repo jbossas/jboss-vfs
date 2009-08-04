@@ -551,6 +551,12 @@ public class VFSUtils
       }
    }
 
+   /**
+    * Attempt to recursively delete a real file.
+    *
+    * @param root the real file to delete
+    * @return {@code true} if the file was deleted
+    */
    public static boolean recursiveDelete(File root) {
       boolean ok = true;
       if (root.isDirectory()) {
