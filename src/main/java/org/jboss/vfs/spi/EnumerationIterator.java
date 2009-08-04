@@ -25,27 +25,23 @@ package org.jboss.vfs.spi;
 import java.util.Iterator;
 import java.util.Enumeration;
 
-class EnumerationIterator<T> implements Iterator<T>
-{
-   private final Enumeration<T> entries;
+class EnumerationIterator<T> implements Iterator<T> {
 
-   public EnumerationIterator(Enumeration<T> entries)
-   {
-      this.entries = entries;
-   }
+    private final Enumeration<T> entries;
 
-   public boolean hasNext()
-   {
-      return entries.hasMoreElements();
-   }
+    public EnumerationIterator(Enumeration<T> entries) {
+        this.entries = entries;
+    }
 
-   public T next()
-   {
-      return entries.nextElement();
-   }
+    public boolean hasNext() {
+        return entries.hasMoreElements();
+    }
 
-   public void remove()
-   {
-      throw new UnsupportedOperationException();
-   }
+    public T next() {
+        return entries.nextElement();
+    }
+
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 }

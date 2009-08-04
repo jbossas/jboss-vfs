@@ -27,6 +27,6 @@ import org.jboss.vfs.protocol.VirtualFileURLStreamHandler;
 /**
  * Stub handler class.
  */
-public final class Handler extends VirtualFileURLStreamHandler
-{
+public final class Handler extends VirtualFileURLStreamHandler {
+
 }

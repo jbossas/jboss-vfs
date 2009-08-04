@@ -33,53 +33,41 @@ import org.xml.sax.InputSource;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class VFSInputSource extends InputSource
-{
-   private VirtualFile file;
+public class VFSInputSource extends InputSource {
 
-   public VFSInputSource(VirtualFile file)
-   {
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
+    private VirtualFile file;
 
-      this.file = file;
-   }
+    public VFSInputSource(VirtualFile file) {
+        if (file == null)
+            throw new IllegalArgumentException("Null file");
+        this.file = file;
+    }
 
-   @Override
-   public String getSystemId()
-   {
-      try
-      {
-         return VFSUtils.getVirtualURI(file).toString();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
+    @Override
+    public String getSystemId() {
+        try {
+            return VFSUtils.getVirtualURI(file).toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   @Override
-   public InputStream getByteStream()
-   {
-      try
-      {
-         return file.openStream();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
+    @Override
+    public InputStream getByteStream() {
+        try {
+            return file.openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   @Override
-   public Reader getCharacterStream()
-   {
-      return new InputStreamReader(getByteStream());
-   }
+    @Override
+    public Reader getCharacterStream() {
+        return new InputStreamReader(getByteStream());
+    }
 
-   @Override
-   public String toString()
-   {
-      return file.getPathName();
-   }
+    @Override
+    public String toString() {
+        return file.getPathName();
+    }
 }

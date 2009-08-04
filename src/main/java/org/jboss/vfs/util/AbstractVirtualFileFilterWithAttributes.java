@@ -26,38 +26,36 @@ import org.jboss.vfs.VisitorAttributes;
 
 /**
  * AbstractVirtualFileFilterWithAttributes
- * 
+ *
  * @author adrian@jboss.org
  * @version $Revision: 44223 $
  */
-public abstract class AbstractVirtualFileFilterWithAttributes implements VirtualFileFilterWithAttributes
-{
-   /** The attributes */
-   private VisitorAttributes attributes;
-   
-   /**
-    * Create a new AbstractVirtualFileFilterWithAttributes,
-    * using {@link VisitorAttributes#DEFAULT}
-    */
-   public AbstractVirtualFileFilterWithAttributes()
-   {
-      this(null);
-   }
-   
-   /**
-    * Create a new AbstractVirtualFileFilterWithAttributes.
-    * 
-    * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
-    */
-   public AbstractVirtualFileFilterWithAttributes(VisitorAttributes attributes)
-   {
-      if (attributes == null)
-         attributes = VisitorAttributes.DEFAULT;
-      this.attributes = attributes;
-   }
-   
-   public VisitorAttributes getAttributes()
-   {
-      return attributes;
-   }
+public abstract class AbstractVirtualFileFilterWithAttributes implements VirtualFileFilterWithAttributes {
+
+    /**
+     * The attributes
+     */
+    private VisitorAttributes attributes;
+
+    /**
+     * Create a new AbstractVirtualFileFilterWithAttributes, using {@link VisitorAttributes#DEFAULT}
+     */
+    protected AbstractVirtualFileFilterWithAttributes() {
+        this(null);
+    }
+
+    /**
+     * Create a new AbstractVirtualFileFilterWithAttributes.
+     *
+     * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
+     */
+    protected AbstractVirtualFileFilterWithAttributes(VisitorAttributes attributes) {
+        if (attributes == null)
+            attributes = VisitorAttributes.DEFAULT;
+        this.attributes = attributes;
+    }
+
+    public VisitorAttributes getAttributes() {
+        return attributes;
+    }
 }

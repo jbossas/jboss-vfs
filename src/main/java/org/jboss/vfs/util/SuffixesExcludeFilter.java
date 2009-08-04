@@ -28,41 +28,40 @@ import org.jboss.vfs.VirtualFileFilter;
 
 /**
  * Filters out a set of suffixes
- * 
+ *
  * @author adrian@jboss.org
  * @version $Revision: 44223 $
  */
-public class SuffixesExcludeFilter implements VirtualFileFilter
-{
-   /** The suffixes */
-   private Collection<String> suffixes;
-   
-   /**
-    * Create a new SuffixMatchFilter,
-    * 
-    * @param suffixes the suffixes
-    * @throws IllegalArgumentException for null suffixes
-    */
-   public SuffixesExcludeFilter(Collection<String> suffixes)
-   {
-      if (suffixes == null)
-         throw new IllegalArgumentException("Null suffixes");
-      for (String suffix : suffixes)
-      {
-         if (suffix == null)
-            throw new IllegalArgumentException("Null suffix in " + suffixes);
-      }
-      this.suffixes = suffixes;
-   }
+public class SuffixesExcludeFilter implements VirtualFileFilter {
 
-   public boolean accepts(VirtualFile file)
-   {
-      String name = file.getName();
-      for(String suffix : suffixes)
-      {
-         if (name.endsWith(suffix))
-            return false;
-      }
-      return true;
-   }
+    /**
+     * The suffixes
+     */
+    private Collection<String> suffixes;
+
+    /**
+     * Create a new SuffixMatchFilter,
+     *
+     * @param suffixes the suffixes
+     *
+     * @throws IllegalArgumentException for null suffixes
+     */
+    public SuffixesExcludeFilter(Collection<String> suffixes) {
+        if (suffixes == null)
+            throw new IllegalArgumentException("Null suffixes");
+        for (String suffix : suffixes) {
+            if (suffix == null)
+                throw new IllegalArgumentException("Null suffix in " + suffixes);
+        }
+        this.suffixes = suffixes;
+    }
+
+    public boolean accepts(VirtualFile file) {
+        String name = file.getName();
+        for (String suffix : suffixes) {
+            if (name.endsWith(suffix))
+                return false;
+        }
+        return true;
+    }
 }

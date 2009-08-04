@@ -23,23 +23,23 @@ package org.jboss.vfs;
 
 /**
  * Visits a virtual file and its children
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public interface VirtualFileVisitor
-{
-   /**
-    * Get the search attribues for this visitor
-    * 
-    * @return the attributes
-    */
-   VisitorAttributes getAttributes();
-   
-   /**
-    * Visit a virtual file
-    * 
-    * @param virtualFile the virtual file being visited
-    */
-   void visit(VirtualFile virtualFile);
+public interface VirtualFileVisitor {
+
+    /**
+     * Get the search attribues for this visitor
+     *
+     * @return the attributes
+     */
+    VisitorAttributes getAttributes();
+
+    /**
+     * Visit a virtual file
+     *
+     * @param virtualFile the virtual file being visited
+     */
+    void visit(VirtualFile virtualFile);
 }

@@ -26,24 +26,24 @@ import org.jboss.vfs.VirtualFileFilter;
 
 /**
  * MatchAllVirtualFileFilter.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public class MatchAllVirtualFileFilter implements VirtualFileFilter
-{
-   /** The instance */
-   public static final MatchAllVirtualFileFilter INSTANCE = new MatchAllVirtualFileFilter();
+public class MatchAllVirtualFileFilter implements VirtualFileFilter {
 
-   /**
-    * Singleton 
-    */
-   private MatchAllVirtualFileFilter()
-   {
-   }
-   
-   public boolean accepts(VirtualFile file)
-   {
-      return true;
-   }
+    /**
+     * The instance
+     */
+    public static final MatchAllVirtualFileFilter INSTANCE = new MatchAllVirtualFileFilter();
+
+    /**
+     * Singleton
+     */
+    private MatchAllVirtualFileFilter() {
+    }
+
+    public boolean accepts(VirtualFile file) {
+        return true;
+    }
 }

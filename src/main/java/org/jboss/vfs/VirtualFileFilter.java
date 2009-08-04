@@ -28,13 +28,14 @@ package org.jboss.vfs;
  * @author adrian@jboss.org
  * @version $Revision: 44334 $
  */
-public interface VirtualFileFilter
-{
-   /**
-    * Match the virtual file
-    * 
-    * @param file the virtual file
-    * @return true when it matches
-    */
-   boolean accepts(VirtualFile file);
+public interface VirtualFileFilter {
+
+    /**
+     * Match the virtual file
+     *
+     * @param file the virtual file
+     *
+     * @return true when it matches
+     */
+    boolean accepts(VirtualFile file);
 }

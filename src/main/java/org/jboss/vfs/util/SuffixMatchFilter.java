@@ -30,87 +30,89 @@ import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VisitorAttributes;
 
 /**
- * Matches a file name against a list of suffixes. 
- * 
+ * Matches a file name against a list of suffixes.
+ *
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
  * @version $Revision: 44223 $
  */
-public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes
-{
-   private static Logger log = Logger.getLogger(SuffixMatchFilter.class);
-   /** The suffixes */
-   private Collection<String> suffixes;
-   private boolean trace;
+public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
 
-   /**
-    * Create a new SuffixMatchFilter,
-    * using {@link VisitorAttributes#DEFAULT}
-    * 
-    * @param suffix the suffix
-    * @throws IllegalArgumentException for a null suffix
-    */
-   public SuffixMatchFilter(String suffix)
-   {
-      this(suffix, null);
-   }
-   
-   /**
-    * Create a new SuffixMatchFilter.
-    * 
-    * @param suffix the suffix
-    * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
-    * @throws IllegalArgumentException for a null suffix
-    */
-   @SuppressWarnings("unchecked")      
-   public SuffixMatchFilter(String suffix, VisitorAttributes attributes)
-   {
-      this(Collections.singleton(suffix), attributes);
-   }
-   /**
-    * Create a new SuffixMatchFilter.
-    * @param suffixes - the list of file suffixes to accept.
-    * @throws IllegalArgumentException for a null suffixes
-    */
-   public SuffixMatchFilter(Collection<String> suffixes)
-   {
-      this(suffixes, null);
-   }
-   /**
-    * Create a new SuffixMatchFilter.
-    * @param suffixes - the list of file suffixes to accept.
-    * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
-    * @throws IllegalArgumentException for a null suffixes
-    */
-   public SuffixMatchFilter(Collection<String> suffixes, VisitorAttributes attributes)
-   {
-      super(attributes == null ? VisitorAttributes.DEFAULT : attributes);
-      if (suffixes == null)
-         throw new IllegalArgumentException("Null suffixes");
-      this.suffixes = new LinkedHashSet<String>();
-      this.suffixes.addAll(suffixes);
-      trace = log.isTraceEnabled();
-   }
+    private static Logger log = Logger.getLogger(SuffixMatchFilter.class);
+    /**
+     * The suffixes
+     */
+    private Collection<String> suffixes;
+    private boolean trace;
 
-   /**
-    * Accept any file that ends with one of the filter suffixes. This checks
-    * that the file.getName() endsWith a suffix.
-    * @return true if the file matches a suffix, false otherwise.
-    */
-   public boolean accepts(VirtualFile file)
-   {
-      String name = file.getName();
-      boolean accepts = false;
-      for(String suffix : suffixes)
-      {
-         if (name.endsWith(suffix))
-         {
-            accepts = true;
-            break;
-         }
-      }
-      if( trace )
-         log.trace(file+" accepted: "+accepts);
-      return accepts;
-   }
+    /**
+     * Create a new SuffixMatchFilter, using {@link VisitorAttributes#DEFAULT}
+     *
+     * @param suffix the suffix
+     *
+     * @throws IllegalArgumentException for a null suffix
+     */
+    public SuffixMatchFilter(String suffix) {
+        this(suffix, null);
+    }
+
+    /**
+     * Create a new SuffixMatchFilter.
+     *
+     * @param suffix the suffix
+     * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
+     *
+     * @throws IllegalArgumentException for a null suffix
+     */
+    @SuppressWarnings("unchecked")
+    public SuffixMatchFilter(String suffix, VisitorAttributes attributes) {
+        this(Collections.singleton(suffix), attributes);
+    }
+
+    /**
+     * Create a new SuffixMatchFilter.
+     *
+     * @param suffixes - the list of file suffixes to accept.
+     *
+     * @throws IllegalArgumentException for a null suffixes
+     */
+    public SuffixMatchFilter(Collection<String> suffixes) {
+        this(suffixes, null);
+    }
+
+    /**
+     * Create a new SuffixMatchFilter.
+     *
+     * @param suffixes - the list of file suffixes to accept.
+     * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
+     *
+     * @throws IllegalArgumentException for a null suffixes
+     */
+    public SuffixMatchFilter(Collection<String> suffixes, VisitorAttributes attributes) {
+        super(attributes == null ? VisitorAttributes.DEFAULT : attributes);
+        if (suffixes == null)
+            throw new IllegalArgumentException("Null suffixes");
+        this.suffixes = new LinkedHashSet<String>();
+        this.suffixes.addAll(suffixes);
+        trace = log.isTraceEnabled();
+    }
+
+    /**
+     * Accept any file that ends with one of the filter suffixes. This checks that the file.getName() endsWith a suffix.
+     *
+     * @return true if the file matches a suffix, false otherwise.
+     */
+    public boolean accepts(VirtualFile file) {
+        String name = file.getName();
+        boolean accepts = false;
+        for (String suffix : suffixes) {
+            if (name.endsWith(suffix)) {
+                accepts = true;
+                break;
+            }
+        }
+        if (trace)
+            log.trace(file + " accepted: " + accepts);
+        return accepts;
+    }
 }

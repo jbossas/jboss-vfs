@@ -26,37 +26,36 @@ import org.jboss.vfs.VisitorAttributes;
 
 /**
  * AbstractVirtualFileVisitor.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public abstract class AbstractVirtualFileVisitor implements VirtualFileVisitor
-{
-   /** The attributes */
-   private final VisitorAttributes attributes;
+public abstract class AbstractVirtualFileVisitor implements VirtualFileVisitor {
 
-   /**
-    * Create a new AbstractVirtualFileVisitor using the default visitor attributes
-    */
-   protected AbstractVirtualFileVisitor()
-   {
-      this(null);
-   }
+    /**
+     * The attributes
+     */
+    private final VisitorAttributes attributes;
 
-   /**
-    * Create a new AbstractVirtualFileVisitor using the default visitor attributes
-    * 
-    * @param attributes the attributes, uses the default if null
-    */
-   protected AbstractVirtualFileVisitor(VisitorAttributes attributes)
-   {
-      if (attributes == null)
-         attributes = VisitorAttributes.DEFAULT;
-      this.attributes = attributes;
-   }
-   
-   public VisitorAttributes getAttributes()
-   {
-      return attributes;
-   }
+    /**
+     * Create a new AbstractVirtualFileVisitor using the default visitor attributes
+     */
+    protected AbstractVirtualFileVisitor() {
+        this(null);
+    }
+
+    /**
+     * Create a new AbstractVirtualFileVisitor using the default visitor attributes
+     *
+     * @param attributes the attributes, uses the default if null
+     */
+    protected AbstractVirtualFileVisitor(VisitorAttributes attributes) {
+        if (attributes == null)
+            attributes = VisitorAttributes.DEFAULT;
+        this.attributes = attributes;
+    }
+
+    public VisitorAttributes getAttributes() {
+        return attributes;
+    }
 }

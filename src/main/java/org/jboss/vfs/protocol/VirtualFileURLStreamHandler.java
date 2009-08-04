@@ -33,42 +33,37 @@ import java.util.HashSet;
 /**
  * The VFS URL stream handler.
  */
-public abstract class VirtualFileURLStreamHandler extends URLStreamHandler
-{
-   private static final Set<String> locals;
+public abstract class VirtualFileURLStreamHandler extends URLStreamHandler {
 
-   static {
-      Set<String> set = new HashSet<String>();
-      set.add(null);
-      set.add("");
-      set.add("~");
-      set.add("localhost");
-      locals = set;
-   }
+    private static final Set<String> locals;
 
-   protected URLConnection openConnection(URL u) throws IOException
-   {
-      if (locals.contains(toLower(u.getHost())))
-      {
-         // the URL is a valid local URL
-         return new VirtualFileURLConnection(u);
-      }
+    static {
+        Set<String> set = new HashSet<String>();
+        set.add(null);
+        set.add("");
+        set.add("~");
+        set.add("localhost");
+        locals = set;
+    }
 
-      throw new IOException("Remote host access not supported for URLs of type \"" + u.getProtocol() + "\"");
-   }
+    protected URLConnection openConnection(URL u) throws IOException {
+        if (locals.contains(toLower(u.getHost()))) {
+            // the URL is a valid local URL
+            return new VirtualFileURLConnection(u);
+        }
+        throw new IOException("Remote host access not supported for URLs of type \"" + u.getProtocol() + "\"");
+    }
 
-   protected URLConnection openConnection(URL u, Proxy p) throws IOException
-   {
-      return openConnection(u);
-   }
+    protected URLConnection openConnection(URL u, Proxy p) throws IOException {
+        return openConnection(u);
+    }
 
-   @Override
-   protected boolean hostsEqual(URL url1, URL url2)
-   {
-      return locals.contains(toLower(url1.getHost())) && locals.contains(toLower(url2.getHost())) || super.hostsEqual(url1, url2);
-   }
+    @Override
+    protected boolean hostsEqual(URL url1, URL url2) {
+        return locals.contains(toLower(url1.getHost())) && locals.contains(toLower(url2.getHost())) || super.hostsEqual(url1, url2);
+    }
 
-   private static String toLower(String str) {
-      return str == null ? null : str.toLowerCase();
-   }
+    private static String toLower(String str) {
+        return str == null ? null : str.toLowerCase();
+    }
 }

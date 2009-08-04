@@ -41,62 +41,50 @@ import sun.net.www.ParseUtil;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-class VirtualFileURLConnection extends URLConnection
-{
-   protected VirtualFile file;
+class VirtualFileURLConnection extends URLConnection {
 
-   public VirtualFileURLConnection(URL url) throws IOException
-   {
-      super(url);
-      file = VFS.getInstance().getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
-   }
+    protected VirtualFile file;
 
-   public void connect() throws IOException
-   {
-   }
+    public VirtualFileURLConnection(URL url) throws IOException {
+        super(url);
+        file = VFS.getInstance().getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
+    }
 
-   public VirtualFile getContent() throws IOException
-   {
-      return file;
-   }
+    public void connect() throws IOException {
+    }
 
-   public int getContentLength()
-   {
-      try
-      {
-         final long size = file.getSize();
-         return size > (long)Integer.MAX_VALUE ? -1 : (int)size;
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
+    public VirtualFile getContent() throws IOException {
+        return file;
+    }
 
-   public long getLastModified()
-   {
-      try
-      {
-         return file.getLastModified();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
+    public int getContentLength() {
+        try {
+            final long size = file.getSize();
+            return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   public InputStream getInputStream() throws IOException
-   {
-      return file.openStream();
-   }
+    public long getLastModified() {
+        try {
+            return file.getLastModified();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   public Permission getPermission() throws IOException {
-      String decodedPath = ParseUtil.decode(url.getPath());
-      if (File.separatorChar == '/') {
-         return new FilePermission(decodedPath, "read");
-      } else {
-         return new FilePermission(
-               decodedPath.replace('/',File.separatorChar), "read");
-      }
-   }
+    public InputStream getInputStream() throws IOException {
+        return file.openStream();
+    }
+
+    public Permission getPermission() throws IOException {
+        String decodedPath = ParseUtil.decode(url.getPath());
+        if (File.separatorChar == '/') {
+            return new FilePermission(decodedPath, "read");
+        } else {
+            return new FilePermission(
+                    decodedPath.replace('/', File.separatorChar), "read");
+        }
+    }
 }
