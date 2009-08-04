@@ -56,12 +56,12 @@ public class VirtualFile implements Serializable
    private final VirtualFile parent;
    private final int hashCode;
 
-   VirtualFile(VFS vfs, String name, VirtualFile parent)
+   VirtualFile(String name, VirtualFile parent)
    {
       this.name = name;
       lcname = name.toLowerCase();
       this.parent = parent;
-      int result = parent == null ? vfs.hashCode() : parent.hashCode();
+      int result = parent == null ? 1 : parent.hashCode();
       result = 31 * result + name.hashCode();
       hashCode = result;
    }
@@ -301,7 +301,7 @@ public class VirtualFile implements Serializable
       final List<VirtualFile> virtualFiles = new ArrayList<VirtualFile>(names.size() + submounts.size());
       for (String name : names)
       {
-         final VirtualFile child = new VirtualFile(vfs, name, this);
+         final VirtualFile child = new VirtualFile(name, this);
          virtualFiles.add(child);
          submounts.remove(name);
       }
@@ -423,7 +423,7 @@ public class VirtualFile implements Serializable
          }
          else if (PathTokenizer.isCurrentToken(part) == false)
          {
-            current = new VirtualFile(vfs, part, current);
+            current = new VirtualFile(part, current);
          }
       }
       try

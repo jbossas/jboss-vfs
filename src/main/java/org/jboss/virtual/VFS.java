@@ -105,7 +105,7 @@ public class VFS
    {
       // By default, there's a root mount which points to the "real" FS
       //noinspection ThisEscapedInObjectConstruction
-      rootVirtualFile = new VirtualFile(this, "", null);
+      rootVirtualFile = new VirtualFile("", null);
       rootMount = new Mount(RealFileSystem.ROOT_INSTANCE, rootVirtualFile);
    }
 
