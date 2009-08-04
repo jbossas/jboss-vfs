@@ -47,12 +47,12 @@ import junit.framework.TestSuite;
 
 import org.jboss.test.vfs.support.ClassPathIterator;
 import org.jboss.test.vfs.support.ClassPathIterator.ClassPathEntry;
-import org.jboss.virtual.TempFileProvider;
-import org.jboss.virtual.VFS;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.VirtualFile;
-import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.util.SuffixMatchFilter;
+import org.jboss.vfs.TempFileProvider;
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSUtils;
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.VisitorAttributes;
+import org.jboss.vfs.util.SuffixMatchFilter;
 
 /**
  * Tests of the VFS implementation
