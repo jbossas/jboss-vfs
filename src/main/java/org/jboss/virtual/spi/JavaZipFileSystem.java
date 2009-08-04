@@ -22,7 +22,7 @@
 
 package org.jboss.virtual.spi;
 
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.util.PathTokenizer;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.TempDir;

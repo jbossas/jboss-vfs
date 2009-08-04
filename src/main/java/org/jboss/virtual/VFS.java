@@ -50,7 +50,7 @@ import java.security.PrivilegedAction;
 import org.jboss.virtual.spi.FileSystem;
 import org.jboss.virtual.spi.RealFileSystem;
 import org.jboss.virtual.spi.JavaZipFileSystem;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.util.PathTokenizer;
 import org.jboss.logging.Logger;
 
 /**

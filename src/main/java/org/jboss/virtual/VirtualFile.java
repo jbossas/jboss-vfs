@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.Arrays;
 
-import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
-import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.util.FilterVirtualFileVisitor;
+import org.jboss.virtual.util.MatchAllVirtualFileFilter;
+import org.jboss.virtual.util.PathTokenizer;
 
 /**
  * A virtual file.  This is a symbolic reference to a location in the virtual file system hierarchy.  Holding a

@@ -26,7 +26,7 @@ import org.jboss.jzipfile.ZipEntry;
 import org.jboss.jzipfile.Zip;
 import org.jboss.jzipfile.ZipCatalog;
 import org.jboss.jzipfile.ZipEntryType;
-import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.util.PathTokenizer;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.TempDir;

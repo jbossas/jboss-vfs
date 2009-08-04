@@ -19,44 +19,31 @@
 * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 */
-package org.jboss.virtual.plugins.vfs.helpers;
+package org.jboss.virtual.util;
 
-import org.jboss.virtual.VirtualFileVisitor;
-import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VirtualFileFilter;
 
 /**
- * AbstractVirtualFileVisitor.
+ * MatchAllVirtualFileFilter.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public abstract class AbstractVirtualFileVisitor implements VirtualFileVisitor
+public class MatchAllVirtualFileFilter implements VirtualFileFilter
 {
-   /** The attributes */
-   private final VisitorAttributes attributes;
+   /** The instance */
+   public static final MatchAllVirtualFileFilter INSTANCE = new MatchAllVirtualFileFilter();
 
    /**
-    * Create a new AbstractVirtualFileVisitor using the default visitor attributes
+    * Singleton 
     */
-   protected AbstractVirtualFileVisitor()
+   private MatchAllVirtualFileFilter()
    {
-      this(null);
-   }
-
-   /**
-    * Create a new AbstractVirtualFileVisitor using the default visitor attributes
-    * 
-    * @param attributes the attributes, uses the default if null
-    */
-   protected AbstractVirtualFileVisitor(VisitorAttributes attributes)
-   {
-      if (attributes == null)
-         attributes = VisitorAttributes.DEFAULT;
-      this.attributes = attributes;
    }
    
-   public VisitorAttributes getAttributes()
+   public boolean accepts(VirtualFile file)
    {
-      return attributes;
+      return true;
    }
 }

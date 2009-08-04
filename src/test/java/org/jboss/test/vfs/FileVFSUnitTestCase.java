@@ -52,7 +52,7 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VisitorAttributes;
-import org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter;
+import org.jboss.virtual.util.SuffixMatchFilter;
 
 /**
  * Tests of the VFS implementation
@@ -624,7 +624,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          expectedClasses.add(outer.getPathName() + "/jar1-filesonly.jar/org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class");
          expectedClasses.add(outer.getPathName() + "/jar2.jar/org/jboss/test/vfs/support/jar2/ClassInJar2.class");
          expectedClasses.add(outer.getPathName() + "/org/jboss/test/vfs/support/CommonClass.class");
-         super.enableTrace("org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter");
+         super.enableTrace("org.jboss.virtual.util.SuffixMatchFilter");
          SuffixMatchFilter classVisitor = new SuffixMatchFilter(".class", VisitorAttributes.RECURSE);
          List<VirtualFile> classes = outer.getChildren(classVisitor);
          int count = 0;
@@ -663,7 +663,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          expectedClasses.add(rootURL.getPath() + "/jar2.jar/org/jboss/test/vfs/support/jar2/ClassInJar2.class");
          // FIXME: .class files are not being copied from the resources directory
          expectedClasses.add(rootURL.getPath() + "/org/jboss/test/vfs/support/CommonClass.class");
-         super.enableTrace("org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter");
+         super.enableTrace("org.jboss.virtual.util.SuffixMatchFilter");
          SuffixMatchFilter classVisitor = new SuffixMatchFilter(".class", VisitorAttributes.RECURSE);
          List<VirtualFile> classes = testdir.getChildren(classVisitor);
          int count = 0;
@@ -699,7 +699,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          HashSet<String> expectedClasses = new HashSet<String>();
          expectedClasses.add(rootURL.getPath() + "/org/jboss/test/vfs/support/jar1/ClassInJar1.class");
          expectedClasses.add(rootURL.getPath() + "/org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class");
-         super.enableTrace("org.jboss.virtual.plugins.vfs.helpers.SuffixMatchFilter");
+         super.enableTrace("org.jboss.virtual.util.SuffixMatchFilter");
          SuffixMatchFilter classVisitor = new SuffixMatchFilter(".class", VisitorAttributes.RECURSE);
          List<VirtualFile> classes = testdir.getChildren(classVisitor);
          int count = 0;
