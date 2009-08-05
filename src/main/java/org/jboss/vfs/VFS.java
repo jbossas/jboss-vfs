@@ -150,10 +150,10 @@ public class VFS {
         URL.setURLStreamHandlerFactory(null);
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
         if (pkgs == null || pkgs.trim().length() == 0) {
-            pkgs = "org.jboss.virtual.protocol";
+            pkgs = "org.jboss.vfs.protocol";
             System.setProperty("java.protocol.handler.pkgs", pkgs);
-        } else if (pkgs.contains("org.jboss.virtual.protocol") == false) {
-            pkgs = "org.jboss.virtual.protocol|" + pkgs;
+        } else if (pkgs.contains("org.jboss.vfs.protocol") == false) {
+            pkgs = "org.jboss.vfs.protocol|" + pkgs;
             System.setProperty("java.protocol.handler.pkgs", pkgs);
         }
     }
