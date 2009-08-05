@@ -179,6 +179,7 @@ public class VFS {
         }
         final String name = mountPoint.getName();
         final Mount mount = new Mount(fileSystem, mountPoint);
+        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
         for (; ;) {
             Map<String, Mount> childMountMap = mounts.get(parent);
             Map<String, Mount> newMap;
