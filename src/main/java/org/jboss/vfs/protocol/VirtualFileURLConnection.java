@@ -21,10 +21,10 @@
 */
 package org.jboss.vfs.protocol;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.File;
 import java.io.FilePermission;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -32,7 +32,6 @@ import java.security.Permission;
 
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
-import sun.net.www.ParseUtil;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -79,7 +78,7 @@ class VirtualFileURLConnection extends URLConnection {
     }
 
     public Permission getPermission() throws IOException {
-        String decodedPath = ParseUtil.decode(url.getPath());
+        String decodedPath = URLDecoder.decode(url.getPath(), "UTF-8");
         if (File.separatorChar == '/') {
             return new FilePermission(decodedPath, "read");
         } else {
