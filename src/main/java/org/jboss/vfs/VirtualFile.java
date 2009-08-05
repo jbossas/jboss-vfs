@@ -396,13 +396,8 @@ public class VirtualFile implements Serializable {
                 current = new VirtualFile(part, current);
             }
         }
-        try {
-            if (current.exists())
-                return current;
-        }
-        catch (IOException e) {
-            // Fall-through
-        }
+        if (current.exists())
+            return current;
         return null;
     }
 
