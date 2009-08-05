@@ -81,10 +81,8 @@ public interface FileSystem extends Closeable {
      * @param target the virtual file to act upon
      *
      * @return {@code true} if the file was deleted, {@code false} if it failed for any reason
-     *
-     * @throws IOException if an I/O error occurs
      */
-    boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException;
+    boolean delete(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Get the size of a virtual file within this filesystem.
@@ -120,7 +118,7 @@ public interface FileSystem extends Closeable {
      *
      * @throws IOException if an I/O error occurs
      */
-    boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException;
+    boolean exists(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Ascertain whether a virtual file within this filesystem is a directory.
@@ -129,8 +127,6 @@ public interface FileSystem extends Closeable {
      * @param target the virtual file to act upon
      *
      * @return {@code true} if the file exists and is a directory, {@code false} otherwise
-     *
-     * @throws IOException if an I/O error occurs
      */
     boolean isDirectory(VirtualFile mountPoint, VirtualFile target);
 
@@ -142,10 +138,8 @@ public interface FileSystem extends Closeable {
      * @param target the virtual file to act upon
      *
      * @return the collection of children names
-     *
-     * @throws IOException if an I/O error occurs
      */
-    List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException;
+    List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Destroy this filesystem instance.  After this method is called, the filesystem may not be used in any way.  This

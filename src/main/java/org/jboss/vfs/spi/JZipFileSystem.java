@@ -154,8 +154,11 @@ public final class JZipFileSystem implements FileSystem {
         return Zip.openEntry(zipFile, entry);
     }
 
-    public boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        final ZipNode zipNode = getExistingZipNode(mountPoint, target);
+    public boolean delete(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = getZipNode(mountPoint, target);
+        if (zipNode == null) {
+            return false;
+        }
         final File cachedFile = zipNode.cachedFile;
         return cachedFile != null && cachedFile.delete();
     }
@@ -174,7 +177,7 @@ public final class JZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.lastModified() : entry == null ? zipTime : entry.getModificationTime();
     }
 
-    public boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public boolean exists(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         if (zipNode == null) {
             return false;
@@ -189,8 +192,11 @@ public final class JZipFileSystem implements FileSystem {
         return zipNode != null && zipNode.entry == null;
     }
 
-    public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        final ZipNode zipNode = getExistingZipNode(mountPoint, target);
+    public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = getZipNode(mountPoint, target);
+        if (zipNode == null) {
+            return Collections.emptyList();
+        }
         final Map<String, ZipNode> children = zipNode.children;
         if (children == null) {
             return Collections.emptyList();
@@ -210,6 +216,14 @@ public final class JZipFileSystem implements FileSystem {
             throw new IOException("Cannot call this operation on a directory");
         }
         return entry;
+    }
+
+    private ZipNode getZipNode(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = rootNode.find(mountPoint, target);
+        if (zipNode == null) {
+            return null;
+        }
+        return zipNode;
     }
 
     private ZipNode getExistingZipNode(VirtualFile mountPoint, VirtualFile target)

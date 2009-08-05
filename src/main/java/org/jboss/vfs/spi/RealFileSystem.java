@@ -81,7 +81,7 @@ public final class RealFileSystem implements FileSystem {
     /**
      * {@inheritDoc}
      */
-    public boolean delete(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public boolean delete(VirtualFile mountPoint, VirtualFile target) {
         return getFile(mountPoint, target).delete();
     }
 
@@ -102,7 +102,7 @@ public final class RealFileSystem implements FileSystem {
     /**
      * {@inheritDoc}
      */
-    public boolean exists(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public boolean exists(VirtualFile mountPoint, VirtualFile target) {
         return getFile(mountPoint, target).exists();
     }
 
@@ -116,7 +116,7 @@ public final class RealFileSystem implements FileSystem {
     /**
      * {@inheritDoc}
      */
-    public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         final String[] names = getFile(mountPoint, target).list();
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }

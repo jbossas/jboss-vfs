@@ -148,7 +148,7 @@ public class VirtualFile implements Serializable {
      *
      * @throws IOException - thrown on failure to detect existence.
      */
-    public boolean exists() throws IOException {
+    public boolean exists() {
         final VFS.Mount mount = VFS.instance.getMount(this);
         return mount.getFileSystem().exists(mount.getMountPoint(), this);
     }
@@ -197,7 +197,7 @@ public class VirtualFile implements Serializable {
      *
      * @throws IOException if an error occurs
      */
-    public boolean delete() throws IOException {
+    public boolean delete() {
         final VFS.Mount mount = VFS.instance.getMount(this);
         return mount.getFileSystem().delete(mount.getMountPoint(), this);
     }
@@ -274,7 +274,7 @@ public class VirtualFile implements Serializable {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public List<VirtualFile> getChildren() throws IOException {
+    public List<VirtualFile> getChildren() {
         if (!isDirectory())
             return Collections.emptyList();
         VFS vfs = VFS.instance;

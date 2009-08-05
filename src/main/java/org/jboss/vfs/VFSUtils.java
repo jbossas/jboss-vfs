@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -547,7 +548,7 @@ public class VFSUtils {
      *
      * @return {@code true} if the file was deleted
      */
-    public static boolean recursiveDelete(VirtualFile root) throws IOException {
+    public static boolean recursiveDelete(VirtualFile root) {
         boolean ok = true;
         if (root.isDirectory()) {
             final List<VirtualFile> files = root.getChildren();
@@ -559,5 +560,113 @@ public class VFSUtils {
             ok &= root.delete() || !root.exists();
         }
         return ok;
+    }
+
+    /**
+     * Recursively copy a file or directory from one location to another.
+     *
+     * @param original the original file or directory
+     * @param destDir the destination directory
+     * @throws IOException if an I/O error occurs before the copy is complete
+     */
+    public static void recursiveCopy(File original, File destDir) throws IOException {
+        final String name = original.getName();
+        final File destFile = new File(destDir, name);
+        if (original.isDirectory()) {
+            destFile.mkdir();
+            for (File file : original.listFiles()) {
+                recursiveCopy(file, destFile);
+            }
+        } else {
+            final OutputStream os = new FileOutputStream(destFile);
+            try {
+                final InputStream is = new FileInputStream(original);
+                copyStreamAndClose(is, os);
+            } finally {
+                // in case the input stream open fails
+                safeClose(os);
+            }
+        }
+    }
+
+    /**
+     * Recursively copy a file or directory from one location to another.
+     *
+     * @param original the original file or directory
+     * @param destDir the destination directory
+     * @throws IOException if an I/O error occurs before the copy is complete
+     */
+    public static void recursiveCopy(File original, VirtualFile destDir) throws IOException {
+        final String name = original.getName();
+        final File destFile = destDir.getChild(name).getPhysicalFile();
+        if (original.isDirectory()) {
+            destFile.mkdir();
+            for (File file : original.listFiles()) {
+                recursiveCopy(file, destFile);
+            }
+        } else {
+            final OutputStream os = new FileOutputStream(destFile);
+            try {
+                final InputStream is = new FileInputStream(original);
+                copyStreamAndClose(is, os);
+            } finally {
+                // in case the input stream open fails
+                safeClose(os);
+            }
+        }
+    }
+
+    /**
+     * Recursively copy a file or directory from one location to another.
+     *
+     * @param original the original virtual file or directory
+     * @param destDir the destination directory
+     * @throws IOException if an I/O error occurs before the copy is complete
+     */
+    public static void recursiveCopy(VirtualFile original, File destDir) throws IOException {
+        final String name = original.getName();
+        final File destFile = new File(destDir, name);
+        if (original.isDirectory()) {
+            destFile.mkdir();
+            for (VirtualFile file : original.getChildren()) {
+                recursiveCopy(file, destFile);
+            }
+        } else {
+            final OutputStream os = new FileOutputStream(destFile);
+            try {
+                final InputStream is = original.openStream();
+                copyStreamAndClose(is, os);
+            } finally {
+                // in case the input stream open fails
+                safeClose(os);
+            }
+        }
+    }
+
+    /**
+     * Recursively copy a file or directory from one location to another.
+     *
+     * @param original the original virtual file or directory
+     * @param destDir the destination virtual directory
+     * @throws IOException if an I/O error occurs before the copy is complete
+     */
+    public static void recursiveCopy(VirtualFile original, VirtualFile destDir) throws IOException {
+        final String name = original.getName();
+        final File destFile = destDir.getChild(name).getPhysicalFile();
+        if (original.isDirectory()) {
+            destFile.mkdir();
+            for (VirtualFile file : original.getChildren()) {
+                recursiveCopy(file, destFile);
+            }
+        } else {
+            final OutputStream os = new FileOutputStream(destFile);
+            try {
+                final InputStream is = original.openStream();
+                copyStreamAndClose(is, os);
+            } finally {
+                // in case the input stream open fails
+                safeClose(os);
+            }
+        }
     }
 }
