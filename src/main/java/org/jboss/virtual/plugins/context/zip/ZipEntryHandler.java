@@ -262,7 +262,7 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
          else
             return realUrl;
       }
-       
+
       throw new RuntimeException("Operation not supported for handler: " + this);
    }
 }

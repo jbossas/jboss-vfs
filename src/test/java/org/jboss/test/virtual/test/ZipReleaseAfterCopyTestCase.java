@@ -170,7 +170,11 @@ public class ZipReleaseAfterCopyTestCase extends AbstractVFSTest
       Field field = ZipEntryContext.class.getDeclaredField("zipSource");
       field.setAccessible(true);
       Object object = field.get(method.invoke(h));
-      assertNull(object);
+
+      field = object.getClass().getDeclaredField("zipFile");
+      field.setAccessible(true);
+
+      assertNull(field.get(object));
       assertNotNull(root.openStream());
 
       root.cleanup();

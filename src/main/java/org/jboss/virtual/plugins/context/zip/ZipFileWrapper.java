@@ -214,7 +214,7 @@ class ZipFileWrapper extends ZipWrapper
       InputStream is = zipFile.getInputStream(ent);
       if (is == null)
          throw new IOException("Entry no longer available: " + ent.getName() + " in file " + file);
-      
+
       ZipEntryInputStream zis = new ZipEntryInputStream(this, is);
 
       // debugging code
@@ -286,6 +286,17 @@ class ZipFileWrapper extends ZipWrapper
 
       if (autoClean)
          file.delete();
+   }
+
+   void releaseHandles()
+   {
+      try
+      {
+         closeZipFile();
+      }
+      catch(Exception ignored)
+      {
+      }
    }
 
    void deleteFile(ZipFileWrapper wrapper) throws IOException

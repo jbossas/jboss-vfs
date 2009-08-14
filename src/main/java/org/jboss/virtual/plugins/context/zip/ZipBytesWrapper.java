@@ -130,6 +130,11 @@ abstract class ZipBytesWrapper extends ZipWrapper
       zipBytes = null;
    }
 
+   void releaseHandles()
+   {
+      // No file handles to release
+   }
+
    boolean delete(int gracePeriod) throws IOException
    {
       close();
