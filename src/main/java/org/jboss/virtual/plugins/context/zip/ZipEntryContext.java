@@ -881,7 +881,12 @@ public class ZipEntryContext extends AbstractVFSContext
       VirtualFileHandler rootHandler = getRoot();
       if (rootHandler.equals(handler))
       {
-         getZipSource().close(); // close == cleanup in zip source impl
+         ZipWrapper source = zipSource;
+         if (source != null)
+         {
+            source.close(); // close == cleanup in zip source impl
+            zipSource = null;
+         }
       }
    }
 
