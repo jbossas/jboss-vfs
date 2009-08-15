@@ -887,11 +887,13 @@ public class ZipEntryContext extends AbstractVFSContext
 
    /**
     * Temporarily release file handles if possible
+    *
+    * @param handler the handler to release
     */
    void releaseHandles(ZipEntryHandler handler)
    {
       VirtualFileHandler rootHandler = getRoot();
-      if (rootHandler.equals(handler) && zipSource != null)
+      if (zipSource != null && rootHandler.equals(handler))
       {
          zipSource.releaseHandles();
       }
