@@ -154,31 +154,36 @@ public class ZipReleaseAfterCopyTestCase extends AbstractVFSTest
       VirtualFile root = VFS.getRoot(url);
       assertNotNull(root);
 
-      VirtualFile copy = VFSUtils.temp(root);
-      assertNotNull(copy);
-      assertTrue(VFSUtils.isTemporaryFile(copy));
+      VirtualFile copy = VFSUtils.explode(root); // ::temp doesn't create zipFile, explode does
+      try
+      {
+         assertNotNull(copy);
+         assertTrue(VFSUtils.isTemporaryFile(copy));
 
-      Method method = VirtualFile.class.getDeclaredMethod("getHandler");
-      method.setAccessible(true);
-      VirtualFileHandler h = (VirtualFileHandler)method.invoke(root);
-      if (h instanceof DelegatingHandler)
-         h = ((DelegatingHandler)h).getDelegate();
+         Method method = VirtualFile.class.getDeclaredMethod("getHandler");
+         method.setAccessible(true);
+         VirtualFileHandler h = (VirtualFileHandler)method.invoke(root);
+         if (h instanceof DelegatingHandler)
+            h = ((DelegatingHandler)h).getDelegate();
 
-      method = h.getClass().getDeclaredMethod("getZipEntryContext");
-      method.setAccessible(true);
+         method = h.getClass().getDeclaredMethod("getZipEntryContext");
+         method.setAccessible(true);
 
-      Field field = ZipEntryContext.class.getDeclaredField("zipSource");
-      field.setAccessible(true);
-      Object object = field.get(method.invoke(h));
+         Field field = ZipEntryContext.class.getDeclaredField("zipSource");
+         field.setAccessible(true);
+         Object object = field.get(method.invoke(h));
 
-      field = object.getClass().getDeclaredField("zipFile");
-      field.setAccessible(true);
+         field = object.getClass().getDeclaredField("zipFile");
+         field.setAccessible(true);
 
-      assertNull(field.get(object));
-      assertNotNull(root.openStream());
-
-      root.cleanup();
-      copy.cleanup();
+         assertNull(field.get(object));
+         assertNotNull(root.openStream());
+      }
+      finally
+      {
+         copy.cleanup();
+         root.cleanup();
+      }
       assertNoRegistryEntry(root.toURI());
    }
 }

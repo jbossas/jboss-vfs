@@ -164,6 +164,12 @@ public class DelegatingHandler extends AbstractVirtualFileHandler
    }
 
    @Override
+   public void releaseHandles()
+   {
+      getDelegate().releaseHandles();
+   }
+
+   @Override
    public void close()
    {
       if (delegate == null)
