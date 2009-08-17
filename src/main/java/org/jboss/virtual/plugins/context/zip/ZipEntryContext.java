@@ -872,7 +872,7 @@ public class ZipEntryContext extends AbstractVFSContext
    }
 
    /**
-    * Clean the handler's resources, if it's root.
+    * Close the handler, if it's root.
     *
     * @param handler the handler to close
     */
@@ -881,21 +881,7 @@ public class ZipEntryContext extends AbstractVFSContext
       VirtualFileHandler rootHandler = getRoot();
       if (rootHandler.equals(handler))
       {
-         getZipSource().close();
-      }
-   }
-
-   /**
-    * Temporarily release file handles if possible
-    *
-    * @param handler the handler to release
-    */
-   void releaseHandles(ZipEntryHandler handler)
-   {
-      VirtualFileHandler rootHandler = getRoot();
-      if (zipSource != null && rootHandler.equals(handler))
-      {
-         zipSource.releaseHandles();
+         getZipSource().close(); // close == cleanup in zip source impl
       }
    }
 

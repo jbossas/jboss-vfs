@@ -46,7 +46,7 @@ import org.jboss.virtual.spi.Options;
 
 /**
  * AbstractVirtualFileHandler.
- *
+ * 
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
@@ -74,7 +74,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * @serialField rootURI URI the VFS context rootURI
     */
    private VFSContext context;
-
+   
    /**
     * The parent
     *
@@ -116,7 +116,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Create a new handler
-    *
+    * 
     * @param context the context
     * @param parent the parent
     * @param name the name
@@ -394,7 +394,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Initialise the path into the path name
-    *
+    * 
     * @param pathName the path name
     * @return whether it added anything
     */
@@ -536,7 +536,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Increment the reference count
-    *
+    * 
     * @return the resulting count
     */
    protected int increment()
@@ -546,7 +546,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Decrement the reference count
-    *
+    * 
     * @return the resulting count
     */
    protected int decrement()
@@ -556,10 +556,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Check whether we are closed
-    *
+    * 
     * @throws IllegalStateException when closed
     */
-   protected void checkClosed() throws IllegalStateException
+   protected void checkClosed() throws IllegalStateException 
    {
       if (references < 0)
          throw new IllegalStateException("Closed " + toStringLocal());
@@ -578,7 +578,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    public void cleanup()
    {
    }
-
+   
    /**
     * Is the handler temporary.
     *
@@ -607,14 +607,6 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
     * The real close
     */
    protected void doClose()
-   {
-      // nothing
-   }
-
-   /**
-    * Temporarily release file handles, if possible
-    */
-   public void releaseHandles()
    {
       // nothing
    }
@@ -704,7 +696,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
 
    /**
     * Simple implementation of findChild
-    *
+    * 
     * @param path the path
     * @return the handler
     * @throws IOException for any error accessing the virtual file system
@@ -805,10 +797,10 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
       close();
    }
    */
-
+   
    /**
     * Safely get a url version of the string
-    *
+    * 
     * @return the string or unknown if there is an error
     */
    private String safeToURLString()

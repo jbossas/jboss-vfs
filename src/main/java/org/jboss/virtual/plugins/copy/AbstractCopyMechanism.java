@@ -159,9 +159,6 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
       if (parent != null && replaceOldHandler(parent, handler, newHandler))
          parent.replaceChild(handler, newHandler);
 
-      // Release underlying file, so that Windows won't lock it.
-      handler.releaseHandles();
-
       return newHandler.getVirtualFile();
    }
 
@@ -227,7 +224,7 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
     */
    protected static void exactCopy(File copy, VirtualFileHandler root) throws IOException
    {
-      unpack(copy, root, COPY);
+      unpack(copy, root, COPY);   
    }
 
    /**

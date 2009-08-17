@@ -102,7 +102,6 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(TempCleanupUnitTestCase.suite());
       suite.addTest(ExplodeCleanupUnitTestCase.suite());
       suite.addTest(UnjarCleanupUnitTestCase.suite());
-      suite.addTest(ZipReleaseAfterCopyTestCase.suite());
 
       return suite;
    }

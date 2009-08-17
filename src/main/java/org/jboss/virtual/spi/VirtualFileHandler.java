@@ -34,7 +34,7 @@ import org.jboss.virtual.VirtualFile;
 
 /**
  * A virtual file handler
- *
+ * 
  * @author Scott.Stark@jboss.org
  * @author Adrian.Brock
  * @author Ales.Justin@jboss.org
@@ -44,14 +44,14 @@ public interface VirtualFileHandler extends Serializable
 {
    /**
     * Get the simple VF name (X.java)
-    *
+    * 
     * @return the simple file name
     */
    String getName();
 
    /**
     * Get the VFS relative path name (org/jboss/X.java)
-    *
+    * 
     * @return the VFS relative path name
     */
    String getPathName();
@@ -72,7 +72,7 @@ public interface VirtualFileHandler extends Serializable
     * @throws MalformedURLException for any error
     */
    URL toVfsUrl() throws MalformedURLException, URISyntaxException;
-
+   
    /**
     * Get a file: or jar:file: URL representing a resource as precisely as possible.
     * file: urls can represent files in the file system  (i.e.: file:/classes/MyClass.class)
@@ -92,24 +92,24 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Get the VF URI (file://root/org/jboss/X.java)
-    *
+    * 
     * @return the full URI to the VF in the VFS.
-    * @throws URISyntaxException for an error parsing the URI
+    * @throws URISyntaxException for an error parsing the URI 
     */
    URI toURI() throws URISyntaxException;
 
    /**
     * Get the VF URL (file://root/org/jboss/X.java)
-    *
+    * 
     * @return the full URL to the VF in the VFS.
-    * @throws URISyntaxException for an error parsing the URI
+    * @throws URISyntaxException for an error parsing the URI 
     * @throws MalformedURLException for any error
     */
    URL toURL() throws MalformedURLException, URISyntaxException;
 
    /**
     * When the file was last modified
-    *
+    * 
     * @return the last modified time
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalStateException if closed
@@ -124,10 +124,10 @@ public interface VirtualFileHandler extends Serializable
     * @throws IOException for any error
     */
    boolean hasBeenModified() throws IOException;
-
+   
    /**
     * Get the size
-    *
+    * 
     * @return the size
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalStateException if closed
@@ -144,13 +144,13 @@ public interface VirtualFileHandler extends Serializable
    /**
     * Whether it is a simple leaf of the VFS,
     * i.e. whether it can contain other files
-    *
+    * 
     * @return true if a simple file.
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalStateException if the file is closed
     */
    boolean isLeaf() throws IOException;
-
+   
    /**
     * Does this represent an archive.
     * e.g. zip, tar, ...
@@ -162,7 +162,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Whether it is hidden
-    *
+    * 
     * @return true if hidden.
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalStateException if closed
@@ -171,7 +171,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Access the file contents.
-    *
+    * 
     * @return An InputStream for the file contents.
     * @throws IOException for any problem accessing the virtual file system
     * @throws IllegalStateException if closed
@@ -180,7 +180,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Get the parent
-    *
+    * 
     * @return the parent
     * @throws IOException for an error accessing the file system
     * @throws IllegalStateException if closed
@@ -189,7 +189,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Get the children
-    *
+    * 
     * @param ignoreErrors whether to ignore errors
     * @return the children
     * @throws IOException for an error accessing the file system
@@ -219,7 +219,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Get the VFSContext this file belongs to
-    *
+    * 
     * @return the context
     * @throws IllegalStateException if closed
     */
@@ -227,7 +227,7 @@ public interface VirtualFileHandler extends Serializable
 
    /**
     * Get the virtual file wrapper
-    *
+    * 
     * @return the wrapper
     * @throws IllegalStateException if closed
     */
@@ -242,11 +242,6 @@ public interface VirtualFileHandler extends Serializable
     * Close the resources
     */
    void close();
-
-   /**
-    * Temporarily release file handles
-    */
-   void releaseHandles();
 
    /**
     * Replace child.

@@ -176,12 +176,6 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       getZipEntryContext().cleanup(this);
    }
 
-   @Override
-   public void releaseHandles()
-   {
-      getZipEntryContext().releaseHandles(this);
-   }
-
    public boolean delete(int gracePeriod) throws IOException
    {
       checkClosed();
@@ -268,7 +262,7 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
          else
             return realUrl;
       }
-
+       
       throw new RuntimeException("Operation not supported for handler: " + this);
    }
 }

@@ -185,11 +185,6 @@ abstract class ZipWrapper
    abstract void close();
 
    /**
-    * Temporarily release handles if possible
-    */
-   abstract void releaseHandles();
-
-   /**
     * Delete this archive
     *
     * @param gracePeriod maximum time to wait for any locks
