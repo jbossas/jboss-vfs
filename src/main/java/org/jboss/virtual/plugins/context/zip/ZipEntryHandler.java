@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.security.cert.Certificate;
 
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.plugins.context.AbstractVirtualFileHandler;
@@ -264,5 +265,10 @@ public class ZipEntryHandler extends AbstractVirtualFileHandler implements Struc
       }
        
       throw new RuntimeException("Operation not supported for handler: " + this);
+   }
+
+   public Certificate[] getCertificates()
+   {
+      return getZipEntryContext().getCertificates(this);
    }
 }

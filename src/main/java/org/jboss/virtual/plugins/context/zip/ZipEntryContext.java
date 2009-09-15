@@ -37,18 +37,20 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -64,8 +66,8 @@ import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
 import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VFSContextConstraints;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -1171,6 +1173,35 @@ public class ZipEntryContext extends AbstractVFSContext
       // realURL is initialized when ZipSource is initialized
       getZipSource();
       return realURL;
+   }
+
+   /**
+    * Get certificates.
+    *
+    * Note: we *must* first read input stream of the file
+    * before we're able to get certificates.
+    *
+    * @param handler the current handler
+    * @return the certificates
+    */
+   Certificate[] getCertificates(ZipEntryHandler handler)
+   {
+      EntryInfo ei = entries.get(handler.getLocalPathName());
+      if (ei != null && ei.entry != null)
+      {
+         ZipEntry entry = ei.entry;
+         JarEntry je;
+         if (entry instanceof JarEntry)
+         {
+            je = (JarEntry)entry;
+         }
+         else
+         {
+            je = new JarEntry(entry);
+         }
+         return je.getCertificates();
+      }
+      return null;
    }
 
    /**

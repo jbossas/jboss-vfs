@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.security.cert.Certificate;
 
 import org.jboss.virtual.plugins.context.HierarchyVirtualFileHandler;
 import org.jboss.virtual.plugins.context.StructuredVirtualFileHandler;
@@ -186,5 +187,10 @@ public class JarEntryHandler extends AbstractJarHandler implements StructuredVir
       entryChildren.remove(original);
       entryChildren.add(replacement);
       entryMap.put(original.getName(), replacement);
+   }
+
+   public Certificate[] getCertificates()
+   {
+      return getJar().getJarEntry(getEntry().getName()).getCertificates(); 
    }
 }

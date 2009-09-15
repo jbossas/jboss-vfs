@@ -31,6 +31,7 @@ import java.net.URI;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -172,7 +173,7 @@ class ZipFileWrapper extends ZipWrapper
    {
       if (zipFile == null)
       {
-         zipFile = new ZipFile(file);
+         zipFile = new JarFile(file);
          if (forceNoReaper == false && noReaperOverride == false)
             ZipFileLockReaper.getInstance().register(this);
       }

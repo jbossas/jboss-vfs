@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.security.cert.Certificate;
 
 import org.jboss.virtual.VirtualFile;
 
@@ -267,4 +268,11 @@ public interface VirtualFileHandler extends Serializable
     *  @throws IOException for any error
     */
    boolean delete(int gracePeriod) throws IOException;
+
+   /**
+    * Get certificates.
+    *
+    * @return the certificates associated with this virtual file handler
+    */
+   Certificate[] getCertificates();
 }

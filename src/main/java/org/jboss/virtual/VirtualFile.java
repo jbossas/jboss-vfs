@@ -28,16 +28,17 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jboss.util.collection.WeakSet;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.MatchAllVirtualFileFilter;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.util.collection.WeakSet;
 
 /**
  * A virtual file as seen by the user
@@ -86,6 +87,16 @@ public class VirtualFile implements Serializable
          throw new IllegalStateException("The virtual file is closed");
 
       return handler;
+   }
+
+   /**
+    * Get certificates.
+    *
+    * @return the certificates associated with this virtual file
+    */
+   public Certificate[] getCertificates()
+   {
+      return getHandler().getCertificates();
    }
 
    /**

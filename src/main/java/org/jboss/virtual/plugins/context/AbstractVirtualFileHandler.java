@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.security.cert.Certificate;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
@@ -632,6 +633,11 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
    {
       VirtualFileHandler parent = getParent();
       return parent != null && parent.removeChild(getName());
+   }
+
+   public Certificate[] getCertificates()
+   {
+      return null;
    }
 
    /**

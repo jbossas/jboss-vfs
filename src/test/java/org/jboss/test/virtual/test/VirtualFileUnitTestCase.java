@@ -21,20 +21,22 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.test.virtual.support.MockVFSContext;
 import org.jboss.test.virtual.support.MockVirtualFileFilter;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -43,6 +45,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * VirtualFileUnitTestCase.
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class VirtualFileUnitTestCase extends AbstractMockVFSTest
@@ -1338,5 +1341,20 @@ public class VirtualFileUnitTestCase extends AbstractMockVFSTest
       assertFalse(file1.equals(null));
 
       assertFalse(file1.equals(new Object()));
+   }
+
+   public void testCertificates() throws Exception
+   {
+      //Debug.getInstance("jar");
+
+      URL url = getResource("/vfs/test/cert_test.jar");
+      VirtualFile jar = VFS.getRoot(url);
+      VirtualFile clazz = jar.findChild("examplets/plugins/impl/AnotherInjectedPlugin.class");
+
+      InputStream tmp = clazz.openStream();
+      VFSUtils.copyStreamAndClose(tmp, new ByteArrayOutputStream()); // dummy read
+
+      Certificate[] certs = clazz.getCertificates();
+      assertNotNull("No certificates: " + clazz, certs);
    }
 }

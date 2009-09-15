@@ -48,10 +48,9 @@ import java.util.zip.ZipInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.jboss.test.virtual.support.ClassPathIterator;
-import org.jboss.test.virtual.support.MetaDataMatchFilter;
 import org.jboss.test.virtual.support.ClassPathIterator.ClassPathEntry;
+import org.jboss.test.virtual.support.MetaDataMatchFilter;
 import org.jboss.virtual.MemoryFileFactory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;

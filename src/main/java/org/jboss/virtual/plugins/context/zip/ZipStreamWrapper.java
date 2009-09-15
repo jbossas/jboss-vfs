@@ -21,9 +21,6 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import org.jboss.logging.Logger;
-import org.jboss.virtual.VFSUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +36,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.jboss.logging.Logger;
+import org.jboss.virtual.VFSUtils;
 
 /**
  * ZipStreamWrapper - for abstracted access to in-memory zip file
