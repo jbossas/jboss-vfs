@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.vfs;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 
 import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.spi.VFSContext;
@@ -48,15 +47,5 @@ public class AssembledFileHandler extends DelegatingHandler
       if (path.endsWith("/") == false)
          path += "/";
       setVfsUrl(new URL("vfs", context.getName(), -1, path, new AssembledUrlStreamHandler(context)));
-   }
-
-   public List<VirtualFileHandler> getChildren(boolean ignoreErrors) throws IOException
-   {
-      throw new IOException("File cannot have children: " + this);
-   }
-
-   public VirtualFileHandler getChild(String path) throws IOException
-   {
-      throw new IOException("File cannot have children: " + this);
    }
 }

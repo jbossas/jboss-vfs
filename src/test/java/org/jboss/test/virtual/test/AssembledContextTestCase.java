@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
-import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.AssembledDirectory;
+import org.jboss.virtual.VFS;
+import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
 
 /**
@@ -257,7 +259,7 @@ public class AssembledContextTestCase extends AbstractVFSTest
       assertTrue("plugins/", found);
 
       System.out.println("Test org/jboss/virtual/plugins/context/jar");
-      VirtualFile jar = directory.findChild("org/jboss/virtual/plugins/context/jar");
+      VirtualFile jar = directory.getChild("org/jboss/virtual/plugins/context/jar");
       assertNotNull(jar);
       assertEquals("jar", jar.getName());
 
@@ -292,5 +294,50 @@ public class AssembledContextTestCase extends AbstractVFSTest
       metainf.clear();
       assertNull(metainf.getChild("bytes1.tmp"));
       assertNull(metainf.getChild("bytes2.tmp"));
+   }
+
+   public void testAddPath() throws Exception
+   {
+      AssembledDirectory sar = AssembledContextFactory.getInstance().create("foo.sar");
+      URL url = getResource("/vfs/test/jar1.jar");
+      VirtualFile jar1 = VFS.getRoot(url);
+
+      sar.addPath(jar1);
+      List<VirtualFile> children = sar.getChildrenRecursively();
+      assertNotNull(children);
+      assertEquals(10, children.size());
+
+      sar.clear();
+
+      sar.addPath(jar1, new VirtualFileFilter()
+      {
+         public boolean accepts(VirtualFile file)
+         {
+            return "META-INF".equalsIgnoreCase(file.getName());
+         }
+      });
+      children = sar.getChildrenRecursively();
+      assertNotNull(children);
+      assertEquals(2, children.size());
+   }
+
+   public void testAddChild() throws Exception
+   {
+      AssembledDirectory sar = AssembledContextFactory.getInstance().create("foo.sar");
+      URL url = getResource("/vfs/test/jar1.jar");
+      VirtualFile jar1 = VFS.getRoot(url);
+
+      sar.addChild(jar1);
+      List<VirtualFile> children = sar.getChildrenRecursively();
+      assertNotNull(children);
+      assertEquals(11, children.size());
+
+      sar.clear();
+
+      sar.addChild(jar1, "jar2.jar");
+      VirtualFile child = sar.getChild("jar2.jar");
+      children = child.getChildrenRecursively();
+      assertNotNull(children);
+      assertEquals(10, children.size());
    }
 }
