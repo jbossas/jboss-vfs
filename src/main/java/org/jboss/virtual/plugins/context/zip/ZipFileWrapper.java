@@ -286,15 +286,34 @@ class ZipFileWrapper extends ZipWrapper
       }
 
       if (autoClean)
-         file.delete();
+         traceDelete(file);
    }
 
+   /**
+    * Delete file.
+    *
+    * @param wrapper the wrapper
+    * @throws IOException for any error
+    */
    void deleteFile(ZipFileWrapper wrapper) throws IOException
    {
       if (file.equals(wrapper.file))
       {
          closeZipFile();
-         file.delete();
+         traceDelete(file);
+      }
+   }
+
+   /**
+    * Trace file deletion.
+    *
+    * @param ref the file ref
+    */
+   private static void traceDelete(File ref)
+   {
+      if (ref.delete() == false && log.isTraceEnabled())
+      {
+         log.trace("Failed to delete file: " + ref);
       }
    }
 
