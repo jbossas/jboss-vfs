@@ -273,7 +273,24 @@ public class AssembledContextTestCase extends AbstractVFSTest
    {
       AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
       directory.mkdir("META-INF");
-      assertNotNull(directory.findChild("META-INF"));
+      assertNotNull(directory.getChild("META-INF"));
+   }
 
+   public void testRemoveAndClear() throws Exception
+   {
+      AssembledDirectory directory = AssembledContextFactory.getInstance().create("foo.jar");
+      AssembledDirectory metainf = directory.mkdir("META-INF");
+      assertNotNull(directory.getChild("META-INF"));
+
+      VirtualFile resource = metainf.addBytes(new byte[]{1, 2, 3}, "bytes.tmp");
+      assertEquals(resource, metainf.getChild("bytes.tmp"));
+      metainf.remove("bytes.tmp");
+      assertNull(metainf.getChild("bytes.tmp"));
+
+      metainf.addBytes(new byte[]{1, 2, 3}, "bytes1.tmp");
+      metainf.addBytes(new byte[]{1, 2, 3}, "bytes2.tmp");
+      metainf.clear();
+      assertNull(metainf.getChild("bytes1.tmp"));
+      assertNull(metainf.getChild("bytes2.tmp"));
    }
 }

@@ -34,6 +34,7 @@ import org.jboss.virtual.plugins.context.vfs.AssembledFileHandler;
 import org.jboss.virtual.plugins.context.vfs.ByteArrayHandler;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
 import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 
 /**
  * Extension of VirtualFile that represents a virtual directory that can be composed of arbitrary files and resources
@@ -178,16 +179,16 @@ public class AssembledDirectory extends VirtualFile
       if (path == null)
          throw new IllegalArgumentException("Null path");
 
-      String[] pkgs = path.split("/");
+      List<String> pkgs = PathTokenizer.getTokens(path);
       AssembledDirectoryHandler dir = directory;
-      for (int i = 0; i < pkgs.length - 1; i++)
+      for (int i = 0; i < pkgs.size() - 1; i++)
       {
-         AssembledDirectoryHandler next = (AssembledDirectoryHandler) dir.findChild(pkgs[i]);
+         AssembledDirectoryHandler next = (AssembledDirectoryHandler) dir.findChild(pkgs.get(i));
          if (next == null)
          {
             try
             {
-               next = new AssembledDirectoryHandler(dir.getVFSContext(), dir, pkgs[i]);
+               next = new AssembledDirectoryHandler(dir.getVFSContext(), dir, pkgs.get(i));
             }
             catch (IOException e)
             {
@@ -389,11 +390,7 @@ public class AssembledDirectory extends VirtualFile
             return false;
          }
       }
-      if (p < paths.length)
-         return false;
-      if (x < expressions.length)
-         return false;
-      return true;
+      return p >= paths.length && x >= expressions.length;
    }
 
    /**
@@ -590,5 +587,23 @@ public class AssembledDirectory extends VirtualFile
       {
          throw new RuntimeException(e);
       }
+   }
+
+   /**
+    * Remove path.
+    *
+    * @param path the path to remove
+    */
+   public void remove(String path)
+   {
+      directory.removeChild(path);
+   }
+
+   /**
+    * Clear directory.
+    */
+   public void clear()
+   {
+      directory.cleanup();   
    }
 }

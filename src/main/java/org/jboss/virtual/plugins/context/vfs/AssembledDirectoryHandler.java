@@ -103,6 +103,12 @@ public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implem
       return false;
    }
 
+   @Override
+   public void cleanup()
+   {
+      children.clear();
+   }
+
    public VirtualFileHandler findChild(String name)
    {
       return children.get(name);
