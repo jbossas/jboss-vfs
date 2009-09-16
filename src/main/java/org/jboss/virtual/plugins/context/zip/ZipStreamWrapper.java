@@ -145,12 +145,14 @@ class ZipStreamWrapper extends ZipBytesWrapper
          return super.getSize();
    }
 
-   void close() {
+   void close()
+   {
       inMemoryFiles = null;
       super.close();
    }
 
-   private void initZipSize() throws IOException {
+   private void initZipSize() throws IOException
+   {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       recomposeZip(baos);
       this.size = baos.size();
