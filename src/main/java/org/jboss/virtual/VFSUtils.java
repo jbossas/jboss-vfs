@@ -48,6 +48,7 @@ import org.jboss.virtual.plugins.copy.ExplodedCopyMechanism;
 import org.jboss.virtual.plugins.copy.TempCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnjarCopyMechanism;
 import org.jboss.virtual.plugins.copy.UnpackCopyMechanism;
+import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.VFSContext;
@@ -1079,12 +1080,13 @@ public class VFSUtils
    }
 
    /**
-    * Strip protocol from url string.
+    * Get path.
+    * Apply Carlo's fix as well.
     *
     * @param uri the uri
-    * @return uri's path string
+    * @return uri's path
     */
-   public static String stripProtocol(URI uri)
+   protected static String getPath(URI uri)
    {
       String path = uri.getPath();
       if(path == null)
@@ -1093,23 +1095,51 @@ public class VFSUtils
          if(s.startsWith("jar:file:"))
             path = s.substring("jar:file:".length()).replaceFirst("!/", "/") + "/";
       }
-      if (path != null && path.length() > 0)
+      return path;
+   }
+
+   /**
+    * Strip protocol from url string, return tokens.
+    *
+    * @param uri the uri
+    * @return uri's path string tokens
+    */
+   public static List<String> stripProtocolToTokens(URI uri)
+   {
+      String path = getPath(uri);
+      try
       {
-         StringBuilder sb = new StringBuilder(path);
+         return PathTokenizer.applySpecialPathsToTokens(path);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
-         if (sb.charAt(0) != '/')
-            sb.insert(0, '/');
-         if (sb.charAt(sb.length() - 1) != '/')
-            sb.append('/');
-
-         path = sb.toString();
+   /**
+    * Strip protocol from url string.
+    *
+    * @param uri the uri
+    * @return uri's path string
+    */
+   public static String stripProtocol(URI uri)
+   {
+      List<String> tokens = stripProtocolToTokens(uri);
+      if (tokens.isEmpty() == false)
+      {
+         StringBuilder builder = new StringBuilder();
+         for (String token : tokens)
+         {
+            builder.append("/").append(token);
+         }
+         builder.append("/");
+         return builder.toString();
       }
       else
       {
-         path = "/";
+         return "/";
       }
-
-      return path;
    }
 
    /**

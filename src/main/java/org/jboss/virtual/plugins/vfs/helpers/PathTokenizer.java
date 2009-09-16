@@ -221,18 +221,15 @@ public class PathTokenizer
    }
 
    /**
-    * Apply any . or .. paths in the path param.
+    * Handle special tokens.
     *
+    * @param tokens the tokens
     * @param path the path
-    * @return simple path, containing no . or .. paths
-    * @throws IOException if reverse path goes over the top path
+    * @return index of last token
+    * @throws IOException for any error
     */
-   public static String applySpecialPaths(String path) throws IOException
+   protected static int applySpecialTokens(List<String> tokens, String path) throws IOException
    {
-      List<String> tokens = getTokens(path);
-      if (tokens == null)
-         return null;
-
       int i = 0;
       for(int j = 0; j < tokens.size(); j++)
       {
@@ -248,7 +245,41 @@ public class PathTokenizer
          if (i < 0)
             throw new IOException("Using reverse path on top path: " + path);
       }
-      return getRemainingPath(tokens, 0, i);
+      return i;
+   }
+
+   /**
+    * Apply any . or .. paths in the path param.
+    *
+    * @param path the path
+    * @return simple path, containing no . or .. paths
+    * @throws IOException if reverse path goes over the top path
+    */
+   public static List<String> applySpecialPathsToTokens(String path) throws IOException
+   {
+      List<String> tokens = getTokens(path);
+      if (tokens == null)
+         return null;
+
+      int index = applySpecialTokens(tokens, path);
+      return tokens.subList(0, index);
+   }
+
+   /**
+    * Apply any . or .. paths in the path param.
+    *
+    * @param path the path
+    * @return simple path, containing no . or .. paths
+    * @throws IOException if reverse path goes over the top path
+    */
+   public static String applySpecialPaths(String path) throws IOException
+   {
+      List<String> tokens = getTokens(path);
+      if (tokens == null)
+         return null;
+
+      int index = applySpecialTokens(tokens, path);
+      return getRemainingPath(tokens, 0, index);
    }
 
    /**

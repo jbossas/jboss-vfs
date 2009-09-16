@@ -24,9 +24,11 @@ package org.jboss.test.virtual.test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.Collections;
 import java.util.Map;
 
+import org.jboss.util.Strings;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.jar.JarContextFactory;
@@ -242,6 +244,41 @@ public abstract class VFSCacheTest extends AbstractVFSRegistryTest
       {
          factoryByProtocol.put("jar", oldFactory);
          
+         stopCache(cache);
+      }
+   }
+
+   public void testCanonicalPath() throws Exception
+   {
+      ProtectionDomain pd = getClass().getProtectionDomain();
+      URL url = pd.getCodeSource().getLocation();
+      String urlString = url.toExternalForm();
+      if (urlString.endsWith("/") == false)
+         urlString += "/";
+      String testDir = urlString + "vfs/../vfs/test/";
+      URL testURL = Strings.toURL(testDir);
+
+      VFSCache cache = createCache();
+      cache.start();
+      try
+      {
+         VFSCacheFactory.setInstance(cache);
+         try
+         {
+            configureCache(cache);
+
+            VirtualFile testVF = VFS.getRoot(testURL);
+            URL jar1URL = new URL(testDir + "jar1.jar/");
+            VirtualFile jar1VF = VFS.getRoot(jar1URL);
+            assertEquals(testVF, jar1VF.getParent()); // should find previous root
+         }
+         finally
+         {
+            VFSCacheFactory.setInstance(null);
+         }
+      }
+      finally
+      {
          stopCache(cache);
       }
    }
