@@ -22,6 +22,7 @@
 package org.jboss.virtual.protocol.vfsmemory;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -52,5 +53,13 @@ public class Handler extends URLStreamHandler
          throw new IOException("VFS does not exist: " + url);
 
       return new VirtualFileURLConnection(url, vf);
+   }
+
+   /**
+    * Always returns null since vfsmemory URLs do not refer to real hosts.
+    */
+   protected InetAddress getHostAddress(URL u)
+   {
+      return null;
    }
 }
