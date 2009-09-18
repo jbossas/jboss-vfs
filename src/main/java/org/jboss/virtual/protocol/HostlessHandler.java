@@ -34,8 +34,11 @@ public abstract class HostlessHandler extends URLStreamHandler
 {
    /**
     * Always returns null since impl's URLs do not refer to real hosts.
+    *
+    * @param url the url
+    * @return always null
     */
-   protected InetAddress getHostAddress(URL u)
+   protected InetAddress getHostAddress(URL url)
    {
       return null;
    }
