@@ -24,20 +24,21 @@ package org.jboss.virtual.protocol.vfs;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
 
+import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
-import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.plugins.vfs.VirtualFileURLConnection;
+import org.jboss.virtual.protocol.HostlessHandler;
 
 /**
  * URLStreamHandler for VFS
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-public class Handler extends URLStreamHandler
+public class Handler extends HostlessHandler
 {
    protected URLConnection openConnection(URL url) throws IOException
    {
