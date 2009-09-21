@@ -220,9 +220,9 @@ class ZipFileWrapper extends ZipWrapper
 
       InputStream is = zipFile.getInputStream(lookup);
       if (is == null)
-         throw new IOException("Entry no longer available: " + ent.getName() + " in file " + file);
+         throw new IOException("Entry no longer available: " + lookup.getName() + " in file " + file);
       
-      InputStream zis = new CertificateReaderInputStream(ent, this, is);
+      InputStream zis = new CertificateReaderInputStream(lookup, this, is);
 
       incrementRef();
       return zis;
