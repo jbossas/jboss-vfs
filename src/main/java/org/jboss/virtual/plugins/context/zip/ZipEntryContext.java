@@ -50,7 +50,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -1081,7 +1080,8 @@ public class ZipEntryContext extends AbstractVFSContext
       if(ei.entry == null)
          return new ByteArrayInputStream(NO_BYTES);
 
-      return getZipSource().openStream(ei.entry);
+      ZipEntry wrapper = new EntryInfoAdapter(ei);
+      return getZipSource().openStream(wrapper);
    }
 
    /**
@@ -1187,21 +1187,7 @@ public class ZipEntryContext extends AbstractVFSContext
    Certificate[] getCertificates(ZipEntryHandler handler)
    {
       EntryInfo ei = entries.get(handler.getLocalPathName());
-      if (ei != null && ei.entry != null)
-      {
-         ZipEntry entry = ei.entry;
-         JarEntry je;
-         if (entry instanceof JarEntry)
-         {
-            je = (JarEntry)entry;
-         }
-         else
-         {
-            je = new JarEntry(entry);
-         }
-         return je.getCertificates();
-      }
-      return null;
+      return (ei != null) ? ei.getCertificates() : null;
    }
 
    /**
@@ -1209,11 +1195,17 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    static class EntryInfo
    {
+      /** a marker */
+      static final Certificate[] MARKER = new Certificate[]{};
+
       /** a handler */
       private AbstractVirtualFileHandler handler;
 
       /** a <tt>ZipEntry</tt> */
-      private ZipEntry entry;
+      ZipEntry entry;
+
+      /** the certificates */
+      Certificate[] certificates;
 
       /** a list of children */
       private Map<String, AbstractVirtualFileHandler> children;
@@ -1228,6 +1220,16 @@ public class ZipEntryContext extends AbstractVFSContext
       {
          this.handler = handler;
          this.entry = entry;
+      }
+
+      /**
+       * Get certificates.
+       *
+       * @return the certificates
+       */
+      private Certificate[] getCertificates()
+      {
+         return (certificates != MARKER) ? certificates : null;
       }
 
       /**

@@ -23,6 +23,9 @@ package org.jboss.virtual.plugins.context.zip;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.ZipEntry;
+
+import org.jboss.logging.Logger;
 
 /**
  * ZipEntryInputStream is part of ZipFileWrapper implementation.
@@ -30,18 +33,22 @@ import java.io.InputStream;
  * It wraps the stream retrieved from ZipFile.getInputStream(entry)
  * and releases the underlying ZipFileWrapper when detecting end of use.
  *
+ * It also reads certificates before closing the stream.
+ *
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @version $Revision: 1.0 $
- * @deprecated this is no longer used
  */
-@Deprecated
-public class ZipEntryInputStream extends InputStream
+class CertificateReaderInputStream extends InputStream
 {
-   /** Underlying input stream */
-   private InputStream delegate;
+   /** ZipEntry */
+   private ZipEntry entry;
 
    /** Underlying zip source */
    private ZipFileWrapper zipWrapper;
+
+   /** Underlying input stream */
+   private InputStream delegate;
 
    /** Is stream closed */
    private boolean closed;
@@ -49,16 +56,18 @@ public class ZipEntryInputStream extends InputStream
    /**
     * ZipEntryInputStream constructor.
     *
+    * @param entry zip entry
     * @param zipWrapper underlying zip source
     * @param is underlying input stream
-    * @throws IOException for any error
+    * @throws java.io.IOException for any error
     * @throws IllegalArgumentException if insput stream is null
     */
-   ZipEntryInputStream(ZipFileWrapper zipWrapper, InputStream is) throws IOException
+   CertificateReaderInputStream(ZipEntry entry, ZipFileWrapper zipWrapper, InputStream is) throws IOException
    {
       if (is == null)
          throw new IllegalArgumentException("Input stream is null");
-      
+
+      this.entry = entry;
       this.zipWrapper = zipWrapper;
       delegate = is;
    }
@@ -66,14 +75,28 @@ public class ZipEntryInputStream extends InputStream
    /**
     * Close this stream and release zipWrapper
     *
-    * @param doClose do we close
+    * @param doClose do we close stream
     */
    private void streamClosed(boolean doClose)
    {
       if (closed == false && doClose)
       {
          closed = true;
-         zipWrapper.release();
+
+         try
+         {
+            if (entry instanceof EntryInfoAdapter)
+               EntryInfoAdapter.class.cast(entry).readCertificates();
+         }
+         catch (RuntimeException e)
+         {
+            Logger.getLogger(getClass()).error("ZipWraper:" + zipWrapper);
+            throw e;
+         }
+         finally
+         {
+            zipWrapper.release();
+         }
       }
    }
 
@@ -81,7 +104,7 @@ public class ZipEntryInputStream extends InputStream
     * Read one byte.
     *
     * @return whatever the underlying input stream returns
-    * @throws IOException for any error
+    * @throws java.io.IOException for any error
     * @see java.io.InputStream#read
     */
    public int read() throws IOException
@@ -104,7 +127,7 @@ public class ZipEntryInputStream extends InputStream
     * @param buf read buffer
     * @return whatever the underlying input stream returns
     *
-    * @throws IOException for any error
+    * @throws java.io.IOException for any error
     * @see java.io.InputStream#read(byte[])
     */
    public int read(byte buf[]) throws IOException
@@ -128,7 +151,7 @@ public class ZipEntryInputStream extends InputStream
     * @param off position within buffer to start reading at
     * @param len maximum bytes to read
     * @return whatever the underlying input stream returns
-    * @throws IOException for any error
+    * @throws java.io.IOException for any error
     * @see java.io.InputStream#read(byte[],int,int)
     */
    public int read(byte buf[], int off, int len) throws IOException

@@ -75,9 +75,6 @@ class ZipFileWrapper extends ZipWrapper
    /** true if noReaper mode is forced on a per-instance basis */
    private boolean noReaperOverride;
 
-   // used for debugging stream leaks
-   //ConcurrentLinkedQueue<ZipEntryInputStream> streams = new ConcurrentLinkedQueue<ZipEntryInputStream>();
-
    /**
     * ZipFileWrapper
     *
@@ -191,6 +188,7 @@ class ZipFileWrapper extends ZipWrapper
       if (zipFile != null && getReferenceCount() <= 0)
       {
          ZipFile zf = zipFile;
+         //log.error(toString(), new Exception());
          zipFile = null;
          zf.close();
          if (forceNoReaper == false && noReaperOverride == false)
@@ -212,14 +210,19 @@ class ZipFileWrapper extends ZipWrapper
          return recomposeZipAsInputStream(ent.getName());
 
       ensureZipFile();
-      InputStream is = zipFile.getInputStream(ent);
+
+      // do lookup on original
+      ZipEntry lookup;
+      if (ent instanceof EntryInfoAdapter)
+         lookup = EntryInfoAdapter.class.cast(ent).getOriginalEntry();
+      else
+         lookup = ent;
+
+      InputStream is = zipFile.getInputStream(lookup);
       if (is == null)
          throw new IOException("Entry no longer available: " + ent.getName() + " in file " + file);
       
-      ZipEntryInputStream zis = new ZipEntryInputStream(this, is);
-
-      // debugging code
-      //streams.add(zis);
+      InputStream zis = new CertificateReaderInputStream(ent, this, is);
 
       incrementRef();
       return zis;
@@ -398,7 +401,7 @@ class ZipFileWrapper extends ZipWrapper
     */
    public String toString()
    {
-      return super.toString() + " - " + file.getAbsolutePath();
+      return super.toString() + " - " + file.getAbsolutePath() + " -- " + zipFile;
    }
 
    /**
