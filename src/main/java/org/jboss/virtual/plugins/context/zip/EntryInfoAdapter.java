@@ -29,6 +29,10 @@ import java.util.zip.ZipEntry;
  * EntryInfo wrapper.
  * It knows how to read certificates.
  *
+ * Note: this is basically a hack,
+ * so we don't have to change ZipWrapper API.
+ * It should be removed with next minor version.
+ *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
 class EntryInfoAdapter extends ZipEntry
