@@ -25,32 +25,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 
 /**
+ * This test case is a dumping ground for tests that don't fit anywhere else
+ * but since somebody bothered (in most cases this would be Carlo) to produce them,
+ * we don't see a point in throwing them away.
+ *
+ * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class JBVFS122Test extends AbstractVFSTest
+public class DumpTestCase extends AbstractVFSTest
 {
-   public JBVFS122Test(String name)
+   public DumpTestCase(String name)
    {
       super(name, true, true);
    }
 
-   @Override
-   protected void setUp() throws Exception
+   public static Test suite()
    {
-      super.setUp();
+      return suite(DumpTestCase.class);
    }
-   
-   public void test1() throws IOException
+
+   public void testJBVFS122() throws IOException
    {
       URL url = getResource("/vfs/test/nested/nested.jar");
       VirtualFile root = VFS.getRoot(url);
       assertNotNull(root);
-      
+
       VirtualFile child = root.getChild("complex.jar/META-INF/MANIFEST.MF");
       InputStream in = child.openStream();
       in.close();

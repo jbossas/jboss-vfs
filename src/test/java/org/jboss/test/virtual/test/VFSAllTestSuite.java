@@ -45,6 +45,8 @@ public class VFSAllTestSuite extends TestSuite
       VFS.init();
       TestSuite suite = new TestSuite("VFS Tests default");
 
+      // general
+      suite.addTest(DumpTestCase.suite());
       // vfs / spi
       suite.addTest(VFSUnitTestCase.suite());
       suite.addTest(VirtualFileUnitTestCase.suite());
