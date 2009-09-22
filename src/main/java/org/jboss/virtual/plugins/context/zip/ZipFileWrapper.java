@@ -188,7 +188,6 @@ class ZipFileWrapper extends ZipWrapper
       if (zipFile != null && getReferenceCount() <= 0)
       {
          ZipFile zf = zipFile;
-         //log.error(toString(), new Exception());
          zipFile = null;
          zf.close();
          if (forceNoReaper == false && noReaperOverride == false)
@@ -199,30 +198,27 @@ class ZipFileWrapper extends ZipWrapper
    /**
     * Get the contents of the given <tt>ZipEntry</tt> as stream
     *
-    * @param ent a zip entry
+    * @param entry a zip entry
     * @return an InputStream that locks the file for as long as it's open
     * @throws IOException for any error
     */
-   synchronized InputStream openStream(ZipEntry ent) throws IOException
+   synchronized InputStream openStream(ZipEntry entry) throws IOException
    {
       // JBVFS-57 JarInputStream composition
-      if (ent.isDirectory())
-         return recomposeZipAsInputStream(ent.getName());
+      if (entry.isDirectory())
+         return recomposeZipAsInputStream(entry.getName());
 
       ensureZipFile();
 
-      // do lookup on original
-      ZipEntry lookup;
-      if (ent instanceof EntryInfoAdapter)
-         lookup = EntryInfoAdapter.class.cast(ent).getOriginalEntry();
-      else
-         lookup = ent;
-
-      InputStream is = zipFile.getInputStream(lookup);
+      InputStream is = zipFile.getInputStream(entry);
       if (is == null)
-         throw new IOException("Entry no longer available: " + lookup.getName() + " in file " + file);
-      
-      InputStream zis = new CertificateReaderInputStream(lookup, this, is);
+         throw new IOException("Entry no longer available: " + entry.getName() + " in file " + file);
+
+      // we need to update entry, from the new zif file
+      if (entry instanceof EntryInfoAdapter)
+         EntryInfoAdapter.class.cast(entry).updateEntry(zipFile.getEntry(entry.getName()));
+
+      InputStream zis = new CertificateReaderInputStream(entry, this, is);
 
       incrementRef();
       return zis;
@@ -401,7 +397,7 @@ class ZipFileWrapper extends ZipWrapper
     */
    public String toString()
    {
-      return super.toString() + " - " + file.getAbsolutePath() + " -- " + zipFile;
+      return super.toString() + " - " + file.getAbsolutePath();
    }
 
    /**

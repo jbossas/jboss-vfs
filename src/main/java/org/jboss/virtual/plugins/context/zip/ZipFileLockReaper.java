@@ -21,12 +21,11 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.io.IOException;
 
 import org.jboss.logging.Logger;
 
@@ -75,7 +74,11 @@ public class ZipFileLockReaper
    {
    }
 
-   /** Factory method to be used to retrieve reference to ZipFileLockReaper */
+   /**
+    * Factory method to be used to retrieve reference to ZipFileLockReaper.
+    *
+    * @return lock reaper singleton  
+    */
    public synchronized static ZipFileLockReaper getInstance()
    {
       if (singleton == null)
@@ -120,10 +123,8 @@ public class ZipFileLockReaper
    {
       synchronized (ZipFileLockReaper.this)
       {
-         Iterator it = monitored.iterator();
-         while (it.hasNext())
+         for (ZipFileWrapper w : monitored)
          {
-            ZipFileWrapper w = (ZipFileWrapper) it.next();
             w.deleteFile(zipFileWrapper);
          }
       }
@@ -155,24 +156,8 @@ public class ZipFileLockReaper
             }
          }
 
-         Iterator it = monitored.iterator();
-         while (it.hasNext())
+         for (ZipFileWrapper w : monitored)
          {
-            ZipFileWrapper w = (ZipFileWrapper) it.next();
-
-            // stream leak debug
-            /*
-            Iterator<ZipEntryInputStream> sit = w.streams.iterator();
-            while (sit.hasNext())
-            {
-               ZipEntryInputStream eis = sit.next();
-               if (!eis.isClosed())
-               {
-                  System.out.println("Stream not closed: " + eis.debugCount + " - " + eis);
-               }
-            }
-            */
-
             if (w.getReferenceCount() <= 0 && now - w.getLastUsed() > PERIOD)
             {
                try
@@ -181,7 +166,7 @@ public class ZipFileLockReaper
                   if (log.isTraceEnabled())
                      log.trace("Asynchronously closed an unused ZipFile: " + w);
                }
-               catch(Exception ignored)
+               catch (Exception ignored)
                {
                   log.debug("IGNORING: Failed to close ZipFile: " + w, ignored);
                }

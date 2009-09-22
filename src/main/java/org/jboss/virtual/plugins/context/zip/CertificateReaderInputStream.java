@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 
-import org.jboss.logging.Logger;
-
 /**
  * ZipEntryInputStream is part of ZipFileWrapper implementation.
  *
@@ -87,11 +85,6 @@ class CertificateReaderInputStream extends InputStream
          {
             if (entry instanceof EntryInfoAdapter)
                EntryInfoAdapter.class.cast(entry).readCertificates();
-         }
-         catch (RuntimeException e)
-         {
-            Logger.getLogger(getClass()).error("ZipWraper:" + zipWrapper);
-            throw e;
          }
          finally
          {

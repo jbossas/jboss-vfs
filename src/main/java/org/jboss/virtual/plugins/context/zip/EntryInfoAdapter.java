@@ -46,13 +46,13 @@ class EntryInfoAdapter extends ZipEntry
    }
 
    /**
-    * Get original entry.
+    * Update entry.
     *
-    * @return the original entry
+    * @param entry the new entry
     */
-   ZipEntry getOriginalEntry()
+   void updateEntry(ZipEntry entry)
    {
-      return ei.entry;
+      ei.entry = entry;      
    }
 
    /**
