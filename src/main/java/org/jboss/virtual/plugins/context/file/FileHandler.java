@@ -46,6 +46,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
@@ -193,7 +194,10 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
             boolean done = Files.delete(f);
             if (done)
             {
-               childCache.remove(f.getName());
+               VirtualFileHandler parent = getParent();
+               if (parent != null)
+                  parent.removeChild(f.getName());
+
                return true;
             }
             
@@ -212,7 +216,10 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       }
       else
       {
-         childCache.remove(f.getName());
+         VirtualFileHandler parent = getParent();
+         if (parent != null)
+            parent.removeChild(f.getName());
+
          return true;
       }
    }
@@ -241,7 +248,7 @@ public class FileHandler extends AbstractURLHandler implements StructuredVirtual
       Map<String, VirtualFileHandler> oldCache = childCache;
       // fill up a new cache with old entries
       // old entries no longer existing in directory are purged by not being added to new cache
-      // we cache handlers so that things like JARs are recreated (optimization)
+      // we cache handlers so that things like JARs are not recreated (optimization)
       for (File file : files)
       {
          try
