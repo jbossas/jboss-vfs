@@ -21,10 +21,10 @@
  */
 package org.jboss.virtual.spi;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.jboss.util.collection.ConcurrentSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Singleton file handler plugin registry
@@ -37,7 +37,7 @@ public class FileHandlerPluginRegistry
    private static FileHandlerPluginRegistry instance = new FileHandlerPluginRegistry();
 
    /** The file handler plugins */
-   private Set<FileHandlerPlugin> plugins = new ConcurrentSet<FileHandlerPlugin>();
+   private Set<FileHandlerPlugin> plugins = new CopyOnWriteArraySet<FileHandlerPlugin>(new TreeSet<FileHandlerPlugin>(FileHandlerPlugin.COMPARATOR));
 
    private FileHandlerPluginRegistry()
    {
@@ -76,14 +76,12 @@ public class FileHandlerPluginRegistry
    }
 
    /**
-    * Return a copy of plugins.
+    * Return unmodifiable plugins.
     *
     * @return the plugins copy
     */
    public Set<FileHandlerPlugin> getFileHandlerPlugins()
    {
-      Set<FileHandlerPlugin> copy = new TreeSet<FileHandlerPlugin>(FileHandlerPlugin.COMPARATOR);
-      copy.addAll(plugins);
-      return copy;
+      return Collections.unmodifiableSet(plugins);
    }
 }

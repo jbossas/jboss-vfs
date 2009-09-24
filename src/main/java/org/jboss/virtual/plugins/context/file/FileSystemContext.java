@@ -41,12 +41,11 @@ import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.jar.JarHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
+import org.jboss.virtual.spi.FileHandlerPlugin;
+import org.jboss.virtual.spi.FileHandlerPluginRegistry;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
-import org.jboss.virtual.spi.FileHandlerPlugin;
-import org.jboss.virtual.spi.FileHandlerPluginRegistry;
-import org.jboss.virtual.spi.VFSContext;
 
 /**
  * FileSystemContext.
@@ -68,7 +67,7 @@ import org.jboss.virtual.spi.VFSContext;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
-public class FileSystemContext extends AbstractVFSContext implements FileHandlerPlugin
+public class FileSystemContext extends AbstractVFSContext
 {
    protected static final Logger staticLog = Logger.getLogger(FileSystemContext.class);
 
@@ -228,16 +227,6 @@ public class FileSystemContext extends AbstractVFSContext implements FileHandler
       return root;
    }
 
-   public int getRelativeOrder()
-   {
-      return Integer.MAX_VALUE;
-   }
-
-   public VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file) throws IOException
-   {
-      return FileSystemContext.class.cast(context).createVirtualFileHandler(parent, file, file.toURI());
-   }
-
    /**
     * Create a new virtual file handler
     *
@@ -253,15 +242,13 @@ public class FileSystemContext extends AbstractVFSContext implements FileHandler
          throw new IllegalArgumentException("Null file");
 
       Set<FileHandlerPlugin> plugins = FileHandlerPluginRegistry.getInstance().getFileHandlerPlugins();
-      plugins.add(this); // add this to potential external plugins
-
       for(FileHandlerPlugin plugin : plugins)
       {
          VirtualFileHandler handler = plugin.createHandler(this, parent, file);
          if (handler != null)
             return handler;
       }
-      return null;
+      return createVirtualFileHandler(parent, file, file.toURI());
    }
 
    /**
