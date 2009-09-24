@@ -44,6 +44,9 @@ import org.jboss.virtual.plugins.context.zip.ZipEntryContext;
 import org.jboss.virtual.spi.LinkInfo;
 import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.FileHandlerPlugin;
+import org.jboss.virtual.spi.FileHandlerPluginRegistry;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * FileSystemContext.
@@ -65,7 +68,7 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  * @author <a href="strukelj@parsek.net">Marko Strukelj</a>
  * @version $Revision: 1.1 $
  */
-public class FileSystemContext extends AbstractVFSContext
+public class FileSystemContext extends AbstractVFSContext implements FileHandlerPlugin
 {
    protected static final Logger staticLog = Logger.getLogger(FileSystemContext.class);
 
@@ -225,6 +228,16 @@ public class FileSystemContext extends AbstractVFSContext
       return root;
    }
 
+   public int getRelativeOrder()
+   {
+      return Integer.MAX_VALUE;
+   }
+
+   public VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file, URI uri) throws IOException
+   {
+      return FileSystemContext.class.cast(context).createVirtualFileHandler(parent, file, file.toURI());
+   }
+
    /**
     * Create a new virtual file handler
     *
@@ -239,36 +252,16 @@ public class FileSystemContext extends AbstractVFSContext
       if (file == null)
          throw new IllegalArgumentException("Null file");
 
-      String name = file.getName();
-      if (file.isFile() && JarUtils.isArchive(name))
-      {
-         if (exists(file) == false)
-            return null;
+      Set<FileHandlerPlugin> plugins = FileHandlerPluginRegistry.getInstance().getFileHandlerPlugins();
+      plugins.add(this); // add this to potential external plugins
 
-         if (forceVfsJar)
-         {
-            try
-            {
-               return new JarHandler(this, parent, file, file.toURI().toURL(), name);
-            }
-            catch(IOException e)
-            {
-               log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
-            }
-         }
-         else
-         {
-            try
-            {
-               return mountZipFS(parent, name, file);
-            }
-            catch (Exception e)
-            {
-               log.debug("IGNORING: Exception while trying to handle file (" + name + ") as a jar through ZipEntryContext: ", e);
-            }
-         }
+      for(FileHandlerPlugin plugin : plugins)
+      {
+         VirtualFileHandler handler = plugin.createHandler(this, parent, file, file.toURI());
+         if (handler != null)
+            return handler;
       }
-      return createVirtualFileHandler(parent, file, getFileURI(file));
+      return null;
    }
 
    /**
@@ -309,20 +302,49 @@ public class FileSystemContext extends AbstractVFSContext
     * @throws IOException for any error accessing the file system
     * @throws IllegalArgumentException for a null file
     */
-   public VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, File file, URI uri)
-      throws IOException
+   public VirtualFileHandler createVirtualFileHandler(VirtualFileHandler parent, File file, URI uri) throws IOException
    {
       if (file == null)
          throw new IllegalArgumentException("Null file");
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
+      String name = file.getName();
+      if (file.isFile() && JarUtils.isArchive(name))
+      {
+         if (exists(file) == false)
+            return null;
+
+         if (forceVfsJar)
+         {
+            try
+            {
+               return new JarHandler(this, parent, file, file.toURI().toURL(), name);
+            }
+            catch(IOException e)
+            {
+               log.debug("Exception while trying to handle file (" + name + ") as a jar: " + e.getMessage());
+            }
+         }
+         else
+         {
+            try
+            {
+               return mountZipFS(parent, name, file);
+            }
+            catch (Exception e)
+            {
+               log.debug("IGNORING: Exception while trying to handle file (" + name + ") as a jar through ZipEntryContext: ", e);
+            }
+         }
+      }
+
       VirtualFileHandler handler = null;
       if(VFSUtils.isLink(file.getName()))
       {
          handler = createLinkHandler(parent, file, null);
       }
-      else if (exists(file) == false && parent != null)
+      else if (parent != null && exists(file) == false)
       {
          // See if we can resolve this to a link in the parent
          if (parent instanceof FileHandler)
@@ -346,8 +368,7 @@ public class FileSystemContext extends AbstractVFSContext
     * @return newly created <tt>LinkHandler</tt>
     * @throws IOException for any error
     */
-   LinkHandler createLinkHandler(VirtualFileHandler parent, File file, String linkNameCondition)
-        throws IOException
+   LinkHandler createLinkHandler(VirtualFileHandler parent, File file, String linkNameCondition) throws IOException
    {
       URI uri = file.toURI();
       LinkHandler handler = null;
@@ -391,7 +412,7 @@ public class FileSystemContext extends AbstractVFSContext
     * @return true if file exists
     * @throws IOException for any error
     */
-   protected boolean exists(File file) throws IOException
+   public boolean exists(File file) throws IOException
    {
       // if force case sensitive is enabled - extra check is required
       boolean isCaseSensitive = forceCaseSensitive;
