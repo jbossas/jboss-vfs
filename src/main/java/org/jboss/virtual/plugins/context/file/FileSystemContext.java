@@ -331,15 +331,14 @@ public class FileSystemContext extends AbstractVFSContext
       {
          handler = createLinkHandler(parent, file, null);
       }
-      else if (parent != null && exists(file) == false)
-      {
-         // See if we can resolve this to a link in the parent
-         if (parent instanceof FileHandler)
-            handler = ((FileHandler) parent).getChildLink(file.getName());
-      }
       else if (exists(file))
       {
          handler = new FileHandler(this, parent, file, uri);
+      }
+      else
+      {
+         if (parent != null && parent instanceof FileHandler)
+            handler = ((FileHandler) parent).getChildLink(file.getName());
       }
       return handler;
    }
