@@ -233,7 +233,7 @@ public class FileSystemContext extends AbstractVFSContext implements FileHandler
       return Integer.MAX_VALUE;
    }
 
-   public VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file, URI uri) throws IOException
+   public VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file) throws IOException
    {
       return FileSystemContext.class.cast(context).createVirtualFileHandler(parent, file, file.toURI());
    }
@@ -257,7 +257,7 @@ public class FileSystemContext extends AbstractVFSContext implements FileHandler
 
       for(FileHandlerPlugin plugin : plugins)
       {
-         VirtualFileHandler handler = plugin.createHandler(this, parent, file, file.toURI());
+         VirtualFileHandler handler = plugin.createHandler(this, parent, file);
          if (handler != null)
             return handler;
       }

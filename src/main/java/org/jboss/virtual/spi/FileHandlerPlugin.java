@@ -23,7 +23,6 @@ package org.jboss.virtual.spi;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Comparator;
 
 /**
@@ -45,12 +44,11 @@ public interface FileHandlerPlugin
     *
     * @param context the current context
     * @param parent the parent virtual file handler
-    * @param file the current file
-    * @param uri the file's uri
+    * @param file the current file (non null)
     * @return new virtual file handler or null if cannot create one
     * @throws IOException for any error
     */
-   VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file, URI uri) throws IOException;
+   VirtualFileHandler createHandler(VFSContext context, VirtualFileHandler parent, File file) throws IOException;
 
    /**
     * The relative order comparator.
