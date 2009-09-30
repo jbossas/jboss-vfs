@@ -35,7 +35,7 @@ import java.util.Collections;
 /**
  * A real filesystem.
  */
-public final class RealFileSystem implements FileSystem {
+public final class RealFileSystem extends AbstractRefCounted implements FileSystem {
 
     /**
      * The root real filesystem (singleton instance).
@@ -121,10 +121,15 @@ public final class RealFileSystem implements FileSystem {
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
 
+    /** {@inheritDoc} */
+    public Handle<? extends RealFileSystem> getHandle() throws IOException {
+        return doGetHandle();
+    }
+
     /**
      * {@inheritDoc}
      */
-    public void close() throws IOException {
+    protected void doClose() throws IOException {
         // no operation - the real FS can't be closed
     }
 }

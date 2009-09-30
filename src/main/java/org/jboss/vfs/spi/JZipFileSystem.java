@@ -52,7 +52,7 @@ import java.util.Collections;
  * This implementation is backed by a zip file.  The provided file must be owned by this instance; otherwise, if the
  * file disappears unexpectedly, the filesystem will malfunction.
  */
-public final class JZipFileSystem implements FileSystem {
+public final class JZipFileSystem extends AbstractRefCounted implements FileSystem {
 
     private final File zipFile;
     private final long zipTime;
@@ -239,8 +239,12 @@ public final class JZipFileSystem implements FileSystem {
         return true;
     }
 
-    public void close() throws IOException {
+    protected void doClose() throws IOException {
         tempDir.close();
+    }
+
+    public Handle<? extends JZipFileSystem> getHandle() throws IOException {
+        return doGetHandle();
     }
 
     private static final class ZipNode {

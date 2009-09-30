@@ -142,6 +142,14 @@ public interface FileSystem extends Closeable {
     List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target);
 
     /**
+     * Get a handle to this filesystem.  Throws an exception if the filesystem was already closed.
+     *
+     * @return
+     * @throws IOException
+     */
+    Handle<? extends FileSystem> getHandle() throws IOException;
+
+    /**
      * Destroy this filesystem instance.  After this method is called, the filesystem may not be used in any way.  This
      * method should be called only after all mounts of this filesystem have been cleared; otherwise, VFS accesses may
      * result in {@code IOException}s.
