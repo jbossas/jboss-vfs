@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.Closeable;
 import java.io.BufferedOutputStream;
 import java.util.List;
 import java.util.Iterator;
@@ -51,7 +52,7 @@ import java.util.zip.ZipEntry;
  * This implementation is backed by a zip file.  The provided file must be owned by this instance; otherwise, if the
  * file disappears unexpectedly, the filesystem will malfunction.
  */
-public final class JavaZipFileSystem extends AbstractRefCounted implements FileSystem {
+public final class JavaZipFileSystem implements FileSystem {
 
     private final ZipFile zipFile;
     private final File archiveFile;
@@ -252,12 +253,12 @@ public final class JavaZipFileSystem extends AbstractRefCounted implements FileS
         return true;
     }
 
-    public Handle<? extends JavaZipFileSystem> getHandle() throws IOException {
-        return doGetHandle();
-    }
-
-    protected void doClose() throws IOException {
-        VFSUtils.safeClose(zipFile);
+    public void close() throws IOException {
+        VFSUtils.safeClose(new Closeable() {
+            public void close() throws IOException {
+                zipFile.close();
+            }
+        });
         tempDir.close();
     }
 
