@@ -47,6 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
@@ -604,6 +606,20 @@ public class VFS {
      */
     public static Closeable mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZipExpanded(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
+    }
+    
+    /**
+     * Create and mount an assembly file system, returning a single handle which will unmount and
+     * close the filesystem when closed. 
+     * 
+     * @param assembly an {@link VirtualFileAssembly} to mount in the VFS
+     * @param mountPoint the point at which the filesystem should be mounted
+     * @return a handle
+     * 
+     * @throws IOException if an error occurs
+     */
+    public static Closeable mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
+       return doMount(new AssemblyFileSystem(assembly), mountPoint);
     }
 
     /**

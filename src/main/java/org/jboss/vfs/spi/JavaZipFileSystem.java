@@ -22,29 +22,29 @@
 
 package org.jboss.vfs.spi;
 
-import org.jboss.vfs.util.PathTokenizer;
-import org.jboss.vfs.VFSUtils;
-import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.TempDir;
-
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.Closeable;
-import java.io.BufferedOutputStream;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.Collection;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.zip.ZipFile;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import org.jboss.vfs.TempDir;
+import org.jboss.vfs.VFSUtils;
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.util.PathTokenizer;
 
 /**
  * {@inheritDoc}
@@ -142,14 +142,15 @@ public final class JavaZipFileSystem implements FileSystem {
             // nope, create a cached temp
             final ZipEntry zipEntry = getNodeEntry(zipNode);
             final String name = zipEntry.getName();
-            cachedFile = new File(contentsDir, name);
+            cachedFile = buildFile(contentsDir, name);
+            cachedFile.getParentFile().mkdirs(); 
             VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
             zipNode.cachedFile = cachedFile;
             return cachedFile;
         }
     }
 
-    public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
+   public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
         final ZipNode zipNode = getExistingZipNode(mountPoint, target);
         final File cachedFile = zipNode.cachedFile;
         if (cachedFile != null) {
@@ -261,6 +262,16 @@ public final class JavaZipFileSystem implements FileSystem {
         });
         tempDir.close();
     }
+    
+    private File buildFile(File contentsDir, String name) {
+       List<String> tokens = PathTokenizer.getTokens(name);
+       File currentFile = contentsDir;
+       for(String token : tokens) {
+          currentFile = new File(currentFile, token);
+       }
+       currentFile.getParentFile().mkdirs();
+       return currentFile;
+    }
 
     private static final class ZipNode {
 
@@ -275,7 +286,7 @@ public final class JavaZipFileSystem implements FileSystem {
             this.name = name;
             this.entry = entry;
         }
-
+        
         private ZipNode find(VirtualFile mountPoint, VirtualFile target) {
             if (mountPoint.equals(target)) {
                 return this;
