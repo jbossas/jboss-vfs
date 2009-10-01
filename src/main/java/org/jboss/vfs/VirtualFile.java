@@ -375,11 +375,11 @@ public class VirtualFile implements Serializable {
     }
 
     /**
-     * Get a child virtual file.
+     * Get a child virtual file.  The child may or may not exist in the virtual filesystem.
      *
      * @param path the path
      *
-     * @return the child or {@code null} if not found
+     * @return the child
      *
      * @throws IllegalArgumentException if the path is null
      */
