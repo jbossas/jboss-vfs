@@ -48,7 +48,7 @@ import org.jboss.vfs.util.PathTokenizer;
  * @author Ales.Justin@jboss.org
  * @version $Revision: 44334 $
  */
-public class VirtualFile implements Serializable {
+public final class VirtualFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final String name;
