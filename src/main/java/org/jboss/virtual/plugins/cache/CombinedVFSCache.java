@@ -209,7 +209,7 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
       return "CombinedVFSCache[real-cache: " + realCache + "]";
    }
 
-   private class PermanentVFSCache extends MapVFSCache
+   private static class PermanentVFSCache extends MapVFSCache
    {
       private boolean started;
 

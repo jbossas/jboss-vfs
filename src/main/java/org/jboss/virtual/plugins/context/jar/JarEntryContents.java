@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -58,7 +57,7 @@ public class JarEntryContents extends AbstractJarHandler implements StructuredVi
    private byte[] contents;
    private boolean isJar;
    private NestedJarFromStream njar;
-   private InputStream openStream;
+   private transient InputStream openStream;
 
    private List<VirtualFileHandler> entryChildren;
    private transient Map<String, VirtualFileHandler> entryMap;

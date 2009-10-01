@@ -56,7 +56,7 @@ public class LinkHandler extends AbstractURLHandler implements StructuredVirtual
    /** The link targets */
    private HashMap<String, VirtualFileHandler> linkTargets = new HashMap<String, VirtualFileHandler>(3);
 
-   class ParentOfLink extends AbstractURLHandler implements StructuredVirtualFileHandler
+   static class ParentOfLink extends AbstractURLHandler implements StructuredVirtualFileHandler
    {
       private static final long serialVersionUID = 1;
 

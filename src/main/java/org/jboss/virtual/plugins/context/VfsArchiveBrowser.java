@@ -102,7 +102,7 @@ public class VfsArchiveBrowser implements Iterator
    /**
     * Archive browser delegate filter.
     */
-   private class ArchiveBrowserFilter implements VirtualFileFilter
+   private static class ArchiveBrowserFilter implements VirtualFileFilter
    {
       private ArchiveBrowser.Filter filter;
 
