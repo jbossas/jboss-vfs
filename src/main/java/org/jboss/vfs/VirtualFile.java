@@ -396,9 +396,7 @@ public class VirtualFile implements Serializable {
                 current = new VirtualFile(part, current);
             }
         }
-        if (current.exists())
-            return current;
-        return null;
+        return current;
     }
 
     /**
