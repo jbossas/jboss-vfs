@@ -35,7 +35,7 @@ import org.jboss.virtual.spi.VFSContextFactory;
  */
 public abstract class AbstractContextFactory implements VFSContextFactory
 {
-   private String[] protocols;
+   private final String[] protocols;
 
    protected AbstractContextFactory(String... protocols)
    {

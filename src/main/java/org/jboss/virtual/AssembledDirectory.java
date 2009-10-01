@@ -606,4 +606,10 @@ public class AssembledDirectory extends VirtualFile
    {
       directory.cleanup();   
    }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      return (obj instanceof AssembledDirectory) && super.equals(obj);
+   }
 }

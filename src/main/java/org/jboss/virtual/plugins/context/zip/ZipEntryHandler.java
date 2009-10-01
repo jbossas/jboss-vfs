@@ -44,6 +44,9 @@ import org.jboss.virtual.spi.VirtualFileHandler;
  */
 public class ZipEntryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
+   /** serialVersionUID */
+   private static final long serialVersionUID = 1L;
+
    /** The url */
    private URL url;
 

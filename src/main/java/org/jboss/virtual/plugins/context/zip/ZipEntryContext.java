@@ -691,7 +691,8 @@ public class ZipEntryContext extends AbstractVFSContext
    protected DelegatingHandler mountZipStream(VirtualFileHandler parent, String name, InputStream zipStream) throws IOException, URISyntaxException
    {
       DelegatingHandler delegator = new DelegatingHandler(this, parent, name);
-      ZipStreamWrapper wrapper = new ZipStreamWrapper(zipStream, name, parent.getLastModified());
+      long lastModified = (parent != null) ? parent.getLastModified() : System.currentTimeMillis();
+      ZipStreamWrapper wrapper = new ZipStreamWrapper(zipStream, name, lastModified);
 
       URL delegatorUrl = null;
 
