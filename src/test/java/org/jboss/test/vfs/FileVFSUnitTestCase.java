@@ -522,7 +522,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       // Find the outer.jar
       VirtualFile outerJar = testdir.getChild("unpacked-outer.jar");
       assertNotNull("unpacked-outer.jar", outerJar);
-      assertNull(outerJar.getChild("WEB-INF"));
+      assertFalse(outerJar.getChild("WEB-INF").exists());
    }
 
    public void testNestedNestedParent() throws Exception
@@ -1502,10 +1502,6 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       // children() don't exist
       children = root.getChildren();
       assertTrue(tmpRoot + ".getChildren().size() == 0", children.size() == 0);
-
-      // getChild() returns null
-      tmpVF = root.getChild(tmp.getName());
-      assertNull(tmpRoot + ".getChild('" + tmp.getName() + "') == null", tmpVF);
 
       // directory delete()
       assertTrue(tmpRoot + ".delete()", root.delete());
