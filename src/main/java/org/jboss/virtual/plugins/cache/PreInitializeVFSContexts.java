@@ -23,12 +23,15 @@ package org.jboss.virtual.plugins.cache;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.TempStore;
 
 /**
  * Initialize vfs contexts - performance improvements.
@@ -37,8 +40,10 @@ import org.jboss.virtual.spi.ExceptionHandler;
  */
 public class PreInitializeVFSContexts
 {
-   private Logger log = Logger.getLogger(PreInitializeVFSContexts.class);
+   protected Logger log = Logger.getLogger(getClass());
+
    private Map<URL, ExceptionHandler> initializedVFSContexts;
+   private Map<URL, TempStore> tempStores;
    private boolean holdReference;
    private List<VFS> references;
 
@@ -49,26 +54,47 @@ public class PreInitializeVFSContexts
     */
    public void start() throws Exception
    {
+      Map<URL, VFS> refs = new HashMap<URL, VFS>();
+
+      // apply exception handlers
       if (initializedVFSContexts != null && initializedVFSContexts.isEmpty() == false)
       {
-         if (holdReference)
-            references = new ArrayList<VFS>();
-
          for (Map.Entry<URL, ExceptionHandler> entry : initializedVFSContexts.entrySet())
          {
-            VFS vfs = VFS.getVFS(entry.getKey());
+            URL url = entry.getKey();
+            VFS vfs = VFS.getVFS(url);
 
             ExceptionHandler eh = entry.getValue();
             if (eh != null)
                vfs.setExceptionHandler(eh);
 
             log.debug("Initialized Virtual File: " + vfs.getRoot());
-            if (holdReference)
-            {
-               references.add(vfs);
-            }
+            refs.put(url, vfs);
          }
       }
+
+      // apply stores
+      if (tempStores != null && tempStores.isEmpty() == false)
+      {
+         for (Map.Entry<URL, TempStore> entry : tempStores.entrySet())
+         {
+            URL url = entry.getKey();
+            VFS vfs = refs.get(url);
+            if (vfs == null)
+            {
+               vfs = VFS.getVFS(url);
+               log.debug("Initialized Virtual File: " + vfs.getRoot());
+               refs.put(url, vfs);
+            }
+
+            TempStore ts = entry.getValue();
+            if (ts != null)
+               vfs.setTempStore(ts);
+         }
+      }
+
+      if (holdReference)
+         references = new ArrayList<VFS>(refs.values());
    }
 
    /**
@@ -87,7 +113,10 @@ public class PreInitializeVFSContexts
     */
    public List<VFS> getReferences()
    {
-      return references;
+      if (references == null || references.isEmpty())
+         return Collections.emptyList();
+      else
+         return Collections.unmodifiableList(references);
    }
 
    /**
@@ -98,6 +127,16 @@ public class PreInitializeVFSContexts
    public void setInitializedVFSContexts(Map<URL, ExceptionHandler> initializedVFSContexts)
    {
       this.initializedVFSContexts = initializedVFSContexts;
+   }
+
+   /**
+    * Set temp stores.
+    *
+    * @param tempStores the temp stores
+    */
+   public void setTempStores(Map<URL, TempStore> tempStores)
+   {
+      this.tempStores = tempStores;
    }
 
    /**
