@@ -33,6 +33,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextFactory;
 import org.jboss.virtual.spi.VFSContextFactoryLocator;
 import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.TempStore;
 import org.jboss.virtual.spi.registry.VFSRegistry;
 
 /**
@@ -118,6 +119,16 @@ public class VFS
    }
 
    /**
+    * Set temp store
+    *
+    * @param store the temp store
+    */
+   public void setTempStore(TempStore store)
+   {
+      context.setTempStore(store);
+   }
+
+   /**
     * Cleanup any resources tied to this file.
     * e.g. vfs cache
     *
@@ -145,6 +156,12 @@ public class VFS
          {
             VFSRegistry registry = VFSRegistry.getInstance();
             registry.removeContext(context);
+
+            TempStore store = context.getTempStore();
+            if (store != null)
+            {
+               store.clear();
+            }
          }
       }
       catch (Exception e)

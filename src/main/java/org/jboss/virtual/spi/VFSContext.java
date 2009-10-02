@@ -175,4 +175,18 @@ public interface VFSContext
     * @param path the path to cleanup
     */
    void cleanupTempInfo(String path);
+
+   /**
+    * Set temp store.
+    *
+    * @param store the store
+    */
+   void setTempStore(TempStore store);
+
+   /**
+    * Get temp store.
+    *
+    * @return the temp store
+    */
+   TempStore getTempStore();
 }

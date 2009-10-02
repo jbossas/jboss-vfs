@@ -49,6 +49,7 @@ import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.VirtualFileHandlerVisitor;
 import org.jboss.virtual.spi.VFSContextConstraints;
+import org.jboss.virtual.spi.TempStore;
 
 /**
  * AbstractVFSContext.
@@ -547,6 +548,16 @@ public abstract class AbstractVFSContext implements VFSContext
    public void setExceptionHandler(ExceptionHandler exceptionHandler)
    {
       setOption(ExceptionHandler.class.getName(), exceptionHandler);
+   }
+
+   public void setTempStore(TempStore store)
+   {
+      setOption(TempStore.class.getName(), store);
+   }
+
+   public TempStore getTempStore()
+   {
+      return getOption(TempStore.class);
    }
 
    @Override

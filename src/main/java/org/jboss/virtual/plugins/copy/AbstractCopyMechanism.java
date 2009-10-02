@@ -40,6 +40,7 @@ import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.plugins.context.temp.BasicTempInfo;
 import org.jboss.virtual.spi.Options;
+import org.jboss.virtual.spi.TempStore;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -129,13 +130,22 @@ public abstract class AbstractCopyMechanism implements CopyMechanism
          return file;
       }
 
+      // old vfs context
+      VFSContext oldVFSContext = handler.getVFSContext();
+
       //create guid dir
-      File guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
+      File guidDir = null;
+      TempStore store = oldVFSContext.getTempStore();
+      if (store != null)
+         guidDir = store.createTempFolder(file);
+
+      if (guidDir == null)
+         guidDir = createTempDirectory(getTempDirectory(), GUID.asString());
+      
       // unpack handler
       File copy = copy(guidDir, handler);
 
       String path = handler.getPathName();
-      VFSContext oldVFSContext = handler.getVFSContext();
       // create new handler
       FileSystemContext fileSystemContext = new TempContext(copy, oldVFSContext, path);
 

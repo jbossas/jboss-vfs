@@ -64,6 +64,7 @@ import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
 import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.Options;
 import org.jboss.virtual.spi.TempInfo;
+import org.jboss.virtual.spi.TempStore;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VFSContextConstraints;
 import org.jboss.virtual.spi.VirtualFileHandler;
@@ -546,7 +547,16 @@ public class ZipEntryContext extends AbstractVFSContext
                   if (createNewTempInfo)
                   {
                      // extract it to temp dir
-                     dest = new File(getTempDir() + "/" + getTempFileName(entryName));
+                     String tempName = getTempFileName(entryName);
+                     TempStore store = (context != null) ? context.getTempStore() : null;
+                     if (store != null)
+                     {
+                        File tempDir = store.createTempFolder(zipSource.getName(), ent.getName());
+                        if (tempDir != null)
+                           dest = new File(tempDir, tempName);
+                     }
+                     if (dest == null)
+                        dest = new File(getTempDir() + "/" + tempName);
                      dest.deleteOnExit();
 
                      if (trace)
