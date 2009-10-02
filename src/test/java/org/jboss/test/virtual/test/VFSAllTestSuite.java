@@ -100,6 +100,8 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(CombinedVFSCacheTestCase.suite());
       // exception handler
       suite.addTest(ExceptionHandlerTestCase.suite());
+      // temp store
+      suite.addTest(TempStoreTestCase.suite());
       // operations
       suite.addTest(TempCleanupUnitTestCase.suite());
       suite.addTest(ExplodeCleanupUnitTestCase.suite());
