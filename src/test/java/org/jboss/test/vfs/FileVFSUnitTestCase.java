@@ -63,8 +63,6 @@ import org.jboss.vfs.util.SuffixMatchFilter;
  */
 public class FileVFSUnitTestCase extends AbstractVFSTest
 {
-   private TempFileProvider provider;
-
    public FileVFSUnitTestCase(String name)
    {
       super(name);
@@ -73,32 +71,17 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void setUp() throws Exception
    {
       super.setUp();
-
-      provider = TempFileProvider.create("test", new ScheduledThreadPoolExecutor(2));
    }
+
 
    public void tearDown() throws Exception
    {
-      provider.close();
+      super.tearDown();
    }
 
    public static Test suite()
    {
       return new TestSuite(FileVFSUnitTestCase.class);
-   }
-
-   public List<Closeable> recursiveMount(VirtualFile file) throws IOException
-   {
-      ArrayList<Closeable> mounts = new ArrayList<Closeable>();
-
-      if (!file.isDirectory() && file.getName().matches("^.*\\.[EeWwJj][Aa][Rr]$"))
-         mounts.add(VFS.mountZip(file, file, provider));
-
-      if (file.isDirectory())
-         for (VirtualFile child : file.getChildren())
-            mounts.addAll(recursiveMount(child));
-
-      return mounts;
    }
 
    /**

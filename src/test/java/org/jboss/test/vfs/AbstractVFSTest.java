@@ -21,10 +21,18 @@
 */
 package org.jboss.test.vfs;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
+import org.jboss.vfs.TempFileProvider;
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * AbstractVFSTest.
@@ -34,6 +42,8 @@ import org.jboss.test.BaseTestCase;
  */
 public abstract class AbstractVFSTest extends BaseTestCase
 {
+   private TempFileProvider provider;
+
    public AbstractVFSTest(String name)
    {
       super(name);
@@ -42,10 +52,13 @@ public abstract class AbstractVFSTest extends BaseTestCase
    protected void setUp() throws Exception
    {
       super.setUp();
+
+      provider = TempFileProvider.create("test", new ScheduledThreadPoolExecutor(2));
    }
 
    protected void tearDown() throws Exception
    {
+      provider.close();
    }
 
    // TODO move to AbstractTestCase
@@ -54,6 +67,20 @@ public abstract class AbstractVFSTest extends BaseTestCase
       URL url = super.getResource(name);
       assertNotNull("Resource not found: " + name, url);
       return url;
+   }
+
+   public List<Closeable> recursiveMount(VirtualFile file) throws IOException
+   {
+      ArrayList<Closeable> mounts = new ArrayList<Closeable>();
+
+      if (!file.isDirectory() && file.getName().matches("^.*\\.([EeWwJj][Aa][Rr]|[Zz][Ii][Pp])$"))
+         mounts.add(VFS.mountZip(file, file, provider));
+
+      if (file.isDirectory())
+         for (VirtualFile child : file.getChildren())
+            mounts.addAll(recursiveMount(child));
+
+      return mounts;
    }
 
    protected <T> void checkThrowableTemp(Class<T> expected, Throwable throwable)
