@@ -111,7 +111,7 @@ public class AssemblyFileSystem implements FileSystem {
     private VirtualFile getExistingFile(final VirtualFile mountPoint, final VirtualFile target) throws FileNotFoundException {
         VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {
-            throw new FileNotFoundException(assemblyFile.getPathName());
+            throw new FileNotFoundException(target.getPathName());
         }
         return assemblyFile;
     }
