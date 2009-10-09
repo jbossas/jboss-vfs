@@ -47,11 +47,7 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        if (assemblyFile == null) {
-            throw new FileNotFoundException(assemblyFile.getPathName());
-        }
-        return assemblyFile.getPhysicalFile();
+        return getExistingFile(mountPoint, target).getPhysicalFile();
     }
 
     /** {@inheritDoc} */
@@ -104,15 +100,19 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        if (assemblyFile == null) {
-            throw new FileNotFoundException(assemblyFile.getPathName());
-        }
-        return assemblyFile.openStream();
+        return getExistingFile(mountPoint, target).openStream();
     }
 
     /** {@inheritDoc} */
     public void close() throws IOException {
         assembly.close();
+    }
+
+    private VirtualFile getExistingFile(final VirtualFile mountPoint, final VirtualFile target) throws FileNotFoundException {
+        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        if (assemblyFile == null) {
+            throw new FileNotFoundException(assemblyFile.getPathName());
+        }
+        return assemblyFile;
     }
 }
