@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.security.CodeSigner;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
@@ -120,8 +121,15 @@ public final class RealFileSystem implements FileSystem {
         final String[] names = getFile(mountPoint, target).list();
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
+    
+   /**
+    * {@inheritDoc}
+    */
+   public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
+      return null;
+   }
 
-    /**
+   /**
      * {@inheritDoc}
      */
     public void close() throws IOException {

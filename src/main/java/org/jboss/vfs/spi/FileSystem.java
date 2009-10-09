@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Closeable;
 import java.io.InputStream;
+import java.security.CodeSigner;
 import java.util.List;
 
 /**
@@ -136,6 +137,16 @@ public interface FileSystem extends Closeable {
      * @return the collection of children names
      */
     List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target);
+    
+    /**
+     * Get the {@link CodeSigner}s for a the virtual file.
+     * 
+     * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+     * @param target the virtual file to act upon
+     *
+     * @return {@link CodeSigner} for the virtual file or null if not signed. 
+     */
+    CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Destroy this filesystem instance.  After this method is called, the filesystem may not be used in any way.  This

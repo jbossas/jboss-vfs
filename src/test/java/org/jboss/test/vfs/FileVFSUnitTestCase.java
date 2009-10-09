@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
@@ -1088,19 +1089,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          try
          {
             InputStream is = jar.openStream();
-            FileOutputStream fos = new FileOutputStream(tmpJar);
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = is.read(buffer)) > 0)
-            {
-               fos.write(buffer, 0, read);
-            }
-            fos.close();
-            log.debug("outer.jar/jar1.jar size is: " + jar.getSize());
-            log.debug(tmpJar.getAbsolutePath() + " size is: " + tmpJar.length());
-            assertTrue("outer.jar > 0", jar.getSize() > 0);
-            assertEquals("copy jar size", jar.getSize(), tmpJar.length());
-            is.close();
+            
+            assertTrue(is instanceof JarInputStream);
          }
          finally
          {

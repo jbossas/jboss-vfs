@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.security.CodeSigner;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -106,6 +107,15 @@ public class AssemblyFileSystem implements FileSystem {
     /** {@inheritDoc} */
     public void close() throws IOException {
         assembly.close();
+    }
+    
+    /** {@inheritDoc} */
+    public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
+       VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+       if (assemblyFile == null) {
+          return null;
+       }
+       return assemblyFile.getCodeSigners();
     }
 
     private VirtualFile getExistingFile(final VirtualFile mountPoint, final VirtualFile target) throws FileNotFoundException {

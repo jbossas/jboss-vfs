@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
+import java.security.CodeSigner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -186,6 +187,9 @@ public final class VirtualFile implements Serializable {
      * @throws IOException for any error accessing the file system
      */
     public InputStream openStream() throws IOException {
+        if(isDirectory()) {
+           return new VirtualJarInputStream(this);
+        }
         final VFS.Mount mount = VFS.instance.getMount(this);
         return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
     }
@@ -419,6 +423,17 @@ public final class VirtualFile implements Serializable {
      */
     public URI toURI() throws URISyntaxException {
         return VFSUtils.getVirtualURI(this);
+    }
+    
+    /**
+     * Get the {@link CodeSigner}s for a the virtual file.
+     *
+     * @return {@link CodeSigner} for the virtual file or null if not signed. 
+    * @throws IOException 
+     */
+    public CodeSigner[] getCodeSigners() {
+        final VFS.Mount mount = VFS.instance.getMount(this);
+        return mount.getFileSystem().getCodeSigners(mount.getMountPoint(), this);
     }
 
     /**

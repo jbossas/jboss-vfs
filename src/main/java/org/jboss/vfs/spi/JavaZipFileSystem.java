@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.CodeSigner;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,8 +39,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.jboss.vfs.TempDir;
 import org.jboss.vfs.VFSUtils;
@@ -54,7 +55,7 @@ import org.jboss.vfs.util.PathTokenizer;
  */
 public final class JavaZipFileSystem implements FileSystem {
 
-    private final ZipFile zipFile;
+    private final JarFile zipFile;
     private final File archiveFile;
     private final long zipTime;
     private final ZipNode rootNode;
@@ -84,14 +85,14 @@ public final class JavaZipFileSystem implements FileSystem {
      */
     public JavaZipFileSystem(File archiveFile, TempDir tempDir) throws IOException {
         zipTime = archiveFile.lastModified();
-        final ZipFile zipFile;
-        this.zipFile = zipFile = new ZipFile(archiveFile);
+        final JarFile zipFile;
+        this.zipFile = zipFile = new JarFile(archiveFile);
         this.archiveFile = archiveFile;
         this.tempDir = tempDir;
-        final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        final Enumeration<? extends JarEntry> entries = zipFile.entries();
         final ZipNode rootNode = new ZipNode(new HashMap<String, ZipNode>(), "", null);
         FILES:
-        for (ZipEntry entry : iter(entries)) {
+        for (JarEntry entry : iter(entries)) {
             final String name = entry.getName();
             final boolean isDirectory = entry.isDirectory();
             final List<String> tokens = PathTokenizer.getTokens(name);
@@ -140,7 +141,7 @@ public final class JavaZipFileSystem implements FileSystem {
                 return cachedFile;
             }
             // nope, create a cached temp
-            final ZipEntry zipEntry = getNodeEntry(zipNode);
+            final JarEntry zipEntry = getNodeEntry(zipNode);
             final String name = zipEntry.getName();
             cachedFile = buildFile(contentsDir, name);
             cachedFile.getParentFile().mkdirs(); 
@@ -159,7 +160,7 @@ public final class JavaZipFileSystem implements FileSystem {
         if (rootNode == zipNode) {
             return new FileInputStream(archiveFile);
         }
-        final ZipEntry entry = zipNode.entry;
+        final JarEntry entry = zipNode.entry;
         if (entry == null) {
             throw new IOException("Not a file: \"" + target.getPathName() + "\"");
         }
@@ -181,7 +182,7 @@ public final class JavaZipFileSystem implements FileSystem {
             return 0L;
         }
         final File cachedFile = zipNode.cachedFile;
-        final ZipEntry entry = zipNode.entry;
+        final JarEntry entry = zipNode.entry;
         if (zipNode == rootNode) {
             return archiveFile.length();
         }
@@ -194,7 +195,7 @@ public final class JavaZipFileSystem implements FileSystem {
             return 0L;
         }
         final File cachedFile = zipNode.cachedFile;
-        final ZipEntry entry = zipNode.entry;
+        final JarEntry entry = zipNode.entry;
         return cachedFile != null ? cachedFile.lastModified() : entry == null ? zipTime : entry.getTime();
     }
 
@@ -229,10 +230,22 @@ public final class JavaZipFileSystem implements FileSystem {
         }
         return names;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
+       final ZipNode zipNode = getZipNode(mountPoint, target);
+       if (zipNode == null) {
+           return null;
+       }
+       JarEntry jarEntry = zipNode.entry;
+       return jarEntry.getCodeSigners();
+    }
 
-    private ZipEntry getNodeEntry(ZipNode zipNode)
+    private JarEntry getNodeEntry(ZipNode zipNode)
             throws IOException {
-        final ZipEntry entry = zipNode.entry;
+        final JarEntry entry = zipNode.entry;
         if (entry == null) {
             throw new IOException("Cannot call this operation on a directory");
         }
@@ -259,7 +272,7 @@ public final class JavaZipFileSystem implements FileSystem {
     public boolean isReadOnly() {
         return true;
     }
-
+    
     public void close() throws IOException {
         VFSUtils.safeClose(new Closeable() {
             public void close() throws IOException {
@@ -284,10 +297,10 @@ public final class JavaZipFileSystem implements FileSystem {
         // immutable child map
         private final Map<String, ZipNode> children;
         private final String name;
-        private final ZipEntry entry;
+        private final JarEntry entry;
         private volatile File cachedFile;
 
-        private ZipNode(Map<String, ZipNode> children, String name, ZipEntry entry) {
+        private ZipNode(Map<String, ZipNode> children, String name, JarEntry entry) {
             this.children = children;
             this.name = name;
             this.entry = entry;

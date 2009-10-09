@@ -35,6 +35,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -683,5 +684,37 @@ public class VFSUtils {
      */
     public static InputStream emptyStream() {
         return EMPTY_STREAM;
+    }
+    
+    
+    /**
+     * Determine the relative path within the assembly.
+     * 
+     * @param mountPoint
+     * @param target
+     * @return
+     */
+    public static List<String> getRelativePath(VirtualFile mountPoint, VirtualFile target) {
+       List<String> pathParts = new LinkedList<String>();
+       collectPathParts(mountPoint, target, pathParts);
+       return pathParts;
+    }
+
+    /**
+     * Recursively work from the target to the mount-point and collect the path elements.
+     * 
+     * @param mountPoint
+     * @param current
+     * @param pathParts
+     */
+    private static void collectPathParts(VirtualFile mountPoint, VirtualFile current, List<String> pathParts) {
+       if (current == null) {
+          throw new IllegalArgumentException("VirtualFile not a child of provided mount point");
+       }
+       if (current.equals(mountPoint)) {
+          return;
+       }
+       collectPathParts(mountPoint, current.getParent(), pathParts);
+       pathParts.add(current.getName());
     }
 }

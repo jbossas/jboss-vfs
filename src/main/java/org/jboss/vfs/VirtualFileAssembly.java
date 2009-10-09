@@ -101,7 +101,7 @@ public class VirtualFileAssembly implements Closeable {
     * @throws IOException 
     */
    public VirtualFile getFile(VirtualFile mountPoint, VirtualFile target) {
-      Path path = getRelativePath(mountPoint, target);
+      Path path = new Path(VFSUtils.getRelativePath(mountPoint, target));
       return rootNode.getFile(path, mountPoint);
    }
 
@@ -110,37 +110,6 @@ public class VirtualFileAssembly implements Closeable {
     */
    public void close() {
       VFSUtils.safeClose(mountHandles);
-   }
-
-   /**
-    * Determine the relative path within the assembly.
-    * 
-    * @param mountPoint
-    * @param target
-    * @return
-    */
-   private Path getRelativePath(VirtualFile mountPoint, VirtualFile target) {
-      List<String> pathParts = new LinkedList<String>();
-      collectPathParts(mountPoint, target, pathParts);
-      return new Path(pathParts);
-   }
-
-   /**
-    * Recursively work from the target to the mount-point and collect the path elements.
-    * 
-    * @param mountPoint
-    * @param current
-    * @param pathParts
-    */
-   private void collectPathParts(VirtualFile mountPoint, VirtualFile current, List<String> pathParts) {
-      if (current == null) {
-         throw new IllegalArgumentException("VirtualFile not a child of provided mount point");
-      }
-      if (current.equals(mountPoint)) {
-         return;
-      }
-      collectPathParts(mountPoint, current.getParent(), pathParts);
-      pathParts.add(current.getName());
    }
 
    /**
