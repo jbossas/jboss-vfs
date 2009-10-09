@@ -8,7 +8,7 @@
   <groupId>org.jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0.CR1-SNAPSHOT</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
@@ -29,8 +29,6 @@
   </organization>
 
   <properties>
-    <version.jboss.jzipfile>1.0.0.CR2-SNAPSHOT</version.jboss.jzipfile>
-    <version.jboss.truezip>6.6</version.jboss.truezip>
     <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
     <version.jboss.logging>2.1.0.GA</version.jboss.logging>
     <version.jboss.test>1.1.0.GA</version.jboss.test>
@@ -126,16 +124,6 @@
   </reporting>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jboss.jzipfile</groupId>
-      <artifactId>jzipfile</artifactId>
-      <version>${version.jboss.jzipfile}</version>
-    </dependency>
-    <dependency>
-      <groupId>de.schlichtherle.io</groupId>
-      <artifactId>truezip</artifactId>
-      <version>${version.jboss.truezip}</version>
-    </dependency>
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-common-core</artifactId>
