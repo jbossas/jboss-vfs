@@ -669,4 +669,19 @@ public class VFSUtils {
             }
         }
     }
+
+    private static final InputStream EMPTY_STREAM = new InputStream() {
+        public int read() throws IOException {
+            return -1;
+        }
+    };
+
+    /**
+     * Get the empty input stream.  This stream always reports an immediate EOF.
+     *
+     * @return the empty input stream
+     */
+    public static InputStream emptyStream() {
+        return EMPTY_STREAM;
+    }
 }
