@@ -427,7 +427,7 @@ public final class VirtualFile implements Serializable {
      * @return the string
      */
     public String toString() {
-        return "Virtual file \"" + getPathName() + "\" for " + VFS.instance;
+        return '"' + getPathName() + '"';
     }
 
     /**
