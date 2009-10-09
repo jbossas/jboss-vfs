@@ -124,7 +124,7 @@ public final class VirtualFile implements Serializable {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public long getLastModified() throws IOException {
+    public long getLastModified() {
         final VFS.Mount mount = VFS.instance.getMount(this);
         return mount.getFileSystem().getLastModified(mount.getMountPoint(), this);
     }
@@ -136,7 +136,7 @@ public final class VirtualFile implements Serializable {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public long getSize() throws IOException {
+    public long getSize() {
         final VFS.Mount mount = VFS.instance.getMount(this);
         return mount.getFileSystem().getSize(mount.getMountPoint(), this);
     }

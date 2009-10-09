@@ -88,14 +88,14 @@ public final class RealFileSystem implements FileSystem {
     /**
      * {@inheritDoc}
      */
-    public long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public long getSize(VirtualFile mountPoint, VirtualFile target) {
         return getFile(mountPoint, target).length();
     }
 
     /**
      * {@inheritDoc}
      */
-    public long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
         return getFile(mountPoint, target).lastModified();
     }
 

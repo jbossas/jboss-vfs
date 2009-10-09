@@ -57,20 +57,12 @@ class VirtualFileURLConnection extends URLConnection {
     }
 
     public int getContentLength() {
-        try {
-            final long size = file.getSize();
-            return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        final long size = file.getSize();
+        return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
     }
 
     public long getLastModified() {
-        try {
-            return file.getLastModified();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return file.getLastModified();
     }
 
     public InputStream getInputStream() throws IOException {

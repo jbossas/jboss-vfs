@@ -90,11 +90,9 @@ public interface FileSystem extends Closeable {
      * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
      * @param target the virtual file to act upon
      *
-     * @return the size, in bytes
-     *
-     * @throws IOException if an I/O error occurs
+     * @return the size, in bytes, or 0L if the file does not exist or is a directory
      */
-    long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException;
+    long getSize(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Get the last modification time of a virtual file within this filesystem.
@@ -102,11 +100,9 @@ public interface FileSystem extends Closeable {
      * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
      * @param target the virtual file to act upon
      *
-     * @return the modification time in milliseconds
-     *
-     * @throws IOException if an I/O error occurs
+     * @return the modification time in milliseconds, or 0L if the file does not exist or if an error occurs
      */
-    long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException;
+    long getLastModified(VirtualFile mountPoint, VirtualFile target);
 
     /**
      * Ascertain the existance of a virtual file within this filesystem.

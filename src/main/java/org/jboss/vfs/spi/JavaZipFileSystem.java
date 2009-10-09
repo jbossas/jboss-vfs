@@ -175,8 +175,11 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null && cachedFile.delete();
     }
 
-    public long getSize(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        final ZipNode zipNode = getExistingZipNode(mountPoint, target);
+    public long getSize(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = getZipNode(mountPoint, target);
+        if (zipNode == null) {
+            return 0L;
+        }
         final File cachedFile = zipNode.cachedFile;
         final ZipEntry entry = zipNode.entry;
         if (zipNode == rootNode) {
@@ -185,8 +188,11 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.length() : entry == null ? 0L : entry.getSize();
     }
 
-    public long getLastModified(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        final ZipNode zipNode = getExistingZipNode(mountPoint, target);
+    public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = getZipNode(mountPoint, target);
+        if (zipNode == null) {
+            return 0L;
+        }
         final File cachedFile = zipNode.cachedFile;
         final ZipEntry entry = zipNode.entry;
         return cachedFile != null ? cachedFile.lastModified() : entry == null ? zipTime : entry.getTime();
