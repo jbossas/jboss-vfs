@@ -60,11 +60,25 @@ class EntryInfoAdapter extends ZipEntry
     */
    void readCertificates()
    {
-      ZipEntry entry = ei.entry;
-      if (ei.certificates == null && entry instanceof JarEntry)
+      if (ei.certificates == null)
       {
-         Certificate[] certs = JarEntry.class.cast(entry).getCertificates();
+         ZipEntry entry = ei.entry;
+
+         Certificate[] certs = null;
+         if (entry instanceof JarEntry)
+            certs = JarEntry.class.cast(entry).getCertificates();
+
          ei.certificates = (certs != null) ? certs : ZipEntryContext.EntryInfo.MARKER;
       }
+   }
+
+   /**
+    * Do we require an update.
+    *
+    * @return true if we need to update entry
+    */
+   boolean requiresUpdate()
+   {
+      return ei.certificates == null;
    }
 }

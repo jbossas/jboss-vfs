@@ -210,15 +210,24 @@ class ZipFileWrapper extends ZipWrapper
 
       ensureZipFile();
 
+      EntryInfoAdapter adapter = null;
+      if (entry instanceof EntryInfoAdapter)
+         adapter = EntryInfoAdapter.class.cast(entry);
+
       // make sure input stream and certs reader work on the same update
-      ZipEntry update = zipFile.getEntry(entry.getName());
+      ZipEntry update;
+      if (adapter != null && adapter.requiresUpdate())
+         update = zipFile.getEntry(entry.getName());
+      else
+         update = entry; // using the old one is good enough, as we're done reading certs
+
       InputStream is = zipFile.getInputStream(update);
       if (is == null)
          throw new IOException("Entry no longer available: " + entry.getName() + " in file " + file);
 
       // we need to update entry, from the new zif file
-      if (entry instanceof EntryInfoAdapter)
-         EntryInfoAdapter.class.cast(entry).updateEntry(update);
+      if (adapter != null)
+         adapter.updateEntry(update);
 
       InputStream zis = new CertificateReaderInputStream(entry, this, is);
 
