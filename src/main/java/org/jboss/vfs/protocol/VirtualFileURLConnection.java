@@ -46,7 +46,7 @@ class VirtualFileURLConnection extends URLConnection {
 
     public VirtualFileURLConnection(URL url) throws IOException {
         super(url);
-        file = VFS.getInstance().getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
+        file = VFS.getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
     }
 
     public void connect() throws IOException {

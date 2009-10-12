@@ -45,7 +45,6 @@ import org.jboss.vfs.VirtualFile;
  * @author Scott.Stark@jboss.org
  * @version $Revision$
  */
-@SuppressWarnings("deprecation")
 public class JARSerializationUnitTestCase extends AbstractVFSTest
 {
    public JARSerializationUnitTestCase(String name)
@@ -65,7 +64,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testInnerJarFile() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar = VFS.getInstance().getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar = VFS.getChild(rootURL).getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -102,7 +101,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testInnerJarFileSerialization() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar = VFS.getInstance().getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar = VFS.getChild(rootURL).getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -141,7 +140,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testInnerJarFilesOnlyFileSerialization() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar =VFS.getInstance().getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar =VFS.getChild(rootURL).getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -179,7 +178,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testLevelZips() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile root = VFS.getInstance().getChild(rootURL);
+      VirtualFile root = VFS.getChild(rootURL);
       VirtualFile one = root.getChild("level1.zip");
       List<Closeable> mounts = recursiveMount(one);
       try
@@ -237,7 +236,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void test2ndLevelRead() throws Exception
    {
       URL rootURL = getResource("/vfs/test/level1.zip");
-      VirtualFile root = VFS.getInstance().getChild(rootURL);
+      VirtualFile root = VFS.getChild(rootURL);
       List<Closeable> mounts = recursiveMount(root);
       try
       {
@@ -255,7 +254,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testEarsInnerJarChild() throws Exception
    {
       URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
-      VirtualFile root = VFS.getInstance().getChild(rootURL);
+      VirtualFile root = VFS.getChild(rootURL);
       List<Closeable> mounts = recursiveMount(root);
       try
       {
@@ -280,7 +279,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testVirtualFileAdaptor() throws Exception
    {
       URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
-      VirtualFile root = VFS.getInstance().getChild(rootURL);
+      VirtualFile root = VFS.getChild(rootURL);
       VirtualFile file = root.getChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
       VirtualFile same = file.getChild("");
       // serialize
@@ -290,7 +289,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
    public void testDeepVFAMechanism() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile root = VFS.getInstance().getChild(rootURL);
+      VirtualFile root = VFS.getChild(rootURL);
       VirtualFile one = root.getChild("level1.zip");
       testVirtualFileAdaptor(one, "test1.txt");
       VirtualFile textOne = one.getChild("test1.txt");
@@ -349,11 +348,11 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       URL url = getResource("/vfs/test/spring-ear.ear");
       String urlString = url.toExternalForm();
       int p = urlString.indexOf(":/");
-      List<Closeable> mounts = recursiveMount(VFS.getInstance().getChild(url));
+      List<Closeable> mounts = recursiveMount(VFS.getChild(url));
       try
       {
          url = new URL("file" + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring");
-         VirtualFile file = VFS.getInstance().getChild(url);
+         VirtualFile file = VFS.getChild(url);
          assertNotNull("No beans dir", file.getChild("beans"));
          testVirtualFileAdaptor(file, "beans");
       }

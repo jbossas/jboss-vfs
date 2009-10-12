@@ -126,7 +126,7 @@ public final class VirtualFile implements Serializable {
      * @throws IOException for any problem accessing the virtual file system
      */
     public long getLastModified() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().getLastModified(mount.getMountPoint(), this);
     }
 
@@ -138,7 +138,7 @@ public final class VirtualFile implements Serializable {
      * @throws IOException for any problem accessing the virtual file system
      */
     public long getSize() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().getSize(mount.getMountPoint(), this);
     }
 
@@ -150,7 +150,7 @@ public final class VirtualFile implements Serializable {
      * @throws IOException - thrown on failure to detect existence.
      */
     public boolean exists() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().exists(mount.getMountPoint(), this);
     }
 
@@ -175,7 +175,7 @@ public final class VirtualFile implements Serializable {
      * @throws IOException if an I/O error occurs
      */
     public boolean isDirectory() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().isDirectory(mount.getMountPoint(), this);
     }
 
@@ -190,7 +190,7 @@ public final class VirtualFile implements Serializable {
         if(isDirectory()) {
            return new VirtualJarInputStream(this);
         }
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
     }
 
@@ -202,7 +202,7 @@ public final class VirtualFile implements Serializable {
      * @throws IOException if an error occurs
      */
     public boolean delete() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().delete(mount.getMountPoint(), this);
     }
 
@@ -217,17 +217,8 @@ public final class VirtualFile implements Serializable {
      * @throws IOException if an I/O error occurs while producing the physical file
      */
     public File getPhysicalFile() throws IOException {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().getFile(mount.getMountPoint(), this);
-    }
-
-    /**
-     * Get the VFS instance for this virtual file
-     *
-     * @return the VFS
-     */
-    public VFS getVFS() {
-        return VFS.instance;
     }
 
     /**
@@ -281,9 +272,8 @@ public final class VirtualFile implements Serializable {
     public List<VirtualFile> getChildren() {
         if (!isDirectory())
             return Collections.emptyList();
-        VFS vfs = VFS.instance;
-        final VFS.Mount mount = vfs.getMount(this);
-        final Set<String> submounts = vfs.getSubmounts(this);
+        final VFS.Mount mount = VFS.getMount(this);
+        final Set<String> submounts = VFS.getSubmounts(this);
         final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
         final List<VirtualFile> virtualFiles = new ArrayList<VirtualFile>(names.size() + submounts.size());
         for (String name : names) {
@@ -432,7 +422,7 @@ public final class VirtualFile implements Serializable {
     * @throws IOException 
      */
     public CodeSigner[] getCodeSigners() {
-        final VFS.Mount mount = VFS.instance.getMount(this);
+        final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().getCodeSigners(mount.getMountPoint(), this);
     }
 

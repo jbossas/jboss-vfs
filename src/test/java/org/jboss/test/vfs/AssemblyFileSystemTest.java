@@ -22,7 +22,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
    public void testBuildAssembly() throws Exception {
 
       VirtualFileAssembly earAssembly = new VirtualFileAssembly();
-      VirtualFile earAssemblyLocation = VFS.getInstance().getChild("assembly.ear");
+      VirtualFile earAssemblyLocation = VFS.getChild("assembly.ear");
       Closeable earAssemblyHandle = VFS.mountAssembly(earAssembly, earAssemblyLocation);
 
       VirtualFileAssembly warAssembly = new VirtualFileAssembly();
@@ -31,7 +31,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
 
       try {
          URL rootURL = getResource("/vfs/test");
-         VirtualFile testDir = VFS.getInstance().getChild(rootURL.getPath());
+         VirtualFile testDir = VFS.getChild(rootURL.getPath());
 
          earAssembly.add("assembly.war", warAssemblyLocation);
 
@@ -44,14 +44,14 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
          warAssembly.add("WEB-INF/lib/jar1.jar/META-INF/Manifest.mf", testDir.getChild("jar1-filesonly.mf"));
          warAssembly.add("WEB-INF/web.xml", testDir.getChild("web.xml"));
 
-         assertMapped(testDir.getChild("nested/nested.jar"), VFS.getInstance().getChild(
+         assertMapped(testDir.getChild("nested/nested.jar"), VFS.getChild(
                "assembly.ear/assembly.war/WEB-INF/lib/nested.jar"));
-         assertMapped(testDir.getChild("nested/nested_copy.jar"), VFS.getInstance().getChild(
+         assertMapped(testDir.getChild("nested/nested_copy.jar"), VFS.getChild(
                "assembly.ear/assembly.war/WEB-INF/lib/nested_copy.jar"));
-         assertMapped(testDir.getChild("jar1-filesonly.mf"), VFS.getInstance().getChild("assembly.ear").getChild(
+         assertMapped(testDir.getChild("jar1-filesonly.mf"), VFS.getChild("assembly.ear").getChild(
                "assembly.war").getChild("WEB-INF").getChild("lib").getChild("jar1.jar").getChild("META-INF").getChild(
                "Manifest.mf"));
-         assertTrue(VFS.getInstance().getChild(
+         assertTrue(VFS.getChild(
                "assembly.ear/assembly.war/WEB-INF/lib/jar1.jar/org/jboss/test/vfs/support/jar1/ClassInJar1.class")
                .exists());
       }
@@ -63,7 +63,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
    @Test
    public void testGetNonExistentFile() throws Exception {
 
-      VirtualFile assemblyLocation = VFS.getInstance().getChild("/assembly");
+      VirtualFile assemblyLocation = VFS.getChild("/assembly");
       VirtualFileAssembly assembly = new VirtualFileAssembly();
       Closeable assemblyHandle = VFS.mountAssembly(assembly, assemblyLocation);
       try {
@@ -78,7 +78,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
    @Test
    public void testDelete() throws Exception {
 
-      VirtualFile assemblyLocation = VFS.getInstance().getChild("/assembly");
+      VirtualFile assemblyLocation = VFS.getChild("/assembly");
       VirtualFileAssembly assembly = new VirtualFileAssembly();
       Closeable assemblyHandle = VFS.mountAssembly(assembly, assemblyLocation);
       try {
@@ -93,7 +93,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
    @Test
    public void testGetChildren() throws Exception {
       VirtualFileAssembly assembly = new VirtualFileAssembly();
-      VirtualFile assemblyLocation = VFS.getInstance().getChild("/assembly");
+      VirtualFile assemblyLocation = VFS.getChild("/assembly");
       Closeable assemblyHandle = VFS.mountAssembly(assembly, assemblyLocation);
       try {
          URL jar1URL = getResource("/vfs/test/jar1.jar");

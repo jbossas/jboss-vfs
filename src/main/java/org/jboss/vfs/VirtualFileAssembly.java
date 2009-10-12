@@ -51,7 +51,7 @@ public class VirtualFileAssembly implements Closeable {
 
    private final List<Closeable> mountHandles = new CopyOnWriteArrayList<Closeable>();
 
-   private final VirtualFile mountRoot = VFS.getInstance().getChild("assembly-mounts").getChild(getAssemblyId());
+   private final VirtualFile mountRoot = VFS.getChild("assembly-mounts").getChild(getAssemblyId());
 
    private TempFileProvider tempFileProvider;
 

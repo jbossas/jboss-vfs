@@ -74,7 +74,7 @@ public class VirtualFileAdaptor implements Serializable
    {
       if (file == null)
       {
-         file = VFS.getInstance().getChild(path);
+         file = VFS.getChild(path);
       }
       return file;
    }

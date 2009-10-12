@@ -58,7 +58,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
    protected VirtualFile getFile() throws Exception
    {
       URL url = getResource("/vfs/test/");
-      VirtualFile root = VFS.getInstance().getChild(url);
+      VirtualFile root = VFS.getChild(url);
       VirtualFile file = root.getChild(getFileName());
       assertNotNull(file);
       return file;

@@ -25,7 +25,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -36,7 +35,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -48,7 +46,6 @@ import junit.framework.TestSuite;
 
 import org.jboss.test.vfs.support.ClassPathIterator;
 import org.jboss.test.vfs.support.ClassPathIterator.ClassPathEntry;
-import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
@@ -93,9 +90,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testVFSFileURIFactory() throws Exception
    {
       URL rootURL = getClass().getProtectionDomain().getCodeSource().getLocation();
-      VFS rootVFS = VFS.getInstance();
-      VirtualFile root0 = rootVFS.getChild(rootURL.getPath());
-      VirtualFile root1 = rootVFS.getChild(root0.toURI().getPath());
+      VirtualFile root0 = VFS.getChild(rootURL.getPath());
+      VirtualFile root1 = VFS.getChild(root0.toURI().getPath());
       assertEquals(root0, root1);
    }
 
@@ -106,8 +102,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testInnerJarFile() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile outerjar = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
@@ -150,7 +145,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindResource() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile jar = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(jar);
       try
@@ -180,7 +175,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindResourceUsingURLStream() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile jar = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(jar);
       try
@@ -227,7 +222,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindResourceInFilesOnlyJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile jar = testdir.getChild("jar1-filesonly.jar");
       List<Closeable> mounts = recursiveMount(jar);
       try
@@ -272,7 +267,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindResourceInFilesOnlyWar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile war2 = testdir.getChild("WarDeployApp_web.war");
       List<Closeable> mounts = recursiveMount(war2);
       try
@@ -337,7 +332,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindClassesInFilesOnlyWar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile war = testdir.getChild("filesonly.war");
       List<Closeable> mounts = recursiveMount(war);
@@ -369,7 +364,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFindResourceUnpackedJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile jar = testdir.getChild("unpacked-outer.jar");
       assertTrue("unpacked-outer.jar != null", jar != null);
 
@@ -397,7 +392,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    {
       log.info("+++ testResolveFile, cwd=" + (new File(".").getCanonicalPath()));
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       // Check resolving the root file
       VirtualFile root = testdir.getChild("");
@@ -441,7 +436,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    {
       log.info("+++ testResolveFile, cwd=" + (new File(".").getCanonicalPath()));
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       // Find ClassInJar1.class
       VirtualFile vf = testdir.getChild("jar1.jar");
@@ -474,7 +469,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    {
       log.info("+++ testResolveFileInUnpackedJar, cwd=" + (new File(".").getCanonicalPath()));
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       // Check resolving the root file
       VirtualFile root = testdir.getChild("");
@@ -501,7 +496,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFileNotFoundInUnpackedJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       // Find the outer.jar
       VirtualFile outerJar = testdir.getChild("unpacked-outer.jar");
@@ -526,7 +521,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testInnerJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outer = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outer);
       try
@@ -559,7 +554,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testInnerJarUsingURLStream() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outer = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outer);
       try
@@ -596,7 +591,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testClassScan() throws Exception
    {
       URL rootURL = getResource("/vfs/test/outer.jar");
-      VirtualFile outer = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile outer = VFS.getChild(rootURL.getPath());
       List<Closeable> mounts = recursiveMount(outer);
       try
       {
@@ -636,7 +631,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testClassScanUnpacked() throws Exception
    {
       URL rootURL = getResource("/vfs/test/unpacked-outer.jar");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       List<Closeable> mounts = recursiveMount(testdir);
       try
       {
@@ -675,7 +670,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testClassScanFilesonly() throws Exception
    {
       URL rootURL = getResource("/vfs/test/jar1-filesonly.jar");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       List<Closeable> mounts = recursiveMount(testdir);
       try
       {
@@ -734,7 +729,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFilesOnlyJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1-filesonly.jar");
       List<Closeable> mounts = recursiveMount(jar);
@@ -780,7 +775,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       tmp.deleteOnExit();
       log.info("+++ testVFSerialization, tmp=" + tmp.getCanonicalPath());
       URL rootURL = tmpRoot.toURI().toURL();
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild("vfs.ser");
       FileOutputStream fos = new FileOutputStream(tmp);
       ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -847,7 +842,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       log.info("+++ testVFJarSerialization, tmp=" + tmpJar.getCanonicalPath());
 
       URI rootURI = tmpRoot.toURI();
-      VirtualFile tmp = VFS.getInstance().getChild(rootURI.getPath());
+      VirtualFile tmp = VFS.getChild(rootURI.getPath());
       File vfsSer = new File(tmpRoot, "vfs.ser");
       vfsSer.createNewFile();
       vfsSer.deleteOnExit();
@@ -903,7 +898,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    {
       // this expects to be run with a working dir of the container root
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outer = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outer);
       try
@@ -959,7 +954,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testDirURLs() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile outerJar = testdir.getChild("unpacked-outer.jar");
       URL outerURL = outerJar.toURL();
@@ -996,7 +991,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testDirURIs() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile outerJar = testdir.getChild("unpacked-outer.jar");
       URI outerURI = outerJar.toURI();
@@ -1031,7 +1026,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testCopyJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile jar = testdir.getChild("outer.jar");
       assertTrue("outer.jar != null", jar != null);
       File tmpJar = File.createTempFile("testCopyJar", ".jar");
@@ -1074,7 +1069,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testCopyInnerJar() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outerjar = testdir.getChild("outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
@@ -1118,7 +1113,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testManifestClasspath() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outerjar = testdir.getChild("outermf.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
@@ -1148,7 +1143,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testInnerManifestClasspath() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile outerjar = testdir.getChild("withalong/rootprefix/outermf.jar");
       assertNotNull(outerjar);
       List<Closeable> mounts = recursiveMount(outerjar);
@@ -1183,7 +1178,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testJarWithSpacesInPath() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tstjar = testdir.getChild("path with spaces/tst.jar");
       List<Closeable> mounts = recursiveMount(tstjar);
       try
@@ -1215,7 +1210,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testJarWithSpacesInContext() throws Exception
    {
       URL rootURL = getResource("/vfs/test/path with spaces");
-      VirtualFile testdir = VFS.getInstance().getChild(URLDecoder.decode(rootURL.getPath(), "UTF-8"));
+      VirtualFile testdir = VFS.getChild(URLDecoder.decode(rootURL.getPath(), "UTF-8"));
       VirtualFile tstear = testdir.getChild("spaces.ear");
       List<Closeable> mounts = recursiveMount(tstear);
       try
@@ -1263,7 +1258,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testUnpackedJarWithSpacesInPath() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tstjar = testdir.getChild("path with spaces/unpacked-tst.jar");
       assertNotNull("tstjar != null", tstjar);
       URI uri = tstjar.toURI();
@@ -1294,7 +1289,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    //   private void testGetMetaDataFromJar(String name) throws Exception
    //   {
    //      URL rootURL = getResource("/vfs/test");
-   //     VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+   //     VirtualFile testdir = VFS.getChild(rootURL.getPath());
    //
    //      VirtualFile jar = testdir.getChild(name);
    //      assertNotNull(jar);
@@ -1320,7 +1315,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testURLClassLoaderFindResourceFailure() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       URL[] cp = { testdir.toURL() };
       URLClassLoader ucl = new URLClassLoader(cp);
       // Search for a non-existent resource
@@ -1344,7 +1339,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       log.info("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
       URL rootURL = tmpRoot.toURI().toURL();
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild(tmp.getName());
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
       assertTrue("tmp.delete()", tmpVF.delete());
@@ -1368,7 +1363,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       log.info("+++ testDirFileExists, tmp=" + tmp.getCanonicalPath());
 
       URL rootURL = tmpRoot.toURI().toURL();
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild(tmp.getName());
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
       assertFalse(tmpVF.getPathName() + ".isLeaf()", tmpVF.isLeaf());
@@ -1398,7 +1393,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       jos.close();
 
       URL rootURL = tmpRoot.toURI().toURL();
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild(tmpJar.getName());
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
       assertTrue(tmpVF.getPathName() + ".size() > 0", tmpVF.getSize() > 0);
@@ -1423,7 +1418,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       log.info("+++ testDirJarExists, tmp=" + tmp.getCanonicalPath());
 
       URL rootURL = tmpRoot.toURI().toURL();
-      VirtualFile testdir = VFS.getInstance().getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild(tmp.getName());
       log.info(tmpVF);
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
@@ -1441,7 +1436,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    public void testFileDelete() throws Exception
    {
       File tmpRoot = File.createTempFile("vfs", ".root");
-      VirtualFile root = VFS.getInstance().getChild(tmpRoot.getPath());
+      VirtualFile root = VFS.getChild(tmpRoot.getPath());
 
       // non-existent directory - exists() not
       tmpRoot.delete();
@@ -1458,7 +1453,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertTrue(tmp.mkdir());
       File tmp2 = File.createTempFile("testFileDelete2", ".jar", tmp);
       assertTrue(tmp2.exists());
-      VirtualFile tmpDeletable = VFS.getRoot(tmp.toURI());
+      VirtualFile tmpDeletable = VFS.getChild(tmp.toURI());
       assertFalse(tmpRoot + ".delete() == false", tmpDeletable.delete());
 
       // children() exist

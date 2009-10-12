@@ -38,9 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Enumeration;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +49,6 @@ import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
-import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.logging.Logger;
 
 /**
@@ -69,14 +65,12 @@ public class VFS {
 
     public static final boolean LEAK_DEBUGGING;
 
-    private final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
-    private final VirtualFile rootVirtualFile;
-    private final Mount rootMount;
+    private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
+    private static final VirtualFile rootVirtualFile = new VirtualFile("", null);
+    private static final Mount rootMount = new Mount(RealFileSystem.ROOT_INSTANCE, rootVirtualFile);
 
-    static VFS instance = new VFS();
     // todo - LRU VirtualFiles?
     // todo - LRU String intern?
-
     static {
         init();
         LEAK_DEBUGGING = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
@@ -87,67 +81,15 @@ public class VFS {
     }
 
     /**
-     * Get the "global" instance.
-     *
-     * @return the VFS instance
+     * Do not allow construction 
      */
-    public static VFS getInstance() {
-        return instance;
+    private VFS() {
     }
-
-    /**
-     * Create a new instance.
-     */
-    public VFS() {
-        // By default, there's a root mount which points to the "real" FS
-        //noinspection ThisEscapedInObjectConstruction
-        rootVirtualFile = new VirtualFile("", null);
-        rootMount = new Mount(RealFileSystem.ROOT_INSTANCE, rootVirtualFile);
-    }
-
-    /**
-     * Get file. Backcompatibility method.
-     *
-     * @param url the url
-     *
-     * @return the file matching url
-     *
-     * @throws IOException if there is a problem accessing the VFS
-     * @deprecated use {@link #getChild(URL)} instead
-     */
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public static VirtualFile getRoot(URL url) throws IOException {
-        try {
-            return getRoot(url.toURI());
-        }
-        catch (URISyntaxException e) {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            throw ioe;
-        }
-    }
-
-    /**
-     * Get file. Backcompatibility method.
-     *
-     * @param uri the uri
-     *
-     * @return the file matching uri
-     *
-     * @throws IOException if there is a problem accessing the VFS
-     * @deprecated use {@link #getChild(URI)} instead
-     */
-    @Deprecated
-    public static VirtualFile getRoot(URI uri) throws IOException {
-        return getInstance().getChild(uri.getPath());
-    }
-
+    
     /**
      * Initialize VFS protocol handlers package property.
      */
-    @SuppressWarnings({ "deprecation", "unchecked" })
-    public static void init() {
+    private static void init() {
         // A small hack that allows us to replace file for now
         URL.setURLStreamHandlerFactory(null);
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
@@ -171,17 +113,14 @@ public class VFS {
      *
      * @throws IOException if an I/O error occurs, such as a filesystem already being mounted at the given mount point
      */
-    public Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
-        if (mountPoint.getVFS() != this) {
-            throw new IOException("VirtualFile does not match VFS instance");
-        }
+    public static Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
         final VirtualFile parent = mountPoint.getParent();
         if (parent == null) {
             throw new IOException("Root filsystem already mounted");
         }
         final String name = mountPoint.getName();
         final Mount mount = new Mount(fileSystem, mountPoint);
-        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
+        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
         for (; ;) {
             Map<String, Mount> childMountMap = mounts.get(parent);
             Map<String, Mount> newMap;
@@ -210,7 +149,7 @@ public class VFS {
      *
      * @throws IllegalArgumentException if the path is null
      */
-    public VirtualFile getChild(URL url) throws URISyntaxException {
+    public static VirtualFile getChild(URL url) throws URISyntaxException {
         return getChild(url.toURI());
     }
 
@@ -223,7 +162,7 @@ public class VFS {
      *
      * @throws IllegalArgumentException if the path is null
      */
-    public VirtualFile getChild(URI uri) {
+    public static VirtualFile getChild(URI uri) {
         return getChild(uri.getPath());
     }
 
@@ -236,10 +175,10 @@ public class VFS {
      *
      * @throws IllegalArgumentException if the path is null
      */
-    public VirtualFile getChild(String path) {
+    public static VirtualFile getChild(String path) {
         if (path == null)
             throw new IllegalArgumentException("Null path");
-        return rootVirtualFile.getChild(path);
+        return getRootVirtualFile().getChild(path);
     }
 
     /**
@@ -247,7 +186,7 @@ public class VFS {
      *
      * @return the root virtual file
      */
-    public VirtualFile getRootVirtualFile() {
+    public static VirtualFile getRootVirtualFile() {
         return rootVirtualFile;
     }
 
@@ -258,7 +197,7 @@ public class VFS {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public List<VirtualFile> getChildren() throws IOException {
+    public static List<VirtualFile> getChildren() throws IOException {
         return getRootVirtualFile().getChildren(null);
     }
 
@@ -271,7 +210,7 @@ public class VFS {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException {
+    public static List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException {
         return getRootVirtualFile().getChildren(filter);
     }
 
@@ -284,7 +223,7 @@ public class VFS {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public List<VirtualFile> getChildrenRecursively() throws IOException {
+    public static List<VirtualFile> getChildrenRecursively() throws IOException {
         return getRootVirtualFile().getChildrenRecursively(null);
     }
 
@@ -299,7 +238,7 @@ public class VFS {
      *
      * @throws IOException for any problem accessing the virtual file system
      */
-    public List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException {
+    public static List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException {
         return getRootVirtualFile().getChildrenRecursively(filter);
     }
 
@@ -311,8 +250,8 @@ public class VFS {
      * @throws IOException for any problem accessing the VFS
      * @throws IllegalArgumentException if the visitor is null
      */
-    public void visit(VirtualFileVisitor visitor) throws IOException {
-        visitor.visit(rootVirtualFile);
+    public static void visit(VirtualFileVisitor visitor) throws IOException {
+        visitor.visit(getRootVirtualFile());
     }
 
     /**
@@ -324,16 +263,14 @@ public class VFS {
      * @throws IOException for any problem accessing the VFS
      * @throws IllegalArgumentException if the file or visitor is null
      */
-    protected void visit(VirtualFile file, VirtualFileVisitor visitor) throws IOException {
+    protected static void visit(VirtualFile file, VirtualFileVisitor visitor) throws IOException {
         if (file == null)
             throw new IllegalArgumentException("Null file");
-        if (file.getVFS() != this)
-            throw new IllegalArgumentException("Virtual file from foreign VFS");
         visitor.visit(file);
     }
 
-    Mount getMount(VirtualFile virtualFile) {
-        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
+    static Mount getMount(VirtualFile virtualFile) {
+        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
         for (; ;) {
             final VirtualFile parent = virtualFile.getParent();
             if (parent == null) {
@@ -360,8 +297,8 @@ public class VFS {
      *
      * @return the collection of present mount (simple) names
      */
-    Set<String> getSubmounts(VirtualFile virtualFile) {
-        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = this.mounts;
+    static Set<String> getSubmounts(VirtualFile virtualFile) {
+        final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
         final Map<String, Mount> mountMap = mounts.get(virtualFile);
         if (mountMap == null) {
             return emptyRemovableSet();
@@ -372,7 +309,7 @@ public class VFS {
     private static Closeable doMount(final FileSystem fileSystem, final VirtualFile mountPoint) throws IOException {
         boolean ok = false;
         try {
-            final Closeable mountHandle = getInstance().mount(mountPoint, fileSystem);
+            final Closeable mountHandle = mount(mountPoint, fileSystem);
             final Closeable closeable = new Closeable() {
                 public void close() throws IOException {
                     VFSUtils.safeClose(mountHandle);
@@ -523,7 +460,7 @@ public class VFS {
         final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
         try {
             final File rootFile = tempDir.getRoot();
-            unzip(zipFile, rootFile);
+            VFSUtils.unzip(zipFile, rootFile);
             final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
             ok = true;
             return new Closeable() {
@@ -570,7 +507,7 @@ public class VFS {
                         VFSUtils.safeClose(os);
                     }
                     final File rootFile = tempDir.getRoot();
-                    unzip(zipFile, rootFile);
+                    VFSUtils.unzip(zipFile, rootFile);
                     final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
                     ok = true;
                     return new Closeable() {
@@ -622,66 +559,13 @@ public class VFS {
        return doMount(new AssemblyFileSystem(assembly), mountPoint);
     }
 
-    /**
-     * Expand a zip file to a destination directory.  The directory must exist.  If an error occurs, the destination
-     * directory may contain a partially-extracted archive, so cleanup is up to the caller.
-     *
-     * @param zipFile the zip file
-     * @param destDir the destination directory
-     *
-     * @throws IOException if an error occurs
-     */
-    public static void unzip(File zipFile, File destDir) throws IOException {
-        final ZipFile zip = new ZipFile(zipFile);
-        try {
-            final Set<File> createdDirs = new HashSet<File>();
-            final Enumeration<? extends ZipEntry> entries = zip.entries();
-            FILES_LOOP:
-            while (entries.hasMoreElements()) {
-                final ZipEntry zipEntry = entries.nextElement();
-                final String name = zipEntry.getName();
-                final List<String> tokens = PathTokenizer.getTokens(name);
-                final Iterator<String> it = tokens.iterator();
-                File current = destDir;
-                while (it.hasNext()) {
-                    String token = it.next();
-                    if (PathTokenizer.isCurrentToken(token) || PathTokenizer.isReverseToken(token)) {
-                        // invalid file; skip it!
-                        continue FILES_LOOP;
-                    }
-                    current = new File(current, token);
-                    if ((it.hasNext() || zipEntry.isDirectory()) && createdDirs.add(current)) {
-                        current.mkdir();
-                    }
-                }
-                if (!zipEntry.isDirectory()) {
-                    final InputStream is = zip.getInputStream(zipEntry);
-                    try {
-                        final FileOutputStream os = new FileOutputStream(current);
-                        try {
-                            VFSUtils.copyStream(is, os);
-                            // allow an error on close to terminate the unzip
-                            is.close();
-                            os.close();
-                        } finally {
-                            VFSUtils.safeClose(os);
-                        }
-                    } finally {
-                        VFSUtils.safeClose(is);
-                    }
-                }
-            }
-        } finally {
-            VFSUtils.safeClose(zip);
-        }
-    }
-
     @SuppressWarnings({ "unchecked" })
     private static <E> Set<E> emptyRemovableSet() {
         return EMPTY_REMOVABLE_SET;
     }
 
-    private static final Set EMPTY_REMOVABLE_SET = new EmptyRemovableSet();
+    @SuppressWarnings("unchecked")
+   private static final Set EMPTY_REMOVABLE_SET = new EmptyRemovableSet();
 
     private static final class EmptyRemovableSet<E> extends AbstractSet<E> {
 
@@ -710,7 +594,7 @@ public class VFS {
      * backing filesystem implementation; the same {@code FileSystem} may be mounted in more than one place, however only
      * one {@code FileSystem} may be bound to a specific path at a time.
      */
-    final class Mount implements Closeable {
+    final static class Mount implements Closeable {
 
         private final FileSystem fileSystem;
         private final VirtualFile mountPoint;
@@ -729,7 +613,7 @@ public class VFS {
             }
             final String name = mountPoint.getName();
             final VirtualFile parent = mountPoint.getParent();
-            final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.this.mounts;
+            final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
             for (; ;) {
                 final Map<String, Mount> parentMounts = mounts.get(parent);
                 if (parentMounts == null) {

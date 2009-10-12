@@ -67,8 +67,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testIteration() throws Exception {
       URL rootURL = getResource("/vfs/test/");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1.jar");
       Closeable mount = VFS.mountZip(jar, jar, provider);
@@ -95,8 +94,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testIterationNonJar() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1");
       Closeable mount = VFS.mountReal(jar.getPhysicalFile(), jar);
@@ -120,8 +118,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testRead() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1.jar");
       Closeable mount = VFS.mountZip(jar, jar, provider);
@@ -149,8 +146,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testReadNonJar() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1");
       Closeable mount = VFS.mountReal(jar.getPhysicalFile(), jar);
@@ -178,8 +174,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testReadClosed() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1.jar");
       Closeable mount = VFS.mountZip(jar, jar, provider);
@@ -204,8 +199,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testGetManifest() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1.jar");
       Closeable mount = VFS.mountZip(jar, jar, provider);
@@ -223,8 +217,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testGetManifestNonJar() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1");
       Closeable mount = VFS.mountReal(jar.getPhysicalFile(), jar);
@@ -242,8 +235,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testGetAttributes() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
 
       VirtualFile jar = testdir.getChild("jar1.jar");
       Closeable mount = VFS.mountZip(jar, jar, provider);
@@ -266,8 +258,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
    @Test
    public void testGetAttributesNonJar() throws Exception {
       URL rootURL = getResource("/vfs/test");
-      VFS vfs = VFS.getInstance();
-      VirtualFile testdir = vfs.getChild(rootURL.getPath());
+      VirtualFile testdir = VFS.getChild(rootURL.getPath());
       
       VirtualFile jar = testdir.getChild("jar1");
       Closeable mount = VFS.mountReal(jar.getPhysicalFile(), jar);

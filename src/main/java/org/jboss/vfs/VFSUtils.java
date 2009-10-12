@@ -35,10 +35,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -46,6 +51,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.collection.CollectionsFactory;
+import org.jboss.vfs.util.PathTokenizer;
 
 /**
  * VFS Utilities
@@ -716,5 +722,59 @@ public class VFSUtils {
        }
        collectPathParts(mountPoint, current.getParent(), pathParts);
        pathParts.add(current.getName());
+    }
+    
+    /**
+     * Expand a zip file to a destination directory.  The directory must exist.  If an error occurs, the destination
+     * directory may contain a partially-extracted archive, so cleanup is up to the caller.
+     *
+     * @param zipFile the zip file
+     * @param destDir the destination directory
+     *
+     * @throws IOException if an error occurs
+     */
+    public static void unzip(File zipFile, File destDir) throws IOException {
+        final ZipFile zip = new ZipFile(zipFile);
+        try {
+            final Set<File> createdDirs = new HashSet<File>();
+            final Enumeration<? extends ZipEntry> entries = zip.entries();
+            FILES_LOOP:
+            while (entries.hasMoreElements()) {
+                final ZipEntry zipEntry = entries.nextElement();
+                final String name = zipEntry.getName();
+                final List<String> tokens = PathTokenizer.getTokens(name);
+                final Iterator<String> it = tokens.iterator();
+                File current = destDir;
+                while (it.hasNext()) {
+                    String token = it.next();
+                    if (PathTokenizer.isCurrentToken(token) || PathTokenizer.isReverseToken(token)) {
+                        // invalid file; skip it!
+                        continue FILES_LOOP;
+                    }
+                    current = new File(current, token);
+                    if ((it.hasNext() || zipEntry.isDirectory()) && createdDirs.add(current)) {
+                        current.mkdir();
+                    }
+                }
+                if (!zipEntry.isDirectory()) {
+                    final InputStream is = zip.getInputStream(zipEntry);
+                    try {
+                        final FileOutputStream os = new FileOutputStream(current);
+                        try {
+                            VFSUtils.copyStream(is, os);
+                            // allow an error on close to terminate the unzip
+                            is.close();
+                            os.close();
+                        } finally {
+                            VFSUtils.safeClose(os);
+                        }
+                    } finally {
+                        VFSUtils.safeClose(is);
+                    }
+                }
+            }
+        } finally {
+            VFSUtils.safeClose(zip);
+        }
     }
 }
