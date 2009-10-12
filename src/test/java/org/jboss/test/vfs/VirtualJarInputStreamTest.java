@@ -23,14 +23,17 @@ package org.jboss.test.vfs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -38,8 +41,8 @@ import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.VirtualJarInputStream;
 import org.junit.Before;
-
 import org.junit.Test;
 
 /**
@@ -63,7 +66,7 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
 
    @Test
    public void testIteration() throws Exception {
-      URL rootURL = getResource("/vfs/test");
+      URL rootURL = getResource("/vfs/test/");
       VFS vfs = VFS.getInstance();
       VirtualFile testdir = vfs.getChild(rootURL.getPath());
 
@@ -77,9 +80,12 @@ public class VirtualJarInputStreamTest extends AbstractVFSTest {
          while ((next = jarInput.getNextJarEntry()) != null) {
             entryNames.add(next.getName());
          }
-         assertTrue(entryNames.contains("META-INF/MANIFEST.MF"));
-         assertTrue(entryNames.contains("org/jboss/test/vfs/support/jar1/ClassInJar1$InnerClass.class"));
-         assertTrue(entryNames.contains("org/jboss/test/vfs/support/jar1/ClassInJar1.class"));
+         JarFile jarFile = new JarFile(new File(new URL(rootURL, "jar1.jar").toURI()));
+         Enumeration<JarEntry> entries = jarFile.entries();
+         while(entries.hasMoreElements()) {
+            String entryName = entries.nextElement().getName();
+            assertTrue("JarEntry for " + entryName + " should be found in VirtualJarInputStream", entryNames.contains(entryName));
+         }
       }
       finally {
          mount.close();
