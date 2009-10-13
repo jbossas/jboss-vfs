@@ -58,6 +58,12 @@ public class VirtualJarInputStream extends JarInputStream {
 
    private boolean closed;
 
+   private static final VirtualFileFilter MANIFEST_FILTER = new VirtualFileFilter() {
+      public boolean accepts(VirtualFile file) {
+         return !MANIFEST_NAME.equalsIgnoreCase(file.getName());
+      }
+   };
+
    /**
     * Construct a {@link VirtualJarInputStream} from a {@link VirtualFile} root
     * 
@@ -99,11 +105,7 @@ public class VirtualJarInputStream extends JarInputStream {
       if (nextEntry.isDirectory()) {
          List<VirtualFile> children = nextEntry.getChildren();
          if(entryName.equalsIgnoreCase(META_INF_DIR)) {
-            children = nextEntry.getChildren(new VirtualFileFilter() {
-               public boolean accepts(VirtualFile file) {
-                  return !MANIFEST_NAME.equalsIgnoreCase(file.getName());
-               }
-            });
+            children = nextEntry.getChildren(MANIFEST_FILTER);
          }
          entryItr.add(children.iterator());
          entryName = fixDirectoryName(entryName);
