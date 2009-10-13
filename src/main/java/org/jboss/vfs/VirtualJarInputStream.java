@@ -53,6 +53,7 @@ public class VirtualJarInputStream extends JarInputStream {
    private final Deque<Iterator<VirtualFile>> entryItr = new ArrayDeque<Iterator<VirtualFile>>();
 
    private final VirtualFile root;
+   private final Manifest manifest;
 
    private InputStream currentEntryStream;
 
@@ -76,6 +77,9 @@ public class VirtualJarInputStream extends JarInputStream {
       VirtualFile manifest = root.getChild(JarFile.MANIFEST_NAME); 
       if(manifest.exists()) {
          entryItr.add(Collections.singleton(manifest).iterator());
+         this.manifest = VFSUtils.readManifest(manifest);
+      } else {
+         this.manifest = null;
       }
       entryItr.add(root.getChildren().iterator());
    }
@@ -124,12 +128,7 @@ public class VirtualJarInputStream extends JarInputStream {
    /** {@inheritDoc} **/ 
    @Override
    public Manifest getManifest() {
-      try {
-         return VFSUtils.getManifest(root);
-      }
-      catch (IOException e) {
-         throw new RuntimeException(e);
-      }
+      return manifest;
    }
 
    /** {@inheritDoc} **/
