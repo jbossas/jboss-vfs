@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.RealFileSystem;
@@ -61,7 +60,7 @@ import org.jboss.logging.Logger;
  */
 public class VFS {
 
-    private static final Logger log = Logger.getLogger(VFS.class);
+    private static final Logger log = Logger.getLogger("org.jboss.vfs");
 
     public static final boolean LEAK_DEBUGGING;
 
@@ -135,6 +134,7 @@ public class VFS {
                 throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
             }
             if (mounts.replace(parent, childMountMap, newMap)) {
+                log.tracef("Mounted filesystem %s on mount point %s", fileSystem, mountPoint);
                 return mount;
             }
         }
@@ -634,16 +634,19 @@ public class VFS {
                         newParentMounts = Collections.singletonMap(e1.getKey(), e1.getValue());
                     }
                     if (mounts.replace(parent, parentMounts, newParentMounts)) {
+                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 } else if (parentMounts.size() == 1) {
                     if (mounts.remove(parent, parentMounts)) {
+                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 } else {
                     newParentMounts = new HashMap<String, Mount>(parentMounts);
                     newParentMounts.remove(name);
                     if (mounts.replace(parent, parentMounts, newParentMounts)) {
+                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 }
