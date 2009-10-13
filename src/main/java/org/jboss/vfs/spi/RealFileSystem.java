@@ -23,6 +23,7 @@
 package org.jboss.vfs.spi;
 
 import org.jboss.vfs.VirtualFile;
+import org.jboss.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,8 @@ public final class RealFileSystem implements FileSystem {
      */
     public static final RealFileSystem ROOT_INSTANCE = new RealFileSystem(new File(""));
 
+    private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
+
     private final File realRoot;
 
     /**
@@ -52,6 +55,7 @@ public final class RealFileSystem implements FileSystem {
      */
     public RealFileSystem(File realRoot) {
         this.realRoot = realRoot;
+        log.tracef("Constructed real filesystem at root %s", realRoot);
     }
 
     /**

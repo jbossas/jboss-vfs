@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileAssembly;
+import org.jboss.logging.Logger;
 
 /**
  * FileSystem used to mount an Assembly into the VFS.
@@ -40,10 +41,13 @@ import org.jboss.vfs.VirtualFileAssembly;
  */
 public class AssemblyFileSystem implements FileSystem {
 
+    private static final Logger log = Logger.getLogger("org.jboss.vfs.assembly");
+
     private final VirtualFileAssembly assembly;
 
     public AssemblyFileSystem(VirtualFileAssembly assembly) {
         this.assembly = assembly;
+        log.tracef("Constructed a new assembly filesystem for %s", assembly);
     }
 
     /** {@inheritDoc} */
@@ -106,6 +110,7 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public void close() throws IOException {
+        log.tracef("Closing assembly filesystem %s", this);
         assembly.close();
     }
     

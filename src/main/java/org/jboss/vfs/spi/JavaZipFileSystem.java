@@ -46,6 +46,7 @@ import org.jboss.vfs.TempDir;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.util.PathTokenizer;
+import org.jboss.logging.Logger;
 
 /**
  * {@inheritDoc}
@@ -54,6 +55,8 @@ import org.jboss.vfs.util.PathTokenizer;
  * file disappears unexpectedly, the filesystem will malfunction.
  */
 public final class JavaZipFileSystem implements FileSystem {
+
+    private static final Logger log = Logger.getLogger("org.jboss.vfs.zip");
 
     private final JarFile zipFile;
     private final File archiveFile;
@@ -121,6 +124,7 @@ public final class JavaZipFileSystem implements FileSystem {
         this.rootNode = rootNode;
         contentsDir = tempDir.getFile("contents");
         contentsDir.mkdir();
+        log.tracef("Created zip filesystem for file %s in temp dir %s", archiveFile, tempDir);
     }
 
     private static <T> Iterable<T> iter(final Enumeration<T> entries) {
@@ -274,6 +278,7 @@ public final class JavaZipFileSystem implements FileSystem {
     }
     
     public void close() throws IOException {
+        log.tracef("Closing zip filesystem %s", this);
         VFSUtils.safeClose(new Closeable() {
             public void close() throws IOException {
                 zipFile.close();
