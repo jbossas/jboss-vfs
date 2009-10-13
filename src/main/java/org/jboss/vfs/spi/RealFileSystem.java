@@ -39,12 +39,12 @@ import java.util.Collections;
  */
 public final class RealFileSystem implements FileSystem {
 
+    private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
+
     /**
      * The root real filesystem (singleton instance).
      */
     public static final RealFileSystem ROOT_INSTANCE = new RealFileSystem(new File(""));
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
 
     private final File realRoot;
 
