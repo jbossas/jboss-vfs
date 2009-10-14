@@ -198,36 +198,32 @@ class ZipFileWrapper extends ZipWrapper
    /**
     * Get the contents of the given <tt>ZipEntry</tt> as stream
     *
-    * @param entry a zip entry
+    * @param info a zip entry info
     * @return an InputStream that locks the file for as long as it's open
     * @throws IOException for any error
     */
-   synchronized InputStream openStream(ZipEntry entry) throws IOException
+   synchronized InputStream openStream(ZipEntryInfo info) throws IOException
    {
       // JBVFS-57 JarInputStream composition
-      if (entry.isDirectory())
-         return recomposeZipAsInputStream(entry.getName());
+      if (info.isDirectory())
+         return recomposeZipAsInputStream(info.getName());
 
       ensureZipFile();
 
       // make sure input stream and certs reader work on the same update
-      ZipEntry update = entry;
-      if (entry instanceof EntryInfoAdapter)
+      ZipEntry update = info.getEntry();
+      if (info.requiresUpdate())
       {
-         EntryInfoAdapter adapter = EntryInfoAdapter.class.cast(entry);
-         if (adapter.requiresUpdate())
-         {
-            // we need to update entry, from the new zif file
-            update = zipFile.getEntry(entry.getName());
-            adapter.updateEntry(update);
-         }
+         // we need to update entry, from the new zif file
+         update = zipFile.getEntry(info.getName());
+         info.setEntry(update);
       }
 
       InputStream is = zipFile.getInputStream(update);
       if (is == null)
-         throw new IOException("Entry no longer available: " + entry.getName() + " in file " + file);
+         throw new IOException("Entry no longer available: " + info.getName() + " in file " + file);
 
-      InputStream zis = new CertificateReaderInputStream(entry, this, is);
+      InputStream zis = new CertificateReaderInputStream(info, this, is);
 
       incrementRef();
       return zis;

@@ -49,7 +49,7 @@ class ZipEntryWrapper extends ZipBytesWrapper
       super(zipStream, name, lastModified);
    }
 
-   InputStream openStream(ZipEntry ent) throws IOException
+   InputStream openStream(ZipEntryInfo info) throws IOException
    {
       return getRootAsStream();
    }

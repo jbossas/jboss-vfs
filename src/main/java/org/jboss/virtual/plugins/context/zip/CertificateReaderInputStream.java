@@ -23,7 +23,6 @@ package org.jboss.virtual.plugins.context.zip;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
 
 /**
  * ZipEntryInputStream is part of ZipFileWrapper implementation.
@@ -39,8 +38,8 @@ import java.util.zip.ZipEntry;
  */
 class CertificateReaderInputStream extends InputStream
 {
-   /** ZipEntry */
-   private ZipEntry entry;
+   /** ZipEntryInfo */
+   private ZipEntryInfo info;
 
    /** Underlying zip source */
    private ZipFileWrapper zipWrapper;
@@ -54,18 +53,18 @@ class CertificateReaderInputStream extends InputStream
    /**
     * ZipEntryInputStream constructor.
     *
-    * @param entry zip entry
+    * @param info zip entry info
     * @param zipWrapper underlying zip source
     * @param is underlying input stream
     * @throws java.io.IOException for any error
     * @throws IllegalArgumentException if insput stream is null
     */
-   CertificateReaderInputStream(ZipEntry entry, ZipFileWrapper zipWrapper, InputStream is) throws IOException
+   CertificateReaderInputStream(ZipEntryInfo info, ZipFileWrapper zipWrapper, InputStream is) throws IOException
    {
       if (is == null)
          throw new IllegalArgumentException("Input stream is null");
 
-      this.entry = entry;
+      this.info = info;
       this.zipWrapper = zipWrapper;
       delegate = is;
    }
@@ -83,8 +82,7 @@ class CertificateReaderInputStream extends InputStream
 
          try
          {
-            if (entry instanceof EntryInfoAdapter)
-               EntryInfoAdapter.class.cast(entry).readCertificates();
+            info.readCertificates();
          }
          finally
          {

@@ -110,16 +110,16 @@ class ZipStreamWrapper extends ZipBytesWrapper
       }
    }
 
-   InputStream openStream(ZipEntry ent) throws IOException
+   InputStream openStream(ZipEntryInfo info) throws IOException
    {
       // JBVFS-57 JarInputStream composition
-      if (ent.isDirectory())
-         return recomposeZipAsInputStream(ent.getName());
+      if (info.isDirectory())
+         return recomposeZipAsInputStream(info.getName());
 
-      InMemoryFile memFile = inMemoryFiles.get(ent.getName());
+      InMemoryFile memFile = inMemoryFiles.get(info.getName());
 
       if (memFile == null)
-         throw new FileNotFoundException("Failed to find nested jar entry: " + ent.getName() + " in zip stream: " + toString());
+         throw new FileNotFoundException("Failed to find nested jar entry: " + info.getName() + " in zip stream: " + toString());
 
       return new ByteArrayInputStream(memFile.fileBytes);
    }

@@ -38,12 +38,10 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,7 +136,7 @@ public class ZipEntryContext extends AbstractVFSContext
    private final boolean autoClean;
 
    /** Registry of everything that zipSource contains */
-   private final Map<String, EntryInfo> entries = new ConcurrentHashMap<String, EntryInfo>(16,.75f,4);
+   private final Map<String, ZipEntryContextInfo> entries = new ConcurrentHashMap<String, ZipEntryContextInfo>(16,.75f,4);
 
    /** Have zip entries been navigated yet */
    private volatile InitializationStatus initStatus = InitializationStatus.NOT_INITIALIZED;
@@ -507,14 +505,14 @@ public class ZipEntryContext extends AbstractVFSContext
             String parentPath = split[0];
             String name = split[1];
 
-            EntryInfo ei = null;
+            ZipEntryContextInfo ei = null;
             if ("".equals(name) == false)
             {
                ei = entries.get(parentPath);
                if (ei == null)
                   ei = makeDummyParent(parentPath);
             }
-            AbstractVirtualFileHandler parent = ei != null ? ei.handler : null;
+            AbstractVirtualFileHandler parent = ei != null ? ei.getHandler() : null;
 
             // it's a nested jar
             if (ent.isDirectory() == false && JarUtils.isArchive(ent.getName()))
@@ -568,7 +566,7 @@ public class ZipEntryContext extends AbstractVFSContext
                      // ensure parent exists
                      dest.getParentFile().mkdirs();
 
-                     InputStream is = zipSource.openStream(ent);
+                     InputStream is = zipSource.openStream(new DefaultZipEntryInfo(ent));
                      OutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
                      VFSUtils.copyStreamAndClose(is, os);
                   }
@@ -582,7 +580,7 @@ public class ZipEntryContext extends AbstractVFSContext
                else
                {
                   // mount another instance of ZipEntryContext
-                  delegator = mountZipStream(parent, name, zipSource.openStream(ent));
+                  delegator = mountZipStream(parent, name, zipSource.openStream(new DefaultZipEntryInfo(ent)));
                }
 
                entries.put(delegator.getLocalPathName(), new EntryInfo(delegator, ent));
@@ -652,7 +650,7 @@ public class ZipEntryContext extends AbstractVFSContext
    {
       if (initStatus != InitializationStatus.NOT_INITIALIZED)
       {
-         EntryInfo rootInfo = entries.get("");
+         ZipEntryContextInfo rootInfo = entries.get("");
          entries.clear();
          entries.put("", rootInfo);
 
@@ -731,11 +729,11 @@ public class ZipEntryContext extends AbstractVFSContext
       String [] split = splitParentChild(parentPath);
       String grandPa = split[0];
 
-      EntryInfo eiParent = entries.get(grandPa);
+      ZipEntryContextInfo eiParent = entries.get(grandPa);
       if(eiParent == null)
          eiParent = makeDummyParent(grandPa);
 
-      ZipEntryHandler handler = new ZipEntryHandler(this, eiParent.handler, split[1], false);
+      ZipEntryHandler handler = new ZipEntryHandler(this, eiParent.getHandler(), split[1], false);
       EntryInfo ei = new EntryInfo(handler, null);
       entries.put(parentPath, ei);
       return ei;
@@ -786,7 +784,7 @@ public class ZipEntryContext extends AbstractVFSContext
       }
       else if (initStatus == InitializationStatus.INITIALIZED && getZipSource().hasBeenModified())
       {
-         EntryInfo rootInfo = entries.get("");
+         ZipEntryContextInfo rootInfo = entries.get("");
          entries.clear();
          entries.put("", rootInfo);
 
@@ -811,7 +809,7 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    public VirtualFileHandler getRoot()
    {
-      return entries.get("").handler;
+      return entries.get("").getHandler();
    }
 
    /**
@@ -834,9 +832,9 @@ public class ZipEntryContext extends AbstractVFSContext
       else
          pathName = pathName + "/" + name;
 
-      EntryInfo ei = entries.get(pathName);
+      ZipEntryContextInfo ei = entries.get(pathName);
       if(ei != null)
-         return ei.handler;
+         return ei.getHandler();
 
       return null;
    }
@@ -858,11 +856,11 @@ public class ZipEntryContext extends AbstractVFSContext
       if(parent instanceof AbstractVirtualFileHandler)
       {
          AbstractVirtualFileHandler parentHandler  = (AbstractVirtualFileHandler) parent;
-         EntryInfo parentEntry = entries.get(parentHandler.getLocalPathName());
+         ZipEntryContextInfo parentEntry = entries.get(parentHandler.getLocalPathName());
          if (parentEntry != null)
          {
-            if (parentEntry.handler instanceof DelegatingHandler)
-               return parentEntry.handler.getChildren(ignoreErrors);
+            if (parentEntry.getHandler() instanceof DelegatingHandler)
+               return parentEntry.getHandler().getChildren(ignoreErrors);
 
             return parentEntry.getChildren();
          }
@@ -910,15 +908,15 @@ public class ZipEntryContext extends AbstractVFSContext
 
       if (getRoot().equals(handler) == false)
          checkIfModified();
-      EntryInfo ei = entries.get(handler.getLocalPathName());
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
       if(ei == null)
          return 0;
 
-      if(ei.entry == null) {
+      if(ei.getEntry() == null) {
          return getZipSource().getLastModified();
       }
 
-      return ei.entry.getTime();
+      return ei.getTime();
    }
 
    /**
@@ -937,11 +935,11 @@ public class ZipEntryContext extends AbstractVFSContext
 
       checkIfModified();
 
-      EntryInfo ei = entries.get(handler.getLocalPathName());
-      if(ei == null || ei.entry == null)
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
+      if(ei == null || ei.getEntry() == null)
          return 0;
 
-      return ei.entry.getSize();
+      return ei.getSize();
    }
 
    /**
@@ -959,7 +957,7 @@ public class ZipEntryContext extends AbstractVFSContext
          return getZipSource().exists();
 
       checkIfModified();
-      EntryInfo ei = entries.get(handler.getLocalPathName());
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
       return ei != null;
    }
 
@@ -977,11 +975,11 @@ public class ZipEntryContext extends AbstractVFSContext
       if (getRoot().equals(handler) == false)
          checkIfModified();
 
-      EntryInfo ei = entries.get(handler.getLocalPathName());
-      if (ei == null || ei.entry == null)
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
+      if (ei == null || ei.getEntry() == null)
          return false;
 
-      return ei.entry.isDirectory() == false;
+      return ei.isDirectory() == false;
    }
 
    /**
@@ -1072,7 +1070,7 @@ public class ZipEntryContext extends AbstractVFSContext
 
       checkIfModified();
 
-      EntryInfo ei = entries.get(handler.getLocalPathName());
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
 
       if (ei == null)
       {
@@ -1088,11 +1086,10 @@ public class ZipEntryContext extends AbstractVFSContext
          throw new FileNotFoundException(uriStr);
       }
 
-      if(ei.entry == null)
+      if(ei.getEntry() == null)
          return new ByteArrayInputStream(NO_BYTES);
 
-      ZipEntry wrapper = new EntryInfoAdapter(ei);
-      return getZipSource().openStream(wrapper);
+      return getZipSource().openStream(ei);
    }
 
    /**
@@ -1109,7 +1106,7 @@ public class ZipEntryContext extends AbstractVFSContext
       if (child == null)
          throw new IllegalArgumentException("Null child");
 
-      EntryInfo parentEntry = entries.get(parent.getLocalPathName());
+      ZipEntryContextInfo parentEntry = entries.get(parent.getLocalPathName());
       if (parentEntry != null)
          parentEntry.add(child);
       else
@@ -1143,7 +1140,7 @@ public class ZipEntryContext extends AbstractVFSContext
    void replaceChild(ZipEntryHandler parent, AbstractVirtualFileHandler original, VirtualFileHandler replacement)
    {
       ensureEntries();
-      EntryInfo parentEntry = entries.get(parent.getLocalPathName());
+      ZipEntryContextInfo parentEntry = entries.get(parent.getLocalPathName());
       if (parentEntry != null)
       {
          DelegatingHandler newOne;
@@ -1161,9 +1158,9 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             parentEntry.replaceChild(original, newOne);
 
-            EntryInfo ei = entries.get(original.getLocalPathName());
-            ei.handler = newOne;
-            ei.entry = null;
+            ZipEntryContextInfo ei = entries.get(original.getLocalPathName());
+            ei.setHandler(newOne);
+            ei.setEntry(null);
             ei.clearChildren();
          }
       }
@@ -1197,104 +1194,8 @@ public class ZipEntryContext extends AbstractVFSContext
     */
    Certificate[] getCertificates(ZipEntryHandler handler)
    {
-      EntryInfo ei = entries.get(handler.getLocalPathName());
+      ZipEntryContextInfo ei = entries.get(handler.getLocalPathName());
       return (ei != null) ? ei.getCertificates() : null;
-   }
-
-   /**
-    *  Internal data structure holding meta information of a virtual file in this context
-    */
-   static class EntryInfo
-   {
-      /** a marker */
-      static final Certificate[] MARKER = new Certificate[]{};
-
-      /** a handler */
-      private AbstractVirtualFileHandler handler;
-
-      /** a <tt>ZipEntry</tt> */
-      ZipEntry entry;
-
-      /** the certificates */
-      Certificate[] certificates;
-
-      /** a list of children */
-      private Map<String, AbstractVirtualFileHandler> children;
-
-      /**
-       * EntryInfo constructor
-       *
-       * @param handler a handler
-       * @param entry an entry
-       */
-      EntryInfo(AbstractVirtualFileHandler handler, ZipEntry entry)
-      {
-         this.handler = handler;
-         this.entry = entry;
-      }
-
-      /**
-       * Get certificates.
-       *
-       * @return the certificates
-       */
-      private Certificate[] getCertificates()
-      {
-         return (certificates != MARKER) ? certificates : null;
-      }
-
-      /**
-       * Get children.
-       *
-       * @return returns a list of children for this handler (by copy)
-       */
-      public synchronized List<VirtualFileHandler> getChildren()
-      {
-         if (children == null)
-            return Collections.emptyList();
-
-         return new ArrayList<VirtualFileHandler>(children.values());
-      }
-
-      /**
-       * Replace a child.
-       *
-       * @param original existing child
-       * @param replacement new child
-       */
-      public synchronized void replaceChild(AbstractVirtualFileHandler original, AbstractVirtualFileHandler replacement)
-      {
-         if (children != null)
-         {
-            final String name = original.getName();
-            if (children.containsKey(name)) {
-               children.put(name, replacement);
-            }
-         }
-      }
-
-      /**
-       * Clear the list of children
-       */
-      public synchronized void clearChildren()
-      {
-         if (children != null)
-            children.clear();
-      }
-
-      /**
-       * Add a child. If a child with the same name exists already, first remove it.
-       *
-       * @param child a child
-       */
-      public synchronized void add(AbstractVirtualFileHandler child)
-      {
-         if (children == null)
-         {
-            children = new LinkedHashMap<String, AbstractVirtualFileHandler>();
-         }
-         children.put(child.getName(), child);
-      }
    }
 
    /**

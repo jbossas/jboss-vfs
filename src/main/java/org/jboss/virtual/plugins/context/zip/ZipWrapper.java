@@ -169,7 +169,7 @@ abstract class ZipWrapper
     * @return InputStream with entry's contents
     * @throws IOException for any error
     */
-   abstract InputStream openStream(ZipEntry ent) throws IOException;
+   abstract InputStream openStream(ZipEntryInfo ent) throws IOException;
 
    /**
     * Get raw bytes of this archive in its compressed form
