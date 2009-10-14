@@ -8,7 +8,7 @@
   <groupId>org.jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>2.2.0-SNAPSHOT</version>
+  <version>2.3.0-SNAPSHOT</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
@@ -31,7 +31,7 @@
   <properties>
     <version.jboss.jzipfile>1.0.0.CR1</version.jboss.jzipfile>
     <version.jboss.truezip>6.6</version.jboss.truezip>
-    <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
+    <version.jboss.common.core>2.2.16.GA</version.jboss.common.core>
     <version.jboss.logging>2.0.5.GA</version.jboss.logging>
     <version.jboss.test>1.1.0.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
