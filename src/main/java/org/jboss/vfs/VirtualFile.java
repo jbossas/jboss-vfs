@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.MalformedURLException;
 import java.security.CodeSigner;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -158,13 +159,12 @@ public final class VirtualFile implements Serializable {
     /**
      * Whether it is a simple leaf of the VFS, i.e. whether it can contain other files
      *
-     * @return true if a simple file.
+     * @return {@code true} if a simple file
      *
-     * @throws IOException for any problem accessing the virtual file system
      * @deprecated use {@link #isDirectory()} instead
      */
     @Deprecated
-    public boolean isLeaf() throws IOException {
+    public boolean isLeaf() {
         return !isDirectory();
     }
 
@@ -172,8 +172,6 @@ public final class VirtualFile implements Serializable {
      * Determine whether the named virtual file is a directory.
      *
      * @return {@code true} if it is a directory, {@code false} otherwise
-     *
-     * @throws IOException if an I/O error occurs
      */
     public boolean isDirectory() {
         final VFS.Mount mount = VFS.getMount(this);
@@ -198,9 +196,7 @@ public final class VirtualFile implements Serializable {
     /**
      * Delete this virtual file
      *
-     * @return true if file was deleted
-     *
-     * @throws IOException if an error occurs
+     * @return {@code true} if file was deleted
      */
     public boolean delete() {
         final VFS.Mount mount = VFS.getMount(this);
@@ -267,8 +263,6 @@ public final class VirtualFile implements Serializable {
      * created by submounts.
      *
      * @return the children
-     *
-     * @throws IOException for any problem accessing the virtual file system
      */
     public List<VirtualFile> getChildren() {
         if (!isDirectory())
@@ -399,9 +393,9 @@ public final class VirtualFile implements Serializable {
      *
      * @return the url
      *
-     * @throws IOException for any io error
+     * @throws MalformedURLException if the URL is somehow malformed
      */
-    public URL toURL() throws IOException {
+    public URL toURL() throws MalformedURLException {
         return VFSUtils.getVirtualURL(this);
     }
 
