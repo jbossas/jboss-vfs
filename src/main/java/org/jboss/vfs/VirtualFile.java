@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.security.CodeSigner;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -418,12 +419,29 @@ public final class VirtualFile implements Serializable {
     /**
      * Get the {@link CodeSigner}s for a the virtual file.
      *
-     * @return {@link CodeSigner} for the virtual file or null if not signed. 
-    * @throws IOException 
+     * @return the {@link CodeSigner}s for the virtual file, or {@code null} if not signed
      */
     public CodeSigner[] getCodeSigners() {
         final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().getCodeSigners(mount.getMountPoint(), this);
+    }
+
+    /**
+     * Get the {@link Certificate}s for the virtual file.  Simply extracts the certificate entries from
+     * the code signers array.
+     *
+     * @return the certificates for the virtual file, or {@code null} if not signed
+     */
+    public Certificate[] getCertificates() {
+        final CodeSigner[] codeSigners = getCodeSigners();
+        if (codeSigners == null) {
+           return null;
+        }
+        final List<Certificate> certList = new ArrayList<Certificate>(codeSigners.length * 3);
+        for (CodeSigner signer : codeSigners) {
+            certList.addAll(signer.getSignerCertPath().getCertificates());
+        }
+        return certList.toArray(new Certificate[certList.size()]);
     }
 
     /**
