@@ -46,6 +46,8 @@ public final class RealFileSystem implements FileSystem {
      */
     public static final RealFileSystem ROOT_INSTANCE = new RealFileSystem(new File(""));
 
+    private static final boolean NEEDS_CONVERSION = File.separatorChar != '/';
+
     private final File realRoot;
 
     /**
@@ -78,8 +80,10 @@ public final class RealFileSystem implements FileSystem {
     public File getFile(VirtualFile mountPoint, VirtualFile target) {
         if (mountPoint.equals(target)) {
             return realRoot;
+        } else if (NEEDS_CONVERSION) {
+            return new File(realRoot, target.getPathNameRelativeTo(mountPoint).replace('/', File.separatorChar));
         } else {
-            return new File(getFile(mountPoint, target.getParent()), target.getName());
+            return new File(realRoot, target.getPathNameRelativeTo(mountPoint));
         }
     }
 

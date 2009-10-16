@@ -96,6 +96,31 @@ public final class VirtualFile implements Serializable {
     }
 
     /**
+     * Get the path name relative to a parent virtual file.  If the given virtual file is not a parent of
+     * this virtual file, then an {@code IllegalArgumentException} is thrown.
+     *
+     * @param parent the parent virtual file
+     * @return the relative path name as a string
+     * @throws IllegalArgumentException if the given virtual file is not a parent of this virtual file
+     */
+    public String getPathNameRelativeTo(VirtualFile parent) throws IllegalArgumentException {
+        final StringBuilder builder = new StringBuilder(160);
+        getPathNameRelativeTo(parent, builder);
+        return builder.toString();
+    }
+
+    private void getPathNameRelativeTo(VirtualFile parent, StringBuilder builder) {
+        if (this.parent == null) {
+            throw new IllegalArgumentException("Given parent is not an ancestor of this virtual file");
+        }
+        if (!this.parent.equals(parent)) {
+            this.parent.getPathNameRelativeTo(parent, builder);
+            builder.append('/');
+        }
+        builder.append(name);
+    }
+
+    /**
      * Get the absolute VFS full path name. If this is a URL then directory entries will have a trailing slash.
      *
      * @param url whether or not this path is being used for a URL
