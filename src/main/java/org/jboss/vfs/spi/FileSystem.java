@@ -118,6 +118,16 @@ public interface FileSystem extends Closeable {
     boolean exists(VirtualFile mountPoint, VirtualFile target);
 
     /**
+     * Ascertain whether a virtual file within this filesystem is a plain file.
+     *
+     * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
+     * @param target the virtual file to act upon
+     *
+     * @return {@code true} if the file exists and is a plain file, {@code false} otherwise
+     */
+    boolean isFile(VirtualFile mountPoint, VirtualFile target);
+
+    /**
      * Ascertain whether a virtual file within this filesystem is a directory.
      *
      * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
@@ -137,14 +147,14 @@ public interface FileSystem extends Closeable {
      * @return the collection of children names
      */
     List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target);
-    
+
     /**
      * Get the {@link CodeSigner}s for a the virtual file.
-     * 
+     *
      * @param mountPoint the mount point of the filesystem instance (guaranteed to be a parent of {@code target})
      * @param target the virtual file to act upon
      *
-     * @return {@link CodeSigner} for the virtual file or null if not signed. 
+     * @return {@link CodeSigner} for the virtual file or null if not signed.
      */
     CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target);
 

@@ -68,6 +68,12 @@ public class AssemblyFileSystem implements FileSystem {
     }
 
     /** {@inheritDoc} */
+    public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
+        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        return assemblyFile != null && assemblyFile.isFile();
+    }
+
+    /** {@inheritDoc} */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {

@@ -115,6 +115,11 @@ public final class RealFileSystem implements FileSystem {
         return getFile(mountPoint, target).exists();
     }
 
+    /** {@inheritDoc} */
+    public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
+        return getFile(mountPoint, target).isFile();
+    }
+
     /**
      * {@inheritDoc}
      */

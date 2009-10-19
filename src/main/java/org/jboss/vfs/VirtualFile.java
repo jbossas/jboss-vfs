@@ -193,6 +193,11 @@ public final class VirtualFile implements Serializable {
         return !isDirectory();
     }
 
+    public boolean isFile() {
+        final VFS.Mount mount = VFS.getMount(this);
+        return mount.getFileSystem().isFile(mount.getMountPoint(), this);
+    }
+
     /**
      * Determine whether the named virtual file is a directory.
      *

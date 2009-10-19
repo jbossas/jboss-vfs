@@ -127,10 +127,12 @@ public final class JavaZipFileSystem implements FileSystem {
         log.tracef("Created zip filesystem for file %s in temp dir %s", archiveFile, tempDir);
     }
 
+    /** {@inheritDoc} */
     private static <T> Iterable<T> iter(final Enumeration<T> entries) {
         return new EnumerationIterable<T>(entries);
     }
 
+    /** {@inheritDoc} */
     public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException {
         final ZipNode zipNode = getExistingZipNode(mountPoint, target);
         // check if we have cached one already
@@ -155,6 +157,7 @@ public final class JavaZipFileSystem implements FileSystem {
         }
     }
 
+    /** {@inheritDoc} */
    public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
         final ZipNode zipNode = getExistingZipNode(mountPoint, target);
         final File cachedFile = zipNode.cachedFile;
@@ -171,6 +174,7 @@ public final class JavaZipFileSystem implements FileSystem {
         return zipFile.getInputStream(entry);
     }
 
+    /** {@inheritDoc} */
     public boolean delete(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -180,6 +184,7 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null && cachedFile.delete();
     }
 
+    /** {@inheritDoc} */
     public long getSize(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -193,6 +198,7 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.length() : entry == null ? 0L : entry.getSize();
     }
 
+    /** {@inheritDoc} */
     public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -203,6 +209,7 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.lastModified() : entry == null ? zipTime : entry.getTime();
     }
 
+    /** {@inheritDoc} */
     public boolean exists(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         if (zipNode == null) {
@@ -213,11 +220,19 @@ public final class JavaZipFileSystem implements FileSystem {
         }
     }
 
-    public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
+    /** {@inheritDoc} */
+    public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         return zipNode != null && zipNode.entry == null;
     }
 
+    /** {@inheritDoc} */
+    public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
+        final ZipNode zipNode = rootNode.find(mountPoint, target);
+        return zipNode != null && zipNode.entry != null;
+    }
+
+    /** {@inheritDoc} */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -273,10 +288,12 @@ public final class JavaZipFileSystem implements FileSystem {
         return zipNode;
     }
 
+    /** {@inheritDoc} */
     public boolean isReadOnly() {
         return true;
     }
     
+    /** {@inheritDoc} */
     public void close() throws IOException {
         log.tracef("Closing zip filesystem %s", this);
         VFSUtils.safeClose(new Closeable() {
