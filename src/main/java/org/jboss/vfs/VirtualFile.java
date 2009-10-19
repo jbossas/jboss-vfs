@@ -193,6 +193,11 @@ public final class VirtualFile implements Serializable {
         return !isDirectory();
     }
 
+    /**
+     * Determine whether the named virtual file is a plain file.
+     *
+     * @return {@code true} if it is a plain file, {@code false} otherwise
+     */
     public boolean isFile() {
         final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().isFile(mount.getMountPoint(), this);

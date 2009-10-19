@@ -223,13 +223,13 @@ public final class JavaZipFileSystem implements FileSystem {
     /** {@inheritDoc} */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
-        return zipNode != null && zipNode.entry == null;
+        return zipNode != null && zipNode.entry != null;
     }
 
     /** {@inheritDoc} */
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
-        return zipNode != null && zipNode.entry != null;
+        return zipNode != null && zipNode.entry == null;
     }
 
     /** {@inheritDoc} */
