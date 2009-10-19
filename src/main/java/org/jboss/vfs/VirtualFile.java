@@ -186,11 +186,11 @@ public final class VirtualFile implements Serializable {
      *
      * @return {@code true} if a simple file
      *
-     * @deprecated use {@link #isDirectory()} instead
+     * @deprecated use {@link #isDirectory()} or {@link #isFile()} instead
      */
     @Deprecated
     public boolean isLeaf() {
-        return !isDirectory();
+        return isFile();
     }
 
     /**

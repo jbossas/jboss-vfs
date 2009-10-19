@@ -277,14 +277,17 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
 
          VirtualFile classes2 = war2.getChild("WEB-INF/classes");
          assertTrue("WEB-INF/classes != null", classes2 != null);
-         assertTrue("WEB-INF/classes is not a leaf", classes2.isLeaf() == false);
+         assertTrue("WEB-INF/classes is not a leaf", classes2.isDirectory());
+         assertFalse("WEB-INF/classes is not a leaf", classes2.isFile());
          classes2 = war2.getChild("WEB-INF/classes");
          assertTrue("WEB-INF/classes != null", classes2 != null);
-         assertTrue("WEB-INF/classes is not a leaf", classes2.isLeaf() == false);
+         assertFalse("WEB-INF/classes is not a leaf", classes2.isFile());
+         assertTrue("WEB-INF/classes is not a leaf", classes2.isDirectory());
 
          VirtualFile HelloJavaBean = classes2.getChild("com/sun/ts/tests/webservices/deploy/warDeploy/HelloJavaBean.class");
          assertTrue("HelloJavaBean.class != null", HelloJavaBean != null);
-         assertTrue("HelloJavaBean.class is a leaf", HelloJavaBean.isLeaf());
+         assertTrue("HelloJavaBean.class is a leaf", HelloJavaBean.isFile());
+         assertFalse("HelloJavaBean.class is a leaf", HelloJavaBean.isDirectory());
 
          VirtualFile war = testdir.getChild("filesonly.war");
          mounts.addAll(recursiveMount(war));
@@ -297,10 +300,12 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
 
          VirtualFile jar1 = war.getChild("WEB-INF/lib/jar1.jar");
          assertTrue("WEB-INF/lib/jar1.jar != null", jar1 != null);
-         assertTrue("WEB-INF/lib/jar1.jar is not a leaf", jar1.isLeaf() == false);
+         assertFalse("WEB-INF/lib/jar1.jar is not a leaf", jar1.isFile());
+         assertTrue("WEB-INF/lib/jar1.jar is not a leaf", jar1.isDirectory());
          VirtualFile ClassInJar1 = jar1.getChild("org/jboss/test/vfs/support/jar1/ClassInJar1.class");
          assertTrue("ClassInJar1.class != null", ClassInJar1 != null);
-         assertTrue("ClassInJar1.class is a leaf", ClassInJar1.isLeaf());
+         assertTrue("ClassInJar1.class is a leaf", ClassInJar1.isFile());
+         assertFalse("ClassInJar1.class is a leaf", ClassInJar1.isDirectory());
 
          VirtualFile metaInf = war.getChild("META-INF/MANIFEST.MF");
          assertTrue("META-INF/MANIFEST.MF != null", metaInf != null);
@@ -316,7 +321,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
 
          war.getChild("WEB-INF/classes");
          assertTrue("WEB-INF/classes != null", classes != null);
-         assertTrue("WEB-INF/classes is not a leaf", classes.isLeaf() == false);
+         assertFalse("WEB-INF/classes is not a leaf", classes.isFile());
+         assertTrue("WEB-INF/classes is not a leaf", classes.isDirectory());
       }
       finally
       {
@@ -398,7 +404,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VirtualFile root = testdir.getChild("");
       assertEquals("root name", "test", root.getName());
       assertEquals("root path", rootURL.getPath(), root.getPathName());
-      assertFalse("root isDirectory", root.isLeaf());
+      assertFalse("root isFile", root.isFile());
+      assertTrue("root isDirectory", root.isDirectory());
 
       // Find the outer.jar
       VirtualFile outerJar = testdir.getChild("outer.jar");
@@ -418,7 +425,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          root = testdir.getChild("");
          assertEquals("root name", "test", root.getName());
          assertEquals("root path", rootURL.getPath(), root.getPathName());
-         assertFalse("root isDirectory", root.isLeaf());
+         assertFalse("root isFile", root.isFile());
+         assertTrue("root isDirectory", root.isDirectory());
       }
       finally
       {
@@ -475,7 +483,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VirtualFile root = testdir.getChild("");
       assertEquals("root name", "test", root.getName());
       assertEquals("root path", rootURL.getPath(), root.getPathName());
-      assertFalse("root isDirectory", root.isLeaf());
+      assertTrue("root isDirectory", root.isDirectory());
+      assertFalse("root isFile", root.isFile());
 
       // Find the outer.jar
       VirtualFile outerJar = testdir.getChild("unpacked-outer.jar");
@@ -490,7 +499,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       root = testdir.getChild("");
       assertEquals("root name", "test", root.getName());
       assertEquals("root path", rootURL.getPath(), root.getPathName());
-      assertFalse("root isDirectory", root.isLeaf());
+      assertTrue("root isDirectory", root.isDirectory());
+      assertFalse("root isFile", root.isFile());
    }
 
    public void testFileNotFoundInUnpackedJar() throws Exception
@@ -527,7 +537,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       try
       {
          VirtualFile inner = testdir.getChild("outer.jar/jar1.jar");
-         log.info("IsFile: " + inner.isLeaf());
+         log.info("IsFile: " + inner.isFile());
          log.info(inner.getLastModified());
          List<VirtualFile> contents = inner.getChildren();
          // META-INF/*, org/jboss/test/vfs/support/jar1/* at least
@@ -560,7 +570,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       try
       {
          VirtualFile inner = testdir.getChild("outer.jar/jar1.jar");
-         log.info("IsFile: " + inner.isLeaf());
+         log.info("IsFile: " + inner.isFile());
          log.info(inner.getLastModified());
          List<VirtualFile> contents = inner.getChildren();
          // META-INF/*, org/jboss/test/vfs/support/jar1/* at least
@@ -798,7 +808,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertEquals("lastModified", lastModified, tmpVF.getLastModified());
       assertEquals("size", size, tmpVF.getSize());
       assertEquals("url", url, tmpVF.toURL());
-      assertEquals("isLeaf", true, tmpVF.isLeaf());
+      assertTrue("isFile", tmpVF.isFile());
+      assertFalse("isDirectory", tmpVF.isDirectory());
       //assertEquals("isHidden", false, tmpVF.isHidden());
 
       // Read in the VF from the serialized file
@@ -812,7 +823,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertEquals("lastModified", lastModified, tmpVF2.getLastModified());
       assertEquals("size", size, tmpVF2.getSize());
       assertEquals("url", url, tmpVF2.toURL());
-      assertEquals("isLeaf", true, tmpVF2.isLeaf());
+      assertTrue("isFile", tmpVF2.isFile());
+      assertFalse("isDirectory", tmpVF2.isDirectory());
       //assertEquals("isHidden", false, tmpVF2.isHidden());
    }
 
@@ -865,8 +877,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertEquals("lastModified", lastModified, tmpVF.getLastModified());
       assertEquals("size", size, tmpVF.getSize());
       assertEquals("url", url.getPath(), tmpVF.toURL().getPath());
-      // TODO: these should pass
-      assertEquals("isDirectory", false, tmpVF.isDirectory());
+      assertFalse("isDirectory", tmpVF.isDirectory());
+      assertTrue("isFile", tmpVF.isFile());
       //assertEquals("isHidden", false, tmpVF.isHidden());
       // Write out the vfs jar file
       fos = new FileOutputStream(vfsSer);
@@ -885,8 +897,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       assertEquals("lastModified", lastModified, tmpVF2.getLastModified());
       assertEquals("size", size, tmpVF2.getSize());
       assertEquals("url", url.getPath(), tmpVF2.toURL().getPath());
-      // TODO: these should pass
-      assertEquals("isDirectory", false, tmpVF2.isDirectory());
+      assertFalse("isDirectory", tmpVF2.isDirectory());
+      assertTrue("isFile", tmpVF2.isFile());
       //assertEquals("isHidden", false, tmpVF2.isHidden());
    }
 
@@ -1229,7 +1241,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          uri = tstjar.toURI();
          expectedURI = new URI("vfs" + rootURL.toString() + "/spaces.ear/spaces-ejb.jar/");
          assertEquals(expectedURI.getPath(), uri.getPath());
-         assertFalse(tstjar.isLeaf());
+         assertFalse(tstjar.isFile());
+         assertTrue(tstjar.isDirectory());
 
          is = uri.toURL().openStream();
          is.close();
@@ -1239,7 +1252,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          uri = tstjar.toURI();
          expectedURI = new URI("vfs" + rootURL.toString() + "/spaces.ear/spaces-lib.jar/");
          assertEquals(expectedURI.getPath(), uri.getPath());
-         assertFalse(tstjar.isLeaf());
+         assertFalse(tstjar.isFile());
+         assertTrue(tstjar.isDirectory());
 
          is = uri.toURL().openStream();
          is.close();
@@ -1366,7 +1380,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VirtualFile testdir = VFS.getChild(rootURL.getPath());
       VirtualFile tmpVF = testdir.getChild(tmp.getName());
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
-      assertFalse(tmpVF.getPathName() + ".isLeaf()", tmpVF.isLeaf());
+      assertFalse(tmpVF.getPathName() + ".isFile()", tmpVF.isFile());
       assertTrue(tmp + ".delete()", tmp.delete());
       assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
       assertTrue(tmpRoot + ".delete()", tmpRoot.delete());
@@ -1422,7 +1436,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VirtualFile tmpVF = testdir.getChild(tmp.getName());
       log.info(tmpVF);
       assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
-      assertFalse(tmpVF.getPathName() + ".isLeaf()", tmpVF.isLeaf());
+      assertFalse(tmpVF.getPathName() + ".isFile()", tmpVF.isFile());
       assertTrue(tmp + ".delete()", tmp.delete());
       assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
       assertTrue(tmpRoot + ".delete()", tmpRoot.delete());

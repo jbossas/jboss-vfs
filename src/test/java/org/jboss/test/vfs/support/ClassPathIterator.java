@@ -207,7 +207,7 @@ public class ClassPathIterator
          {
             next = currentListing.get(index);
             index ++;
-            if( next.isLeaf() == false )
+             if( next.isFile() == false )
                subDirectories.addLast(next);
          }
          return next;
