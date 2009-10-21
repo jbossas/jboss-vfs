@@ -100,20 +100,11 @@ public class AssembledContextFactory
    /**
     * Remove an assembly
     *
-    * @param directory the directory
+    * @param name the name to remove
     */
-   public void remove(AssembledDirectory directory)
+   public void remove(String name)
    {
-      try
-      {
-         if (directory.getParent() != null)
-            throw new RuntimeException("This is not the root of assembly");
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      registry.remove(directory.getName());
+      registry.remove(name);
    }
 
    /**

@@ -78,7 +78,28 @@ public class AssembledDirectory extends VirtualFile
     */
    public static void removeAssembledDirectory(AssembledDirectory directory)
    {
-      AssembledContextFactory.getInstance().remove(directory);
+      try
+      {
+         if (directory.getParent() != null)
+            throw new RuntimeException("This is not the root of assembly");
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      removeDirectory(directory);
+   }
+
+   /**
+    * Remove directory, w/o check.
+    *
+    * @param directory the directory to remove
+    */
+   protected static void removeDirectory(AssembledDirectory directory)
+   {
+      String name = directory.directory.getVFSContext().getName();
+      AssembledContextFactory.getInstance().remove(name);
    }
 
    @Override
@@ -87,7 +108,7 @@ public class AssembledDirectory extends VirtualFile
       try
       {
          if (getParent() == null)
-            removeAssembledDirectory(this);            
+            removeDirectory(this);            
       }
       catch (Exception ignored)
       {

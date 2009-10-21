@@ -268,7 +268,7 @@ public class AssembledContextTestCase extends AbstractVFSTest
       {
          if (child.getName().startsWith("Nested")) throw new RuntimeException("did not exclude propertly");
       }
-      AssembledContextFactory.getInstance().remove(directory);
+      AssembledDirectory.removeAssembledDirectory(directory);
    }
 
    public void testMkDir() throws Exception
