@@ -150,8 +150,11 @@ public final class JavaZipFileSystem implements FileSystem {
             final JarEntry zipEntry = getNodeEntry(zipNode);
             final String name = zipEntry.getName();
             cachedFile = buildFile(contentsDir, name);
-            cachedFile.getParentFile().mkdirs(); 
-            VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
+            if (zipEntry == null) {
+                cachedFile.mkdir();
+            } else {
+                VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
+            }
             zipNode.cachedFile = cachedFile;
             return cachedFile;
         }
