@@ -22,19 +22,19 @@
 package org.jboss.virtual;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.virtual.plugins.context.jar.JarUtils;
-import org.jboss.virtual.plugins.context.vfs.AssembledContext;
+import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
 import org.jboss.virtual.plugins.context.vfs.AssembledDirectoryHandler;
 import org.jboss.virtual.plugins.context.vfs.AssembledFileHandler;
 import org.jboss.virtual.plugins.context.vfs.ByteArrayHandler;
 import org.jboss.virtual.plugins.vfs.helpers.FilterVirtualFileVisitor;
-import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
 import org.jboss.virtual.plugins.vfs.helpers.PathTokenizer;
+import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
 
 /**
  * Extension of VirtualFile that represents a virtual directory that can be composed of arbitrary files and resources
@@ -68,8 +68,17 @@ public class AssembledDirectory extends VirtualFile
     */
    public static AssembledDirectory createAssembledDirectory(String name, String rootName) throws IOException, URISyntaxException
    {
-      AssembledContext context = new AssembledContext(name, rootName);
-      return context.getRoot().getVirtualFile();
+      return AssembledContextFactory.getInstance().create(name, rootName);
+   }
+
+   /**
+    * Remove assembled directory.
+    *
+    * @param directory the directory to remove
+    */
+   public static void removeAssembledDirectory(AssembledDirectory directory)
+   {
+      AssembledContextFactory.getInstance().remove(directory);
    }
 
    /**

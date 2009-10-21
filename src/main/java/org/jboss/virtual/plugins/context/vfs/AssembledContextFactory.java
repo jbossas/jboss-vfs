@@ -21,9 +21,10 @@
 */
 package org.jboss.virtual.plugins.context.vfs;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.net.URISyntaxException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.virtual.AssembledDirectory;
 
@@ -31,13 +32,14 @@ import org.jboss.virtual.AssembledDirectory;
  * Factory for creating AssembledDirectory.
  *
  * @author <a href="bill@jboss.com">Bill Burke</a>
+ * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
 public class AssembledContextFactory
 {
    private static AssembledContextFactory instance = new AssembledContextFactory();
 
-   private ConcurrentHashMap<String, AssembledDirectory> registry = new ConcurrentHashMap<String, AssembledDirectory>();
+   private Map<String, AssembledDirectory> registry = new ConcurrentHashMap<String, AssembledDirectory>();
    private volatile int count;
 
    /**
@@ -56,7 +58,7 @@ public class AssembledContextFactory
       try
       {
          AssembledContext context = new AssembledContext(name, rootName);
-         AssembledDirectory directory = (AssembledDirectory)context.getRoot().getVirtualFile();
+         AssembledDirectory directory = context.getRoot().getVirtualFile();
          registry.put(name, directory);
          return directory;
       }
@@ -73,8 +75,8 @@ public class AssembledContextFactory
    /**
     * Find an assembly.  Usually used only by the URL protocol handlers.
     *
-    * @param name
-    * @return
+    * @param name the name
+    * @return assembled directory if found, null otherwise
     */
    public AssembledDirectory find(String name)
    {
