@@ -81,6 +81,23 @@ public class AssembledDirectory extends VirtualFile
       AssembledContextFactory.getInstance().remove(directory);
    }
 
+   @Override
+   public void cleanup()
+   {
+      try
+      {
+         if (getParent() == null)
+            removeAssembledDirectory(this);            
+      }
+      catch (Exception ignored)
+      {
+      }
+      finally
+      {
+         super.cleanup();
+      }
+   }
+
    /**
     * Add files recursively from root, using the no jars filter.
     *
