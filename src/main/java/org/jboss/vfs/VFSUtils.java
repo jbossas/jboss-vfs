@@ -186,7 +186,7 @@ public class VFSUtils {
         if (archive == null)
             throw new IllegalArgumentException("Null archive");
         VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
-        if (manifest == null) {
+        if (manifest == null || !manifest.exists()) {
             if (log.isTraceEnabled())
                 log.trace("Can't find manifest for " + archive.getPathName());
             return null;
