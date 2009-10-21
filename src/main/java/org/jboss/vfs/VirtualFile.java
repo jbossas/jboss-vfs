@@ -149,8 +149,6 @@ public final class VirtualFile implements Serializable {
      * When the file was last modified
      *
      * @return the last modified time
-     *
-     * @throws IOException for any problem accessing the virtual file system
      */
     public long getLastModified() {
         final VFS.Mount mount = VFS.getMount(this);
@@ -161,8 +159,6 @@ public final class VirtualFile implements Serializable {
      * Get the size
      *
      * @return the size
-     *
-     * @throws IOException for any problem accessing the virtual file system
      */
     public long getSize() {
         final VFS.Mount mount = VFS.getMount(this);
@@ -173,8 +169,6 @@ public final class VirtualFile implements Serializable {
      * Tests whether the underlying implementation file still exists.
      *
      * @return true if the file exists, false otherwise.
-     *
-     * @throws IOException - thrown on failure to detect existence.
      */
     public boolean exists() {
         final VFS.Mount mount = VFS.getMount(this);
