@@ -38,6 +38,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 @Assembled
 public class AssembledFileHandler extends DelegatingHandler
 {
+   private static final long serialVersionUID = 1L;
+
    public AssembledFileHandler(VFSContext context, AssembledDirectoryHandler parent, String name, VirtualFileHandler delegate) throws IOException
    {
       super(context, parent, name, delegate);

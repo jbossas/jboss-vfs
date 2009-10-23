@@ -49,6 +49,8 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 @Assembled
 public class AssembledDirectoryHandler extends AbstractVirtualFileHandler implements StructuredVirtualFileHandler
 {
+   private static final long serialVersionUID = 1L;
+
    private long lastModified = System.currentTimeMillis();
    private Map<String, VirtualFileHandler> children = new HashMap<String, VirtualFileHandler>();
 

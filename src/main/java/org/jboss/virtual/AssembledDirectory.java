@@ -46,6 +46,8 @@ import org.jboss.virtual.plugins.vfs.helpers.SuffixesExcludeFilter;
  */
 public class AssembledDirectory extends VirtualFile
 {
+   private static final long serialVersionUID = 1L;
+   
    /** No jars file filter */
    private static final VirtualFileFilter noJars = new SuffixesExcludeFilter(JarUtils.getSuffixes());
    /** The directory */
