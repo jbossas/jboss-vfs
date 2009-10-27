@@ -60,6 +60,7 @@ import org.jboss.virtual.spi.cache.VFSCacheFactory;
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
 public class VFSUtils
@@ -1152,5 +1153,65 @@ public class VFSUtils
    {
       URI uri = context.getRootURI();
       return stripProtocol(uri);
+   }
+   
+   /**
+    * Returns a string of the contents of the virtual file, showing the names of all 
+    * the nested directories and names, useful for debugging
+    * 
+    * @param file the virtual file to display the contents of
+    * @return A string containing the contents of the virtual file
+    * @throws RuntimeException if an error happened
+    */
+   public static String outputContents(VirtualFile file)
+   {
+      try
+      {
+         VirtualFileOutputter outputter = new VirtualFileOutputter(file.toURI().toString());
+         outputter.outputContents(0, file);
+         return outputter.getOutput();
+      }
+      catch(Exception e)
+      {
+         throw new RuntimeException("ERROR displaying the contents of " + file.getName(), e);
+      }
+   }
+   
+   
+   private static class VirtualFileOutputter
+   {
+      StringBuilder sb;
+
+      private VirtualFileOutputter(String uri)
+      {
+         sb = new StringBuilder("Contents of " + uri + "\n");
+      }
+      
+      private String getOutput()
+      {
+         return sb.toString();
+      }
+      
+      private void outputContents(int level, VirtualFile file) throws Exception
+      {
+         String suffix = file.isLeaf() ? "" : "/";
+         writeToBuffer(level, file.getName() + suffix);
+         if (!file.isLeaf())
+         {
+            for (VirtualFile child : file.getChildren())
+            {
+               outputContents(level + 1, child);
+            }
+         }
+      }
+      
+      private void writeToBuffer(int level, String s)
+      {
+         for (int i = 0 ; i < level ; i++)
+            sb.append("  ");
+         
+         sb.append(s);
+         sb.append("\n");
+      }
    }
 }
