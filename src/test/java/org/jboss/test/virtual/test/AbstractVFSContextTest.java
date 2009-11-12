@@ -24,6 +24,8 @@ package org.jboss.test.virtual.test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +34,7 @@ import org.jboss.test.virtual.support.MockVirtualFileHandlerVisitor;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VisitorAttributes;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -176,6 +179,7 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
       expected.add("child1");
       expected.add("child2");
       expected.add("child3");
+      expected.add("folder");
 
       Set<String> actual = new HashSet<String>();
       for (VirtualFileHandler child : children)
@@ -381,23 +385,52 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
 
    public void testVisit() throws Exception
    {
-      VFSContext context = getVFSContext("children");
-      VirtualFileHandler root = context.getRoot();
       MockVirtualFileHandlerVisitor visitor = new MockVirtualFileHandlerVisitor();
-      context.visit(root, visitor);
-      
+
       Set<String> expected = new HashSet<String>();
       expected.add("child1");
       expected.add("child2");
       expected.add("child3");
+      expected.add("folder");
 
-      Set<String> actual = new HashSet<String>();
+      assertVisited(visitor, expected);
+   }
+
+   public void testVisitWithRoot() throws Exception
+   {
+      VisitorAttributes attributes = new VisitorAttributes();
+      attributes.setIncludeRoot(true);
+      attributes.setRecurseFilter(VisitorAttributes.RECURSE_ALL);
+      MockVirtualFileHandlerVisitor visitor = new MockVirtualFileHandlerVisitor(attributes);
+
+      Set<String> expected = new HashSet<String>();
+      expected.add("children" + getSuffix());
+      expected.add("child1");
+      expected.add("child2");
+      expected.add("child3");
+      expected.add("folder");
+      expected.add("subchild1");
+      expected.add("subchild2");
+      expected.add("subchild3");
+
+      assertVisited(visitor, expected);
+   }
+
+   protected void assertVisited(MockVirtualFileHandlerVisitor visitor, Set<String> expected) throws Exception
+   {
+      VFSContext context = getVFSContext("children");
+      VirtualFileHandler root = context.getRoot();
+      context.visit(root, visitor);
+
+      Collection<String> actual = new ArrayList<String>();
       for (VirtualFileHandler child : visitor.getVisited())
       {
          if (child.getName().startsWith("META-INF") == false && child.getName().equals(".svn") == false)
             actual.add(child.getName());
       }
-      
+
+      assertEquals(expected + "!=" + actual, expected.size(), actual.size());
+      actual = new HashSet<String>(actual);            
       assertEquals(expected, actual);
    }
 

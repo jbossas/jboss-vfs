@@ -66,7 +66,15 @@ public class MockVirtualFileVisitor extends AbstractVirtualFileVisitor
    {
       return visited;
    }
-   
+
+   /**
+    * Clear visited.
+    */
+   public void clear()
+   {
+      visited.clear();
+   }
+
    public void visit(VirtualFile file)
    {
       visited.add(file);

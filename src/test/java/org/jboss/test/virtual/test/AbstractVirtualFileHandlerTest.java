@@ -23,13 +23,19 @@ package org.jboss.test.virtual.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.test.virtual.support.MockVirtualFileVisitor;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VisitorAttributes;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.VirtualFileHandler;
 
@@ -48,9 +54,16 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
    
    protected abstract VFSContext getVFSContext(String name) throws Exception;
 
+   protected String getSuffix()
+   {
+      return "";
+   }
+
+   protected abstract URL getRootResource(String name) throws Exception;
+
    protected String getRootName(String name) throws Exception
    {
-      return name;
+      return name + getSuffix();
    }
    
    protected abstract long getRealLastModified(String name, String path) throws Exception;
@@ -124,7 +137,7 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
     * Test that finding a child and listing its parent result in consistent
     * child handlers.
     * 
-    * @throws Exception
+    * @throws Exception for any error
     */
    public void testSubSubChildPathName() throws Exception
    {
@@ -397,6 +410,7 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
       expected.add("child1");
       expected.add("child2");
       expected.add("child3");
+      expected.add("folder");
 
       Set<String> actual = new HashSet<String>();
       for (VirtualFileHandler child : children)
@@ -641,5 +655,67 @@ public abstract class AbstractVirtualFileHandlerTest extends AbstractVFSTest
          assertNull(file.getParent());
       else
          assertEquals(parent.getVirtualFile(), file.getParent());
+   }
+
+   public void testVisit() throws Exception
+   {
+      MockVirtualFileVisitor visitor = new MockVirtualFileVisitor();
+
+      Set<String> expected = new HashSet<String>();
+      expected.add("child1");
+      expected.add("child2");
+      expected.add("child3");
+      expected.add("folder");
+
+      assertVisited(visitor, expected);
+   }
+
+   public void testVisitWithRoot() throws Exception
+   {
+      VisitorAttributes attributes = new VisitorAttributes();
+      attributes.setIncludeRoot(true);
+      attributes.setRecurseFilter(VisitorAttributes.RECURSE_ALL);
+      MockVirtualFileVisitor visitor = new MockVirtualFileVisitor(attributes);
+
+      Set<String> expected = new HashSet<String>();
+      expected.add("children" + getSuffix());
+      expected.add("child1");
+      expected.add("child2");
+      expected.add("child3");
+      expected.add("folder");
+      expected.add("subchild1");
+      expected.add("subchild2");
+      expected.add("subchild3");
+
+      assertVisited(visitor, expected);
+   }
+
+   protected void assertVisited(MockVirtualFileVisitor visitor, Set<String> expected) throws Exception
+   {
+      VFSContext context = getVFSContext("children");
+      assertVisited(visitor, expected, context);
+
+      visitor.clear();
+
+      URL url = getRootResource("children");
+      FileSystemContext fsc = new FileSystemContext(url);
+      assertVisited(visitor, expected, fsc);
+   }
+
+   protected void assertVisited(MockVirtualFileVisitor visitor, Set<String> expected, VFSContext context) throws IOException
+   {
+      VirtualFileHandler root = context.getRoot();
+      root.getVirtualFile().visit(visitor);
+
+      Collection<String> actual = new ArrayList<String>();
+      for (VirtualFile child : visitor.getVisited())
+      {
+         if (child.getName().startsWith("META-INF") == false && child.getName().equals(".svn") == false)
+            actual.add(child.getName());
+      }
+
+      assertEquals(expected + "!=" + actual, expected.size(), actual.size());
+      actual = new HashSet<String>(actual);
+      assertEquals(expected, actual);
    }
 }

@@ -51,7 +51,13 @@ public class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandle
    {
       return new TestSuite(JARVirtualFileHandlerUnitTestCase.class);
    }
-   
+
+   @Override
+   protected String getSuffix()
+   {
+      return ".jar";
+   }
+
    protected URL getRootResource(String name) throws Exception
    {
       if (name.endsWith(".jar"))
@@ -80,11 +86,6 @@ public class JARVirtualFileHandlerUnitTestCase extends AbstractVirtualFileHandle
       URL url = getRootResource(name);
       url = JarUtils.createJarURL(url);
       return new JarContext(url);
-   }
-
-   protected String getRootName(String name) throws Exception
-   {
-      return name + ".jar";
    }
 
    protected long getRealLastModified(String name, String path) throws Exception

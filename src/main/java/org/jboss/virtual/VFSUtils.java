@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -1165,53 +1168,92 @@ public class VFSUtils
     */
    public static String outputContents(VirtualFile file)
    {
+      StringWriter writer = new StringWriter();
+      outputContents(file, writer);
+      return writer.toString();
+   }
+
+   /**
+    * Output contents to writer.
+    *
+    * @param file the file
+    * @param writer the writer
+    */
+   public static void outputContents(VirtualFile file, Writer writer)
+   {
+      if (writer == null)
+         throw new IllegalArgumentException("Null writer.");
+
       try
       {
-         VirtualFileOutputter outputter = new VirtualFileOutputter(file.toURI().toString());
-         outputter.outputContents(0, file);
-         return outputter.getOutput();
+         //writer.write("Contents of " + file.toURI() + "\n");
+         VirtualFileOutputter.visit(file, writer);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
          throw new RuntimeException("ERROR displaying the contents of " + file.getName(), e);
       }
    }
-   
-   
-   private static class VirtualFileOutputter
-   {
-      StringBuilder sb;
 
-      private VirtualFileOutputter(String uri)
+   /**
+    * Output visitor.
+    */
+   private static class VirtualFileOutputter implements VirtualFileVisitor
+   {
+      private Writer writer;
+      private Map<VirtualFile, Integer> levels;
+
+      private VirtualFileOutputter(Writer writer, Map<VirtualFile, Integer> levels)
       {
-         sb = new StringBuilder("Contents of " + uri + "\n");
+         this.writer = writer;
+         // prepare levels
+         this.levels = levels;
       }
-      
-      private String getOutput()
+
+      static void visit(VirtualFile file, Writer writer) throws IOException
       {
-         return sb.toString();
+         Map<VirtualFile, Integer> levels = new HashMap<VirtualFile, Integer>();
+         levels.put(file.getParent(), 0);
+         VirtualFileOutputter visitor = new VirtualFileOutputter(writer, levels);
+         file.visit(visitor);
       }
-      
-      private void outputContents(int level, VirtualFile file) throws Exception
+
+      public VisitorAttributes getAttributes()
       {
-         String suffix = file.isLeaf() ? "" : "/";
-         writeToBuffer(level, file.getName() + suffix);
-         if (!file.isLeaf())
+         VisitorAttributes attributes = new VisitorAttributes();
+         attributes.setIncludeRoot(true);
+         attributes.setRecurseFilter(VisitorAttributes.RECURSE_ALL);
+         return attributes;
+      }
+
+      public void visit(VirtualFile file)
+      {
+         try
          {
-            for (VirtualFile child : file.getChildren())
+            VirtualFile parent = file.getParent();
+            int level = levels.get(parent);
+            String suffix = "";
+            if (file.isLeaf() == false)
             {
-               outputContents(level + 1, child);
+               suffix = "/";
+               levels.put(file, level + 1);
             }
+            String string = file.getName() + suffix;
+            writeToBuffer(level, string);
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException("Cannot handle file: " + file, e);
          }
       }
       
-      private void writeToBuffer(int level, String s)
+      private void writeToBuffer(int level, String string) throws IOException
       {
          for (int i = 0 ; i < level ; i++)
-            sb.append("  ");
+            writer.append("  ");
          
-         sb.append(s);
-         sb.append("\n");
+         writer.append(string);
+         writer.append("\n");
       }
    }
 }

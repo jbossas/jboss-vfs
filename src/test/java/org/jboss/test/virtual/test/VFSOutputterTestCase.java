@@ -30,7 +30,8 @@ import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 
 /**
- * 
+ * Test vfs utils output.
+ *
  * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
  * @version $Revision: 1.1 $
  */
@@ -45,7 +46,6 @@ public class VFSOutputterTestCase extends AbstractVFSTest
    {
       return suite(VFSOutputterTestCase.class);
    }
-
 
    public void testOutputJarContents() throws Exception
    {
