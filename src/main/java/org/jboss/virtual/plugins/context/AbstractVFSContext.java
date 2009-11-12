@@ -371,10 +371,7 @@ public abstract class AbstractVFSContext implements VFSContext
          {
             try
             {
-               if (handler instanceof DelegatingHandler)
-                  child.getVFSContext().visit(child, visitor);
-               else
-                  visit(child, visitor, false, leavesOnly, ignoreErrors, includeHidden, recurseFilter);
+               visit(child, visitor, false, leavesOnly, ignoreErrors, includeHidden, recurseFilter);
             }
             catch (StackOverflowError e)
             {
