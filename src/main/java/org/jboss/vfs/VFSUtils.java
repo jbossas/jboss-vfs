@@ -694,7 +694,7 @@ public class VFSUtils {
     
     
     /**
-     * Determine the relative path within the assembly.
+     * Determine the relative path between a root and a target.
      * 
      * @param mountPoint
      * @param target
@@ -705,6 +705,24 @@ public class VFSUtils {
        collectPathParts(mountPoint, target, pathParts);
        return pathParts;
     }
+
+    /**
+     * Determine the relative path between a root and a target as a string.
+     * 
+     * @param mountPoint
+     * @param target
+     * @return
+     */
+    public static String getRelativePathString(VirtualFile mountPoint, VirtualFile target) {
+       List<String> pathParts = getRelativePath(mountPoint, target);
+       if(!pathParts.isEmpty()) {
+          return PathTokenizer.getRemainingPath(pathParts, 0);
+       } else {
+          return "";
+       }
+    }
+    
+    
 
     /**
      * Recursively work from the target to the mount-point and collect the path elements.
