@@ -147,14 +147,18 @@ public final class JavaZipFileSystem implements FileSystem {
                 return cachedFile;
             }
             // nope, create a cached temp
-            final JarEntry zipEntry = getNodeEntry(zipNode);
-            final String name = zipEntry.getName();
-            cachedFile = buildFile(contentsDir, name);
-            if (zipEntry == null) {
-                cachedFile.mkdir();
-            } else {
-                VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
+            cachedFile = buildFile(contentsDir, zipNode.name);
+            
+            if(zipNode.entry != null)
+            {
+               final JarEntry zipEntry = getNodeEntry(zipNode);
+               VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
             }
+            else if(cachedFile.exists() == false) 
+            {
+               cachedFile.mkdir();
+            }
+            
             zipNode.cachedFile = cachedFile;
             return cachedFile;
         }
