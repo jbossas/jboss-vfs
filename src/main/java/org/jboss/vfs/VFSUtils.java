@@ -156,7 +156,7 @@ public class VFSUtils {
             String path = tokenizer.nextToken();
             try {
                 VirtualFile vf = parent.getChild(path);
-                if (vf != null) {
+                if (vf.exists()) {
                     if (paths.contains(vf) == false) {
                         paths.add(vf);
                         // Recursively process the jar
