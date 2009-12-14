@@ -70,9 +70,6 @@ public class VFSUtils
    /** The log */
    private static final Logger log = Logger.getLogger(VFSUtils.class);
 
-   /** The default encoding */
-   private static final String DEFAULT_ENCODING = "UTF-8";
-
    /** The link */
    public static final String VFS_LINK_INFIX = ".vfslink";
 
