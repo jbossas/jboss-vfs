@@ -281,7 +281,7 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             zipSource = createZipSource(filePath);
          }
-         catch (IOException e)
+         catch (Exception e)
          {
             throw new RuntimeException("Failed to initialize ZipWrapper: " + filePath, e);
          }
@@ -322,13 +322,14 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param rootPath the root path
     * @return zip entry wrapper
-    * @throws IOException for any error
+    * @throws Exception for any error
     */
-   protected ZipWrapper createZipSource(String rootPath) throws IOException
+   protected ZipWrapper createZipSource(String rootPath) throws Exception
    {
       File file = null;
       String relative = null;
-      File fp = new File(VFSUtils.decode(rootPath));
+      URI uri = new URI("file:" + rootPath); // we expect a file
+      File fp = new File(uri);
       if (fp.exists())
       {
          file = fp;
@@ -744,8 +745,10 @@ public class ZipEntryContext extends AbstractVFSContext
     *
     * @param localRootUrl local root url
     * @return file path
+    * @throws IOException for any error
+    * @throws URISyntaxException for any URI syntax error
     */
-   private String initRootAndPath(URL localRootUrl)
+   private String initRootAndPath(URL localRootUrl) throws IOException, URISyntaxException
    {
       String filePath = localRootUrl.toString();
       String zipPath = filePath;

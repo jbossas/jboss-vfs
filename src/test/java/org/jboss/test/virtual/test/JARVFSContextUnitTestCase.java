@@ -62,6 +62,12 @@ public class JARVFSContextUnitTestCase extends AbstractVFSContextTest
       return new TestSuite(JARVFSContextUnitTestCase.class);
    }
 
+   protected VFSContext getVFSContext(URL url) throws Exception
+   {
+      url = JarUtils.createJarURL(url);
+      return new JarContext(url);
+   }
+
    protected VFSContext getVFSContext(String name) throws Exception
    {
       URL url = getResource("/vfs/context/jar/" + name + ".jar");

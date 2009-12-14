@@ -24,21 +24,20 @@ package org.jboss.virtual;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -330,36 +329,6 @@ public class VFSUtils
          return name.substring(0, length-1);
 
       return name;
-   }
-
-   /**
-    * Decode the path with UTF-8 encoding..
-    *
-    * @param path the path to decode
-    * @return decoded path
-    */
-   public static String decode(String path)
-   {
-      return decode(path, DEFAULT_ENCODING);
-   }
-
-   /**
-    * Decode the path.
-    *
-    * @param path the path to decode
-    * @param encoding the encodeing
-    * @return decoded path
-    */
-   public static String decode(String path, String encoding)
-   {
-      try
-      {
-         return URLDecoder.decode(path, encoding);
-      }
-      catch (UnsupportedEncodingException e)
-      {
-         throw new IllegalArgumentException("Cannot decode: " + path + " [" + encoding + "]", e);
-      }
    }
 
    /**

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarFile;
 
 import org.jboss.test.virtual.support.MockVirtualFileHandlerVisitor;
 import org.jboss.virtual.VFS;
@@ -51,7 +52,9 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
       super(name);
    }
-   
+
+   protected abstract VFSContext getVFSContext(URL url) throws Exception;
+
    protected abstract VFSContext getVFSContext(String name) throws Exception;
 
    protected abstract VFSContext getParentVFSContext() throws Exception;
@@ -73,6 +76,16 @@ public abstract class AbstractVFSContextTest extends AbstractVFSTest
    {
    }
    */
+
+   public void testPathWithPluses() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/path+with+plusses/jar1.jar");
+      VFSContext context = getVFSContext(rootURL);
+      VFS vfs = context.getVFS();
+      VirtualFile jar = vfs.getRoot();
+      assertNotNull("jar != null", jar);
+      assertNotNull(jar.getChild(JarFile.MANIFEST_NAME));
+   }
 
    public void testRealURL() throws Exception
    {

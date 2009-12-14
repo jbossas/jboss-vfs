@@ -1378,7 +1378,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    /**
     * Validate accessing an packed jar vf and its uri when the vfs path
     * contains spaces
-    * @throws Exception
+    *
+    * @throws Exception for any error
     */
    public void testJarWithSpacesInPath()
       throws Exception
@@ -1442,10 +1443,10 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
    /**
     * Validate accessing an unpacked jar vf and its uri when the vfs path
     * contains spaces
-    * @throws Exception
+    *
+    * @throws Exception for any error
     */
-   public void testUnpackedJarWithSpacesInPath()
-      throws Exception
+   public void testUnpackedJarWithSpacesInPath() throws Exception
    {
       URL rootURL = getResource("/vfs/test");
       VFS vfs = VFS.getVFS(rootURL);
@@ -1454,6 +1455,19 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       URI uri = tstjar.toURI();
       URI expectedURI = new URI("vfs" + rootURL.toString()+"/path%20with%20spaces/unpacked-tst.jar/");
       assertEquals(uri, expectedURI);
+   }
+
+   public void testPathWithPluses() throws Exception
+   {
+      URL rootURL = getResource("/vfs/test/path+with+plusses/jar1.jar");
+      VFS vfs = VFS.getVFS(rootURL);
+      VirtualFile jar = vfs.getRoot();
+      assertNotNull("jar != null", jar);
+
+      rootURL = getResource("/vfs/test");
+      vfs = VFS.getVFS(rootURL);
+      jar = vfs.getChild("path+with+plusses/jar1.jar");
+      assertNotNull("jar != null", jar);
    }
 
    /**
