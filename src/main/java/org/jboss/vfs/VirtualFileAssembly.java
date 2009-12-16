@@ -26,11 +26,13 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -103,6 +105,26 @@ public class VirtualFileAssembly implements Closeable {
    public VirtualFile getFile(VirtualFile mountPoint, VirtualFile target) {
       Path path = new Path(VFSUtils.getRelativePath(mountPoint, target));
       return rootNode.getFile(path, mountPoint);
+   }
+   
+   /**
+    * Returns a list of all the names of the children in the assembly.  
+    * @return
+    */
+   public Set<String> getChildNames(VirtualFile mountPoint, VirtualFile target) {
+      if(mountPoint.equals(target)) {
+         return rootNode.children.keySet();
+      }
+      AssemblyNode node = rootNode.find(new Path(VFSUtils.getRelativePath(mountPoint, target)));
+      if(node != null) {
+         return node.children.keySet();
+      }
+      return Collections.emptySet();
+   }
+   
+   public boolean contains(VirtualFile mountPoint, VirtualFile target) {
+      Path path = new Path(VFSUtils.getRelativePath(mountPoint, target));
+      return rootNode.find(path) != null;
    }
 
    /**

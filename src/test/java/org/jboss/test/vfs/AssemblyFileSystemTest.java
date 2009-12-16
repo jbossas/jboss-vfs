@@ -1,5 +1,7 @@
 package org.jboss.test.vfs;
 
+import static org.junit.Assert.*;
+
 import java.io.Closeable;
 import java.io.File;
 import java.net.URL;
@@ -112,6 +114,57 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
       finally {
          VFSUtils.safeClose(assemblyHandle);
       }
+   }
+   
+   @Test
+   public void testFileExistence() throws Exception {
+      VirtualFileAssembly assembly = new VirtualFileAssembly();
+      VirtualFile assemblyLocation = VFS.getChild("/assembly");
+      Closeable assemblyHandle = VFS.mountAssembly(assembly, assemblyLocation);
+      try {
+         assertTrue(assemblyLocation.exists());
+         
+         assertFalse(assemblyLocation.getChild("lib").exists());
+         
+         URL jarURL = getResource("/vfs/test/jar1.jar");
+         VirtualFile jarFile = VFS.getChild(jarURL);
+         assembly.add("lib/jar.jar", jarFile);
+         
+         assertTrue(assemblyLocation.getChild("lib").exists());
+         
+         assertTrue(assemblyLocation.getChild("lib/jar.jar").exists());
+         
+         VirtualFile bogusFile = VFS.getChild("/bogus.jar");
+         
+         assembly.add(bogusFile);
+         
+         assertFalse(assemblyLocation.getChild("bogus.jar").exists());
+      }
+      finally {
+         VFSUtils.safeClose(assemblyHandle);
+      }
+   }
+   
+   @Test
+   public void testIsDirectory() throws Exception
+   {
+      VirtualFileAssembly assembly = new VirtualFileAssembly();
+      VirtualFile assemblyLocation = VFS.getChild("/assembly");
+      Closeable assemblyHandle = VFS.mountAssembly(assembly, assemblyLocation);
+      try {
+         assertTrue(assemblyLocation.isDirectory());
+         
+         URL jarURL = getResource("/vfs/test/jar1.jar");
+         VirtualFile jarFile = VFS.getChild(jarURL);
+         assembly.add("lib/jar.jar", jarFile);
+         
+         assertTrue(assemblyLocation.getChild("lib").isDirectory());
+         
+         assertFalse(assemblyLocation.getChild("lib/jar.jar").isDirectory());
+      }
+      finally {
+         VFSUtils.safeClose(assemblyHandle);
+      }      
    }
 
    @Test

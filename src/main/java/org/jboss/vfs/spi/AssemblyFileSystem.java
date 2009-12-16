@@ -26,10 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.security.CodeSigner;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileAssembly;
 import org.jboss.logging.Logger;
@@ -63,8 +65,15 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public boolean exists(VirtualFile mountPoint, VirtualFile target) {
+        if(mountPoint.equals(target)) 
+        {
+           return true;
+        }
         VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        return assemblyFile != null && assemblyFile.exists();
+        if(assemblyFile != null) {
+           return assemblyFile.exists();
+        }
+        return assembly.contains(mountPoint, target);
     }
 
     /** {@inheritDoc} */
@@ -77,7 +86,7 @@ public class AssemblyFileSystem implements FileSystem {
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {
-            return Collections.<String>emptyList();
+           return new ArrayList<String>(assembly.getChildNames(mountPoint, target));
         }
         List<String> directoryEntries = new LinkedList<String>();
         for (VirtualFile child : assemblyFile.getChildren()) {
@@ -100,8 +109,12 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
+        if(mountPoint.equals(target))
+           return true;
         VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        return assemblyFile != null && assemblyFile.isDirectory();
+        if(assemblyFile != null)
+           return assemblyFile.isDirectory();
+        return assembly.contains(mountPoint, target);
     }
 
     /** {@inheritDoc} */
