@@ -49,7 +49,7 @@ public class VirtualFileAssembly implements Closeable {
 
    private static final Random RANDOM_NUM_GEN = new SecureRandom();
 
-   private final AssemblyNode rootNode = new AssemblyNode();
+   private final AssemblyNode rootNode = new AssemblyNode("");
 
    private final List<Closeable> mountHandles = new CopyOnWriteArrayList<Closeable>();
 
@@ -111,15 +111,20 @@ public class VirtualFileAssembly implements Closeable {
     * Returns a list of all the names of the children in the assembly.  
     * @return
     */
-   public Set<String> getChildNames(VirtualFile mountPoint, VirtualFile target) {
+   public List<String> getChildNames(VirtualFile mountPoint, VirtualFile target) {
+      List<String> names = new LinkedList<String>();
+      AssemblyNode targetNode = null;
       if(mountPoint.equals(target)) {
-         return rootNode.children.keySet();
+         targetNode = rootNode;
+      } else {
+         targetNode = rootNode.find(new Path(VFSUtils.getRelativePath(mountPoint, target)));
       }
-      AssemblyNode node = rootNode.find(new Path(VFSUtils.getRelativePath(mountPoint, target)));
-      if(node != null) {
-         return node.children.keySet();
+      if(targetNode != null) {
+         for(AssemblyNode childNode : targetNode.children.values()) {
+            names.add(childNode.realName);
+         }
       }
-      return Collections.emptySet();
+      return names;
    }
    
    public boolean contains(VirtualFile mountPoint, VirtualFile target) {
@@ -180,10 +185,13 @@ public class VirtualFileAssembly implements Closeable {
     */
    private static class AssemblyNode {
       private final Map<String, AssemblyNode> children = new ConcurrentHashMap<String, AssemblyNode>();
+      
+      private final String realName;
 
       private VirtualFile target;
 
-      public AssemblyNode() {
+      public AssemblyNode(String realName) {
+         this.realName = realName;
       }
 
       /**
@@ -223,7 +231,7 @@ public class VirtualFileAssembly implements Closeable {
             if (!createIfMissing) {
                return null;
             }
-            childNode = new AssemblyNode();
+            childNode = new AssemblyNode(current);
             addChild(current, childNode);
          }
          return childNode.find(path, createIfMissing);

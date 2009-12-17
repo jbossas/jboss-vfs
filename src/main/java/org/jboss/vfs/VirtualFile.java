@@ -305,6 +305,10 @@ public final class VirtualFile implements Serializable {
             virtualFiles.add(child);
             submounts.remove(name);
         }
+        for (String name : submounts) {
+           final VirtualFile child = new VirtualFile(name, this);
+           virtualFiles.add(child);
+        }
         return virtualFiles;
     }
 
