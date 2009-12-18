@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.deployers.vfs.plugins.structure;
+package org.jboss.vfs.util;
 
 import java.io.Closeable;
 import java.io.IOException;

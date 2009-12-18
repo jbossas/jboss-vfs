@@ -19,11 +19,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.deployers.vfs.structure;
+package org.jboss.test.vfs;
 
 import java.net.URL;
 
-import org.jboss.deployers.vfs.plugins.structure.Automounter;
+import org.jboss.vfs.util.Automounter;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
@@ -43,7 +43,7 @@ public class AutomounterTest extends BaseTestCase
 
    public void testMountAndCleanup() throws Exception
    {
-      VirtualFile virtualFile = getVirtualFile("/structure/ear/archive.ear");
+      VirtualFile virtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(virtualFile, virtualFile);
       assertTrue(Automounter.isMounted(virtualFile));
       Automounter.cleanup(virtualFile);
@@ -52,7 +52,7 @@ public class AutomounterTest extends BaseTestCase
 
    public void testCleanupWithOwner() throws Exception
    {
-      VirtualFile earVirtualFile = getVirtualFile("/structure/ear/simple/simple.ear");
+      VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(earVirtualFile);
 
       VirtualFile jarVirtualFile = earVirtualFile.getChild("archive.jar");
@@ -74,7 +74,7 @@ public class AutomounterTest extends BaseTestCase
 
    public void testCleanupRecursive() throws Exception
    {
-      VirtualFile earVirtualFile = getVirtualFile("/structure/ear/simple/simple.ear");
+      VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(earVirtualFile);
 
       VirtualFile jarVirtualFile = earVirtualFile.getChild("archive.jar");
@@ -96,20 +96,20 @@ public class AutomounterTest extends BaseTestCase
 
    public void testCleanupRefereces() throws Exception
    {
-      VirtualFile earVirtualFile = getVirtualFile("/structure/ear/simple/simple.ear");
+      VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(earVirtualFile);
 
-      VirtualFile jarVirtualFile = getVirtualFile("/structure/jar/indirectory/archive.jar");
+      VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
       Automounter.mount(earVirtualFile, jarVirtualFile);
 
-      VirtualFile warVirtualFile = getVirtualFile("/structure/war/simple/simple.war");
+      VirtualFile warVirtualFile = getVirtualFile("/vfs/test/filesonly.war");
       Automounter.mount(earVirtualFile, warVirtualFile);
 
       assertTrue(Automounter.isMounted(earVirtualFile));
       assertTrue(Automounter.isMounted(warVirtualFile));
       assertTrue(Automounter.isMounted(jarVirtualFile));
 
-      VirtualFile otherEarVirtualFile = getVirtualFile("/structure/ear/scanning.ear");
+      VirtualFile otherEarVirtualFile = getVirtualFile("/vfs/test/spring-ear.ear");
       Automounter.mount(otherEarVirtualFile, jarVirtualFile);
 
       Automounter.cleanup(earVirtualFile);
