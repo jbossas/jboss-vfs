@@ -91,6 +91,12 @@
            <tagBase>https://svn.jboss.org/repos/jbossas/projects/vfs/tags</tagBase>
          </configuration>
        </plugin>
+      <plugin>
+        <artifactId>maven-idea-plugin</artifactId>
+        <configuration>
+          <downloadSources>true</downloadSources>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

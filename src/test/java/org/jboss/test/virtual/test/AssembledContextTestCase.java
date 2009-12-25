@@ -21,7 +21,6 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -30,6 +29,7 @@ import junit.framework.Test;
 
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VFS;
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VirtualFileFilter;
 import org.jboss.virtual.plugins.context.vfs.AssembledContextFactory;
@@ -343,17 +343,15 @@ public class AssembledContextTestCase extends AbstractVFSTest
       assertEquals(10, children.size());
    }
 
-/*
    public void testDirectory() throws Exception
    {
-      URL url = getResource("/vfs/test");
-      InputStream is = url.openStream(); //new FileInputStream(new File(url.toURI()));
-      int read;
-      while((read = is.read()) >= 0)
-      {
-         System.out.print((char)(read));         
-      }
-      is.close();
+      AssembledDirectory sar = AssembledContextFactory.getInstance().create("foo.sar");
+      URL url = getResource("/vfs/test/jar1.jar");
+      VirtualFile jar1 = VFS.getRoot(url);
+      sar.addChild(jar1);
+
+      VirtualFile temp = VFSUtils.temp(sar);
+      assertNotNull(temp);
+      temp.delete();
    }
-*/
 }
