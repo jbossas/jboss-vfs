@@ -21,11 +21,13 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
+
 import org.jboss.virtual.AssembledDirectory;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
@@ -340,4 +342,18 @@ public class AssembledContextTestCase extends AbstractVFSTest
       assertNotNull(children);
       assertEquals(10, children.size());
    }
+
+/*
+   public void testDirectory() throws Exception
+   {
+      URL url = getResource("/vfs/test");
+      InputStream is = url.openStream(); //new FileInputStream(new File(url.toURI()));
+      int read;
+      while((read = is.read()) >= 0)
+      {
+         System.out.print((char)(read));         
+      }
+      is.close();
+   }
+*/
 }
