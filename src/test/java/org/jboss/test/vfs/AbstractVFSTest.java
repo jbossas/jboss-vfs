@@ -21,8 +21,12 @@
 */
 package org.jboss.test.vfs;
 
+import static org.junit.Assert.assertArrayEquals;
+
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +36,9 @@ import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
+import org.junit.internal.ArrayComparisonFailure;
 
 /**
  * AbstractVFSTest.
@@ -61,12 +67,18 @@ public abstract class AbstractVFSTest extends BaseTestCase
       provider.close();
    }
 
-   // TODO move to AbstractTestCase
    public URL getResource(String name)
    {
       URL url = super.getResource(name);
       assertNotNull("Resource not found: " + name, url);
       return url;
+   }
+   
+   public VirtualFile getVirtualFile(String name)
+   {
+      VirtualFile virtualFile = VFS.getChild(getResource(name).getPath()); 
+      assertTrue("VirtualFile does not exist: " + name, virtualFile.exists());
+      return virtualFile;
    }
 
    public List<Closeable> recursiveMount(VirtualFile file) throws IOException
@@ -101,5 +113,16 @@ public abstract class AbstractVFSTest extends BaseTestCase
       {
          getLog().debug("Got expected " + expected.getName() + "(" + throwable + ")");
       }
+   }
+   
+   protected void assertContentEqual(VirtualFile expected, VirtualFile actual) throws ArrayComparisonFailure, IOException {
+      assertArrayEquals("Expected content must mach actual conent", getContent(expected), getContent(actual));
+   }
+
+   protected byte[] getContent(VirtualFile virtualFile) throws IOException {
+      InputStream is = virtualFile.openStream();
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      VFSUtils.copyStreamAndClose(is, bos);
+      return bos.toByteArray();
    }
 }

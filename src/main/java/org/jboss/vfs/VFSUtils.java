@@ -21,6 +21,7 @@
 */
 package org.jboss.vfs;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -52,6 +54,7 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.collection.CollectionsFactory;
 import org.jboss.vfs.util.PathTokenizer;
+
 
 /**
  * VFS Utilities
@@ -340,6 +343,29 @@ public class VFSUtils {
     public static URL sanitizeURL(URL url) throws URISyntaxException, MalformedURLException {
         return toURI(url).toURL();
     }
+    
+    public static void copyChildrenRecursive(VirtualFile original, VirtualFile target) throws IOException {
+       if(original == null) throw new IllegalArgumentException("Original VirtualFile must not be null");
+       if(target == null) throw new IllegalArgumentException("Target VirtualFile must not be null");
+
+       List<VirtualFile> children = original.getChildren();
+       for(VirtualFile child : children) {
+          VirtualFile targetChild = target.getChild(child.getName());
+          File childFile = child.getPhysicalFile();
+          if(childFile.isDirectory()) {
+             if(!targetChild.getPhysicalFile().mkdir()) {
+                throw new IllegalArgumentException("Problems creating new directory: " + targetChild);
+             }
+             copyChildrenRecursive(child, targetChild);
+          } else {
+             FileInputStream is = new FileInputStream(childFile);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             copyStreamAndClose(is, bos);            
+             writeFile(targetChild, bos.toByteArray());
+          }
+       }
+    }
+    
 
     /**
      * Copy input stream to output stream and close them both
@@ -500,6 +526,15 @@ public class VFSUtils {
         catch (Exception e) {
             log.trace("Failed to close resource", e);
         }
+    }
+    
+    /**
+     * Safely close some resource without throwing an exception.  Any exception will be logged at TRACE level.
+     *
+     * @param closeables the resources
+     */
+    public static void safeClose(final Closeable... closeables) {
+       safeClose(Arrays.asList(closeables));
     }
 
     /**

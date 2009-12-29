@@ -1,7 +1,5 @@
 package org.jboss.test.vfs;
 
-import static org.junit.Assert.*;
-
 import java.io.Closeable;
 import java.io.File;
 import java.net.URL;
@@ -32,8 +30,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
       Closeable warAssemblyHandle = VFS.mountAssembly(warAssembly, warAssemblyLocation);
 
       try {
-         URL rootURL = getResource("/vfs/test");
-         VirtualFile testDir = VFS.getChild(rootURL.getPath());
+         VirtualFile testDir = getVirtualFile("/vfs/test");
 
          earAssembly.add("assembly.war", warAssemblyLocation);
 
@@ -126,8 +123,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
          
          assertFalse(assemblyLocation.getChild("lib").exists());
          
-         URL jarURL = getResource("/vfs/test/jar1.jar");
-         VirtualFile jarFile = VFS.getChild(jarURL);
+         VirtualFile jarFile = getVirtualFile("/vfs/test/jar1.jar");
          assembly.add("lib/jar.jar", jarFile);
          
          assertTrue(assemblyLocation.getChild("lib").exists());
@@ -154,8 +150,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
       try {
          assertTrue(assemblyLocation.isDirectory());
          
-         URL jarURL = getResource("/vfs/test/jar1.jar");
-         VirtualFile jarFile = VFS.getChild(jarURL);
+         VirtualFile jarFile = getVirtualFile("/vfs/test/jar1.jar");
          assembly.add("lib/jar.jar", jarFile);
          
          assertTrue(assemblyLocation.getChild("lib").isDirectory());

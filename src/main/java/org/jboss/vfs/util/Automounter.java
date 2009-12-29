@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 
+import org.jboss.util.id.GUID;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
@@ -51,6 +52,9 @@ public class Automounter
    /* Root entry in the tree. */
    private static final RegistryEntry rootEntry = new RegistryEntry();
 
+   /* VirutalFile used as a base mount for 'hidden' original copies of mounted files */
+   private static final VirtualFile originalsRoot = VFS.getChild("/vfs/backups");
+   
    /* Possible mount types */
    private static enum MountType {
       ZIP, EXPANDED
@@ -87,7 +91,7 @@ public class Automounter
       RegistryEntry ownerEntry = getEntry(owner);
       targetEntry.mount(ownerEntry, target, MountType.ZIP);
    }
-   
+
    /**
     * Mount provided {@link VirtualFile} (if not mounted) as an expanded Zip mount and add an owner entry.  
     * Also creates a back-reference to from the owner to the target. (Self owned mount)
@@ -137,7 +141,45 @@ public class Automounter
    {
       return getEntry(target).isMounted();
    }
-
+   
+   /**
+    * Create a backup of the provided root.  Only one backup is allowed for a location.   
+    * 
+    * @param original the original VirtualFile to backup
+    * @return a reference to the backup location
+    * @throws IOException if any problems occur during the backup process
+    */
+   public static VirtualFile backup(VirtualFile original) throws IOException
+   {
+      RegistryEntry entry = getEntry(original); 
+      entry.backup(original);
+      return entry.backup.file;
+   }
+   
+   /**
+    * Get the backup for the provided target
+    * 
+    * @param target the location to get the backup for
+    * @return the backup
+    */
+   public static VirtualFile getBackup(VirtualFile target) 
+   {
+      Backup backup = getEntry(target).backup;
+      return backup != null ? backup.file : null;
+   }
+   
+   /**
+    * Check to see if a backup exists for the provided location.
+    * 
+    * @param target the location to check for a backup.
+    * @return true if the backup exists.
+    */
+   public static boolean hasBackup(VirtualFile target) 
+   {
+      return getEntry(target).backup != null;
+   }
+   
+   
    /**
     * Get the entry from the tree creating the entry if not present.
     * 
@@ -157,7 +199,7 @@ public class Automounter
    {
       return TempFileProvider.create(name, Executors.newSingleThreadScheduledExecutor());
    }
-
+   
    static class RegistryEntry
    {
       private final ConcurrentMap<String, RegistryEntry> children = new ConcurrentHashMap<String, RegistryEntry>();
@@ -167,6 +209,8 @@ public class Automounter
       private final Set<RegistryEntry> outboundReferences = new HashSet<RegistryEntry>();
 
       private Closeable handle;
+      
+      private Backup backup;
 
       Collection<RegistryEntry> getChildren()
       {
@@ -175,12 +219,16 @@ public class Automounter
 
       void mount(RegistryEntry owner, VirtualFile target, MountType mountType) throws IOException
       {
-         if (!isMounted() && target.isFile())
+         if (!isMounted())
          {
-            if (MountType.ZIP.equals(mountType))
-               handle = VFS.mountZip(target, target, getTempFileProvider(target.getName()));
-            else
-               handle = VFS.mountZipExpanded(target, target, getTempFileProvider(target.getName()));
+            if(target.isFile())
+            {
+               backup(target);
+               if (MountType.ZIP.equals(mountType))
+                  handle = VFS.mountZip(target, target, getTempFileProvider(target.getName()));
+               else
+                  handle = VFS.mountZipExpanded(target, target, getTempFileProvider(target.getName()));
+            }
          }
          if (owner.equals(this) == false)
          {
@@ -202,6 +250,10 @@ public class Automounter
       {
          VFSUtils.safeClose(handle);
          handle = null;
+         if(backup != null) {
+            VFSUtils.safeClose(backup.handle);
+            backup = null;
+         }
 
          Collection<RegistryEntry> entries = getEntriesRecursive();
          for (RegistryEntry entry : entries)
@@ -250,8 +302,23 @@ public class Automounter
             collectEntries(childEntry, entries);
             entries.add(childEntry);
          }
-
       }
+      
+      void backup(VirtualFile target) throws IOException
+      {
+         VirtualFile backupFile = originalsRoot.getChild(GUID.asString() + target.getName());
+         backup  = new Backup(backupFile, VFS.mountReal(target.getPhysicalFile(), backupFile));
+      }
+   }
+   
+   static class Backup {
+      private final VirtualFile file;
+      private final Closeable handle;
 
+      public Backup(VirtualFile backupFile, Closeable handle)
+      {
+         this.file = backupFile;
+         this.handle = handle;
+      }
    }
 }

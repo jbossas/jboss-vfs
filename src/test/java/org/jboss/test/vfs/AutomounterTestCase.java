@@ -21,26 +21,22 @@
  */
 package org.jboss.test.vfs;
 
-import java.net.URL;
-
-import org.jboss.vfs.util.Automounter;
-import org.jboss.test.BaseTestCase;
-import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.util.Automounter;
 
 /**
  * Test for {@link Automounter}
  * 
  * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-public class AutomounterTest extends BaseTestCase
+public class AutomounterTestCase extends AbstractVFSTest
 {
 
-   public AutomounterTest(String name)
+   public AutomounterTestCase(String name)
    {
       super(name);
    }
-
+   
    public void testMountAndCleanup() throws Exception
    {
       VirtualFile virtualFile = getVirtualFile("/vfs/test/simple.ear");
@@ -120,14 +116,8 @@ public class AutomounterTest extends BaseTestCase
 
       Automounter.cleanup(otherEarVirtualFile);
       assertFalse(Automounter.isMounted(jarVirtualFile));
-
    }
-
-   protected VirtualFile getVirtualFile(String path) throws Exception
-   {
-      URL url = getResource(path);
-      VirtualFile rootFile = VFS.getChild(url);
-      return rootFile;
-   }
+   
+   
 
 }

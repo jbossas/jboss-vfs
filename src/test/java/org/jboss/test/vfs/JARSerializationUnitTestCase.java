@@ -63,8 +63,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
     */
    public void testInnerJarFile() throws Exception
    {
-      URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar = VFS.getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar  = getVirtualFile("/vfs/test/outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -100,8 +99,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void testInnerJarFileSerialization() throws Exception
    {
-      URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar = VFS.getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar  = getVirtualFile("/vfs/test/outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -139,8 +137,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void testInnerJarFilesOnlyFileSerialization() throws Exception
    {
-      URL rootURL = getResource("/vfs/test");
-      VirtualFile outerjar =VFS.getChild(rootURL).getChild("outer.jar");
+      VirtualFile outerjar  = getVirtualFile("/vfs/test/outer.jar");
       List<Closeable> mounts = recursiveMount(outerjar);
       try
       {
@@ -235,8 +232,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void test2ndLevelRead() throws Exception
    {
-      URL rootURL = getResource("/vfs/test/level1.zip");
-      VirtualFile root = VFS.getChild(rootURL);
+      VirtualFile root = getVirtualFile("/vfs/test/level1.zip");
       List<Closeable> mounts = recursiveMount(root);
       try
       {
@@ -253,8 +249,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void testEarsInnerJarChild() throws Exception
    {
-      URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
-      VirtualFile root = VFS.getChild(rootURL);
+      VirtualFile root = getVirtualFile("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
       List<Closeable> mounts = recursiveMount(root);
       try
       {
@@ -278,8 +273,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void testVirtualFileAdaptor() throws Exception
    {
-      URL rootURL = getResource("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
-      VirtualFile root = VFS.getChild(rootURL);
+      VirtualFile root = getVirtualFile("/vfs/test/interop_W2JREMarshallTest_appclient_vehicle.ear");
       VirtualFile file = root.getChild("interop_W2JREMarshallTest_appclient_vehicle_client.jar");
       VirtualFile same = file.getChild("");
       // serialize
@@ -288,8 +282,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
 
    public void testDeepVFAMechanism() throws Exception
    {
-      URL rootURL = getResource("/vfs/test");
-      VirtualFile root = VFS.getChild(rootURL);
+      VirtualFile root = getVirtualFile("/vfs/test");
       VirtualFile one = root.getChild("level1.zip");
       testVirtualFileAdaptor(one, "test1.txt");
       VirtualFile textOne = one.getChild("test1.txt");
