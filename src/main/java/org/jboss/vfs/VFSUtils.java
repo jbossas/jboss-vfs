@@ -344,6 +344,13 @@ public class VFSUtils {
         return toURI(url).toURL();
     }
     
+    /**
+     * Copy all the children from the original {@link VirtualFile} the target recursivly.  
+     *  
+     * @param original the file to copy children from
+     * @param target the file to copy the children to
+     * @throws IOException if any problems occur copying the files
+     */
     public static void copyChildrenRecursive(VirtualFile original, VirtualFile target) throws IOException {
        if(original == null) throw new IllegalArgumentException("Original VirtualFile must not be null");
        if(target == null) throw new IllegalArgumentException("Target VirtualFile must not be null");
@@ -359,9 +366,7 @@ public class VFSUtils {
              copyChildrenRecursive(child, targetChild);
           } else {
              FileInputStream is = new FileInputStream(childFile);
-             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             copyStreamAndClose(is, bos);            
-             writeFile(targetChild, bos.toByteArray());
+             writeFile(targetChild, is);
           }
        }
     }
@@ -455,6 +460,22 @@ public class VFSUtils {
         } finally {
             safeClose(fos);
         }
+    }
+    
+    /**
+     * Write the content from the given {@link InputStream} to the given virtual file, replacing its current contents (if any) or creating a new file if
+     * one does not exist.
+     *
+     * @param virtualFile the virtual file to write
+     * @param bytes the bytes
+     *
+     * @throws IOException if an error occurs
+     */
+    public static void writeFile(VirtualFile virtualFile, InputStream is) throws IOException {
+       final File file = virtualFile.getPhysicalFile();
+       file.getParentFile().mkdirs();
+       final FileOutputStream fos = new FileOutputStream(file);
+       copyStreamAndClose(is, fos);
     }
 
     /**
