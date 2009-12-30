@@ -22,9 +22,11 @@
 package org.jboss.vfs.util;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.util.id.GUID;
 import org.jboss.vfs.TempFileProvider;
@@ -53,7 +56,10 @@ public class Automounter
    private static final RegistryEntry rootEntry = new RegistryEntry();
 
    /* VirutalFile used as a base mount for 'hidden' original copies of mounted files */
-   private static final VirtualFile originalsRoot = VFS.getChild("/vfs/backups");
+   private static final VirtualFile originalsRoot = VFS.getChild("/.vfs/backups");
+   
+   /* VirutalFile used as a base for all temporary filesytems created */
+   private static final VirtualFile tempRoot = VFS.getChild("/.vfs/tmp");
    
    /* Possible mount types */
    private static enum MountType {
@@ -153,7 +159,7 @@ public class Automounter
    {
       RegistryEntry entry = getEntry(original); 
       entry.backup(original);
-      return entry.backup.file;
+      return entry.backupFile;
    }
    
    /**
@@ -164,8 +170,8 @@ public class Automounter
     */
    public static VirtualFile getBackup(VirtualFile target) 
    {
-      Backup backup = getEntry(target).backup;
-      return backup != null ? backup.file : null;
+      RegistryEntry entry = getEntry(target);
+      return entry.backupFile != null ? entry.backupFile : null;
    }
    
    /**
@@ -176,7 +182,7 @@ public class Automounter
     */
    public static boolean hasBackup(VirtualFile target) 
    {
-      return getEntry(target).backup != null;
+      return getEntry(target).backupFile != null;
    }
    
    
@@ -200,7 +206,7 @@ public class Automounter
       return TempFileProvider.create(name, Executors.newSingleThreadScheduledExecutor());
    }
    
-   static class RegistryEntry
+   private static class RegistryEntry
    {
       private final ConcurrentMap<String, RegistryEntry> children = new ConcurrentHashMap<String, RegistryEntry>();
 
@@ -208,26 +214,28 @@ public class Automounter
 
       private final Set<RegistryEntry> outboundReferences = new HashSet<RegistryEntry>();
 
-      private Closeable handle;
+      private final List<Closeable> handles = new LinkedList<Closeable>();
       
-      private Backup backup;
-
-      Collection<RegistryEntry> getChildren()
+      private final AtomicBoolean mounted = new AtomicBoolean();
+      
+      private VirtualFile backupFile;
+      
+      private void mount(RegistryEntry owner, VirtualFile target, MountType mountType) throws IOException
       {
-         return Collections.unmodifiableCollection(children.values());
-      }
-
-      void mount(RegistryEntry owner, VirtualFile target, MountType mountType) throws IOException
-      {
-         if (!isMounted())
+         if (mounted.compareAndSet(false, true))
          {
             if(target.isFile())
             {
+               final TempFileProvider provider = getTempFileProvider(target.getName());
+               // Make sure we can get to the original
                backup(target);
+               // Copy archive to temporary location to avoid file locking issues
+               File copy = copyArchiveFile(target, provider);
+               
                if (MountType.ZIP.equals(mountType))
-                  handle = VFS.mountZip(target, target, getTempFileProvider(target.getName()));
+                  handles.add(VFS.mountZip(copy, target, provider));
                else
-                  handle = VFS.mountZipExpanded(target, target, getTempFileProvider(target.getName()));
+                  handles.add(VFS.mountZipExpanded(copy, target, provider));
             }
          }
          if (owner.equals(this) == false)
@@ -237,7 +245,18 @@ public class Automounter
          }
       }
 
-      void removeInboundReference(RegistryEntry owner)
+      
+      private File copyArchiveFile(VirtualFile target, final TempFileProvider provider) throws IOException,
+            FileNotFoundException
+      {
+         VirtualFile tempLocation = tempRoot.getChild(GUID.asString());
+         handles.add(VFS.mountTemp(tempLocation, provider));
+         File copy = tempLocation.getChild(target.getName()).getPhysicalFile();
+         VFSUtils.copyStreamAndClose(target.openStream(), new FileOutputStream(copy));
+         return copy;
+      }
+
+      private void removeInboundReference(RegistryEntry owner)
       {
          inboundReferences.remove(owner);
          if (inboundReferences.isEmpty())
@@ -246,14 +265,10 @@ public class Automounter
          }
       }
 
-      void cleanup()
+      private void cleanup()
       {
-         VFSUtils.safeClose(handle);
-         handle = null;
-         if(backup != null) {
-            VFSUtils.safeClose(backup.handle);
-            backup = null;
-         }
+         VFSUtils.safeClose(handles);
+         handles.clear();
 
          Collection<RegistryEntry> entries = getEntriesRecursive();
          for (RegistryEntry entry : entries)
@@ -264,19 +279,20 @@ public class Automounter
          {
             entry.removeInboundReference(this);
          }
+         mounted.set(false);
       }
 
-      boolean isMounted()
+      private boolean isMounted()
       {
-         return handle != null;
+         return !handles.isEmpty();
       }
 
-      RegistryEntry find(VirtualFile file)
+      private RegistryEntry find(VirtualFile file)
       {
          return find(PathTokenizer.getTokens(file.getPathName()));
       }
 
-      RegistryEntry find(List<String> path)
+      private RegistryEntry find(List<String> path)
       {
          if (path.isEmpty())
          {
@@ -288,37 +304,26 @@ public class Automounter
          return childEntry.find(path);
       }
 
-      Collection<RegistryEntry> getEntriesRecursive()
+      private Collection<RegistryEntry> getEntriesRecursive()
       {
          List<RegistryEntry> allHandles = new LinkedList<RegistryEntry>();
          collectEntries(this, allHandles);
          return allHandles;
       }
 
-      void collectEntries(RegistryEntry registryEntry, List<RegistryEntry> entries)
+      private void collectEntries(RegistryEntry registryEntry, List<RegistryEntry> entries)
       {
-         for (RegistryEntry childEntry : registryEntry.getChildren())
+         for (RegistryEntry childEntry : registryEntry.children.values())
          {
             collectEntries(childEntry, entries);
             entries.add(childEntry);
          }
       }
       
-      void backup(VirtualFile target) throws IOException
+      private void backup(VirtualFile target) throws IOException
       {
-         VirtualFile backupFile = originalsRoot.getChild(GUID.asString() + target.getName());
-         backup  = new Backup(backupFile, VFS.mountReal(target.getPhysicalFile(), backupFile));
-      }
-   }
-   
-   static class Backup {
-      private final VirtualFile file;
-      private final Closeable handle;
-
-      public Backup(VirtualFile backupFile, Closeable handle)
-      {
-         this.file = backupFile;
-         this.handle = handle;
+         backupFile = originalsRoot.getChild(GUID.asString() + target.getName());
+         handles.add(VFS.mountReal(target.getPhysicalFile(), backupFile));
       }
    }
 }
