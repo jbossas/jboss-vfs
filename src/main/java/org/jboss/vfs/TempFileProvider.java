@@ -99,7 +99,7 @@ public final class TempFileProvider implements Closeable {
         throw eo;
     }
 
-    private static final Random rng = new SecureRandom();
+    private static final Random rng = new Random();
 
     private static File createTempDir(String prefix, String suffix, File root) throws IOException {
         for (int i = 0; i < RETRIES; i++) {
