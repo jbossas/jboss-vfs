@@ -19,12 +19,9 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.vfs.util;
+package org.jboss.vfs.util.automount;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,18 +51,13 @@ public class Automounter
 {
    /* Root entry in the tree. */
    private static final RegistryEntry rootEntry = new RegistryEntry();
+   
+   /* Map of owners and their references */
+   private static final ConcurrentMap<MountOwner, Set<RegistryEntry>> ownerReferences = new ConcurrentHashMap<MountOwner, Set<RegistryEntry>>();
 
    /* VirutalFile used as a base mount for 'hidden' original copies of mounted files */
    private static final VirtualFile originalsRoot = VFS.getChild("/.vfs/backups");
    
-   /* VirutalFile used as a base for all temporary filesytems created */
-   private static final VirtualFile tempRoot = VFS.getChild("/.vfs/tmp");
-   
-   /* Possible mount types */
-   private static enum MountType {
-      ZIP, EXPANDED
-   };
-
    /**
     * Private constructor
     */
@@ -81,60 +73,41 @@ public class Automounter
     */
    public static void mount(VirtualFile target) throws IOException
    {
-      mount(target, target);
+      mount(new VirtualFileOwner(target), target);
    }
 
    /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
     * 
-    * @param owner Virtual file that owns the reference to the mount
+    * @param owner MountOwner that owns the reference to the mount
     * @param target VirtualFile to mount
     * @throws IOException when the target can not be mounted
     */
-   public static void mount(VirtualFile owner, VirtualFile target) throws IOException
+   public static void mount(MountOwner owner, VirtualFile target) throws IOException
    {
       RegistryEntry targetEntry = getEntry(target);
-      RegistryEntry ownerEntry = getEntry(owner);
-      targetEntry.mount(ownerEntry, target, MountType.ZIP);
+      targetEntry.mount(target);
+      targetEntry.inboundReferences.add(owner);
+      ownerReferences.putIfAbsent(owner, new HashSet<RegistryEntry>());
+      ownerReferences.get(owner).add(targetEntry);
    }
 
    /**
-    * Mount provided {@link VirtualFile} (if not mounted) as an expanded Zip mount and add an owner entry.  
-    * Also creates a back-reference to from the owner to the target. (Self owned mount)
+    * Cleanup all references from the {@link MountOwner}.  Cleanup any mounted entries that become un-referenced in the process.
     * 
-    * @param owner Virtual file that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted 
+    * @param owner {@link MountOwner} to cleanup references for
     */
-   public static void mountExpanded(VirtualFile target) throws IOException
+   public static void cleanup(MountOwner owner)
    {
-      mountExpanded(target, target);
-   }
-
-   /**
-    * Mount provided {@link VirtualFile} (if not mounted) as an expanded Zip mount and add an owner entry.  
-    * Also creates a back-reference to from the owner to the target.
-    * 
-    * @param owner Virtual file that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted 
-    */
-   public static void mountExpanded(VirtualFile owner, VirtualFile target) throws IOException
-   {
-      RegistryEntry targetEntry = getEntry(target);
-      RegistryEntry ownerEntry = getEntry(owner);
-      targetEntry.mount(ownerEntry, target, MountType.EXPANDED);
-   }
-
-   /**
-    * Recursively cleanup all mounted handles starting at the provided {@link VirtualFile} location
-    * and remove all references to other mounts.
-    * 
-    * @param owner VirtualFile to cleanup
-    */
-   public static void cleanup(VirtualFile owner)
-   {
-      getEntry(owner).cleanup();
+      final Set<RegistryEntry> references = ownerReferences.remove(owner);
+      if(references != null) 
+      {
+         for (RegistryEntry entry : references)
+         {
+            entry.removeInboundReference(owner);
+         }
+      }
+      owner.onCleanup();
    }
 
    /**
@@ -149,7 +122,8 @@ public class Automounter
    }
    
    /**
-    * Create a backup of the provided root.  Only one backup is allowed for a location.   
+    * Create a backup of the provided root.  Only one backup is allowed for a location.
+    * TODO: Find a way to remove the need for this.   
     * 
     * @param original the original VirtualFile to backup
     * @return a reference to the backup location
@@ -164,6 +138,7 @@ public class Automounter
    
    /**
     * Get the backup for the provided target
+    * TODO: Find a way to remove the need for this.
     * 
     * @param target the location to get the backup for
     * @return the backup
@@ -176,6 +151,7 @@ public class Automounter
    
    /**
     * Check to see if a backup exists for the provided location.
+    * TODO: Find a way to remove the need for this.
     * 
     * @param target the location to check for a backup.
     * @return true if the backup exists.
@@ -192,7 +168,7 @@ public class Automounter
     * @param virtualFile
     * @return
     */
-   private static RegistryEntry getEntry(VirtualFile virtualFile)
+   static RegistryEntry getEntry(VirtualFile virtualFile)
    {
       if (virtualFile == null)
       {
@@ -206,13 +182,11 @@ public class Automounter
       return TempFileProvider.create(name, Executors.newSingleThreadScheduledExecutor());
    }
    
-   private static class RegistryEntry
+   static class RegistryEntry
    {
       private final ConcurrentMap<String, RegistryEntry> children = new ConcurrentHashMap<String, RegistryEntry>();
 
-      private final Set<RegistryEntry> inboundReferences = new HashSet<RegistryEntry>();
-
-      private final Set<RegistryEntry> outboundReferences = new HashSet<RegistryEntry>();
+      private final Set<MountOwner> inboundReferences = new HashSet<MountOwner>();
 
       private final List<Closeable> handles = new LinkedList<Closeable>();
       
@@ -220,7 +194,7 @@ public class Automounter
       
       private VirtualFile backupFile;
       
-      private void mount(RegistryEntry owner, VirtualFile target, MountType mountType) throws IOException
+      private void mount(VirtualFile target) throws IOException
       {
          if (mounted.compareAndSet(false, true))
          {
@@ -229,34 +203,12 @@ public class Automounter
                final TempFileProvider provider = getTempFileProvider(target.getName());
                // Make sure we can get to the original
                backup(target);
-               // Copy archive to temporary location to avoid file locking issues
-               File copy = copyArchiveFile(target, provider);
-               
-               if (MountType.ZIP.equals(mountType))
-                  handles.add(VFS.mountZip(copy, target, provider));
-               else
-                  handles.add(VFS.mountZipExpanded(copy, target, provider));
+               handles.add(VFS.mountZip(target, target, provider));
             }
          }
-         if (owner.equals(this) == false)
-         {
-            inboundReferences.add(owner);
-            owner.outboundReferences.add(this);
-         }
       }
-
       
-      private File copyArchiveFile(VirtualFile target, final TempFileProvider provider) throws IOException,
-            FileNotFoundException
-      {
-         VirtualFile tempLocation = tempRoot.getChild(GUID.asString());
-         handles.add(VFS.mountTemp(tempLocation, provider));
-         File copy = tempLocation.getChild(target.getName()).getPhysicalFile();
-         VFSUtils.copyStreamAndClose(target.openStream(), new FileOutputStream(copy));
-         return copy;
-      }
-
-      private void removeInboundReference(RegistryEntry owner)
+      private void removeInboundReference(MountOwner owner)
       {
          inboundReferences.remove(owner);
          if (inboundReferences.isEmpty())
@@ -265,7 +217,7 @@ public class Automounter
          }
       }
 
-      private void cleanup()
+      void cleanup()
       {
          VFSUtils.safeClose(handles);
          handles.clear();
@@ -275,10 +227,7 @@ public class Automounter
          {
             entry.cleanup();
          }
-         for (RegistryEntry entry : outboundReferences)
-         {
-            entry.removeInboundReference(this);
-         }
+         
          mounted.set(false);
       }
 

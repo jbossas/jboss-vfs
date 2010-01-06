@@ -19,10 +19,14 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.test.vfs;
+package org.jboss.test.vfs.util.automount;
 
+import org.jboss.test.vfs.AbstractVFSTest;
 import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.util.Automounter;
+import org.jboss.vfs.util.automount.Automounter;
+import org.jboss.vfs.util.automount.MountOwner;
+import org.jboss.vfs.util.automount.SimpleMountOwner;
+import org.jboss.vfs.util.automount.VirtualFileOwner;
 
 /**
  * Test for {@link Automounter}
@@ -40,9 +44,10 @@ public class AutomounterTestCase extends AbstractVFSTest
    public void testMountAndCleanup() throws Exception
    {
       VirtualFile virtualFile = getVirtualFile("/vfs/test/simple.ear");
-      Automounter.mount(virtualFile, virtualFile);
+      MountOwner owner = new VirtualFileOwner(virtualFile);
+      Automounter.mount(owner, virtualFile);
       assertTrue(Automounter.isMounted(virtualFile));
-      Automounter.cleanup(virtualFile);
+      Automounter.cleanup(owner);
       assertFalse(Automounter.isMounted(virtualFile));
    }
 
@@ -51,17 +56,19 @@ public class AutomounterTestCase extends AbstractVFSTest
       VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(earVirtualFile);
 
+      VirtualFileOwner owner = new VirtualFileOwner(earVirtualFile);
+      
       VirtualFile jarVirtualFile = earVirtualFile.getChild("archive.jar");
-      Automounter.mount(earVirtualFile, jarVirtualFile);
+      Automounter.mount(owner, jarVirtualFile);
 
       VirtualFile warVirtualFile = earVirtualFile.getChild("simple.war");
-      Automounter.mount(earVirtualFile, warVirtualFile);
+      Automounter.mount(owner, warVirtualFile);
 
       assertTrue(Automounter.isMounted(earVirtualFile));
       assertTrue(Automounter.isMounted(warVirtualFile));
       assertTrue(Automounter.isMounted(jarVirtualFile));
 
-      Automounter.cleanup(earVirtualFile);
+      Automounter.cleanup(owner);
 
       assertFalse(Automounter.isMounted(earVirtualFile));
       assertFalse(Automounter.isMounted(warVirtualFile));
@@ -83,7 +90,7 @@ public class AutomounterTestCase extends AbstractVFSTest
       assertTrue(Automounter.isMounted(warVirtualFile));
       assertTrue(Automounter.isMounted(jarVirtualFile));
 
-      Automounter.cleanup(earVirtualFile);
+      Automounter.cleanup(new VirtualFileOwner(earVirtualFile));
 
       assertFalse(Automounter.isMounted(earVirtualFile));
       assertFalse(Automounter.isMounted(warVirtualFile));
@@ -94,30 +101,83 @@ public class AutomounterTestCase extends AbstractVFSTest
    {
       VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
       Automounter.mount(earVirtualFile);
-
+      
+      VirtualFileOwner owner = new VirtualFileOwner(earVirtualFile);
+      
       VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
-      Automounter.mount(earVirtualFile, jarVirtualFile);
+      Automounter.mount(owner, jarVirtualFile);
 
       VirtualFile warVirtualFile = getVirtualFile("/vfs/test/filesonly.war");
-      Automounter.mount(earVirtualFile, warVirtualFile);
+      Automounter.mount(owner, warVirtualFile);
 
       assertTrue(Automounter.isMounted(earVirtualFile));
       assertTrue(Automounter.isMounted(warVirtualFile));
       assertTrue(Automounter.isMounted(jarVirtualFile));
 
       VirtualFile otherEarVirtualFile = getVirtualFile("/vfs/test/spring-ear.ear");
-      Automounter.mount(otherEarVirtualFile, jarVirtualFile);
+      VirtualFileOwner otherOwner = new VirtualFileOwner(otherEarVirtualFile);
+      Automounter.mount(otherOwner, jarVirtualFile);
 
-      Automounter.cleanup(earVirtualFile);
+      Automounter.cleanup(owner);
 
       assertFalse(Automounter.isMounted(earVirtualFile));
       assertFalse(Automounter.isMounted(warVirtualFile));
       assertTrue("Should not have unmounted the reference from two locations", Automounter.isMounted(jarVirtualFile));
 
-      Automounter.cleanup(otherEarVirtualFile);
+      Automounter.cleanup(otherOwner);
       assertFalse(Automounter.isMounted(jarVirtualFile));
    }
    
+   public void testCleanupReferecesSameVF() throws Exception
+   {
+      VirtualFile earVirtualFile = getVirtualFile("/vfs/test/simple.ear");
+      Automounter.mount(earVirtualFile);
+      
+      VirtualFileOwner owner = new VirtualFileOwner(earVirtualFile);
+      
+      VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
+      Automounter.mount(owner, jarVirtualFile);
+
+      VirtualFileOwner otherOwner = new VirtualFileOwner(earVirtualFile);
+      Automounter.mount(otherOwner, jarVirtualFile);
+
+      Automounter.cleanup(owner);
+
+      assertFalse("Should have been unmounted since the VirtualFile is the same", Automounter.isMounted(jarVirtualFile));
+   }
    
+   public void testCleanupReferecesSimpleOwner() throws Exception
+   {
+      MountOwner owner = new SimpleMountOwner(new Object());
+      
+      VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
+      Automounter.mount(owner, jarVirtualFile);
+
+      MountOwner otherOwner = new SimpleMountOwner(new Object());
+      Automounter.mount(otherOwner, jarVirtualFile);
+
+      Automounter.cleanup(owner);
+
+      assertTrue("Should not have unmounted the reference from two locations", Automounter.isMounted(jarVirtualFile));
+      
+      Automounter.cleanup(otherOwner);
+      assertFalse(Automounter.isMounted(jarVirtualFile));
+   }
+   
+   public void testCleanupReferecesSimpleOwnerSameObj() throws Exception
+   {
+      Object ownerObject = new Object();
+      MountOwner owner = new SimpleMountOwner(ownerObject);
+      
+      VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
+      Automounter.mount(owner, jarVirtualFile);
+
+      MountOwner otherOwner = new SimpleMountOwner(ownerObject);
+      Automounter.mount(otherOwner, jarVirtualFile);
+
+      Automounter.cleanup(owner);
+
+      assertFalse("Should have been unmounted since the owner object is the same", Automounter.isMounted(jarVirtualFile));
+   }
 
 }
