@@ -115,8 +115,7 @@ public class AutomounterTestCase extends AbstractVFSTest
       assertTrue(Automounter.isMounted(jarVirtualFile));
 
       VirtualFile otherEarVirtualFile = getVirtualFile("/vfs/test/spring-ear.ear");
-      VirtualFileOwner otherOwner = new VirtualFileOwner(otherEarVirtualFile);
-      Automounter.mount(otherOwner, jarVirtualFile);
+      Automounter.mount(otherEarVirtualFile, jarVirtualFile);
 
       Automounter.cleanup(owner);
 
@@ -124,7 +123,7 @@ public class AutomounterTestCase extends AbstractVFSTest
       assertFalse(Automounter.isMounted(warVirtualFile));
       assertTrue("Should not have unmounted the reference from two locations", Automounter.isMounted(jarVirtualFile));
 
-      Automounter.cleanup(otherOwner);
+      Automounter.cleanup(otherEarVirtualFile);
       assertFalse(Automounter.isMounted(jarVirtualFile));
    }
    
@@ -167,15 +166,13 @@ public class AutomounterTestCase extends AbstractVFSTest
    public void testCleanupReferecesSimpleOwnerSameObj() throws Exception
    {
       Object ownerObject = new Object();
-      MountOwner owner = new SimpleMountOwner(ownerObject);
       
       VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
-      Automounter.mount(owner, jarVirtualFile);
+      Automounter.mount(ownerObject, jarVirtualFile);
 
-      MountOwner otherOwner = new SimpleMountOwner(ownerObject);
-      Automounter.mount(otherOwner, jarVirtualFile);
+      Automounter.mount(ownerObject, jarVirtualFile);
 
-      Automounter.cleanup(owner);
+      Automounter.cleanup(ownerObject);
 
       assertFalse("Should have been unmounted since the owner object is the same", Automounter.isMounted(jarVirtualFile));
    }

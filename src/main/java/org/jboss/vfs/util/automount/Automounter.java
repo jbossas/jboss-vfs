@@ -75,6 +75,30 @@ public class Automounter
    {
       mount(new VirtualFileOwner(target), target);
    }
+   
+   /**
+    * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner Object that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted.
+    */
+   public static void mount(Object owner, VirtualFile target) throws IOException
+   {
+      mount(new SimpleMountOwner(owner), target);
+   }
+   
+   /**
+    * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner VirtualFile that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted.
+    */
+   public static void mount(VirtualFile owner, VirtualFile target) throws IOException
+   {
+      mount(new VirtualFileOwner(owner), target);
+   }
 
    /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
@@ -92,6 +116,26 @@ public class Automounter
       ownerReferences.get(owner).add(targetEntry);
    }
 
+   /**
+    * Cleanup all references from the owner.  Cleanup any mounted entries that become un-referenced in the process.
+    * 
+    * @param owner {@link Object} to cleanup references for
+    */
+   public static void cleanup(Object owner)
+   {
+      cleanup(new SimpleMountOwner(owner));
+   }
+   
+   /**
+    * Cleanup all references from the owner.  Cleanup any mounted entries that become un-referenced in the process.
+    * 
+    * @param owner {@link Object} to cleanup references for
+    */
+   public static void cleanup(VirtualFile owner)
+   {
+      cleanup(new VirtualFileOwner(owner));
+   }
+   
    /**
     * Cleanup all references from the {@link MountOwner}.  Cleanup any mounted entries that become un-referenced in the process.
     * 
