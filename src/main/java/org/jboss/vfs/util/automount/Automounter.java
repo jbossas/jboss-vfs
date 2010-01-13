@@ -58,6 +58,9 @@ public class Automounter
    /* VirutalFile used as a base mount for 'hidden' original copies of mounted files */
    private static final VirtualFile originalsRoot = VFS.getChild("/.vfs/backups");
    
+   /* Mount types */
+   private static enum MountType {ZIP, EXPANDED};
+   
    /**
     * Private constructor
     */
@@ -75,7 +78,7 @@ public class Automounter
    {
       mount(new VirtualFileOwner(target), target);
    }
-   
+
    /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
     * 
@@ -87,7 +90,7 @@ public class Automounter
    {
       mount(new SimpleMountOwner(owner), target);
    }
-   
+
    /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
     * 
@@ -101,16 +104,74 @@ public class Automounter
    }
 
    /**
+    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner MountOwner that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted
+    */
+   public static void mount(MountOwner owner, VirtualFile target) throws IOException {
+      mount(owner, target, MountType.ZIP);
+   }
+
+   /**
+    * Mount provided {@link VirtualFile} (if not mounted) and set the owner to be the provided target.  (Self owned mount)
+    * 
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted.
+    */
+   public static void mountExpanded(VirtualFile target) throws IOException
+   {
+      mountExpanded(new VirtualFileOwner(target), target);
+   }
+
+   /**
+    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner Object that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted.
+    */
+   public static void mountExpanded(Object owner, VirtualFile target) throws IOException
+   {
+      mountExpanded(new SimpleMountOwner(owner), target);
+   }
+   
+   /**
+    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner VirtualFile that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @throws IOException when the target can not be mounted.
+    */
+   public static void mountExpanded(VirtualFile owner, VirtualFile target) throws IOException
+   {
+      mountExpanded(new VirtualFileOwner(owner), target);
+   }
+   
+   /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
     * 
     * @param owner MountOwner that owns the reference to the mount
     * @param target VirtualFile to mount
     * @throws IOException when the target can not be mounted
     */
-   public static void mount(MountOwner owner, VirtualFile target) throws IOException
+   public static void mountExpanded(MountOwner owner, VirtualFile target) throws IOException {
+      mount(owner, target, MountType.EXPANDED);
+   }
+   
+   /**
+    * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
+    * 
+    * @param owner MountOwner that owns the reference to the mount
+    * @param target VirtualFile to mount
+    * @param mountType {@link MountType} type of mount to create
+    * @throws IOException when the target can not be mounted
+    */
+   private static void mount(MountOwner owner, VirtualFile target, MountType mountType) throws IOException
    {
       RegistryEntry targetEntry = getEntry(target);
-      targetEntry.mount(target);
+      targetEntry.mount(target, mountType);
       targetEntry.inboundReferences.add(owner);
       ownerReferences.putIfAbsent(owner, new HashSet<RegistryEntry>());
       ownerReferences.get(owner).add(targetEntry);
@@ -238,7 +299,7 @@ public class Automounter
       
       private VirtualFile backupFile;
       
-      private void mount(VirtualFile target) throws IOException
+      private void mount(VirtualFile target, MountType mountType) throws IOException
       {
          if (mounted.compareAndSet(false, true))
          {
@@ -247,7 +308,10 @@ public class Automounter
                final TempFileProvider provider = getTempFileProvider(target.getName());
                // Make sure we can get to the original
                backup(target);
-               handles.add(VFS.mountZip(target, target, provider));
+               if(MountType.ZIP.equals(mountType))
+                  handles.add(VFS.mountZip(target, target, provider));
+               else
+                  handles.add(VFS.mountZipExpanded(target, target, provider));
             }
          }
       }

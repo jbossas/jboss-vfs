@@ -49,6 +49,7 @@ import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
 import org.jboss.logging.Logger;
+import org.jboss.net.protocol.URLStreamHandlerFactory;
 
 /**
  * Virtual File System
@@ -89,14 +90,19 @@ public class VFS {
      * Initialize VFS protocol handlers package property.
      */
     private static void init() {
-        // A small hack that allows us to replace file for now
-        URL.setURLStreamHandlerFactory(null);
+        // If this doesn't work, hopefully the existing URLStreamHandlerFactory supports updates to the 'java.protocol.handler.pkgs' property.
+        try {
+           URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory());
+        } catch (Throwable ignored) {}
+
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
         if (pkgs == null || pkgs.trim().length() == 0) {
-            pkgs = "org.jboss.vfs.protocol";
+            pkgs = "org.jboss.net.protocol|org.jboss.vfs.protocol";
             System.setProperty("java.protocol.handler.pkgs", pkgs);
         } else if (pkgs.contains("org.jboss.vfs.protocol") == false) {
-            pkgs = "org.jboss.vfs.protocol|" + pkgs;
+            if(pkgs.contains("org.jboss.net.protocol") == false)
+                pkgs += "|org.jboss.net.protocol";
+            pkgs += "|org.jboss.vfs.protocol";
             System.setProperty("java.protocol.handler.pkgs", pkgs);
         }
     }
