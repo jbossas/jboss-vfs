@@ -8,7 +8,7 @@
   <groupId>org.jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>2.3.0-SNAPSHOT</version>
+  <version>3.0.0.CR1-SNAPSHOT</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
@@ -29,10 +29,8 @@
   </organization>
 
   <properties>
-    <version.jboss.jzipfile>1.0.0.CR1</version.jboss.jzipfile>
-    <version.jboss.truezip>6.6</version.jboss.truezip>
-    <version.jboss.common.core>2.2.16.GA</version.jboss.common.core>
-    <version.jboss.logging>2.0.5.GA</version.jboss.logging>
+    <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
+    <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
     <version.jboss.test>1.1.0.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
   </properties>
@@ -58,8 +56,8 @@
         <version>2.0</version>
         <configuration>
           <debug>true</debug>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
       <!-- define that we wish to create src jars -->
@@ -74,6 +72,28 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        <executions>
+          <execution>
+            <id>enforce-java-maven-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>1.6</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -127,24 +147,22 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss.jzipfile</groupId>
-      <artifactId>jzipfile</artifactId>
-      <version>${version.jboss.jzipfile}</version>
-    </dependency>
-    <dependency>
-      <groupId>de.schlichtherle.io</groupId>
-      <artifactId>truezip</artifactId>
-      <version>${version.jboss.truezip}</version>
-    </dependency>
-    <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-common-core</artifactId>
       <version>${version.jboss.common.core}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging-spi</artifactId>
       <version>${version.jboss.logging}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-log4j</artifactId>
+      <version>${version.jboss.logging}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.test</groupId>
