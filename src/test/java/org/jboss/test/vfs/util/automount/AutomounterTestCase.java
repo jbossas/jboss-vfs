@@ -21,9 +21,12 @@
  */
 package org.jboss.test.vfs.util.automount;
 
+import java.io.File;
+
 import org.jboss.test.vfs.AbstractVFSTest;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.util.automount.Automounter;
+import org.jboss.vfs.util.automount.MountOption;
 import org.jboss.vfs.util.automount.MountOwner;
 import org.jboss.vfs.util.automount.SimpleMountOwner;
 import org.jboss.vfs.util.automount.VirtualFileOwner;
@@ -174,6 +177,20 @@ public class AutomounterTestCase extends AbstractVFSTest
 
       Automounter.cleanup(ownerObject);
 
+      assertFalse("Should have been unmounted since the owner object is the same", Automounter.isMounted(jarVirtualFile));
+   }
+   
+   public void testMountWithCopy() throws Exception
+   {
+      VirtualFile jarVirtualFile = getVirtualFile("/vfs/test/jar1.jar");
+      File originalFile = jarVirtualFile.getPhysicalFile();
+      Automounter.mount(jarVirtualFile, MountOption.COPY);
+
+      File copiedFile = jarVirtualFile.getPhysicalFile();   
+      
+      assertFalse(copiedFile.equals(originalFile));
+      
+      Automounter.cleanup(jarVirtualFile);
       assertFalse("Should have been unmounted since the owner object is the same", Automounter.isMounted(jarVirtualFile));
    }
 

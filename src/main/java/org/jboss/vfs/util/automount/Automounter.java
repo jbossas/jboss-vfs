@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.util.id.GUID;
+import org.jboss.logging.Logger;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
@@ -55,11 +55,10 @@ public class Automounter
    /* Map of owners and their references */
    private static final ConcurrentMap<MountOwner, Set<RegistryEntry>> ownerReferences = new ConcurrentHashMap<MountOwner, Set<RegistryEntry>>();
 
-   /* VirutalFile used as a base mount for 'hidden' original copies of mounted files */
-   private static final VirtualFile originalsRoot = VFS.getChild("/.vfs/backups");
+   /* Provider of temp files/directories*/
+   private static TempFileProvider tempFileProvider;
    
-   /* Mount types */
-   private static enum MountType {ZIP, EXPANDED};
+   private static final Logger log = Logger.getLogger("org.jboss.vfs.util.automount");
    
    /**
     * Private constructor
@@ -72,11 +71,12 @@ public class Automounter
     * Mount provided {@link VirtualFile} (if not mounted) and set the owner to be the provided target.  (Self owned mount)
     * 
     * @param target VirtualFile to mount
+    * @param mountOptions optional configuration to use for mounting
     * @throws IOException when the target can not be mounted.
     */
-   public static void mount(VirtualFile target) throws IOException
+   public static void mount(VirtualFile target, MountOption... mountOptions) throws IOException
    {
-      mount(new VirtualFileOwner(target), target);
+      mount(new VirtualFileOwner(target), target, mountOptions);
    }
 
    /**
@@ -84,11 +84,12 @@ public class Automounter
     * 
     * @param owner Object that owns the reference to the mount
     * @param target VirtualFile to mount
+    * @param mountOptions optional configuration to use for mounting
     * @throws IOException when the target can not be mounted.
     */
-   public static void mount(Object owner, VirtualFile target) throws IOException
+   public static void mount(Object owner, VirtualFile target, MountOption... mountOptions) throws IOException
    {
-      mount(new SimpleMountOwner(owner), target);
+      mount(new SimpleMountOwner(owner), target, mountOptions);
    }
 
    /**
@@ -96,85 +97,43 @@ public class Automounter
     * 
     * @param owner VirtualFile that owns the reference to the mount
     * @param target VirtualFile to mount
+    * @param mountOptions optional configuration to use for mounting
     * @throws IOException when the target can not be mounted.
     */
-   public static void mount(VirtualFile owner, VirtualFile target) throws IOException
+   public static void mount(VirtualFile owner, VirtualFile target, MountOption... mountOptions) throws IOException
    {
-      mount(new VirtualFileOwner(owner), target);
+      mount(new VirtualFileOwner(owner), target, mountOptions);
    }
 
-   /**
-    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
-    * 
-    * @param owner MountOwner that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted
-    */
-   public static void mount(MountOwner owner, VirtualFile target) throws IOException {
-      mount(owner, target, MountType.ZIP);
-   }
-
-   /**
-    * Mount provided {@link VirtualFile} (if not mounted) and set the owner to be the provided target.  (Self owned mount)
-    * 
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted.
-    */
-   public static void mountExpanded(VirtualFile target) throws IOException
-   {
-      mountExpanded(new VirtualFileOwner(target), target);
-   }
-
-   /**
-    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
-    * 
-    * @param owner Object that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted.
-    */
-   public static void mountExpanded(Object owner, VirtualFile target) throws IOException
-   {
-      mountExpanded(new SimpleMountOwner(owner), target);
-   }
-   
-   /**
-    * Mount provided {@link VirtualFile} as an expanded file system (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
-    * 
-    * @param owner VirtualFile that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @throws IOException when the target can not be mounted.
-    */
-   public static void mountExpanded(VirtualFile owner, VirtualFile target) throws IOException
-   {
-      mountExpanded(new VirtualFileOwner(owner), target);
-   }
-   
    /**
     * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
     * 
     * @param owner MountOwner that owns the reference to the mount
     * @param target VirtualFile to mount
+    * @param mountOptions optional configuration to use for mounting
     * @throws IOException when the target can not be mounted
     */
-   public static void mountExpanded(MountOwner owner, VirtualFile target) throws IOException {
-      mount(owner, target, MountType.EXPANDED);
-   }
-   
-   /**
-    * Mount provided {@link VirtualFile} (if not mounted) and add an owner entry.  Also creates a back-reference to from the owner to the target.
-    * 
-    * @param owner MountOwner that owns the reference to the mount
-    * @param target VirtualFile to mount
-    * @param mountType {@link MountType} type of mount to create
-    * @throws IOException when the target can not be mounted
-    */
-   private static void mount(MountOwner owner, VirtualFile target, MountType mountType) throws IOException
+   public static void mount(MountOwner owner, VirtualFile target, MountOption... mountOptions) throws IOException
    {
-      RegistryEntry targetEntry = getEntry(target);
-      targetEntry.mount(target, mountType);
+      final RegistryEntry targetEntry = getEntry(target);
+      targetEntry.mount(target, getMountConfig(mountOptions));
       targetEntry.inboundReferences.add(owner);
       ownerReferences.putIfAbsent(owner, new HashSet<RegistryEntry>());
       ownerReferences.get(owner).add(targetEntry);
+   }
+   
+   /**
+    * Creates a MountConfig and applies the provided mount options
+    * 
+    * @param mountOptions options to use for mounting
+    * @return a MountConfig
+    */
+   private static MountConfig getMountConfig(MountOption[] mountOptions) {
+      final MountConfig config = new MountConfig();
+      for(MountOption option : mountOptions) {
+         option.apply(config);
+      }
+      return config;
    }
 
    /**
@@ -227,47 +186,6 @@ public class Automounter
    }
    
    /**
-    * Create a backup of the provided root.  Only one backup is allowed for a location.
-    * TODO: Find a way to remove the need for this.   
-    * 
-    * @param original the original VirtualFile to backup
-    * @return a reference to the backup location
-    * @throws IOException if any problems occur during the backup process
-    */
-   public static VirtualFile backup(VirtualFile original) throws IOException
-   {
-      RegistryEntry entry = getEntry(original); 
-      entry.backup(original);
-      return entry.backupFile;
-   }
-   
-   /**
-    * Get the backup for the provided target
-    * TODO: Find a way to remove the need for this.
-    * 
-    * @param target the location to get the backup for
-    * @return the backup
-    */
-   public static VirtualFile getBackup(VirtualFile target) 
-   {
-      RegistryEntry entry = getEntry(target);
-      return entry.backupFile != null ? entry.backupFile : null;
-   }
-   
-   /**
-    * Check to see if a backup exists for the provided location.
-    * TODO: Find a way to remove the need for this.
-    * 
-    * @param target the location to check for a backup.
-    * @return true if the backup exists.
-    */
-   public static boolean hasBackup(VirtualFile target) 
-   {
-      return getEntry(target).backupFile != null;
-   }
-   
-   
-   /**
     * Get the entry from the tree creating the entry if not present.
     * 
     * @param virtualFile
@@ -282,9 +200,11 @@ public class Automounter
       return rootEntry.find(virtualFile);
    }
 
-   private static TempFileProvider getTempFileProvider(String name) throws IOException
+   private static TempFileProvider getTempFileProvider() throws IOException
    {
-      return TempFileProvider.create(name, Executors.newSingleThreadScheduledExecutor());
+      if(tempFileProvider == null)
+         tempFileProvider = TempFileProvider.create("automount", Executors.newScheduledThreadPool(2));
+      return tempFileProvider;
    }
    
    static class RegistryEntry
@@ -297,22 +217,30 @@ public class Automounter
       
       private final AtomicBoolean mounted = new AtomicBoolean();
       
-      private VirtualFile backupFile;
-      
-      private void mount(VirtualFile target, MountType mountType) throws IOException
+      private void mount(VirtualFile target, MountConfig mountConfig) throws IOException
       {
          if (mounted.compareAndSet(false, true))
          {
             if(target.isFile())
             {
-               final TempFileProvider provider = getTempFileProvider(target.getName());
-               // Make sure we can get to the original
-               backup(target);
-               if(MountType.ZIP.equals(mountType))
-                  handles.add(VFS.mountZip(target, target, provider));
+               log.debugf("Automounting: %s with options %s", target, mountConfig);
+               
+               final TempFileProvider provider = getTempFileProvider();
+               if(mountConfig.mountExpanded()) 
+               {
+                  if(mountConfig.copyTarget())
+                     handles.add(VFS.mountZipExpanded(target, target, provider));
+                  else 
+                     handles.add(VFS.mountZipExpanded(target.getPhysicalFile(), target, provider));
+               }
                else
-                  handles.add(VFS.mountZipExpanded(target, target, provider));
-            }
+               {
+                  if(mountConfig.copyTarget())
+                     handles.add(VFS.mountZip(target, target, provider));
+                  else
+                     handles.add(VFS.mountZip(target.getPhysicalFile(), target, provider));
+               }
+             }
          }
       }
       
@@ -327,21 +255,22 @@ public class Automounter
 
       void cleanup()
       {
-         VFSUtils.safeClose(handles);
-         handles.clear();
-
-         Collection<RegistryEntry> entries = getEntriesRecursive();
-         for (RegistryEntry entry : entries)
+         if(mounted.compareAndSet(true, false)) 
          {
-            entry.cleanup();
+            VFSUtils.safeClose(handles);
+            handles.clear();
+   
+            final Collection<RegistryEntry> entries = getEntriesRecursive();
+            for (RegistryEntry entry : entries)
+            {
+               entry.cleanup();
+            }
          }
-         
-         mounted.set(false);
       }
 
       private boolean isMounted()
       {
-         return !handles.isEmpty();
+         return mounted.get();
       }
 
       private RegistryEntry find(VirtualFile file)
@@ -355,15 +284,15 @@ public class Automounter
          {
             return this;
          }
-         String current = path.remove(0);
+         final String current = path.remove(0);
          children.putIfAbsent(current, new RegistryEntry());
-         RegistryEntry childEntry = children.get(current);
+         final RegistryEntry childEntry = children.get(current);
          return childEntry.find(path);
       }
 
       private Collection<RegistryEntry> getEntriesRecursive()
       {
-         List<RegistryEntry> allHandles = new LinkedList<RegistryEntry>();
+         final List<RegistryEntry> allHandles = new LinkedList<RegistryEntry>();
          collectEntries(this, allHandles);
          return allHandles;
       }
@@ -375,12 +304,6 @@ public class Automounter
             collectEntries(childEntry, entries);
             entries.add(childEntry);
          }
-      }
-      
-      private void backup(VirtualFile target) throws IOException
-      {
-         backupFile = originalsRoot.getChild(GUID.asString() + target.getName());
-         handles.add(VFS.mountReal(target.getPhysicalFile(), backupFile));
       }
    }
 }
