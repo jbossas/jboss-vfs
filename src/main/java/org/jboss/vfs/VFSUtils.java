@@ -21,7 +21,6 @@
 */
 package org.jboss.vfs;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -747,57 +746,7 @@ public class VFSUtils {
     public static InputStream emptyStream() {
         return EMPTY_STREAM;
     }
-    
-    
-    /**
-     * Determine the relative path between a root and a target.
-     * 
-     * @param mountPoint
-     * @param target
-     * @return
-     */
-    public static List<String> getRelativePath(VirtualFile mountPoint, VirtualFile target) {
-       List<String> pathParts = new LinkedList<String>();
-       collectPathParts(mountPoint, target, pathParts);
-       return pathParts;
-    }
 
-    /**
-     * Determine the relative path between a root and a target as a string.
-     * 
-     * @param mountPoint
-     * @param target
-     * @return
-     */
-    public static String getRelativePathString(VirtualFile mountPoint, VirtualFile target) {
-       List<String> pathParts = getRelativePath(mountPoint, target);
-       if(!pathParts.isEmpty()) {
-          return PathTokenizer.getRemainingPath(pathParts, 0);
-       } else {
-          return "";
-       }
-    }
-    
-    
-
-    /**
-     * Recursively work from the target to the mount-point and collect the path elements.
-     * 
-     * @param mountPoint
-     * @param current
-     * @param pathParts
-     */
-    private static void collectPathParts(VirtualFile mountPoint, VirtualFile current, List<String> pathParts) {
-       if (current == null) {
-          throw new IllegalArgumentException("VirtualFile not a child of provided mount point");
-       }
-       if (current.equals(mountPoint)) {
-          return;
-       }
-       collectPathParts(mountPoint, current.getParent(), pathParts);
-       pathParts.add(current.getName());
-    }
-    
     /**
      * Expand a zip file to a destination directory.  The directory must exist.  If an error occurs, the destination
      * directory may contain a partially-extracted archive, so cleanup is up to the caller.

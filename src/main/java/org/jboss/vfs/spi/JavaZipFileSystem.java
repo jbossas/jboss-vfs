@@ -149,7 +149,7 @@ public final class JavaZipFileSystem implements FileSystem {
             
             // nope, create a cached temp
             final JarEntry zipEntry = zipNode.entry;
-            String name = VFSUtils.getRelativePathString(mountPoint, target);
+            String name = target.getPathNameRelativeTo(mountPoint);
             cachedFile = buildFile(contentsDir, name);
             if(zipEntry == null)  {
                cachedFile.mkdir();
@@ -265,15 +265,6 @@ public final class JavaZipFileSystem implements FileSystem {
        }
        JarEntry jarEntry = zipNode.entry;
        return jarEntry.getCodeSigners();
-    }
-
-    private JarEntry getNodeEntry(ZipNode zipNode)
-            throws IOException {
-        final JarEntry entry = zipNode.entry;
-        if (entry == null) {
-            throw new IOException("Cannot call this operation on a directory");
-        }
-        return entry;
     }
 
     private ZipNode getZipNode(VirtualFile mountPoint, VirtualFile target) {

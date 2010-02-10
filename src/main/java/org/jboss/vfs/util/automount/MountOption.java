@@ -29,13 +29,13 @@ package org.jboss.vfs.util.automount;
 public enum MountOption {
    
    EXPANDED {
-      void apply(MountConfig config)
+      void applyTo(MountConfig config)
       {
          config.setMountExpanded(true);
       }
    },
    COPY {
-      void apply(MountConfig config)
+      void applyTo(MountConfig config)
       {
          config.setCopyTarget(true);
       }
@@ -46,5 +46,5 @@ public enum MountOption {
     * 
     * @param config MountConfig to apply settings to
     */
-   abstract void apply(MountConfig config);
+   abstract void applyTo(MountConfig config);
 }

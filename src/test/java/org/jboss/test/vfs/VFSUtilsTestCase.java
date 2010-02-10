@@ -21,12 +21,9 @@
  */
 package org.jboss.test.vfs;
 
-import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.Executors;
 
 import org.jboss.vfs.TempFileProvider;

@@ -62,7 +62,7 @@ public class VirtualFileAssembly implements Closeable {
     */
    public void add(VirtualFile virtualFile) {
       String path = virtualFile.getName();
-      AssemblyNode assemblyNode = rootNode.findOrBuild(new Path(path));
+      AssemblyNode assemblyNode = rootNode.findOrBuild(path);
       assemblyNode.setTarget(virtualFile);
    }
 
@@ -73,7 +73,7 @@ public class VirtualFileAssembly implements Closeable {
     * @param virtualFile
     */
    public void add(String path, VirtualFile virtualFile) {
-      AssemblyNode assemblyNode = rootNode.findOrBuild(new Path(path));
+      AssemblyNode assemblyNode = rootNode.findOrBuild(path);
       assemblyNode.setTarget(virtualFile);
    }
 
@@ -101,8 +101,8 @@ public class VirtualFileAssembly implements Closeable {
     * @throws IOException 
     */
    public VirtualFile getFile(VirtualFile mountPoint, VirtualFile target) {
-      Path path = new Path(VFSUtils.getRelativePath(mountPoint, target));
-      return rootNode.getFile(path, mountPoint);
+      final String path = target.getPathNameRelativeTo(mountPoint);
+      return rootNode.getFile(new Path(path), mountPoint);
    }
    
    /**
@@ -115,7 +115,7 @@ public class VirtualFileAssembly implements Closeable {
       if(mountPoint.equals(target)) {
          targetNode = rootNode;
       } else {
-         targetNode = rootNode.find(new Path(VFSUtils.getRelativePath(mountPoint, target)));
+         targetNode = rootNode.find(target.getPathNameRelativeTo(mountPoint));
       }
       if(targetNode != null) {
          for(AssemblyNode childNode : targetNode.children.values()) {
@@ -126,7 +126,7 @@ public class VirtualFileAssembly implements Closeable {
    }
    
    public boolean contains(VirtualFile mountPoint, VirtualFile target) {
-      Path path = new Path(VFSUtils.getRelativePath(mountPoint, target));
+      final String path = target.getPathNameRelativeTo(mountPoint);
       return rootNode.find(path) != null;
    }
 
@@ -165,10 +165,6 @@ public class VirtualFileAssembly implements Closeable {
          parts.addAll(tokens);
       }
 
-      private Path(List<String> parts) {
-         this.parts = new LinkedList<String>(parts);
-      }
-
       private boolean isEndOfPath() {
          return parts.isEmpty();
       }
@@ -198,8 +194,8 @@ public class VirtualFileAssembly implements Closeable {
        * @param path
        * @return
        */
-      public AssemblyNode find(Path path) {
-         return find(path, false);
+      public AssemblyNode find(String path) {
+         return find(new Path(path), false);
       }
 
       /**
@@ -208,8 +204,8 @@ public class VirtualFileAssembly implements Closeable {
        * @param path
        * @return
        */
-      public AssemblyNode findOrBuild(Path path) {
-         return find(path, true);
+      public AssemblyNode findOrBuild(String path) {
+         return find(new Path(path), true);
       }
 
       /**

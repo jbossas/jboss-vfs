@@ -29,7 +29,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Random;
-import java.security.SecureRandom;
 
 /**
  * A provider for temporary physical files and directories.

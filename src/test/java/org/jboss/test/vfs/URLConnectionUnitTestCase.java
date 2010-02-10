@@ -30,7 +30,6 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
 
 /**

@@ -27,11 +27,9 @@ import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.security.CodeSigner;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileAssembly;
 import org.jboss.logging.Logger;
@@ -59,7 +57,7 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public boolean delete(VirtualFile mountPoint, VirtualFile target) {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile != null && assemblyFile.delete();
     }
 
@@ -69,7 +67,7 @@ public class AssemblyFileSystem implements FileSystem {
         {
            return true;
         }
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if(assemblyFile != null) {
            return assemblyFile.exists();
         }
@@ -78,17 +76,17 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile != null && assemblyFile.isFile();
     }
 
     /** {@inheritDoc} */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {
            return new ArrayList<String>(assembly.getChildNames(mountPoint, target));
         }
-        List<String> directoryEntries = new LinkedList<String>();
+        final List<String> directoryEntries = new LinkedList<String>();
         for (VirtualFile child : assemblyFile.getChildren()) {
             directoryEntries.add(child.getName());
         }
@@ -97,13 +95,13 @@ public class AssemblyFileSystem implements FileSystem {
 
     /** {@inheritDoc} */
     public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile == null ? 0L : assemblyFile.getLastModified();
     }
 
     /** {@inheritDoc} */
     public long getSize(VirtualFile mountPoint, VirtualFile target) {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile == null ? 0L : assemblyFile.getSize();
     }
 
@@ -111,7 +109,7 @@ public class AssemblyFileSystem implements FileSystem {
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
         if(mountPoint.equals(target))
            return true;
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if(assemblyFile != null)
            return assemblyFile.isDirectory();
         return assembly.contains(mountPoint, target);
@@ -135,7 +133,7 @@ public class AssemblyFileSystem implements FileSystem {
     
     /** {@inheritDoc} */
     public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
-       VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+       final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
        if (assemblyFile == null) {
           return null;
        }
@@ -143,7 +141,7 @@ public class AssemblyFileSystem implements FileSystem {
     }
 
     private VirtualFile getExistingFile(final VirtualFile mountPoint, final VirtualFile target) throws FileNotFoundException {
-        VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {
             throw new FileNotFoundException(target.getPathName());
         }

@@ -110,6 +110,9 @@ public final class VirtualFile implements Serializable {
     }
 
     private void getPathNameRelativeTo(VirtualFile parent, StringBuilder builder) {
+        if(this == parent) {
+            return;
+        }
         if (this.parent == null) {
             throw new IllegalArgumentException("Given parent is not an ancestor of this virtual file");
         }

@@ -43,8 +43,6 @@ import org.jboss.vfs.util.PathTokenizer;
 /**
  * Utility used to manage mounting Virtual FileSystems.
  * 
- * TODO - Make this thread safe.............
- *  
  * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
 public class Automounter
@@ -131,7 +129,7 @@ public class Automounter
    private static MountConfig getMountConfig(MountOption[] mountOptions) {
       final MountConfig config = new MountConfig();
       for(MountOption option : mountOptions) {
-         option.apply(config);
+         option.applyTo(config);
       }
       return config;
    }

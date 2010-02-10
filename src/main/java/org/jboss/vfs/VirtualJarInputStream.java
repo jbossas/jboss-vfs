@@ -38,8 +38,6 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import org.jboss.vfs.util.PathTokenizer;
-
 /**
  * Virtual JarInputStream used for representing any VFS directory as a JarInputStream.
  *
@@ -74,7 +72,7 @@ public class VirtualJarInputStream extends JarInputStream {
    public VirtualJarInputStream(VirtualFile root) throws IOException {
       super(VFSUtils.emptyStream());
       this.root = root;
-      VirtualFile manifest = root.getChild(JarFile.MANIFEST_NAME); 
+      final VirtualFile manifest = root.getChild(JarFile.MANIFEST_NAME); 
       if(manifest.exists()) {
          entryItr.add(Collections.singleton(manifest).iterator());
          this.manifest = VFSUtils.readManifest(manifest);
@@ -95,7 +93,7 @@ public class VirtualJarInputStream extends JarInputStream {
    public JarEntry getNextJarEntry() throws IOException {
       closeEntry();
 
-      Iterator<VirtualFile> topItr = entryItr.peekFirst();
+      final Iterator<VirtualFile> topItr = entryItr.peekFirst();
       if (topItr == null) {
          return null;
       }
@@ -104,7 +102,7 @@ public class VirtualJarInputStream extends JarInputStream {
          return getNextJarEntry();
       }
       
-      VirtualFile nextEntry = topItr.next();
+      final VirtualFile nextEntry = topItr.next();
       String entryName = getEntryName(nextEntry);
       if (nextEntry.isDirectory()) {
          List<VirtualFile> children = nextEntry.getChildren();
@@ -117,7 +115,7 @@ public class VirtualJarInputStream extends JarInputStream {
       openCurrent(nextEntry);
       
       Attributes attributes = null;
-      Manifest manifest = getManifest();
+      final Manifest manifest = getManifest();
       if (manifest != null) {
          attributes = manifest.getAttributes(entryName);
       }
@@ -220,8 +218,7 @@ public class VirtualJarInputStream extends JarInputStream {
     * @return
     */
    private String getEntryName(VirtualFile entry) {
-      List<String> pathParts = VFSUtils.getRelativePath(root, entry);
-      return PathTokenizer.getRemainingPath(pathParts, 0);
+      return entry.getPathNameRelativeTo(root);
    }
    
    /** 
@@ -279,11 +276,11 @@ public class VirtualJarInputStream extends JarInputStream {
       /** {@inheritDoc} **/
       @Override
       public Certificate[] getCertificates() {
-         CodeSigner[] signers = getCodeSigners();
+         final CodeSigner[] signers = getCodeSigners();
          if (signers == null) {
             return null;
          }
-         List<Certificate> certs = new ArrayList<Certificate>();
+         final List<Certificate> certs = new ArrayList<Certificate>();
          for (CodeSigner signer : signers) {
             certs.addAll(signer.getSignerCertPath().getCertificates());
          }
