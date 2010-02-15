@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,7 @@ import java.util.jar.Manifest;
 import org.jboss.logging.Logger;
 import org.jboss.util.collection.CollectionsFactory;
 import org.jboss.vfs.util.PathTokenizer;
+import org.jboss.vfs.util.automount.Automounter;
 
 
 /**
@@ -162,6 +162,7 @@ public class VFSUtils {
                     if (paths.contains(vf) == false) {
                         paths.add(vf);
                         // Recursively process the jar
+                        Automounter.mount(file, vf);
                         addManifestLocations(vf, paths);
                     } else if (trace)
                         log.trace(vf.getName() + " from manifiest is already in the classpath " + paths);
