@@ -22,14 +22,17 @@
 package org.jboss.test.vfs;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.Test;
 
+import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -114,6 +117,28 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       assertTrue(Arrays.equals(readBytes(file.openStream()), readBytes(conn.getInputStream())));
    }
 
+   public void testPathWithSpaces() throws Exception
+   {
+      VirtualFile root = getVirtualFile("/vfs/test/");
+      VirtualFile file = root.getChild("path with spaces/spaces.ear");
+      File real = file.getPhysicalFile();
+      assertTrue(real.exists());
+      URL url = file.toURL();
+      URLConnection conn = url.openConnection();
+      assertTrue(Arrays.equals(readBytes(conn.getInputStream()), readBytes(file.openStream())));
+   }
+
+   public void testTempPath() throws Exception
+   {
+      File temp = File.createTempFile("123", ".tmp");
+      temp.deleteOnExit();
+      VirtualFile file = VFS.getChild(temp.toURI());
+      assertTrue(file.exists());
+      URL url = file.toURL();
+      URLConnection conn = url.openConnection();
+      assertEquals(file.getLastModified(), conn.getLastModified());
+   }
+   
    protected static byte[] readBytes(InputStream inputStream) throws Exception
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();

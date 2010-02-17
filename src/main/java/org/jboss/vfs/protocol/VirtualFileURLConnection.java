@@ -21,17 +21,19 @@
 */
 package org.jboss.vfs.protocol;
 
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSUtils;
+import org.jboss.vfs.VirtualFile;
+
 import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.security.Permission;
-
-import org.jboss.vfs.VFS;
-import org.jboss.vfs.VirtualFile;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -40,42 +42,61 @@ import org.jboss.vfs.VirtualFile;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-class VirtualFileURLConnection extends URLConnection {
+class VirtualFileURLConnection extends URLConnection
+{
+   private final VirtualFile file;
 
-    protected VirtualFile file;
+   public VirtualFileURLConnection(URL url) throws IOException
+   {
+      super(url);
+      file = VFS.getChild(toURI(url));
+   }
 
-    public VirtualFileURLConnection(URL url) throws IOException {
-        super(url);
-        file = VFS.getChild(URLDecoder.decode(url.getPath(), "UTF-8"));
-    }
+   public void connect() throws IOException
+   {
+   }
 
-    public void connect() throws IOException {
-    }
+   public VirtualFile getContent() throws IOException
+   {
+      return file;
+   }
 
-    public VirtualFile getContent() throws IOException {
-        return file;
-    }
+   public int getContentLength()
+   {
+      final long size = file.getSize();
+      return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
+   }
 
-    public int getContentLength() {
-        final long size = file.getSize();
-        return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
-    }
+   public long getLastModified()
+   {
+      return file.getLastModified();
+   }
 
-    public long getLastModified() {
-        return file.getLastModified();
-    }
+   public InputStream getInputStream() throws IOException
+   {
+      return file.openStream();
+   }
 
-    public InputStream getInputStream() throws IOException {
-        return file.openStream();
-    }
+   public Permission getPermission() throws IOException
+   {
+      String decodedPath = toURI(url).getPath(); // TODO -- is this OK?
+      if (File.separatorChar != '/')
+         decodedPath = decodedPath.replace('/', File.separatorChar);
 
-    public Permission getPermission() throws IOException {
-        String decodedPath = URLDecoder.decode(url.getPath(), "UTF-8");
-        if (File.separatorChar == '/') {
-            return new FilePermission(decodedPath, "read");
-        } else {
-            return new FilePermission(
-                    decodedPath.replace('/', File.separatorChar), "read");
-        }
-    }
+      return new FilePermission(decodedPath, "read");
+   }
+
+   private static URI toURI(URL url) throws IOException
+   {
+      try
+      {
+         return VFSUtils.toURI(url);
+      }
+      catch (URISyntaxException e)
+      {
+         IOException ioe = new IOException();
+         ioe.initCause(e);
+         throw ioe;
+      }
+   }
 }

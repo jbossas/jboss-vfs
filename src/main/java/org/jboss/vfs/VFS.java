@@ -154,6 +154,7 @@ public class VFS {
      * @return the child
      *
      * @throws IllegalArgumentException if the path is null
+     * @throws java.net.URISyntaxException for any uri error
      */
     public static VirtualFile getChild(URL url) throws URISyntaxException {
         return getChild(url.toURI());
