@@ -46,16 +46,18 @@ class CustomLRUCachePolicy extends LRUCachePolicy
    @Override
    protected void ageOut(LRUCacheEntry entry)
    {
-      VFSContext context = (VFSContext) entry.m_object;
-      super.ageOut(entry); // remove entry
-
       try
       {
+         VFSContext context = (VFSContext) entry.m_object;
          context.cleanupTempInfo(""); // cleanup from root
       }
       catch (Exception e)
       {
          log.debug("Error cleaning up: " + e);
+      }
+      finally
+      {
+         super.ageOut(entry); // remove entry         
       }
    }
 
