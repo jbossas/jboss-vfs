@@ -74,7 +74,11 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
       {
          Map<Object, VFSContext> contexts = new TreeMap<Object, VFSContext>();
          for (Object key : keys)
-            contexts.put(key, (VFSContext)tcp.peek(key)); // value should match valid key
+         {
+            VFSContext context = (VFSContext)tcp.peek(key);
+            if (context != null) // should be there, but you never know
+               contexts.put(key, context);
+         }
 
          return contexts.values();
       }
