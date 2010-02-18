@@ -189,4 +189,9 @@ public interface VFSContext
     * @return the temp store
     */
    TempStore getTempStore();
+
+   /**
+    * Cleanup on cache eviction.
+    */
+   void cleanup();
 }

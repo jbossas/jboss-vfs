@@ -23,8 +23,10 @@ package org.jboss.virtual.spi.registry;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.VFSContext;
 
@@ -60,6 +62,39 @@ public abstract class VFSRegistry
    public abstract void removeContext(VFSContext context);
 
    /**
+    * Get the context.
+    *
+    * @param uri the uri to match
+    * @return matching context or null
+    * @throws IOException for any IO error
+    */
+   public abstract VFSContext getContext(URI uri) throws IOException;
+
+   /**
+    * Get the context.
+    *
+    * @param url the url to match
+    * @return matching context or null
+    * @throws IOException for any IO error
+    */
+   public VFSContext getContext(URL url) throws IOException
+   {
+      if (url == null)
+         throw new IllegalArgumentException("Null url");
+
+      try
+      {
+         return getContext(VFSUtils.toURI(url));
+      }
+      catch (URISyntaxException e)
+      {
+         IOException ioe = new IOException();
+         ioe.initCause(e);
+         throw ioe;
+      }
+   }
+
+   /**
     * Get the file.
     * Check the cache for cached entry,
     * return null if no matching entry exists.
@@ -79,5 +114,20 @@ public abstract class VFSRegistry
     * @return virtual file instance or null if it doesn't exist in cache
     * @throws IOException for any error
     */
-   public abstract VirtualFile getFile(URL url) throws IOException;
+   public VirtualFile getFile(URL url) throws IOException
+   {
+      if (url == null)
+         throw new IllegalArgumentException("Null url");
+
+      try
+      {
+         return getFile(VFSUtils.toURI(url));
+      }
+      catch (URISyntaxException e)
+      {
+         IOException ioe = new IOException();
+         ioe.initCause(e);
+         throw ioe;
+      }
+   }
 }

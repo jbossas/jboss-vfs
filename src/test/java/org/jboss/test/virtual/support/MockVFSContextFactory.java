@@ -78,6 +78,7 @@ public class MockVFSContextFactory implements VFSContextFactory
    public VFSContext getVFS(URI rootURI) throws IOException
    {
       throwIOException("getVFSURI");
+      throwIOException("getVFSURL"); // simplify / no_duplicate in VFS
       VFSContext context = contexts.get(rootURI);
       if (context == null)
          throw new IOException("No such context " + rootURI);

@@ -83,6 +83,18 @@ public class DefaultVFSRegistry extends VFSRegistry
       }
    }
 
+   public VFSContext getContext(URI uri) throws IOException
+   {
+      VFSContext context = getCache().findContext(uri);
+      if (context != null)
+      {
+         String relativePath = VFSUtils.getRelativePath(context, uri);
+         if (relativePath.length() == 0)
+            return context;
+      }
+      return null;
+   }
+
    public VirtualFile getFile(URI uri) throws IOException
    {
       if (uri == null)
@@ -128,22 +140,5 @@ public class DefaultVFSRegistry extends VFSRegistry
          throw new IOException("Child not found " + path + " for " + root + ", available children: " + children);
       }
       return child;
-   }
-
-   public VirtualFile getFile(URL url) throws IOException
-   {
-      if (url == null)
-         throw new IllegalArgumentException("Null url");
-
-      try
-      {
-         return getFile(VFSUtils.toURI(url));
-      }
-      catch (URISyntaxException e)
-      {
-         IOException ioe = new IOException();
-         ioe.initCause(e);
-         throw ioe;
-      }
    }
 }

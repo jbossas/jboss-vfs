@@ -49,7 +49,7 @@ class CustomLRUCachePolicy extends LRUCachePolicy
       try
       {
          VFSContext context = (VFSContext) entry.m_object;
-         context.cleanupTempInfo(""); // cleanup from root
+         context.cleanup();
       }
       catch (Exception e)
       {

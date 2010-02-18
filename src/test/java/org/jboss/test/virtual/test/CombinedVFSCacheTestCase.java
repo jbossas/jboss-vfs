@@ -76,7 +76,8 @@ public class CombinedVFSCacheTestCase extends VFSCacheTest
          if (cache instanceof CombinedWrapperVFSCache)
          {
             CombinedWrapperVFSCache cwvc = (CombinedWrapperVFSCache)cache;
-            cwvc.getTemp().stop();
+            VFSCache temp = cwvc.getTemp();
+            temp.stop();
          }
          cache.stop();
       }

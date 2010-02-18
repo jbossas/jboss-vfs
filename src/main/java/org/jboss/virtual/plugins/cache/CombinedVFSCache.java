@@ -113,7 +113,7 @@ public class CombinedVFSCache implements VFSCache, CacheStatistics
       if (context != null)
          return context;
 
-      return realCache.findContext(uri);
+      return (realCache != null) ? realCache.findContext(uri) : null;
    }
 
    public VFSContext findContext(URL url)

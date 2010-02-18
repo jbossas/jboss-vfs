@@ -190,7 +190,7 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
       {
          try
          {
-            context.cleanupTempInfo(""); // cleanup from root
+            context.cleanup();
          }
          catch (Exception e)
          {

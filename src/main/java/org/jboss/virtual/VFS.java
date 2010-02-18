@@ -23,6 +23,7 @@ package org.jboss.virtual;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -180,11 +181,36 @@ public class VFS
     */
    public static VFS getVFS(URI rootURI) throws IOException
    {
+      return getVFS(rootURI, false);
+   }
+
+   /**
+    * Get the virtual file system for a root uri
+    *
+    * @param rootURI the root URI
+    * @param createNew do we create a new context
+    * @return the virtual file system
+    * @throws IOException if there is a problem accessing the VFS
+    * @throws IllegalArgumentException if the rootURL is null
+    */
+   private static VFS getVFS(URI rootURI, boolean createNew) throws IOException
+   {
+      VFSRegistry registry = VFSRegistry.getInstance();
+      VFSContext context = registry.getContext(rootURI);
+      if (context != null && createNew == false)
+         return context.getVFS();
+
       VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
       if (factory == null)
          throw new IOException("No context factory for " + rootURI);
 
-      VFSContext context = factory.getVFS(rootURI);
+      if (context != null)
+      {
+         registry.removeContext(context);
+         context.cleanup();
+      }
+
+      context = factory.getVFS(rootURI); // create new
       VFSRegistry.getInstance().addContext(context);
       return context.getVFS();
    }
@@ -199,7 +225,7 @@ public class VFS
     */
    public static VirtualFile createNewRoot(URI rootURI) throws IOException
    {
-      VFS vfs = getVFS(rootURI);
+      VFS vfs = getVFS(rootURI, true);
       return vfs.getRoot();
    }
 
@@ -234,6 +260,20 @@ public class VFS
       return root.findChild(name);
    }
 
+   private static URI toURI(URL url) throws IOException
+   {
+      try
+      {
+         return VFSUtils.toURI(url);
+      }
+      catch (URISyntaxException e)
+      {
+         IOException ioe = new IOException();
+         ioe.initCause(e);
+         throw ioe;
+      }
+   }
+
    /**
     * Get the virtual file system for a root url
     * 
@@ -244,13 +284,7 @@ public class VFS
     */
    public static VFS getVFS(URL rootURL) throws IOException
    {
-      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURL);
-      if (factory == null)
-         throw new IOException("No context factory for " + rootURL);
-
-      VFSContext context = factory.getVFS(rootURL);
-      VFSRegistry.getInstance().addContext(context);
-      return context.getVFS();
+      return getVFS(toURI(rootURL));
    }
 
    /**
@@ -263,8 +297,7 @@ public class VFS
     */
    public static VirtualFile createNewRoot(URL rootURL) throws IOException
    {
-      VFS vfs = getVFS(rootURL);
-      return vfs.getRoot();
+      return createNewRoot(toURI(rootURL));
    }
 
    /**
@@ -277,9 +310,7 @@ public class VFS
     */
    public static VirtualFile getRoot(URL rootURL) throws IOException
    {
-      VFSRegistry registry = VFSRegistry.getInstance();
-      VirtualFile file = registry.getFile(rootURL);
-      return (file != null) ? file : createNewRoot(rootURL);
+      return getRoot(toURI(rootURL));
    }
 
    /**
@@ -294,8 +325,7 @@ public class VFS
    @SuppressWarnings("deprecation")
    public static VirtualFile getVirtualFile(URL rootURL, String name) throws IOException
    {
-      VirtualFile root = getRoot(rootURL);
-      return root.findChild(name);
+      return getVirtualFile(toURI(rootURL), name);
    }
 
    /**

@@ -557,6 +557,14 @@ public abstract class AbstractVFSContext implements VFSContext
       return getOption(TempStore.class);
    }
 
+   public void cleanup()
+   {
+      cleanupTempInfo(""); // clear from root
+      TempStore store = getTempStore();
+      if (store != null)
+         store.clear();
+   }
+
    @Override
    public String toString()
    {
