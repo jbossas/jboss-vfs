@@ -359,7 +359,7 @@ public class MemoryTestCase extends AbstractVFSTest
       final VirtualFile nested = VFS.createNewRoot(root);
 
       // flush - so we only get in-memory contexts (if they exist)
-      VFSCacheFactory.getInstance().flush();
+      // VFSCacheFactory.getInstance().flush(); // flush destroys cache entries
 
       root = new URL("vfsmemory://aopdomain");
       final VFS vfs = MemoryFileFactory.createRoot(root);

@@ -24,7 +24,9 @@ package org.jboss.virtual.plugins.cache;
 import java.util.Map;
 
 import org.jboss.util.LRUCachePolicy;
+import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
 
 /**
  * LRU cache policy vfs cache.
@@ -63,7 +65,7 @@ public class LRUVFSCache extends CachePolicyVFSCache<LRUCachePolicy>
 
       log.debug("Creating LRU cache policy, min: " + min + ", max: " + max);
 
-      return new LRUCachePolicy(min, max);
+      return new CustomLRUCachePolicy(min, max);
    }
 
    /**

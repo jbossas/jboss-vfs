@@ -140,9 +140,20 @@ public abstract class CachePolicyVFSCache<T extends CachePolicy> extends PathMat
 
    protected void putContext(String path, VFSContext context)
    {
-      Object result = policy.peek(path);
+      Object result = policy.get(path);
       if (result == null)
-         policy.insert(path, context);
+         policy.insert(path, wrapContext(context));
+   }
+
+   /**
+    * Wrap the context value.
+    *
+    * @param context the context to wrap
+    * @return possibly wrapped context
+    */
+   protected Object wrapContext(VFSContext context)
+   {
+      return context;
    }
 
    public void removeContext(String key, VFSContext context)

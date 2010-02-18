@@ -21,14 +21,14 @@
 */
 package org.jboss.virtual.plugins.cache;
 
+import org.jboss.util.TimedCachePolicy;
+import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.spi.VFSContext;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.jboss.util.TimedCachePolicy;
-import org.jboss.virtual.VFSUtils;
-import org.jboss.virtual.spi.VFSContext;
 
 /**
  * Timed cache policy vfs cache.
@@ -74,7 +74,7 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
       {
          Map<Object, VFSContext> contexts = new TreeMap<Object, VFSContext>();
          for (Object key : keys)
-            contexts.put(key, (VFSContext)tcp.peek(key));
+            contexts.put(key, (VFSContext)tcp.peek(key)); // value should match valid key
 
          return contexts.values();
       }
@@ -148,5 +148,55 @@ public class TimedVFSCache extends CachePolicyVFSCache<TimedCachePolicy>
    public String toString()
    {
       return info;
+   }
+
+   @Override
+   protected Object wrapContext(VFSContext context)
+   {
+      return new VFSContextWrapper(getPolicy().getDefaultLifetime(), context);
+   }
+
+   private class VFSContextWrapper implements TimedCachePolicy.TimedEntry
+   {
+      private long expirationTime;
+      private VFSContext context;
+
+      VFSContextWrapper(long lifetime, VFSContext value)
+      {
+         this.expirationTime = 1000 * lifetime;
+         this.context = value;
+      }
+
+      public void init(long now)
+      {
+         expirationTime += now;
+      }
+
+      public boolean isCurrent(long now)
+      {
+         return expirationTime > now;
+      }
+
+      public boolean refresh()
+      {
+         return false;
+      }
+
+      public void destroy()
+      {
+         try
+         {
+            context.cleanupTempInfo(""); // cleanup from root
+         }
+         catch (Exception e)
+         {
+            log.debug("Error cleaning up: " + e);
+         }
+      }
+
+      public Object getValue()
+      {
+         return context;
+      }
    }
 }
