@@ -195,14 +195,14 @@ public class VFS
     */
    private static VFS getVFS(URI rootURI, boolean createNew) throws IOException
    {
+      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
+      if (factory == null)
+         throw new IOException("No context factory for " + rootURI);
+
       VFSRegistry registry = VFSRegistry.getInstance();
       VFSContext context = registry.getContext(rootURI);
       if (context != null && createNew == false)
          return context.getVFS();
-
-      VFSContextFactory factory = VFSContextFactoryLocator.getFactory(rootURI);
-      if (factory == null)
-         throw new IOException("No context factory for " + rootURI);
 
       if (context != null)
       {
