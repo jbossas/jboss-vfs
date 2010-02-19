@@ -50,6 +50,7 @@ public class SymlinkTestCase extends AbstractVFSTest
 {
    private String testPath;
    private String testName;
+   private boolean useEditor;
 
    public SymlinkTestCase(String name)
    {
@@ -77,11 +78,12 @@ public class SymlinkTestCase extends AbstractVFSTest
 
       // setup symlink dir and test path!
 
-      //System.setProperty("test.dir", "/Users/alesj/projects/jboss6/trunk"); // plain path
-      System.setProperty("test.dir", "/Users/alesj/jboss"); // -- this is symlink
+      System.setProperty("test.dir", "/Users/alesj/projects/jboss6/trunk"); // plain path
+      //System.setProperty("test.dir", "/Users/alesj/jboss"); // -- this is symlink
 
       testPath = "/testsuite/output/lib/jboss-seam-booking.ear/jboss-seam.jar/org/jboss/seam/Seam.class";
       testName = "jboss-seam.jar";
+      useEditor = true;
    }
 
    @Override
@@ -114,10 +116,18 @@ public class SymlinkTestCase extends AbstractVFSTest
       VFSCacheFactory.setInstance(cache);
       try
       {
-         URLEditor editor = new URLEditor();
          String rootText = StringPropertyReplacer.replaceProperties("${test.dir}");
-         editor.setAsText(rootText);
-         URL rootURL = (URL) editor.getValue();
+         URL rootURL;
+         if (useEditor)
+         {
+            URLEditor editor = new URLEditor();
+            editor.setAsText(rootText);
+            rootURL = (URL) editor.getValue();
+         }
+         else
+         {
+            rootURL = new URL("file://" + rootText);
+         }
          VFS vfs = VFS.getVFS(rootURL);
          VFSUtils.enableCopy(vfs);
          TrackingTempStore store = new TrackingTempStore(new MockTempStore(new Random().nextLong()));
