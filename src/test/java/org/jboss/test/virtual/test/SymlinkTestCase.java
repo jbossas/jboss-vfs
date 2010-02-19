@@ -28,8 +28,10 @@ import org.jboss.util.propertyeditor.URLEditor;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.cache.CombinedVFSCache;
 import org.jboss.virtual.plugins.cache.MapVFSCache;
 import org.jboss.virtual.plugins.copy.TrackingTempStore;
+import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
@@ -37,6 +39,7 @@ import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -104,7 +107,8 @@ public class SymlinkTestCase extends AbstractVFSTest
       assertNotNull(testPath);
       assertNotNull(testName);
 
-      VFSCache cache = new MapVFSCache()
+      CombinedVFSCache cache = new CombinedVFSCache();                           
+      VFSCache realCache = new MapVFSCache()
       {
          @Override
          protected Map<String, VFSContext> createMap()
@@ -112,7 +116,8 @@ public class SymlinkTestCase extends AbstractVFSTest
             return new HashMap<String, VFSContext>();
          }
       };
-      cache.start();
+      realCache.start();
+      cache.setRealCache(realCache);
       VFSCacheFactory.setInstance(cache);
       try
       {
@@ -128,6 +133,9 @@ public class SymlinkTestCase extends AbstractVFSTest
          {
             rootURL = new URL("file://" + rootText);
          }
+         cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(rootURL, null));
+         cache.start();
+
          VFS vfs = VFS.getVFS(rootURL);
          VFSUtils.enableCopy(vfs);
          TrackingTempStore store = new TrackingTempStore(new MockTempStore(new Random().nextLong()));
