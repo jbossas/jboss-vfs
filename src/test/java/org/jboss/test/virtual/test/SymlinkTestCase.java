@@ -29,19 +29,16 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.cache.CombinedVFSCache;
-import org.jboss.virtual.plugins.cache.MapVFSCache;
 import org.jboss.virtual.plugins.copy.TrackingTempStore;
 import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
+import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -108,14 +105,7 @@ public class SymlinkTestCase extends AbstractVFSTest
       assertNotNull(testName);
 
       CombinedVFSCache cache = new CombinedVFSCache();                           
-      VFSCache realCache = new MapVFSCache()
-      {
-         @Override
-         protected Map<String, VFSContext> createMap()
-         {
-            return new HashMap<String, VFSContext>();
-         }
-      };
+      VFSCache realCache = new NoopVFSCache();
       realCache.start();
       cache.setRealCache(realCache);
       VFSCacheFactory.setInstance(cache);
@@ -136,13 +126,17 @@ public class SymlinkTestCase extends AbstractVFSTest
          cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(rootURL, null));
          cache.start();
 
+         // setup VFS
          VFS vfs = VFS.getVFS(rootURL);
          VFSUtils.enableCopy(vfs);
          TrackingTempStore store = new TrackingTempStore(new MockTempStore(new Random().nextLong()));
          vfs.setTempStore(store);
+
          try
          {
-            VirtualFile root = vfs.getRoot();
+            URL directRootURL = new URL("file://" + rootText);
+            VirtualFile root = VFS.getRoot(directRootURL);
+            // assertEquals(vfs, root.getVFS()); // this is actually the real cause
             VirtualFile file = root.getChild(testPath);
             assertNotNull(file);
             assertTrue(file.getSize() > 0);
