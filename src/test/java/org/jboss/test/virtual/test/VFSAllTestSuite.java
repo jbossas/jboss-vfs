@@ -107,6 +107,8 @@ public class VFSAllTestSuite extends TestSuite
       suite.addTest(TempCleanupUnitTestCase.suite());
       suite.addTest(ExplodeCleanupUnitTestCase.suite());
       suite.addTest(UnjarCleanupUnitTestCase.suite());
+      // symlink
+      suite.addTest(SymlinkTestCase.suite());
 
       return suite;
    }
