@@ -44,7 +44,7 @@ import java.util.Random;
 /**
  * Symlink VFSCache Test.
  *
- * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
 public class SymlinkTestCase extends AbstractVFSTest
 {
@@ -137,6 +137,7 @@ public class SymlinkTestCase extends AbstractVFSTest
             VirtualFile root = vfs.getRoot();
             VirtualFile file = root.getChild(testPath);
             assertNotNull(file);
+            assertTrue(file.getSize() > 0);
             assertCopies(store);
             URL url = file.toURL();
             URLConnection conn = url.openConnection();
