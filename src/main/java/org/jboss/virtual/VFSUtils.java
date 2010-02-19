@@ -105,6 +105,11 @@ public class VFSUtils
    public static final String CASE_SENSITIVE_QUERY = "caseSensitive";
 
    /**
+    * Key used to force canonical lookup
+    */
+   public static final String FORCE_CANONICAL_LOOKUP = "jboss.vfs.forceCanonicalLookup";
+
+   /**
     * Key used to turn on memory optimizations - less cache use at the expense of performance
     */
    public static final String OPTIMIZE_FOR_MEMORY_KEY = "jboss.vfs.optimizeForMemory";

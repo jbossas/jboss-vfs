@@ -21,13 +21,7 @@
  */
 package org.jboss.virtual.plugins.registry;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
-
+import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.spi.TempInfo;
@@ -38,6 +32,15 @@ import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.registry.VFSRegistry;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Default vfs registry.
  *
@@ -45,6 +48,17 @@ import org.jboss.virtual.spi.registry.VFSRegistry;
  */
 public class DefaultVFSRegistry extends VFSRegistry
 {
+   /** Do we force canonical lookup */
+   private static boolean forceCanonical;
+
+   static
+   {
+      forceCanonical = AccessController.doPrivileged(new CheckForceCanonical());
+
+      if (forceCanonical)
+         Logger.getLogger(DefaultVFSRegistry.class).info("VFS force canonical lookup is enabled.");
+   }
+
    /**
     * Get vfs cache.
     *
@@ -83,8 +97,46 @@ public class DefaultVFSRegistry extends VFSRegistry
       }
    }
 
+   /**
+    * Canonicalize uri.
+    *
+    * @param uri the uri
+    * @return canonical uri
+    * @throws IOException for any IO error
+    */
+   protected static URI canonicalize(URI uri) throws IOException
+   {
+      // TODO -- this file "recursion" needs more testing ...
+      if (forceCanonical)
+      {
+         String path = "";
+         File file = new File(uri.getPath());
+         while(file.exists() == false)
+         {
+            path = File.separator + file.getName() + path;
+            file = file.getParentFile();
+         }
+         file = file.getCanonicalFile();
+         try
+         {
+            return new URI(uri.getScheme(), uri.getHost(), file.getPath() + path, uri.getQuery(), uri.getFragment());
+         }
+         catch (URISyntaxException e)
+         {
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            throw ioe;
+         }
+      }
+      return uri;
+   }
+
    public VFSContext getContext(URI uri) throws IOException
    {
+      if (uri == null)
+         throw new IllegalArgumentException("Null uri");
+
+      uri = canonicalize(uri);
       VFSContext context = getCache().findContext(uri);
       if (context != null)
       {
@@ -100,6 +152,7 @@ public class DefaultVFSRegistry extends VFSRegistry
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
+      uri = canonicalize(uri);
       VFSContext context = getCache().findContext(uri);
       if (context != null)
       {
@@ -140,5 +193,17 @@ public class DefaultVFSRegistry extends VFSRegistry
          throw new IOException("Child not found " + path + " for " + root + ", available children: " + children);
       }
       return child;
+   }
+
+   /**
+    * <tt>PriviligedAction</tt> class for checking a system property
+    */
+   private static class CheckForceCanonical implements PrivilegedAction<Boolean>
+   {
+      public Boolean run()
+      {
+         String forceString = System.getProperty(VFSUtils.FORCE_CANONICAL_LOOKUP, "false");
+         return Boolean.valueOf(forceString);
+      }
    }
 }
