@@ -49,6 +49,7 @@ import java.util.Random;
 public class SymlinkTestCase extends AbstractVFSTest
 {
    private String testPath;
+   private String testName;
 
    public SymlinkTestCase(String name)
    {
@@ -60,11 +61,11 @@ public class SymlinkTestCase extends AbstractVFSTest
       return suite(SymlinkTestCase.class);
    }
 
+   // enable this to run the test -- no Winz though :-)
    private static boolean supportSymlinks()
    {
       return false;
 
-        // enable this to run the test -- no Winz :-)
 //      String os = System.getProperty("os.name");
 //      return os.contains("Win") == false;
    }
@@ -80,6 +81,7 @@ public class SymlinkTestCase extends AbstractVFSTest
       System.setProperty("test.dir", "/Users/alesj/jboss"); // -- this is symlink
 
       testPath = "/testsuite/output/lib/jboss-seam-booking.ear/jboss-seam.jar/org/jboss/seam/Seam.class";
+      testName = "jboss-seam.jar";
    }
 
    @Override
@@ -87,6 +89,7 @@ public class SymlinkTestCase extends AbstractVFSTest
    {
       System.clearProperty("test.dir");
       testPath = null;
+      testName = null;
 
       super.tearDown();
    }
@@ -97,6 +100,7 @@ public class SymlinkTestCase extends AbstractVFSTest
          return;
 
       assertNotNull(testPath);
+      assertNotNull(testName);
 
       VFSCache cache = new MapVFSCache()
       {
@@ -146,9 +150,9 @@ public class SymlinkTestCase extends AbstractVFSTest
       int counter = 0;
       for (File file : store.getFiles())
       {
-         if (file.getName().contains("jboss-seam.jar"))
+         if (file.getName().contains(testName))
             counter++;
       }
-      assertEquals("Seam files == 1", 1, counter);
+      assertEquals("Test files == 1", 1, counter);
    }
 }
