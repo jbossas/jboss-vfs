@@ -148,6 +148,11 @@ public class SymlinkTestCase extends AbstractVFSTest
             URLConnection conn = url.openConnection();
             assertCopies(store);
             assertEquals(file.getLastModified(), conn.getLastModified());
+
+            directRootURL = new URL("vfszip://" + rootText + testPath);
+            conn = directRootURL.openConnection();
+            assertCopies(store);
+            assertEquals(file.getLastModified(), conn.getLastModified());
          }
          finally
          {

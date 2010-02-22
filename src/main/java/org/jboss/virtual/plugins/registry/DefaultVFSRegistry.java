@@ -106,20 +106,21 @@ public class DefaultVFSRegistry extends VFSRegistry
     */
    protected static URI canonicalize(URI uri) throws IOException
    {
-      // TODO -- this file "recursion" needs more testing ...
       if (forceCanonical)
       {
-         String path = "";
+         StringBuilder path = new StringBuilder();
          File file = new File(uri.getPath());
          while(file.exists() == false)
          {
-            path = File.separator + file.getName() + path;
+            path.insert(0, file.getName());
+            path.insert(0, File.separator);
             file = file.getParentFile();
          }
          file = file.getCanonicalFile();
+         path.insert(0, file.getPath());
          try
          {
-            return new URI(uri.getScheme(), uri.getHost(), file.getPath() + path, uri.getQuery(), uri.getFragment());
+            return new URI(uri.getScheme(), uri.getHost(), path.toString(), uri.getQuery(), uri.getFragment());
          }
          catch (URISyntaxException e)
          {
