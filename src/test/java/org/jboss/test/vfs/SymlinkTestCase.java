@@ -34,7 +34,7 @@ import java.net.URLConnection;
 import java.util.List;
 
 /**
- * Symlink VFSCache Test.
+ * Symlink test.
  *
  * @author <a href="ales.justin@jboss.org">Ales Justin</a>
  */
@@ -134,7 +134,7 @@ public class SymlinkTestCase extends AbstractVFSTest
          URL directRootURL = new URL("file://" + rootText + testOuterJar + "/" + testInnerJar + "/" + testInnerFile);
          conn = directRootURL.openConnection();
          long actual2 = conn.getLastModified();
-         assertEquals(expected, actual2); // TODO -- FIXME!
+         assertEquals(expected, actual2); // TODO -- FIXME -- underlying file system is Real
       }
       finally
       {
