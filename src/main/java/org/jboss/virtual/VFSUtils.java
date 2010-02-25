@@ -107,7 +107,7 @@ public class VFSUtils
    /**
     * Key used to force canonical lookup
     */
-   public static final String FORCE_CANONICAL_LOOKUP = "jboss.vfs.forceCanonicalLookup";
+   public static final String FORCE_CANONICAL = "jboss.vfs.forceCanonical";
 
    /**
     * Key used to turn on memory optimizations - less cache use at the expense of performance

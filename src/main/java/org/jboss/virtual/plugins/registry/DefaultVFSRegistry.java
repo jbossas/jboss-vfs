@@ -108,19 +108,11 @@ public class DefaultVFSRegistry extends VFSRegistry
    {
       if (forceCanonical)
       {
-         StringBuilder path = new StringBuilder();
          File file = new File(uri.getPath());
-         while(file.exists() == false)
-         {
-            path.insert(0, file.getName());
-            path.insert(0, File.separator);
-            file = file.getParentFile();
-         }
          file = file.getCanonicalFile();
-         path.insert(0, file.getPath());
          try
          {
-            return new URI(uri.getScheme(), uri.getHost(), path.toString(), uri.getQuery(), uri.getFragment());
+            return new URI(uri.getScheme(), uri.getHost(), file.getPath(), uri.getQuery(), uri.getFragment());
          }
          catch (URISyntaxException e)
          {
@@ -203,7 +195,7 @@ public class DefaultVFSRegistry extends VFSRegistry
    {
       public Boolean run()
       {
-         String forceString = System.getProperty(VFSUtils.FORCE_CANONICAL_LOOKUP, "false");
+         String forceString = System.getProperty(VFSUtils.FORCE_CANONICAL, "false");
          return Boolean.valueOf(forceString);
       }
    }

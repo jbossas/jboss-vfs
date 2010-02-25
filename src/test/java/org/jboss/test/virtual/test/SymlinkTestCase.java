@@ -77,7 +77,7 @@ public class SymlinkTestCase extends AbstractVFSTest
       super.setUp();
 
       // enable force canonical
-      System.setProperty(VFSUtils.FORCE_CANONICAL_LOOKUP, "true");
+      System.setProperty(VFSUtils.FORCE_CANONICAL, "true");
 
       // setup symlink dir and test path!
 
