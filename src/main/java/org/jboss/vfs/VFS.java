@@ -207,16 +207,14 @@ public class VFS {
     {
        if (FORCE_CANONICAL)
        {
-          File file = new File(path);
           try
           {
-             file = file.getCanonicalFile();
+             return new File(path).getCanonicalPath();
           }
           catch (IOException e)
           {
              throw new RuntimeException("Cannot get canonical file for path: " + path, e);
           }
-          return file.getPath();
        }
        return path;
     }
