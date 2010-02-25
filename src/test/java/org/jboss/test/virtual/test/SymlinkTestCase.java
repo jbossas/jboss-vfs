@@ -65,10 +65,10 @@ public class SymlinkTestCase extends AbstractVFSTest
    // enable this to run the test -- no Winz though :-)
    private static boolean supportSymlinks()
    {
-//      return false;
-//
-      String os = System.getProperty("os.name");
-      return os.contains("Win") == false;
+      return false;
+
+//      String os = System.getProperty("os.name");
+//      return os.contains("Win") == false;
    }
 
    @Override
