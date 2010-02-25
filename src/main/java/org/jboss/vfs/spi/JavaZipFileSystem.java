@@ -268,11 +268,7 @@ public final class JavaZipFileSystem implements FileSystem {
     }
 
     private ZipNode getZipNode(VirtualFile mountPoint, VirtualFile target) {
-        final ZipNode zipNode = rootNode.find(mountPoint, target);
-        if (zipNode == null) {
-            return null;
-        }
-        return zipNode;
+        return rootNode.find(mountPoint, target);
     }
 
     private ZipNode getExistingZipNode(VirtualFile mountPoint, VirtualFile target)

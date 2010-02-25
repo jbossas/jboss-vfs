@@ -64,6 +64,7 @@ public class VFS {
     private static final Logger log = Logger.getLogger("org.jboss.vfs");
 
     public static final boolean LEAK_DEBUGGING;
+    public static final boolean FORCE_CANONICAL;
 
     private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
     private static final VirtualFile rootVirtualFile = new VirtualFile("", null);
@@ -77,7 +78,15 @@ public class VFS {
             public Boolean run() {
                 return Boolean.valueOf(System.getProperty("jboss.vfs.leakDebugging", "true"));
             }
-        }).booleanValue();
+        });
+        FORCE_CANONICAL = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.getBoolean("jboss.vfs.forceCanonical");
+            }
+        });
+
+        if (FORCE_CANONICAL)
+           log.info("Canonical path lookup enabled.");
     }
 
     /**
@@ -185,7 +194,31 @@ public class VFS {
     public static VirtualFile getChild(String path) {
         if (path == null)
             throw new IllegalArgumentException("Null path");
-        return getRootVirtualFile().getChild(path);
+        return getRootVirtualFile().getChild(canonicalize(path));
+    }
+
+   /**
+    * Canonicalize path.
+    *
+    * @param path the path to canonicalize
+    * @return canonical path of given @param path
+    */
+    private static String canonicalize(String path)
+    {
+       if (FORCE_CANONICAL)
+       {
+          File file = new File(path);
+          try
+          {
+             file = file.getCanonicalFile();
+          }
+          catch (IOException e)
+          {
+             throw new RuntimeException("Cannot get canonical file for path: " + path, e);
+          }
+          return file.getPath();
+       }
+       return path;
     }
 
     /**

@@ -70,6 +70,9 @@ public class SymlinkTestCase extends AbstractVFSTest
    {
       super.setUp();
 
+      // set force canonical
+      System.setProperty("jboss.vfs.forceCanonical", Boolean.TRUE.toString());
+
       // setup symlink dir and test path!
 
 //      System.setProperty("test.dir", "/Users/alesj/projects/jboss6/trunk"); // plain path
@@ -84,7 +87,9 @@ public class SymlinkTestCase extends AbstractVFSTest
    @Override
    protected void tearDown() throws Exception
    {
+      System.clearProperty("jboss.vfs.forceCanonical");
       System.clearProperty("test.dir");
+
       testOuterJar = null;
       testInnerJar = null;
       testInnerFile = null;
@@ -134,7 +139,7 @@ public class SymlinkTestCase extends AbstractVFSTest
          URL directRootURL = new URL("file://" + rootText + testOuterJar + "/" + testInnerJar + "/" + testInnerFile);
          conn = directRootURL.openConnection();
          long actual2 = conn.getLastModified();
-         assertEquals(expected, actual2); // TODO -- FIXME -- underlying file system is Real
+         assertEquals(expected, actual2);
       }
       finally
       {
