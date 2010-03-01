@@ -79,7 +79,7 @@ class VirtualFileURLConnection extends URLConnection
 
    public Permission getPermission() throws IOException
    {
-      String decodedPath = toURI(url).getPath(); // TODO -- is this OK?
+      String decodedPath = toURI(url).getPath();
       if (File.separatorChar != '/')
          decodedPath = decodedPath.replace('/', File.separatorChar);
 
