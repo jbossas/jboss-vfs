@@ -102,7 +102,9 @@ public class VFS {
         // If this doesn't work, hopefully the existing URLStreamHandlerFactory supports updates to the 'java.protocol.handler.pkgs' property.
         try {
            URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+           log.warn("VFS was unable to set the URLStreamHandlerFactory.  This will have unpredictable results");
+        }
 
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
         if (pkgs == null || pkgs.trim().length() == 0) {
