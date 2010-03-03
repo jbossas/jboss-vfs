@@ -504,7 +504,10 @@ public final class VirtualFile implements Serializable {
      * @return {@code true} if they are equal
      */
     public boolean equals(VirtualFile o) {
-        if (o != this || o == null || hashCode != o.hashCode || ! name.equals(o.name)) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || hashCode != o.hashCode || ! name.equals(o.name)) {
             return false;
         }
         final VirtualFile parent = this.parent;
