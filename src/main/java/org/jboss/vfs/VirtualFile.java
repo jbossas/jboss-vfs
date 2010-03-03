@@ -425,27 +425,85 @@ public final class VirtualFile implements Serializable {
     }
 
     /**
-     * Get file's URL.
+     * Get file's current URL.  <b>Note:</b> if this VirtualFile refers to a directory <b>at the time of this
+     * method invocation</b>, a trailing slash will be appended to the URL; this means that invoking
+     * this method may require a filesystem access, and in addition, may not produce consistent results
+     * over time.
      *
-     * @return the url
+     * @return the current url
      *
      * @throws MalformedURLException if the URL is somehow malformed
+     * @see VirtualFile#asDirectoryURL()
+     * @see VirtualFile#asFileURL()
      */
     public URL toURL() throws MalformedURLException {
         return VFSUtils.getVirtualURL(this);
     }
 
     /**
-     * Get file's URI.
+     * Get file's current URI.  <b>Note:</b> if this VirtualFile refers to a directory <b>at the time of this
+     * method invocation</b>, a trailing slash will be appended to the URI; this means that invoking
+     * this method may require a filesystem access, and in addition, may not produce consistent results
+     * over time.
      *
-     * @return the uri
+     * @return the current uri
      *
-     * @throws URISyntaxException for any error
+     * @throws URISyntaxException if the URI is somehow malformed
+     * @see VirtualFile#asDirectoryURI()
+     * @see VirtualFile#asFileURI()
      */
     public URI toURI() throws URISyntaxException {
         return VFSUtils.getVirtualURI(this);
     }
     
+   /**
+    * Get file's URL as a directory.  There will always be a trailing {@code "/"} character.
+    *
+    * @return the url
+    *
+    * @throws MalformedURLException if the URL is somehow malformed
+    */
+    public URL asDirectoryURL() throws MalformedURLException {
+       final String pathName = getPathName(false);
+       return new URL("file", "", -1, parent == null ? pathName : pathName + "/");
+    }
+
+   /**
+    * Get file's URI as a directory.  There will always be a trailing {@code "/"} character.
+    *
+    * @return the uri
+    *
+    * @throws URISyntaxException if the URI is somehow malformed
+    */
+    public URI asDirectoryURI() throws URISyntaxException {
+       final String pathName = getPathName(false);
+       return new URI("file", "", parent == null ? pathName : pathName + "/", null);
+    }
+
+   /**
+    * Get file's URL as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
+    * represents a root.
+    *
+    * @return the url
+    *
+    * @throws MalformedURLException if the URL is somehow malformed
+    */
+    public URL asFileURL() throws MalformedURLException {
+       return new URL("file", "", -1, getPathName(false));
+    }
+
+   /**
+    * Get file's URI as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
+    * represents a root.
+    *
+    * @return the url
+    *
+    * @throws URISyntaxException if the URI is somehow malformed
+    */
+    public URI asFileURI() throws URISyntaxException {
+       return new URI("file", "", getPathName(false), null);
+    }
+
     /**
      * Get the {@link CodeSigner}s for a the virtual file.
      *

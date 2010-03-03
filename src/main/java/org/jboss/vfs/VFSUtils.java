@@ -482,12 +482,18 @@ public class VFSUtils {
      * Get the virtual URL for a virtual file.  This URL can be used to access the virtual file; however, taking the file
      * part of the URL and attempting to use it with the {@link java.io.File} class may fail if the file is not present
      * on the physical filesystem, and in general should not be attempted.
+     * <b>Note:</b> if the given VirtualFile refers to a directory <b>at the time of this
+     * method invocation</b>, a trailing slash will be appended to the URL; this means that invoking
+     * this method may require a filesystem access, and in addition, may not produce consistent results
+     * over time.
      *
      * @param file the virtual file
      *
      * @return the URL
      *
      * @throws MalformedURLException if the file cannot be coerced into a URL for some reason
+     * @see VirtualFile#asDirectoryURL()
+     * @see VirtualFile#asFileURL()
      */
     public static URL getVirtualURL(VirtualFile file) throws MalformedURLException {
         // todo: specify the URL handler directly as a minor optimization
@@ -496,12 +502,18 @@ public class VFSUtils {
 
     /**
      * Get the virtual URI for a virtual file.
+     * <b>Note:</b> if the given VirtualFile refers to a directory <b>at the time of this
+     * method invocation</b>, a trailing slash will be appended to the URI; this means that invoking
+     * this method may require a filesystem access, and in addition, may not produce consistent results
+     * over time.
      *
      * @param file the virtual file
      *
      * @return the URI
      *
      * @throws URISyntaxException if the file cannot be coerced into a URI for some reason
+     * @see VirtualFile#asDirectoryURI()
+     * @see VirtualFile#asFileURI()
      */
     public static URI getVirtualURI(VirtualFile file) throws URISyntaxException {
         return new URI("file", "", file.getPathName(true), null);
