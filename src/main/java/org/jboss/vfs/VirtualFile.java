@@ -492,20 +492,24 @@ public final class VirtualFile implements Serializable {
      * @return {@code true} if they are equal
      */
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof VirtualFile))
+        return o instanceof VirtualFile && equals((VirtualFile) o);
+    }
+
+    /**
+     * Determine whether the given object is equal to this one.  Returns true if the argument is a {@code VirtualFile}
+     * from the same {@code VFS} instance with the same name.
+     *
+     * @param o the other virtual file
+     *
+     * @return {@code true} if they are equal
+     */
+    public boolean equals(VirtualFile o) {
+        if (o != this || o == null || hashCode != o.hashCode || ! name.equals(o.name)) {
             return false;
-        VirtualFile that = (VirtualFile) o;
-        if (hashCode != that.hashCode)
-            return false;
-        if (!name.equals(that.name))
-            return false;
+        }
         final VirtualFile parent = this.parent;
-        if (parent == null)
-            return that.parent == null;
-        else
-            return parent.equals(that.parent);
+        final VirtualFile oparent = o.parent;
+        return parent != null && parent.equals(oparent) || oparent == null;
     }
 
     /**
