@@ -217,25 +217,26 @@ public class VFS {
             //   TODO Consider creating our own normalization routine, which would
             //   allow for testing on non-Windows
             String absolute = new File(path).getAbsolutePath();
-            
-            if (absolute.charAt(1) == ':') {
-                // Drive form
-                root = new VirtualFile("/" + absolute.charAt(0) + ":/", null);
-                path = absolute.substring(2).replace('\\', '/');
-            } else if (absolute.charAt(0) == '\\' && absolute.charAt(1) == '\\') {
-                // UNC form 
-                for (int i = 2; i < absolute.length(); i++) {
-                    if (absolute.charAt(i) == '\\') {
-                        // Switch \\ to // just like java file URLs.
-                        // Note, it turns out that File.toURL puts this portion
-                        // in the path portion of the URL, which is actually not
-                        // correct, since // is supposed to signify the authority.
-                        root = new VirtualFile("//" + absolute.substring(0,i), null);
-                        path = absolute.substring(i).replace('\\', '/');
-                        break;
-                    }
-                }               
-            } 
+            if (absolute.length() > 2) {
+                if (absolute.charAt(1) == ':') {
+                    // Drive form
+                    root = new VirtualFile("/" + absolute.charAt(0) + ":/", null);
+                    path = absolute.substring(2).replace('\\', '/');
+                } else if (absolute.charAt(0) == '\\' && absolute.charAt(1) == '\\') {
+                    // UNC form 
+                    for (int i = 2; i < absolute.length(); i++) {
+                        if (absolute.charAt(i) == '\\') {
+                            // Switch \\ to // just like java file URLs.
+                            // Note, it turns out that File.toURL puts this portion
+                            // in the path portion of the URL, which is actually not
+                            // correct, since // is supposed to signify the authority.
+                            root = new VirtualFile("//" + absolute.substring(0,i), null);
+                            path = absolute.substring(i).replace('\\', '/');
+                            break;
+                        }
+                    }               
+                }
+            }
             
             if (root == null)
                 throw new IllegalArgumentException("Invalid Win32 path: " + path);       
