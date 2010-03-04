@@ -783,8 +783,9 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       long lastModified = tmp.lastModified();
       long size = tmp.length();
       String name = tmp.getName();
-      String vfsPath = tmp.getPath();
+      
       URL url = tmp.toURI().toURL();
+      String vfsPath = url.getPath();
       log.debug("name: " + name);
       log.debug("vfsPath: " + vfsPath);
       log.debug("url: " + url);
@@ -851,8 +852,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       long lastModified = tmpJar.lastModified();
       long size = tmpJar.length();
       String name = tmpJar.getName();
-      String vfsPath = tmpJar.getPath();
       URL url = tmpJar.toURL();
+      String vfsPath = url.getPath();
       //url = JarUtils.createJarURL(url);
       log.debug("name: " + name);
       log.debug("vfsPath: " + vfsPath);

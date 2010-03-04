@@ -48,6 +48,7 @@ import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
+import org.jboss.vfs.spi.RootFileSystem;
 import org.jboss.logging.Logger;
 import org.jboss.net.protocol.URLStreamHandlerFactory;
 
@@ -67,8 +68,14 @@ public class VFS {
     public static final boolean FORCE_CANONICAL;
 
     private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
-    private static final VirtualFile rootVirtualFile = new VirtualFile("", null);
-    private static final Mount rootMount = new Mount(RealFileSystem.ROOT_INSTANCE, rootVirtualFile);
+    private static final VirtualFile rootVirtualFile = createDefaultRoot();
+
+    private static VirtualFile createDefaultRoot() {
+       return isWindows() ? getChild("/") : new VirtualFile("/", null);
+    }
+            
+    // Note that rootVirtualFile is ignored by RootFS
+    private static final Mount rootMount = new Mount(RootFileSystem.ROOT_INSTANCE, rootVirtualFile);
 
     // todo - LRU VirtualFiles?
     // todo - LRU String intern?
@@ -170,6 +177,12 @@ public class VFS {
     public static VirtualFile getChild(URL url) throws URISyntaxException {
         return getChild(url.toURI());
     }
+    
+    private static boolean isWindows()
+    {
+        // Not completely accurate, but good enough
+        return File.separatorChar == '\\';
+    }
 
     /**
      * Find a virtual file.
@@ -196,29 +209,41 @@ public class VFS {
     public static VirtualFile getChild(String path) {
         if (path == null)
             throw new IllegalArgumentException("Null path");
-        return getRootVirtualFile().getChild(canonicalize(path));
-    }
-
-   /**
-    * Canonicalize path.
-    *
-    * @param path the path to canonicalize
-    * @return canonical path of given @param path
-    */
-    private static String canonicalize(String path)
-    {
-       if (FORCE_CANONICAL)
-       {
-          try
-          {
-             return new File(path).getCanonicalPath();
-          }
-          catch (IOException e)
-          {
-             throw new RuntimeException("Cannot get canonical file for path: " + path, e);
-          }
-       }
-       return path;
+        
+        VirtualFile root = null;
+        
+        if (isWindows()) {
+            // Normalize the path using java.io.File
+            //   TODO Consider creating our own normalization routine, which would
+            //   allow for testing on non-Windows
+            String absolute = new File(path).getAbsolutePath();
+            
+            if (absolute.charAt(1) == ':') {
+                // Drive form
+                root = new VirtualFile("/" + absolute.charAt(0) + ":/", null);
+                path = absolute.substring(2).replace('\\', '/');
+            } else if (absolute.charAt(0) == '\\' && absolute.charAt(1) == '\\') {
+                // UNC form 
+                for (int i = 2; i < absolute.length(); i++) {
+                    if (absolute.charAt(i) == '\\') {
+                        // Switch \\ to // just like java file URLs.
+                        // Note, it turns out that File.toURL puts this portion
+                        // in the path portion of the URL, which is actually not
+                        // correct, since // is supposed to signify the authority.
+                        root = new VirtualFile("//" + absolute.substring(0,i), null);
+                        path = absolute.substring(i).replace('\\', '/');
+                        break;
+                    }
+                }               
+            } 
+            
+            if (root == null)
+                throw new IllegalArgumentException("Invalid Win32 path: " + path);       
+        } else {
+            root = rootVirtualFile;
+        }
+        
+        return root.getChild(path);
     }
 
     /**

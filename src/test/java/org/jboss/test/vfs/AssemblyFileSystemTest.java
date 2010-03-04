@@ -2,6 +2,7 @@ package org.jboss.test.vfs;
 
 import java.io.Closeable;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -104,7 +105,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
 
          assertFalse(directoryEntries.isEmpty());
          for (VirtualFile child : directoryEntries) {
-            assertTrue(child.getPathName().startsWith("/assembly/jar1.jar"));
+            assertTrue(child.getPathName().startsWith(winFriendlyAbsolutePath("/assembly/jar1.jar")));
          }
 
       }
@@ -113,6 +114,10 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
       }
    }
    
+   private String winFriendlyAbsolutePath(String path) {
+       return (File.separatorChar == '\\') ? "/" + new File("\\").getAbsolutePath().replace('\\', '/') + path.substring(1) : path; 
+   }
+
    @Test
    public void testFileExistence() throws Exception {
       VirtualFileAssembly assembly = new VirtualFileAssembly();

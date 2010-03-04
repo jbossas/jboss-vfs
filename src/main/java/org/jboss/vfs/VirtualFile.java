@@ -134,7 +134,7 @@ public final class VirtualFile implements Serializable {
         final StringBuilder builder = new StringBuilder(160);
         final VirtualFile parent = this.parent;
         if (parent == null) {
-            return "/";
+            return name;
         } else {
             builder.append(parent.getPathName());
             if (parent.parent != null) {
@@ -176,6 +176,17 @@ public final class VirtualFile implements Serializable {
     public boolean exists() {
         final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().exists(mount.getMountPoint(), this);
+    }
+    
+    /**
+     * Determines whether this virtual file represents a true root of a file system.
+     * On UNIX, there is only one root "/". Howevever, on Windows there are an infinite
+     * number of roots that correspond to drives, or UNC paths.
+     * 
+     * @return {@code true} if this represents a root.
+     */ 
+    public boolean isRoot() {
+        return parent == null;
     }
 
     /**

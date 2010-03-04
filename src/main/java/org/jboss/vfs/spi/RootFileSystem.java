@@ -35,30 +35,18 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * A real filesystem.
+ * A special FileSystem which supports multiple roots.
+ * 
+ * This is currently accomplished by requiring that VirtualFile.getPathName()
+ * produce output that is consumable by java.io.File as a path.
  */
-public final class RealFileSystem implements FileSystem {
+public final class RootFileSystem implements FileSystem {
 
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
-
-    /**
-     * The root real filesystem (singleton instance).
-     */
-   
-
-    private static final boolean NEEDS_CONVERSION = File.separatorChar != '/';
-
-    private final File realRoot;
-
-    /**
-     * Construct a real filesystem with the given real root.
-     *
-     * @param realRoot the real root
-     */
-    public RealFileSystem(File realRoot) {
-        this.realRoot = realRoot;
-        log.tracef("Constructed real filesystem at root %s", realRoot);
-    }
+    private static final Logger log = Logger.getLogger("org.jboss.vfs.root");
+    
+    public static final RootFileSystem ROOT_INSTANCE = new RootFileSystem();
+    
+    private RootFileSystem(){}
 
     /**
      * {@inheritDoc}
@@ -78,13 +66,7 @@ public final class RealFileSystem implements FileSystem {
      * {@inheritDoc}
      */
     public File getFile(VirtualFile mountPoint, VirtualFile target) {
-        if (mountPoint.equals(target)) {
-            return realRoot;
-        } else if (NEEDS_CONVERSION) {
-            return new File(realRoot, target.getPathNameRelativeTo(mountPoint).replace('/', File.separatorChar));
-        } else {
-            return new File(realRoot, target.getPathNameRelativeTo(mountPoint));
-        }
+        return new File(target.getPathName());
     }
 
     /**
@@ -146,6 +128,6 @@ public final class RealFileSystem implements FileSystem {
      * {@inheritDoc}
      */
     public void close() throws IOException {
-        // no operation - the real FS can't be closed
+        // no operation - the root FS can't be closed
     }
 }
