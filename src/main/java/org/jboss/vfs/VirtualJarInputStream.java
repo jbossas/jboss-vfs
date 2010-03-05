@@ -53,7 +53,7 @@ public class VirtualJarInputStream extends JarInputStream {
    private final VirtualFile root;
    private final Manifest manifest;
 
-   private InputStream currentEntryStream;
+   private InputStream currentEntryStream = VFSUtils.emptyStream();
 
    private boolean closed;
 

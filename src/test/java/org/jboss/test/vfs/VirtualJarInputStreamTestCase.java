@@ -253,4 +253,26 @@ public class VirtualJarInputStreamTestCase extends AbstractVFSTest {
       }
    }
 
+   /**
+    * Test to verify the VirtualJarInputStream correctly behaves when read is called
+    * before a call to getNextEntry or getNextJarEntry.
+    *
+    * @See https://jira.jboss.org/jira/browse/JBVFS-142
+    *
+    * @throws Exception
+    */
+   @Test
+   public void testReadCallWithNoEntry() throws Exception {
+      VirtualFile jar = testdir.getChild("jar1.jar");
+      Closeable mount = VFS.mountZip(jar, jar, provider);
+      try {
+         JarInputStream jarInput = (JarInputStream) jar.openStream();
+         assertEquals(-1, jarInput.read());
+      }
+      finally {
+         mount.close();
+      }
+   }
+
+
 }
