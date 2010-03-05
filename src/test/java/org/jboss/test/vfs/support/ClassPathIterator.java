@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileFilter;
 
@@ -58,7 +59,7 @@ public class ClassPathIterator
       if( protocol == null )
       {
       }
-      else if( protocol.equals("file") || protocol.startsWith("vfs"))
+      else if( protocol.equals(VFSUtils.VFS_PROTOCOL))
       {
          URLConnection conn = url.openConnection();
          vf = (VirtualFile) conn.getContent();

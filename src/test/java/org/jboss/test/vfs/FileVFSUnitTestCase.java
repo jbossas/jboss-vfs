@@ -784,7 +784,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       long size = tmp.length();
       String name = tmp.getName();
       
-      URL url = tmp.toURI().toURL();
+      URL url = toVfsUrl(tmp.toURI().toURL());
       String vfsPath = url.getPath();
       log.debug("name: " + name);
       log.debug("vfsPath: " + vfsPath);
@@ -995,7 +995,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       log.debug("outerURI: " + outerURI);
       assertTrue(outerURI + " ends in '/'", outerURI.getPath().endsWith("/"));
       // Validate that jar1 is under unpacked-outer.jar
-      URI jar1URI = new URI(outerURI + "jar1.jar/");
+      URI jar1URI = toVfsUri(new URI(outerURI + "jar1.jar/"));
       log.debug("jar1URI: " + jar1URI + ", path=" + jar1URI.getPath());
       assertTrue("jar1URI path ends in unpacked-outer.jar/jar1.jar!/", jar1URI.getPath().endsWith("unpacked-outer.jar/jar1.jar/"));
       VirtualFile jar1 = outerJar.getChild("jar1.jar");
@@ -1178,7 +1178,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       {
          assertNotNull("tstjar != null", tstjar);
          URI uri = tstjar.toURI();
-         URI expectedURI = new URI("vfs" + rootURL.toString() + "/path%20with%20spaces/tst.jar/");
+         URI expectedURI = toVfsUri(new URI(rootURL.toString() + "/path%20with%20spaces/tst.jar/"));
          assertEquals(expectedURI.getPath(), uri.getPath());
 
          InputStream is = uri.toURL().openStream();
@@ -1188,7 +1188,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          mounts.addAll(recursiveMount(tstjar));
          assertNotNull("tstjar != null", tstjar);
          uri = tstjar.toURI();
-         expectedURI = new URI("vfs" + rootURL.toString() + "/path%20with%20spaces/tst%2520nospace.jar/");
+         expectedURI = toVfsUri(new URI(rootURL.toString() + "/path%20with%20spaces/tst%2520nospace.jar/"));
          assertEquals(expectedURI.getPath(), uri.getPath());
 
          is = uri.toURL().openStream();
@@ -1211,7 +1211,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          assertNotNull("spaces.ear != null", tstear);
          assertTrue(tstear.isDirectory());
          URI uri = tstear.toURI();
-         URI expectedURI = new URI("vfs" + rootURL.toString() + "/spaces.ear/");
+         URI expectedURI = toVfsUri(new URI(rootURL.toString() + "/spaces.ear/"));
          assertEquals(expectedURI.getPath(), uri.getPath());
 
          InputStream is = uri.toURL().openStream();
@@ -1220,7 +1220,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          VirtualFile tstjar = tstear.getChild("spaces-ejb.jar");
          assertNotNull("spaces-ejb.jar != null", tstjar);
          uri = tstjar.toURI();
-         expectedURI = new URI("vfs" + rootURL.toString() + "/spaces.ear/spaces-ejb.jar/");
+         expectedURI = toVfsUri(new URI(rootURL.toString() + "/spaces.ear/spaces-ejb.jar/"));
          assertEquals(expectedURI.getPath(), uri.getPath());
          assertFalse(tstjar.isFile());
          assertTrue(tstjar.isDirectory());
@@ -1231,7 +1231,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
          tstjar = tstear.getChild("spaces-lib.jar");
          assertNotNull("spaces-lib.jar != null", tstjar);
          uri = tstjar.toURI();
-         expectedURI = new URI("vfs" + rootURL.toString() + "/spaces.ear/spaces-lib.jar/");
+         expectedURI = toVfsUri(new URI(rootURL.toString() + "/spaces.ear/spaces-lib.jar/"));
          assertEquals(expectedURI.getPath(), uri.getPath());
          assertFalse(tstjar.isFile());
          assertTrue(tstjar.isDirectory());
@@ -1257,8 +1257,8 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
       VirtualFile tstjar = testdir.getChild("path with spaces/unpacked-tst.jar");
       assertNotNull("tstjar != null", tstjar);
       URI uri = tstjar.toURI();
-      URI expectedURI = new URI(rootURL.toString() + "/path%20with%20spaces/unpacked-tst.jar/");
-      assertEquals(uri, expectedURI);
+      URI expectedURI = toVfsUri(new URI(rootURL.toString() + "/path%20with%20spaces/unpacked-tst.jar/"));
+      assertEquals(expectedURI, uri);
    }
 
    //   /**
@@ -1467,6 +1467,15 @@ public class FileVFSUnitTestCase extends AbstractVFSTest
 
       // directory delete()
       assertTrue(tmpRoot + ".delete()", root.delete());
+   }
+
+   private URL toVfsUrl(URL fileUrl) throws Exception
+   {
+      return new URL(VFSUtils.VFS_PROTOCOL, fileUrl.getHost(), fileUrl.getFile());
+   }
+
+   private URI toVfsUri(URI fileUri) throws Exception {
+      return new URI(VFSUtils.VFS_PROTOCOL, fileUri.getHost(), fileUri.getPath(), fileUri.getFragment());
    }
 
    /**

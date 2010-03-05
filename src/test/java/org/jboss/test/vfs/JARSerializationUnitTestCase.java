@@ -344,7 +344,7 @@ public class JARSerializationUnitTestCase extends AbstractVFSTest
       List<Closeable> mounts = recursiveMount(VFS.getChild(url));
       try
       {
-         url = new URL("file" + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring");
+         url = new URL(VFSUtils.VFS_PROTOCOL + urlString.substring(p) + "/lib/spring-beans.jar/org/jboss/test/spring");
          VirtualFile file = VFS.getChild(url);
          assertNotNull("No beans dir", file.getChild("beans"));
          testVirtualFileAdaptor(file, "beans");

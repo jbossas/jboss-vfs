@@ -33,6 +33,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -65,6 +66,13 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       return file;
    }
 
+   protected URL getURLAndAssertProtocol(VirtualFile file) throws Exception
+   {
+      URL url = file.toURL();
+      assertEquals(VFSUtils.VFS_PROTOCOL, url.getProtocol());
+      return url;
+   }
+
    /**
     * Test url connection content.
     *
@@ -73,7 +81,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
    public void testContent() throws Exception
    {
       VirtualFile file = getFile();
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertEquals(file, conn.getContent());
    }
@@ -86,7 +94,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
    public void testContentLenght() throws Exception
    {
       VirtualFile file = getFile();
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertEquals(file.getSize(), conn.getContentLength());
    }
@@ -99,7 +107,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
    public void testLastModified() throws Exception
    {
       VirtualFile file = getFile();
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertEquals(file.getLastModified(), conn.getLastModified());
    }
@@ -112,7 +120,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
    public void testInputStream() throws Exception
    {
       VirtualFile file = getFile();
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertTrue(Arrays.equals(readBytes(file.openStream()), readBytes(conn.getInputStream())));
    }
@@ -123,7 +131,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       VirtualFile file = root.getChild("path with spaces/spaces.ear");
       File real = file.getPhysicalFile();
       assertTrue(real.exists());
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertTrue(Arrays.equals(readBytes(conn.getInputStream()), readBytes(file.openStream())));
    }
@@ -134,11 +142,22 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       temp.deleteOnExit();
       VirtualFile file = VFS.getChild(temp.toURI());
       assertTrue(file.exists());
-      URL url = file.toURL();
+      URL url = getURLAndAssertProtocol(file);
       URLConnection conn = url.openConnection();
       assertEquals(file.getLastModified(), conn.getLastModified());
    }
-   
+
+   public void testOutsideUrl() throws Exception
+   {
+      URL url = getResource("/vfs/test/outer.jar");
+      File file = new File(url.toURI());
+       
+      url = new URL(VFSUtils.VFS_PROTOCOL, url.getHost(), url.getPort(), url.getFile());
+
+      URLConnection conn = url.openConnection();
+      assertEquals(file.lastModified(), conn.getLastModified());
+   }
+
    protected static byte[] readBytes(InputStream inputStream) throws Exception
    {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -75,14 +75,10 @@ public class VFSUtils {
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     /**
-     * Constant representing the URL file protocol
+     * Constant representing the URL vfs protocol
      */
-    public static final String FILE_PROTOCOL = "file";
+    public static final String VFS_PROTOCOL = "vfs";
 
-    /**
-     * Standard separator for JAR URL
-     */
-    public static final String JAR_URL_SEPARATOR = "!/";
 
     /**
      * The default buffer size to use for copies
@@ -497,7 +493,7 @@ public class VFSUtils {
      */
     public static URL getVirtualURL(VirtualFile file) throws MalformedURLException {
         // todo: specify the URL handler directly as a minor optimization
-        return new URL("file", "", -1, file.getPathName(true));
+        return new URL(VFS_PROTOCOL, "", -1, file.getPathName(true));
     }
 
     /**
@@ -516,7 +512,7 @@ public class VFSUtils {
      * @see VirtualFile#asFileURI()
      */
     public static URI getVirtualURI(VirtualFile file) throws URISyntaxException {
-        return new URI("file", "", file.getPathName(true), null);
+        return new URI(VFS_PROTOCOL, "", file.getPathName(true), null);
     }
 
     /**

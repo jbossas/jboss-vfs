@@ -476,7 +476,7 @@ public final class VirtualFile implements Serializable {
     */
     public URL asDirectoryURL() throws MalformedURLException {
        final String pathName = getPathName(false);
-       return new URL("file", "", -1, parent == null ? pathName : pathName + "/");
+       return new URL(VFSUtils.VFS_PROTOCOL, "", -1, parent == null ? pathName : pathName + "/");
     }
 
    /**
@@ -488,7 +488,7 @@ public final class VirtualFile implements Serializable {
     */
     public URI asDirectoryURI() throws URISyntaxException {
        final String pathName = getPathName(false);
-       return new URI("file", "", parent == null ? pathName : pathName + "/", null);
+       return new URI(VFSUtils.VFS_PROTOCOL, "", parent == null ? pathName : pathName + "/", null);
     }
 
    /**
@@ -500,7 +500,7 @@ public final class VirtualFile implements Serializable {
     * @throws MalformedURLException if the URL is somehow malformed
     */
     public URL asFileURL() throws MalformedURLException {
-       return new URL("file", "", -1, getPathName(false));
+       return new URL(VFSUtils.VFS_PROTOCOL, "", -1, getPathName(false));
     }
 
    /**
@@ -512,7 +512,7 @@ public final class VirtualFile implements Serializable {
     * @throws URISyntaxException if the URI is somehow malformed
     */
     public URI asFileURI() throws URISyntaxException {
-       return new URI("file", "", getPathName(false), null);
+       return new URI(VFSUtils.VFS_PROTOCOL, "", getPathName(false), null);
     }
 
     /**
