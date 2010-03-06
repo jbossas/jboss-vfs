@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, JBoss Inc., and individual contributors as indicated
+ * Copyright 2010, JBoss Inc., and individual contributors as indicated
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -19,25 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.jboss.vfs.protocol;
 
-import java.net.URLStreamHandler;
-import java.net.URLConnection;
-import java.net.URL;
-import java.net.Proxy;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
- * The VFS URL stream handler.
+ * A File based URLStreamHandler
+ *
+ * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
+ * @version $Revision$
  */
-public abstract class VirtualFileURLStreamHandler extends AbstractLocalURLStreamHandler {
-
+public class FileURLStreamHandler extends AbstractLocalURLStreamHandler {
     @Override
-    protected URLConnection openConnection(URL url) throws IOException {
+    protected URLConnection openConnection(final URL url) throws IOException {
         ensureLocal(url);
-        return new VirtualFileURLConnection(url);
+        return new FileURLConnection(url);
     }
 }

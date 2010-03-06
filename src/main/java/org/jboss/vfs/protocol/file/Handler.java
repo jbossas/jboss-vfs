@@ -22,11 +22,16 @@
 
 package org.jboss.vfs.protocol.file;
 
+import org.jboss.vfs.protocol.AbstractLocalURLStreamHandler;
+import org.jboss.vfs.protocol.FileURLStreamHandler;
 import org.jboss.vfs.protocol.VirtualFileURLStreamHandler;
+
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Stub handler class.
  */
-public final class Handler extends VirtualFileURLStreamHandler {
-
+public final class Handler extends FileURLStreamHandler {
 }
