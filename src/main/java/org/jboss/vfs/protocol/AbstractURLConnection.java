@@ -73,17 +73,14 @@ public abstract class AbstractURLConnection extends URLConnection {
    public String getContentType() {
       if(contentType != null)
          return contentType;
-      contentType = super.getHeaderField("content-type");
+      contentType = getFileNameMap().getContentTypeFor(getName());
       if(contentType == null) {
-         contentType = getFileNameMap().getContentTypeFor(getName());
-         if(contentType == null) {
-            try {
-               InputStream is = getInputStream();
-               BufferedInputStream bis = new BufferedInputStream(is);
-               contentType = java.net.URLConnection.guessContentTypeFromStream(bis);
-               bis.close();
-            } catch(IOException e) { /* ignore */ }
-         }
+         try {
+            InputStream is = getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            contentType = java.net.URLConnection.guessContentTypeFromStream(bis);
+            bis.close();
+         } catch(IOException e) { /* ignore */ }
       }
       return contentType;
    }
