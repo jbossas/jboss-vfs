@@ -22,17 +22,13 @@
 package org.jboss.vfs.protocol;
 
 import org.jboss.vfs.VFS;
-import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 
 import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.Permission;
 
 /**
@@ -42,7 +38,7 @@ import java.security.Permission;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-class VirtualFileURLConnection extends URLConnection
+class VirtualFileURLConnection extends AbstractURLConnection
 {
    private final VirtualFile file;
 
@@ -86,17 +82,8 @@ class VirtualFileURLConnection extends URLConnection
       return new FilePermission(decodedPath, "read");
    }
 
-   private static URI toURI(URL url) throws IOException
-   {
-      try
-      {
-         return VFSUtils.toURI(url);
-      }
-      catch (URISyntaxException e)
-      {
-         IOException ioe = new IOException();
-         ioe.initCause(e);
-         throw ioe;
-      }
+   @Override
+   protected String getName() {
+      return file.getName();
    }
 }

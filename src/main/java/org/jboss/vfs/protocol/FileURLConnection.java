@@ -22,7 +22,6 @@
 package org.jboss.vfs.protocol;
 
 import org.jboss.vfs.VFS;
-import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.spi.RootFileSystem;
 
@@ -30,7 +29,7 @@ import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
+import java.net.URL;
 import java.security.Permission;
 
 /**
@@ -39,7 +38,7 @@ import java.security.Permission;
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  * @version $Revision$
  */
-public class FileURLConnection extends URLConnection {
+public class FileURLConnection extends AbstractURLConnection {
 
    private final RootFileSystem rootFileSystem = RootFileSystem.ROOT_INSTANCE;
 
@@ -74,21 +73,16 @@ public class FileURLConnection extends URLConnection {
       return rootFileSystem.openInputStream(mountPoint, file);
    }
 
-    @Override
-    public void connect() throws IOException {
-    }
+   @Override
+   public Permission getPermission() throws IOException {
+      return new FilePermission(file.getPathName(), "read");
+   }
 
-    private static URI toURI(URL url) throws IOException
-   {
-      try
-      {
-         return VFSUtils.toURI(url);
-      }
-      catch (URISyntaxException e)
-      {
-         IOException ioe = new IOException();
-         ioe.initCause(e);
-         throw ioe;
-      }
+   public void connect() throws IOException {
+   }
+
+   @Override
+   protected String getName() {
+      return file.getName();
    }
 }

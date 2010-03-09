@@ -148,6 +148,16 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       assertEquals(file.getLastModified(), conn.getLastModified());
    }
 
+   public void testVfsUrlContentType() throws Exception
+   {
+      URL url = getResource("/vfs/test/test-web.xml");
+      VirtualFile xml = VFS.getChild(url);
+      URLConnection conn = xml.toURL().openConnection();
+      String contentType = conn.getContentType();
+      assertNotNull(contentType);
+      assertEquals("application/xml", contentType);
+   }
+
    public void testOutsideUrl() throws Exception
    {
       URL url = getResource("/vfs/test/outer.jar");
@@ -192,6 +202,35 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       } finally {
          VFSUtils.safeClose(handle, provider);
       }
+   }
+
+   public void testFileUrlContentType() throws Exception
+   {
+      VFS.getChild("");
+      URL url = getResource("/vfs/test/test-web.xml");
+      url = new URL("file", url.getHost(), url.getFile());
+      
+      URLConnection conn = url.openConnection();
+      String contentType = conn.getContentType();
+      assertNotNull(contentType);
+      assertEquals("application/xml", contentType);
+   }
+
+   public void testHeaderFields() throws Exception
+   {
+      VFS.getChild("");
+      URL url = getResource("/vfs/test/test-web.xml");
+      url = new URL("file", url.getHost(), url.getFile());
+
+      URLConnection conn = url.openConnection();
+      int contentLength = conn.getContentLength();
+      assertTrue(contentLength > 0);
+      String contentLengthHeader = conn.getHeaderField("content-length");
+      assertEquals(String.valueOf(contentLength), contentLengthHeader);
+
+      assertTrue(conn.getLastModified() > 0);
+      String lastModifiedHeader = conn.getHeaderField("last-modified");
+      assertNotNull(lastModifiedHeader);
    }
 
    protected static byte[] readBytes(InputStream inputStream) throws Exception
