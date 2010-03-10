@@ -48,7 +48,7 @@ import org.junit.internal.ArrayComparisonFailure;
  */
 public abstract class AbstractVFSTest extends BaseTestCase
 {
-   private TempFileProvider provider;
+   protected TempFileProvider provider;
 
    public AbstractVFSTest(String name)
    {

@@ -284,7 +284,12 @@ public final class JavaZipFileSystem implements FileSystem {
     public boolean isReadOnly() {
         return true;
     }
-    
+
+    /** {@inheritDoc} */
+    public File getMountSource() {
+        return archiveFile;
+    }
+
     /** {@inheritDoc} */
     public void close() throws IOException {
         log.tracef("Closing zip filesystem %s", this);

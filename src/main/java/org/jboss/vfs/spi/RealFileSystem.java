@@ -135,14 +135,21 @@ public final class RealFileSystem implements FileSystem {
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
     
-   /**
-    * {@inheritDoc}
-    */
-   public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
-      return null;
-   }
+    /**
+     * {@inheritDoc}
+     */
+    public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
+        return null;
+    }
 
-   /**
+    /**
+     * {@inheritDoc}
+     */
+    public File getMountSource() {
+        return realRoot;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void close() throws IOException {

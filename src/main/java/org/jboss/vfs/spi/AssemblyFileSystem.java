@@ -140,6 +140,11 @@ public class AssemblyFileSystem implements FileSystem {
        return assemblyFile.getCodeSigners();
     }
 
+    /** {@inheritDoc} */
+    public File getMountSource() {
+        return null;
+    }
+
     private VirtualFile getExistingFile(final VirtualFile mountPoint, final VirtualFile target) throws FileNotFoundException {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {

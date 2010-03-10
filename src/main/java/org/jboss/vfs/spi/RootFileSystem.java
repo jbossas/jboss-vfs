@@ -117,14 +117,22 @@ public final class RootFileSystem implements FileSystem {
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
     
-   /**
-    * {@inheritDoc}
-    */
-   public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
-      return null;
-   }
+    /**
+     * {@inheritDoc}
+     */
+    public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
+        return null;
+    }
 
-   /**
+
+    /**
+     * {@inheritDoc}
+     */
+    public File getMountSource() {
+        return null;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void close() throws IOException {

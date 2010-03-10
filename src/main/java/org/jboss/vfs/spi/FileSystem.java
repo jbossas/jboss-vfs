@@ -166,4 +166,11 @@ public interface FileSystem extends Closeable {
      * @throws IOException if an I/O error occurs during close
      */
     void close() throws IOException;
+
+    /**
+     * Get the {@link java.io.File} source provided at mount time.
+     *
+     * @return the source used for mounting
+     */
+    File getMountSource();
 }

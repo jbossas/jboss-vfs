@@ -46,6 +46,7 @@ import java.security.PrivilegedAction;
 
 import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
+import org.jboss.vfs.spi.MountHandle;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
 import org.jboss.vfs.spi.RootFileSystem;
@@ -372,18 +373,12 @@ public class VFS {
         return new HashSet<String>(mountMap.keySet());
     }
 
-    private static Closeable doMount(final FileSystem fileSystem, final VirtualFile mountPoint) throws IOException {
+    private static MountHandle doMount(final FileSystem fileSystem, final VirtualFile mountPoint, Closeable... additionalCloseables) throws IOException {
         boolean ok = false;
         try {
             final Closeable mountHandle = mount(mountPoint, fileSystem);
-            final Closeable closeable = new Closeable() {
-                public void close() throws IOException {
-                    VFSUtils.safeClose(mountHandle);
-                    VFSUtils.safeClose(fileSystem);
-                }
-            };
             ok = true;
-            return closeable;
+            return new BasicMountHandle(fileSystem, mountHandle, additionalCloseables);
         } finally {
             if (!ok) {
                 VFSUtils.safeClose(fileSystem);
@@ -403,13 +398,13 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
         try {
-            final Closeable closeable = doMount(new JavaZipFileSystem(zipFile, tempDir), mountPoint);
+            final MountHandle handle = doMount(new JavaZipFileSystem(zipFile, tempDir), mountPoint);
             ok = true;
-            return closeable;
+            return handle;
         } finally {
             if (!ok) {
                 VFSUtils.safeClose(tempDir);
@@ -430,14 +425,14 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         try {
             final TempDir tempDir = tempFileProvider.createTempDir(zipName);
             try {
-                final Closeable closeable = doMount(new JavaZipFileSystem(zipName, zipData, tempDir), mountPoint);
+                final MountHandle handle = doMount(new JavaZipFileSystem(zipName, zipData, tempDir), mountPoint);
                 ok = true;
-                return closeable;
+                return handle;
             } finally {
                 if (!ok) {
                     VFSUtils.safeClose(tempDir);
@@ -460,7 +455,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZip(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
     }
 
@@ -475,7 +470,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountReal(File realRoot, VirtualFile mountPoint) throws IOException {
+    public static MountHandle mountReal(File realRoot, VirtualFile mountPoint) throws IOException {
         return doMount(new RealFileSystem(realRoot), mountPoint);
     }
 
@@ -490,18 +485,13 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir("tmpfs");
         try {
-            final Closeable closeable = doMount(new RealFileSystem(tempDir.getRoot()), mountPoint);
+            final MountHandle handle = doMount(new RealFileSystem(tempDir.getRoot()), mountPoint, tempDir);
             ok = true;
-            return new Closeable() {
-                public void close() throws IOException {
-                    VFSUtils.safeClose(closeable);
-                    VFSUtils.safeClose(tempDir);
-                }
-            };
+            return handle;
         } finally {
             if (!ok) {
                 VFSUtils.safeClose(tempDir);
@@ -521,20 +511,15 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
         try {
             final File rootFile = tempDir.getRoot();
             VFSUtils.unzip(zipFile, rootFile);
-            final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
+            final MountHandle handle = doMount(new RealFileSystem(rootFile), mountPoint, tempDir);
             ok = true;
-            return new Closeable() {
-                public void close() throws IOException {
-                    VFSUtils.safeClose(closeable);
-                    VFSUtils.safeClose(tempDir);
-                }
-            };
+            return handle;
         } finally {
             if (!ok) {
                 VFSUtils.safeClose(tempDir);
@@ -555,7 +540,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         try {
             boolean ok = false;
             final TempDir tempDir = tempFileProvider.createTempDir(zipName);
@@ -574,14 +559,9 @@ public class VFS {
                     }
                     final File rootFile = tempDir.getRoot();
                     VFSUtils.unzip(zipFile, rootFile);
-                    final Closeable closeable = doMount(new RealFileSystem(rootFile), mountPoint);
+                    final MountHandle handle = doMount(new RealFileSystem(rootFile), mountPoint, tempDir);
                     ok = true;
-                    return new Closeable() {
-                        public void close() throws IOException {
-                            VFSUtils.safeClose(closeable);
-                            VFSUtils.safeClose(tempDir);
-                        }
-                    };
+                    return handle;
                 } finally {
                     zipFile.delete();
                 }
@@ -607,7 +587,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static Closeable mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static MountHandle mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZipExpanded(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
     }
     
@@ -621,7 +601,7 @@ public class VFS {
      * 
      * @throws IOException if an error occurs
      */
-    public static Closeable mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
+    public static MountHandle mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
        return doMount(new AssemblyFileSystem(assembly), mountPoint);
     }
 
