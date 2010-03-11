@@ -836,7 +836,9 @@ public class VFSUtils {
         StringBuilder patternBuilder = new StringBuilder();
         patternBuilder.append("^");
         final Matcher m = GLOB_PATTERN.matcher(glob);
+        boolean lastWasSlash = false;
         while (m.find()) {
+            lastWasSlash = false;
             String grp;
             if ((grp = m.group(1)) != null) {
                 // match a * or **
@@ -856,12 +858,13 @@ public class VFSUtils {
             } else if ((grp = m.group(4)) != null) {
                 // match any number of / chars
                 patternBuilder.append("/+");
+                lastWasSlash = true;
             } else {
                 // some other string
                 patternBuilder.append(Pattern.quote(m.group()));
             }
         }
-        if (glob.charAt(glob.length() - 1) == '/') {
+        if (lastWasSlash) {
             // ends in /, append **
             patternBuilder.append(".*");
         }
