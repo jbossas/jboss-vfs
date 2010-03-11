@@ -861,7 +861,7 @@ public class VFSUtils {
                 patternBuilder.append(Pattern.quote(m.group()));
             }
         }
-        if (patternBuilder.charAt(patternBuilder.length() - 1) == '/') {
+        if (glob.charAt(glob.length() - 1) == '/') {
             // ends in /, append **
             patternBuilder.append(".*");
         }
