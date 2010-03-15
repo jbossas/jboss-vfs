@@ -53,6 +53,7 @@ import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.collection.CollectionsFactory;
+import org.jboss.vfs.spi.MountHandle;
 import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.vfs.util.automount.Automounter;
 
@@ -810,6 +811,17 @@ public class VFSUtils {
         } finally {
             VFSUtils.safeClose(zip);
         }
+    }
+
+   /**
+    * Return the mount source File for a given mount handle.
+    * @param handle The handle to get the source for
+    * @return The mount source file or null if the handle does not have a source, or is not a MountHandle
+    */
+    public static File getMountSource(Closeable handle) {
+       if(handle instanceof MountHandle)
+         return MountHandle.class.cast(handle).getMountSource();
+       return null;
     }
 
     private static final Pattern GLOB_PATTERN = Pattern.compile("(\\*\\*?)|(\\?)|(\\\\.)|(/+)|([^*?]+)");

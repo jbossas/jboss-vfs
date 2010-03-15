@@ -24,8 +24,8 @@ package org.jboss.test.vfs;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.spi.MountHandle;
 
+import java.io.Closeable;
 import java.io.File;
 
 /**
@@ -42,11 +42,11 @@ public class MountHandleTestCase extends AbstractVFSTest {
    public void testZipGetMountSource() throws Exception {
       VirtualFile jar  = getVirtualFile("/vfs/test/jar1.jar");
       File origin = jar.getPhysicalFile();
-      MountHandle mountHandle = VFS.mountZip(jar, jar, provider);
+      Closeable mountHandle = VFS.mountZip(jar, jar, provider);
       try
       {
          File mounted = jar.getPhysicalFile();
-         File source = mountHandle.getMountSource();
+         File source = VFSUtils.getMountSource(mountHandle);
 
          assertNotNull(origin);
          assertNotNull(mounted);

@@ -398,7 +398,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
         try {
@@ -425,7 +425,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         try {
             final TempDir tempDir = tempFileProvider.createTempDir(zipName);
@@ -455,7 +455,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZip(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
     }
 
@@ -470,7 +470,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountReal(File realRoot, VirtualFile mountPoint) throws IOException {
+    public static Closeable mountReal(File realRoot, VirtualFile mountPoint) throws IOException {
         return doMount(new RealFileSystem(realRoot), mountPoint);
     }
 
@@ -485,7 +485,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir("tmpfs");
         try {
@@ -511,7 +511,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         boolean ok = false;
         final TempDir tempDir = tempFileProvider.createTempDir(zipFile.getName());
         try {
@@ -540,7 +540,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         try {
             boolean ok = false;
             final TempDir tempDir = tempFileProvider.createTempDir(zipName);
@@ -587,7 +587,7 @@ public class VFS {
      *
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
+    public static Closeable mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZipExpanded(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
     }
     
@@ -601,7 +601,7 @@ public class VFS {
      * 
      * @throws IOException if an error occurs
      */
-    public static MountHandle mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
+    public static Closeable mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
        return doMount(new AssemblyFileSystem(assembly), mountPoint);
     }
 
