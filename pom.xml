@@ -147,15 +147,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-common-core</artifactId>
-      <version>${version.jboss.common.core}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging-spi</artifactId>
       <version>${version.jboss.logging}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-common-core</artifactId>
+      <version>${version.jboss.common.core}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
