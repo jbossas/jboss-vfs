@@ -59,6 +59,7 @@ import org.jboss.net.protocol.URLStreamHandlerFactory;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author Scott.Stark@jboss.org
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @version $Revision: 1.1 $
  */
 public class VFS {

@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A temporary directory which exists until it is closed, at which time its contents will be removed.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class TempDir implements Closeable {
 

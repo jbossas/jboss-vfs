@@ -53,6 +53,8 @@ import org.jboss.logging.Logger;
  * <p/>
  * This implementation is backed by a zip file.  The provided file must be owned by this instance; otherwise, if the
  * file disappears unexpectedly, the filesystem will malfunction.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class JavaZipFileSystem implements FileSystem {
 

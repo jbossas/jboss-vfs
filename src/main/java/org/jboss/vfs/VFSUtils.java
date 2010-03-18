@@ -63,6 +63,7 @@ import org.jboss.vfs.util.automount.Automounter;
  *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @version $Revision: 1.1 $
  */
 public class VFSUtils {

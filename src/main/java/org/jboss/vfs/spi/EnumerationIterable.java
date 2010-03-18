@@ -25,6 +25,12 @@ package org.jboss.vfs.spi;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+/**
+ * An iterable enumeration wrapper.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @param <T> the element type
+ */
 class EnumerationIterable<T> implements Iterable<T> {
 
     private final Enumeration<T> entries;

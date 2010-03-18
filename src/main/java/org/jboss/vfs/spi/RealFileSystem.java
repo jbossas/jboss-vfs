@@ -36,6 +36,8 @@ import java.util.Collections;
 
 /**
  * A real filesystem.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class RealFileSystem implements FileSystem {
 

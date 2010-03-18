@@ -32,6 +32,8 @@ import java.util.Random;
 
 /**
  * A provider for temporary physical files and directories.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class TempFileProvider implements Closeable {
 

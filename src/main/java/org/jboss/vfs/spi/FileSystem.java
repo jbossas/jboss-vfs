@@ -36,6 +36,8 @@ import java.util.List;
  * instance of {@code FileSystem} will be mounted at some point on a VFS.  The specific instance is only called when a
  * file from this filesystem is called upon.  The path components passed in to the operations are canonical, with no "."
  * or ".." components.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public interface FileSystem extends Closeable {
 

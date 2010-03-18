@@ -49,6 +49,7 @@ import org.jboss.vfs.util.PathTokenizer;
  * @author Scott.Stark@jboss.org
  * @author adrian@jboss.org
  * @author Ales.Justin@jboss.org
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @version $Revision: 44334 $
  */
 public final class VirtualFile implements Serializable {
