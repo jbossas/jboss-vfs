@@ -267,6 +267,12 @@ public class VirtualJarInputStream extends JarInputStream {
          return virtualFile.getSize();
       }
 
+      @Override
+      public long getTime()
+      {
+         return virtualFile.getLastModified();
+      }
+
       /** {@inheritDoc} **/
       @Override
       public boolean isDirectory() {

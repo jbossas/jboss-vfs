@@ -121,6 +121,10 @@ public abstract class AbstractVFSTest extends BaseTestCase
 
    protected byte[] getContent(VirtualFile virtualFile) throws IOException {
       InputStream is = virtualFile.openStream();
+      return getContent(is);
+   }
+
+   protected byte[] getContent(InputStream is) throws IOException {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       VFSUtils.copyStreamAndClose(is, bos);
       return bos.toByteArray();
