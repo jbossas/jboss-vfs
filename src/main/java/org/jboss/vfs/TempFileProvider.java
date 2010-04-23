@@ -96,7 +96,8 @@ public final class TempFileProvider implements Closeable {
             if (f.mkdir())
                 return new TempDir(this, f);
         }
-        final IOException eo = new IOException("Could not create directory after " + RETRIES + " attempts");
+        final IOException eo = new IOException(
+                String.format("Could not create directory for original name '%s' after %d attempts", originalName, Integer.valueOf(RETRIES)));
         throw eo;
     }
 
@@ -108,7 +109,11 @@ public final class TempFileProvider implements Closeable {
             if (f.mkdir())
                 return f;
         }
-        final IOException eo = new IOException("Could not create directory after " + RETRIES + " attempts");
+        final IOException eo = new IOException(
+                String.format("Could not create directory for root '%s' (prefix '%s', suffix '%s') after %d attempts",
+                        root,
+                        prefix,
+                        suffix));
         throw eo;
     }
 
