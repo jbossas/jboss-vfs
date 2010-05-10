@@ -33,6 +33,9 @@ import org.jboss.vfs.VirtualFile;
  * Delaying opening stream from underlying virtual file as long as possible.
  * Won't be opened if not used at all.
  *
+ * Synchronization is very simplistic, as it's highly unlikely
+ * there will be a lot of concurrent requests.
+ *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public class LazyInputStream extends InputStream
@@ -91,9 +94,13 @@ public class LazyInputStream extends InputStream
    }
 
    @Override
-   public void close() throws IOException
+   public synchronized void close() throws IOException
    {
+      if (stream == null)
+         return;
+
       openStream().close();
+      stream = null; // reset the stream
    }
 
    @Override
