@@ -22,9 +22,10 @@
 package org.jboss.virtual;
 
 import java.io.InputStream;
-import java.io.IOException;
-import java.io.Reader;
 import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.jboss.virtual.plugins.vfs.helpers.LazyInputStream;
 
 import org.xml.sax.InputSource;
 
@@ -59,16 +60,8 @@ public class VFSInputSource extends InputSource
    }
 
    @Override
-   public InputStream getByteStream()
-   {
-      try
-      {
-         return file.openStream();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+    public InputStream getByteStream() {
+        return new LazyInputStream(file); 
    }
 
    @Override
