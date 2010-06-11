@@ -21,20 +21,31 @@
  */
 package org.jboss.vfs.protocol;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A File based URLStreamHandler
+ * URLStreamHandlerFactory providing URLStreamHandlers for VFS based URLS.
  *
- * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
- * @version $Revision$
+ * @author John Bailey
  */
-public class FileURLStreamHandler extends AbstractLocalURLStreamHandler {
-    @Override
-    protected URLConnection openConnection(final URL url) throws IOException {
-        ensureLocal(url);
-        return new FileURLConnection(url);
-    }
+public class VfsUrlStreamHandlerFactory implements URLStreamHandlerFactory {
+
+
+   private static Map<String, URLStreamHandler> handlerMap = new HashMap<String, URLStreamHandler>(2);
+
+   static {
+      handlerMap.put("file", new FileURLStreamHandler());
+      handlerMap.put("vfs", new VirtualFileURLStreamHandler());
+   }
+
+
+   @Override
+   public URLStreamHandler createURLStreamHandler(final String protocol)
+   {
+      return handlerMap.get(protocol);
+   }
 }

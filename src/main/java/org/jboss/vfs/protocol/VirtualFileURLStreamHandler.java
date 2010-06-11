@@ -22,18 +22,14 @@
 
 package org.jboss.vfs.protocol;
 
-import java.net.URLStreamHandler;
 import java.net.URLConnection;
 import java.net.URL;
-import java.net.Proxy;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * The VFS URL stream handler.
  */
-public abstract class VirtualFileURLStreamHandler extends AbstractLocalURLStreamHandler {
+public class VirtualFileURLStreamHandler extends AbstractLocalURLStreamHandler {
 
     @Override
     protected URLConnection openConnection(URL url) throws IOException {
