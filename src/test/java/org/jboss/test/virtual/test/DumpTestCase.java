@@ -21,13 +21,17 @@
  */
 package org.jboss.test.virtual.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 import junit.framework.Test;
 import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.plugins.context.file.FileSystemContext;
+import org.jboss.virtual.spi.VirtualFileHandler;
 
 /**
  * This test case is a dumping ground for tests that don't fit anywhere else
@@ -59,5 +63,17 @@ public class DumpTestCase extends AbstractVFSTest
       VirtualFile child = root.getChild("complex.jar/META-INF/MANIFEST.MF");
       InputStream in = child.openStream();
       in.close();
+   }
+
+   public void testJBVFS160() throws Exception
+   {
+      URI uri = new URI("file:////127.0.0.1/shared");
+      File file = new File("\\\\127.0.0.1\\shared");
+
+      FileSystemContext fsc = new FileSystemContext(uri);
+      VirtualFileHandler vfh = fsc.createVirtualFileHandler(null, file);
+      // this doesn't test anything as we don't have shared dir
+      // more of a helper for actual usage
+      System.out.println(vfh);
    }
 }

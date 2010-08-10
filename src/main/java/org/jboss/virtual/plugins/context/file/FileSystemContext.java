@@ -119,10 +119,10 @@ public class FileSystemContext extends AbstractVFSContext
    }
 
    /**
-    * Get the url for a file
+    * Get the uri for a file
     *
     * @param file the file
-    * @return the url
+    * @return the uri
     * @throws IOException for any error accessing the file system
     * @throws IllegalArgumentException for a null file
     */
@@ -131,7 +131,7 @@ public class FileSystemContext extends AbstractVFSContext
       if (file == null)
          throw new IllegalArgumentException("Null file");
 
-      URI url = file.toURI();
+      URL url = file.toURI().toURL();
       String path = url.getPath();
       if (file.isDirectory() == false)
       {
