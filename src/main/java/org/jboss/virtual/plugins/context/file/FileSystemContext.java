@@ -131,20 +131,20 @@ public class FileSystemContext extends AbstractVFSContext
       if (file == null)
          throw new IllegalArgumentException("Null file");
 
-      URL url = file.toURI().toURL();
-      String path = url.getPath();
+      URI uri = file.toURI();
+      String path = uri.getPath();
       if (file.isDirectory() == false)
       {
          path = VFSUtils.fixName(path);
       }
       else if (path.endsWith("/") == false)
       {
-            path = path + '/';
+         path = path + '/';
       }
 
       try
       {
-         return new URI("file", null, path, null);
+         return new URI("file", uri.getHost(), path, null);
       }
       catch(URISyntaxException e)
       {
