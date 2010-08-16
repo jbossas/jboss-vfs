@@ -144,7 +144,7 @@ public class FileSystemContext extends AbstractVFSContext
 
       try
       {
-         return new URI("file", uri.getHost(), path, null);
+         return new URI("file", path.startsWith("//") ? "" : null, path, null);
       }
       catch(URISyntaxException e)
       {
