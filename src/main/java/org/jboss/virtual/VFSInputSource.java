@@ -22,8 +22,6 @@
 package org.jboss.virtual;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
 import org.jboss.virtual.plugins.vfs.helpers.LazyInputStream;
 
@@ -62,12 +60,6 @@ public class VFSInputSource extends InputSource
    @Override
     public InputStream getByteStream() {
         return new LazyInputStream(file); 
-   }
-
-   @Override
-   public Reader getCharacterStream()
-   {
-      return new InputStreamReader(getByteStream());
    }
 
    @Override
