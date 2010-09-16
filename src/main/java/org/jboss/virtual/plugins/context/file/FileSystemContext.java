@@ -139,7 +139,7 @@ public class FileSystemContext extends AbstractVFSContext
       }
       else if (path.endsWith("/") == false)
       {
-            path = path + '/';
+         path = path + '/';
       }
 
       try
