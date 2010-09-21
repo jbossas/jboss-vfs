@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Created-By: 1.5.0_06-b05 ${java.runtime.version} (${java.vendor})
+Specification-Title: jar1-filesonly
+Specification-Version: 1.0.0.GA
+Specification-Vendor: JBoss Inc.
+Implementation-Title: jar1-filesonly
+Implementation-URL: http://www.jboss.org
+Implementation-Version: 1.0.0.GA-jboss
+Implementation-Vendor: JBoss Inc.
+

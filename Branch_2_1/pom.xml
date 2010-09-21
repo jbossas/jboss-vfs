@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>4</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jboss</groupId>
+  <artifactId>jboss-vfs</artifactId>
+  <packaging>jar</packaging>
+  <version>2.1.3.SP2</version>
+  <name>JBoss VFS</name>
+  <url>http://www.jboss.org</url>
+  <description>A VFS library</description>
+ <scm>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/tags/2.1.3.SP2</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.1.3.SP2</developerConnection>
+    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/tags/2.1.3.SP2</url>
+  </scm>
+  <licenses>
+    <license>
+      <name>lgpl</name>
+      <url>http://repository.jboss.org/licenses/lgpl.txt</url>
+    </license>
+  </licenses>
+  <organization>
+    <name>JBoss, A division of Red Hat, Inc</name>
+    <url>http://www.jboss.org</url>
+  </organization>
+
+  <properties>
+    <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
+    <version.jboss.logging>2.0.5.GA</version.jboss.logging>
+    <version.jboss.test>1.1.0.GA</version.jboss.test>
+    <version.junit>4.4</version.junit>
+  </properties>
+
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <finalName>${artifactId}</finalName>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      
+      <!-- define how we want compilation to take place
+        here, we accept most of the defaults but say that we want the
+        optimization flag set, and define the source and target to be 1.5,
+        these setting will be inherited by child projects -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0</version>
+        <configuration>
+          <debug>true</debug>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <!-- define that we wish to create src jars -->
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.3</version>
+        <configuration>
+          <forkMode>always</forkMode> <!-- required to correctly run the PojoServer tests -->
+          <useSystemClassLoader>true</useSystemClassLoader>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <testFailureIgnore>true</testFailureIgnore>
+        </configuration>
+      </plugin>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-release-plugin</artifactId>
+         <version>2.0-beta-9</version>
+         <configuration>
+           <tagBase>https://svn.jboss.org/repos/jbossas/projects/vfs/tags</tagBase>
+         </configuration>
+       </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-common-core</artifactId>
+      <version>${version.jboss.common.core}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging-spi</artifactId>
+      <version>${version.jboss.logging}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.test</groupId>
+      <artifactId>jboss-test</artifactId>
+      <version>${version.jboss.test}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${version.junit}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

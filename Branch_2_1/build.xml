@@ -1,0 +1,45 @@
+<!--
+An ant build script that copies the mvn generated targets to a 
+jbossbuild repository without the version info embedded in the
+jar name.
+$Id:$
+-->
+<project name="jbossbuild helper" default="copy-targets">
+	<!-- Allow local overrides of properties -->
+	<property file="local.properties" />
+	<property name="jboss.repository" value="/cvs/Repository/repository.jboss.com" />
+	<property name="vfs.version" value="2.0.0.snapshot" />
+
+	<target name="copy-targets">
+		<mkdir dir="${jboss.repository}/jboss/jboss-vfs/${vfs.version}/lib"/>
+		<echo file="${jboss.repository}/jboss/jboss-vfs/${vfs.version}/component-info.xml"><![CDATA[<project name="jboss-vfs-component-info">
+   <component id="jboss/jboss-vfs"
+              version="${vfs.version}"
+              licenseType="lgpl"
+              description="A VFS library"
+   >
+      <artifact id="jboss-vfs.jar"/>
+      <artifact id="jboss-vfs-sources.jar"/>
+      <export>
+         <include input="jboss-vfs.jar"/>
+      </export>
+   </component>
+</project>
+]]>
+		</echo>
+		<copy overwrite="true" file="target/jboss-vfs.jar"
+			tofile="${jboss.repository}/jboss/jboss-vfs/${vfs.version}/lib/jboss-vfs.jar"/>
+		<copy overwrite="true" file="target/jboss-vfs-sources.jar"
+			tofile="${jboss.repository}/jboss/jboss-vfs/${vfs.version}/lib/jboss-vfs-sources.jar"/>
+	</target>
+
+	<target name="tag-release">
+		<exec executable="svn">
+			<arg value="copy"/>
+			<arg value="-m" />
+			<arg value="Tag the ${common.version} release" />
+			<arg value="https://svn.jboss.org/repos/common/build/trunk/"/>
+			<arg value="https://svn.jboss.org/repos/common/build/tags/${common.version}"/>			
+		</exec>
+	</target>
+</project>

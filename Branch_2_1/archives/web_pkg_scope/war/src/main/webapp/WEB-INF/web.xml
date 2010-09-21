@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <display-name>web_pkg_scope</display-name>
+    <servlet>
+        <servlet-name>ServletTest</servlet-name>
+        <servlet-class>web_pkg_scope.servlet.JpaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletTest</servlet-name>
+        <url-pattern>/ServletTest</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>54</session-timeout>
+    </session-config>
+    <persistence-context-ref>
+        <description>My Entity Manager</description> 
+        <persistence-context-ref-name>persistence/MyEM</persistence-context-ref-name>
+        <persistence-unit-name>AccountManager</persistence-unit-name>
+        <persistence-context-type>Transaction</persistence-context-type>
+    </persistence-context-ref>
+</web-app>
