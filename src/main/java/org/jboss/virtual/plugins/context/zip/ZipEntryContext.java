@@ -21,16 +21,7 @@
 */
 package org.jboss.virtual.plugins.context.zip;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,17 +29,7 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -61,13 +42,7 @@ import org.jboss.virtual.plugins.context.DelegatingHandler;
 import org.jboss.virtual.plugins.context.ReplacementHandler;
 import org.jboss.virtual.plugins.context.jar.JarUtils;
 import org.jboss.virtual.plugins.copy.AbstractCopyMechanism;
-import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.Options;
-import org.jboss.virtual.spi.TempInfo;
-import org.jboss.virtual.spi.TempStore;
-import org.jboss.virtual.spi.VFSContext;
-import org.jboss.virtual.spi.VFSContextConstraints;
-import org.jboss.virtual.spi.VirtualFileHandler;
+import org.jboss.virtual.spi.*;
 
 /**
  * <tt>ZipEntryContext</tt> implements a {@link org.jboss.virtual.spi.VFSContext}
@@ -283,7 +258,7 @@ public class ZipEntryContext extends AbstractVFSContext
          {
             zipSource = createZipSource(filePath);
          }
-         catch (IOException e)
+         catch (Exception e)
          {
             throw new RuntimeException("Failed to initialize ZipWrapper: " + filePath, e);
          }
@@ -326,11 +301,12 @@ public class ZipEntryContext extends AbstractVFSContext
     * @return zip entry wrapper
     * @throws IOException for any error
     */
-   protected ZipWrapper createZipSource(String rootPath) throws IOException
+   protected ZipWrapper createZipSource(String rootPath) throws Exception
    {
       File file = null;
       String relative = null;
-      File fp = new File(VFSUtils.decode(rootPath));
+      URI uri = new URI("file:" + rootPath); // we expect a file
+      File fp = new File(uri);
       if (fp.exists())
       {
          file = fp;
