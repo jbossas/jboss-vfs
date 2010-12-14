@@ -21,36 +21,21 @@
 */
 package org.jboss.vfs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import org.jboss.logging.Logger;
 import org.jboss.util.collection.CollectionsFactory;
@@ -468,7 +453,7 @@ public class VFSUtils {
      * one does not exist.
      *
      * @param virtualFile the virtual file to write
-     * @param bytes the bytes
+     * @param is the input stream
      *
      * @throws IOException if an error occurs
      */
@@ -498,7 +483,11 @@ public class VFSUtils {
      */
     public static URL getVirtualURL(VirtualFile file) throws MalformedURLException {
         // todo: specify the URL handler directly as a minor optimization
-        return new URL(VFS_PROTOCOL, "", -1, file.getPathName(true));
+        try {
+            return getVirtualURI(file).toURL();
+        } catch (URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
     }
 
     /**

@@ -22,21 +22,25 @@
 
 package org.jboss.vfs;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.Closeable;
+import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.Random;
+
+import org.jboss.logging.Logger;
 
 /**
  * A provider for temporary physical files and directories.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public final class TempFileProvider implements Closeable {
 
+    private static final Logger log = Logger.getLogger(TempFileProvider.class);
     private static final String JBOSS_TMP_DIR_PROPERTY = "jboss.server.temp.dir";
     private static final String JVM_TMP_DIR_PROPERTY = "java.io.tmpdir";
     private static final File TMP_ROOT;
@@ -60,7 +64,7 @@ public final class TempFileProvider implements Closeable {
      * Create a temporary file provider for a given type.
      *
      * @param providerType the provider type string (used as a prefix in the temp file dir name)
-     *
+     * @param executor the executor
      * @return the new provider
      *
      * @throws IOException if an I/O error occurs
@@ -84,7 +88,7 @@ public final class TempFileProvider implements Closeable {
      *
      * @return the temp directory
      *
-     * @throws IOException
+     * @throws IOException for any error
      */
     public TempDir createTempDir(String originalName) throws IOException {
         if (!open.get()) {
@@ -96,9 +100,8 @@ public final class TempFileProvider implements Closeable {
             if (f.mkdir())
                 return new TempDir(this, f);
         }
-        final IOException eo = new IOException(
-                String.format("Could not create directory for original name '%s' after %d attempts", originalName, Integer.valueOf(RETRIES)));
-        throw eo;
+        throw new IOException(
+                String.format("Could not create directory for original name '%s' after %d attempts", originalName, RETRIES));
     }
 
     private static final Random rng = new Random();
@@ -109,12 +112,12 @@ public final class TempFileProvider implements Closeable {
             if (f.mkdir())
                 return f;
         }
-        final IOException eo = new IOException(
+        throw new IOException(
                 String.format("Could not create directory for root '%s' (prefix '%s', suffix '%s') after %d attempts",
                         root,
                         prefix,
-                        suffix));
-        throw eo;
+                        suffix,
+                        RETRIES));
     }
 
     static String createTempName(String prefix, String suffix) {
@@ -143,7 +146,8 @@ public final class TempFileProvider implements Closeable {
         }
 
         public void run() {
-            if (!VFSUtils.recursiveDelete(root)) {
+            if (VFSUtils.recursiveDelete(root) == false) {
+                log.tracef("Failed to delete root (%s), retrying in 30sec.", root);
                 executor.schedule(this, 30L, TimeUnit.SECONDS);
             }
         }
