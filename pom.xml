@@ -29,9 +29,9 @@
   </organization>
 
   <properties>
-    <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
+    <version.jboss.common.core>2.2.17.GA</version.jboss.common.core>
     <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
-    <version.jboss.test>1.1.0.GA</version.jboss.test>
+    <version.jboss.test>1.1.5.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
   </properties>
 
