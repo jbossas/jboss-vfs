@@ -13,9 +13,9 @@
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/trunk</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</developerConnection>
-    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/trunk</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</developerConnection>
+    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</url>
   </scm>
   <licenses>
     <license>
@@ -29,9 +29,9 @@
   </organization>
 
   <properties>
-    <version.jboss.common.core>2.2.13.GA</version.jboss.common.core>
+    <version.jboss.common.core>2.2.17.GA</version.jboss.common.core>
     <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
-    <version.jboss.test>1.1.0.GA</version.jboss.test>
+    <version.jboss.test>1.1.5.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
   </properties>
 
