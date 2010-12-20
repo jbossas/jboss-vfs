@@ -22,36 +22,28 @@
 package org.jboss.vfs;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.net.URISyntaxException;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
-import org.jboss.vfs.spi.AssemblyFileSystem;
-import org.jboss.vfs.spi.FileSystem;
-import org.jboss.vfs.spi.MountHandle;
-import org.jboss.vfs.spi.RealFileSystem;
-import org.jboss.vfs.spi.JavaZipFileSystem;
-import org.jboss.vfs.spi.RootFileSystem;
 import org.jboss.logging.Logger;
 import org.jboss.net.protocol.URLStreamHandlerFactory;
+import org.jboss.vfs.spi.AssemblyFileSystem;
+import org.jboss.vfs.spi.FileSystem;
+import org.jboss.vfs.spi.JavaZipFileSystem;
+import org.jboss.vfs.spi.MountHandle;
+import org.jboss.vfs.spi.RealFileSystem;
+import org.jboss.vfs.spi.RootFileSystem;
 
 /**
  * Virtual File System
@@ -175,7 +167,9 @@ public class VFS {
      *
      * @throws IllegalArgumentException if the path is null
      * @throws java.net.URISyntaxException for any uri error
+     * @deprecated use getChild(URI) instead
      */
+    @Deprecated
     public static VirtualFile getChild(URL url) throws URISyntaxException {
         return getChild(url.toURI());
     }
@@ -564,7 +558,8 @@ public class VFS {
                     ok = true;
                     return handle;
                 } finally {
-                    zipFile.delete();
+                   //noinspection ResultOfMethodCallIgnored
+                   zipFile.delete();
                 }
             } finally {
                 if (!ok) {
@@ -708,6 +703,7 @@ public class VFS {
             return mountPoint;
         }
 
+        @SuppressWarnings({"FinalizeDoesntCallSuperFinalize"})
         protected void finalize() throws IOException {
             if (!closed.get()) {
                 final StackTraceElement[] allocationPoint = this.allocationPoint;
