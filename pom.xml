@@ -8,14 +8,14 @@
   <groupId>org.jboss</groupId>
   <artifactId>jboss-vfs</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.0.GA</version>
+  <version>3.0.1-SNAPSHOT</version>
   <name>JBoss VFS</name>
   <url>http://www.jboss.org</url>
   <description>A VFS library</description>
  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/tags/3.0.0.GA</connection>    
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/tags/3.0.0.GA</developerConnection>
-    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/tags/3.0.0.GA</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</connection>    
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</developerConnection>
+    <url>https://svn.jboss.org/repos/jbossas/projects/vfs/branches/Branch_3_0</url>
   </scm>
   <licenses>
     <license>
