@@ -82,6 +82,7 @@ public final class VirtualFile implements Serializable {
      * Get the simple VF name mapped to lowercase (x.java) (used by case-insensitive filesystems like ZIP).
      *
      * @return the lowercase simple file name
+     * @deprecated should not be used anymore, as the code is case-sensitive from JBVFS-170
      */
     public String getLowerCaseName() {
         return lcname;
