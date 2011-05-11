@@ -55,6 +55,7 @@ import org.jboss.logging.Logger;
  * file disappears unexpectedly, the filesystem will malfunction.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public final class JavaZipFileSystem implements FileSystem {
 
@@ -114,11 +115,10 @@ public final class JavaZipFileSystem implements FileSystem {
                     // todo - log bad zip entry
                     continue FILES;
                 }
-                final String lcToken = token.toLowerCase();
-                ZipNode child = children.get(lcToken);
+                ZipNode child = children.get(token);
                 if (child == null) {
                     child = it.hasNext() || isDirectory ? new ZipNode(new HashMap<String, ZipNode>(), token, null) : new ZipNode(null, token, entry);
-                    children.put(lcToken, child);
+                    children.put(token, child);
                 }
                 node = child;
             }
@@ -339,7 +339,7 @@ public final class JavaZipFileSystem implements FileSystem {
                 if (children == null) {
                     return null;
                 }
-                return children.get(target.getLowerCaseName());
+                return children.get(target.getName());
             }
         }
     }
