@@ -135,6 +135,30 @@ public class Automounter
    }
 
    /**
+    * Add handle to owner, to be auto closed.
+    *
+    * @param owner the handle owner
+    * @param handle the handle
+    * @return add result
+    */
+   public static boolean addHandle(VirtualFile owner, Closeable handle) {
+      RegistryEntry entry = getEntry(owner);
+      return entry.handles.add(handle);
+   }
+
+   /**
+    * Remove handle from owner.
+    *
+    * @param owner the handle owner
+    * @param handle the handle
+    * @return remove result
+    */
+   public static boolean removeHandle(VirtualFile owner, Closeable handle) {
+      RegistryEntry entry = getEntry(owner);
+      return entry.handles.remove(handle);
+   }
+
+   /**
     * Cleanup all references from the owner.  Cleanup any mounted entries that become un-referenced in the process.
     * 
     * @param owner {@link Object} to cleanup references for
@@ -175,8 +199,8 @@ public class Automounter
    /**
     * Determines whether a target {@link VirtualFile} is mounted.
     * 
-    * @param target
-    * @return
+    * @param target target to check
+    * @return true if mounted, false otherwise
     */
    public static boolean isMounted(VirtualFile target)
    {
@@ -186,8 +210,8 @@ public class Automounter
    /**
     * Get the entry from the tree creating the entry if not present.
     * 
-    * @param virtualFile
-    * @return
+    * @param virtualFile entry's owner file
+    * @return registry entry
     */
    static RegistryEntry getEntry(VirtualFile virtualFile)
    {
