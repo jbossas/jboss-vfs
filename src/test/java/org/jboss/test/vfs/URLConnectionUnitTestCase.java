@@ -24,9 +24,7 @@ package org.jboss.test.vfs;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Executors;
 
 import junit.framework.Test;
@@ -35,7 +33,6 @@ import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.protocol.FileURLConnection;
 
 /**
  * Basic tests of URL connection
@@ -169,6 +166,11 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       assertEquals(file.lastModified(), conn.getLastModified());
    }
 
+    /**
+     * We no longer override file: protocol handling.
+     *
+     * @throws Exception for any error
+     */
    public void testFileUrl() throws Exception
    {
       // Hack to ensure VFS.init has been called and has taken over the file: protocol
@@ -178,7 +180,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest
       URL url = new URL("file", resourceUrl.getHost(), resourceUrl.getFile());
 
       // Make sure we are using our handler
-      URLConnection urlConn = url.openConnection();
+      // URLConnection urlConn = url.openConnection();
       // assertTrue(urlConn instanceof FileURLConnection);
 
       File file = new File(url.toURI());
