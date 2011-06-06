@@ -37,7 +37,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.logging.Logger;
-import org.jboss.net.protocol.URLStreamHandlerFactory;
 import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
@@ -100,13 +99,6 @@ public class VFS {
      * Initialize VFS protocol handlers package property.
      */
     private static void init() {
-        // If this doesn't work, hopefully the existing URLStreamHandlerFactory supports updates to the 'java.protocol.handler.pkgs' property.
-        try {
-           URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory());
-        } catch (Throwable ignored) {
-           log.warn("VFS was unable to set the URLStreamHandlerFactory.  This will have unpredictable results");
-        }
-
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
         if (pkgs == null || pkgs.trim().length() == 0) {
             pkgs = "org.jboss.net.protocol|org.jboss.vfs.protocol";

@@ -29,8 +29,7 @@
   </organization>
 
   <properties>
-    <version.jboss.common.core>2.2.17.GA</version.jboss.common.core>
-    <version.jboss.logging>2.2.0.CR1</version.jboss.logging>
+    <version.jboss.logging>3.0.0.CR1</version.jboss.logging>
     <version.jboss.test>1.1.5.GA</version.jboss.test>
     <version.junit>4.4</version.junit>
   </properties>
@@ -148,21 +147,9 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-spi</artifactId>
+      <artifactId>jboss-logging</artifactId>
       <version>${version.jboss.logging}</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-common-core</artifactId>
-      <version>${version.jboss.common.core}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging-log4j</artifactId>
-      <version>${version.jboss.logging}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.test</groupId>

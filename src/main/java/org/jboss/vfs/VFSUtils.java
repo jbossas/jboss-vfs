@@ -38,7 +38,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.collection.CollectionsFactory;
 import org.jboss.vfs.spi.MountHandle;
 import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.vfs.util.automount.Automounter;
@@ -280,7 +279,7 @@ public class VFSUtils {
      * @return String[] for the name/value pairs in the query. May be empty but never null.
      */
     public static Map<String, String> parseURLQuery(String query) {
-        Map<String, String> pairsMap = CollectionsFactory.createLazyMap();
+        Map<String, String> pairsMap = new HashMap<String, String>();
         if (query != null) {
             StringTokenizer tokenizer = new StringTokenizer(query, "=&");
             while (tokenizer.hasMoreTokens()) {
