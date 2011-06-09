@@ -29,8 +29,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +43,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.logging.Logger;
-import org.jboss.net.protocol.URLStreamHandlerFactory;
 import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
@@ -66,9 +63,6 @@ public class VFS {
 
     private static final Logger log = Logger.getLogger("org.jboss.vfs");
 
-    public static final boolean LEAK_DEBUGGING;
-    public static final boolean FORCE_CANONICAL;
-
     private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
     private static final VirtualFile rootVirtualFile = createDefaultRoot();
 
@@ -79,23 +73,8 @@ public class VFS {
     // Note that rootVirtualFile is ignored by RootFS
     private static final Mount rootMount = new Mount(RootFileSystem.ROOT_INSTANCE, rootVirtualFile);
 
-    // todo - LRU VirtualFiles?
-    // todo - LRU String intern?
     static {
         init();
-        LEAK_DEBUGGING = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return Boolean.valueOf(System.getProperty("jboss.vfs.leakDebugging", "true"));
-            }
-        }).booleanValue();
-        FORCE_CANONICAL = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return Boolean.valueOf(System.getProperty("jboss.vfs.forceCanonical", "false"));
-            }
-        }).booleanValue();
-
-        if (FORCE_CANONICAL)
-           log.info("Canonical path lookup enabled.");
     }
 
     /**
@@ -108,13 +87,6 @@ public class VFS {
      * Initialize VFS protocol handlers package property.
      */
     private static void init() {
-        // If this doesn't work, hopefully the existing URLStreamHandlerFactory supports updates to the 'java.protocol.handler.pkgs' property.
-        try {
-           URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory());
-        } catch (Throwable ignored) {
-           log.warn("VFS was unable to set the URLStreamHandlerFactory.  This will have unpredictable results");
-        }
-
         String pkgs = System.getProperty("java.protocol.handler.pkgs");
         if (pkgs == null || pkgs.trim().length() == 0) {
             pkgs = "org.jboss.net.protocol|org.jboss.vfs.protocol";
@@ -128,7 +100,7 @@ public class VFS {
     }
 
     /**
-     * Mount a filesystem on a mount point in the VFS.  The mount point is any valid file name, existant or non-existant.
+     * Mount a filesystem on a mount point in the VFS.  The mount point is any valid file name, existent or non-existent.
      * If a relative path is given, it will be treated as relative to the VFS root.
      *
      * @param mountPoint the mount point
@@ -141,7 +113,7 @@ public class VFS {
     public static Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
         final VirtualFile parent = mountPoint.getParent();
         if (parent == null) {
-            throw new IOException("Root filsystem already mounted");
+            throw new IOException("Root filesystem already mounted");
         }
         final String name = mountPoint.getName();
         final Mount mount = new Mount(fileSystem, mountPoint);
@@ -157,7 +129,7 @@ public class VFS {
             }
             newMap = new HashMap<String, Mount>(childMountMap);
             if (newMap.put(name, mount) != null) {
-                throw new IOException("Filsystem already mounted at mount point \"" + mountPoint + "\"");
+                throw new IOException("Filesystem already mounted at mount point \"" + mountPoint + "\"");
             }
             if (mounts.replace(parent, childMountMap, newMap)) {
                 log.tracef("Mounted filesystem %s on mount point %s", fileSystem, mountPoint);
@@ -644,7 +616,7 @@ public class VFS {
      * backing filesystem implementation; the same {@code FileSystem} may be mounted in more than one place, however only
      * one {@code FileSystem} may be bound to a specific path at a time.
      */
-    final static class Mount implements Closeable {
+    static final class Mount implements Closeable {
 
         private final FileSystem fileSystem;
         private final VirtualFile mountPoint;
