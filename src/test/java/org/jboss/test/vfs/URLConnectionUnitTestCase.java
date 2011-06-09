@@ -21,21 +21,22 @@
 */
 package org.jboss.test.vfs;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Executors;
-
 import junit.framework.Test;
-
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.protocol.FileURLConnection;
+import org.jboss.vfs.protocol.VfsUrlStreamHandlerFactory;
 
 /**
  * Basic tests of URL connection
@@ -44,6 +45,10 @@ import org.jboss.vfs.protocol.FileURLConnection;
  */
 public class URLConnectionUnitTestCase extends AbstractVFSTest
 {
+   static {
+      URL.setURLStreamHandlerFactory(new VfsUrlStreamHandlerFactory());
+   }
+
    public URLConnectionUnitTestCase(String name)
    {
       super(name);
