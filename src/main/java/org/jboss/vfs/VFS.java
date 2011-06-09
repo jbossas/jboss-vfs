@@ -31,7 +31,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,12 +87,12 @@ public class VFS {
             public Boolean run() {
                 return Boolean.valueOf(System.getProperty("jboss.vfs.leakDebugging", "true"));
             }
-        });
+        }).booleanValue();
         FORCE_CANONICAL = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
             public Boolean run() {
-                return Boolean.getBoolean("jboss.vfs.forceCanonical");
+                return Boolean.valueOf(System.getProperty("jboss.vfs.forceCanonical", "false"));
             }
-        });
+        }).booleanValue();
 
         if (FORCE_CANONICAL)
            log.info("Canonical path lookup enabled.");
