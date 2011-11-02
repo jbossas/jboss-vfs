@@ -22,6 +22,8 @@
 
 package org.jboss.vfs.spi;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.jboss.vfs.VirtualFile;
 
 import java.io.File;
@@ -175,4 +177,12 @@ public interface FileSystem extends Closeable {
      * @return the source used for mounting
      */
     File getMountSource();
+
+    /**
+     * Get the root URI for this file system, or {@code null} if there is no valid root URI.
+     *
+     * @return the root URI
+     * @throws URISyntaxException if the URI isn't valid
+     */
+    URI getRootURI() throws URISyntaxException;
 }

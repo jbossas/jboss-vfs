@@ -30,6 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.CodeSigner;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -290,6 +292,10 @@ public final class JavaZipFileSystem implements FileSystem {
     /** {@inheritDoc} */
     public File getMountSource() {
         return archiveFile;
+    }
+
+    public URI getRootURI() throws URISyntaxException {
+        return new URI("jar", archiveFile.toURI().toString() + "!/", null);
     }
 
     /** {@inheritDoc} */

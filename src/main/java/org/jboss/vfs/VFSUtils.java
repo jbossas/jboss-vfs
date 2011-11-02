@@ -54,6 +54,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jboss.logging.Logger;
+import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.MountHandle;
 import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.vfs.util.automount.Automounter;
@@ -550,6 +551,36 @@ public class VFSUtils {
      */
     public static URI getPhysicalURI(VirtualFile file) throws IOException {
         return file.getPhysicalFile().toURI();
+    }
+
+    /**
+     * Get the physical root URL of the filesystem of a virtual file.  This URL is suitable for use as a class loader's
+     * code source or in similar situations where only standard URL types ({@code jar} and {@code file}) are supported.
+     *
+     * @param file the virtual file
+     * @return the root URL
+     * @throws MalformedURLException if the URL is not valid
+     */
+    public static URL getRootURL(VirtualFile file) throws MalformedURLException {
+        final URI uri;
+        try {
+            uri = getRootURI(file);
+        } catch (URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
+        return uri.toURL();
+    }
+
+    /**
+     * Get the physical root URL of the filesystem of a virtual file.  This URI is suitable for conversion to a class loader's
+     * code source URL or in similar situations where only standard URL types ({@code jar} and {@code file}) are supported.
+     *
+     * @param file the virtual file
+     * @return the root URI
+     * @throws URISyntaxException if the URI is not valid
+     */
+    public static URI getRootURI(final VirtualFile file) throws URISyntaxException {
+        return VFS.getMount(file).getFileSystem().getRootURI();
     }
 
     /**

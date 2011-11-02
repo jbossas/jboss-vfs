@@ -22,6 +22,8 @@
 
 package org.jboss.vfs.spi;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.logging.Logger;
 
@@ -149,6 +151,10 @@ public final class RealFileSystem implements FileSystem {
      */
     public File getMountSource() {
         return realRoot;
+    }
+
+    public URI getRootURI() throws URISyntaxException {
+        return realRoot.toURI();
     }
 
     /**
