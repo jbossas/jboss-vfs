@@ -206,7 +206,7 @@ public class VFS {
                             // Note, it turns out that File.toURL puts this portion
                             // in the path portion of the URL, which is actually not
                             // correct, since // is supposed to signify the authority.
-                            root = new VirtualFile("//" + absolute.substring(0,i), null);
+                            root = new VirtualFile("//" + absolute.substring(0,i) + "/", null);
                             path = absolute.substring(i).replace('\\', '/');
                             break;
                         }
