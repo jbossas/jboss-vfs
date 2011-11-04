@@ -1,6 +1,38 @@
-.idea
+# ignore .svn metadata files
+.svn
+# ignore Maven generated target folders
+~
+target
+# ignore eclipse files
+.project
+.classpath
+.settings
+.metadata
+# ignore IDEA files
 *.iml
 *.ipr
 *.iws
-target/
+.idea
+# ignore NetBeans files
+nbactions.xml
+#
+maven-ant-tasks.jar
+test-output
+transaction.log
+# vim files
+*.swp
+/.gitk-tmp.*
+atlassian-ide-plugin.xml
+# temp files
+*~
+# maven versions plugin
+pom.xml.versionsBackup
+# hprof dumps
+/*.hprof
+# ignore 'randomly' strewn around logs
+server.log
+# ignore java crashes
+hs_err_pid*.log
+# H2 databases produced by tests
+*.h2.db
 
