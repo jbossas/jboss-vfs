@@ -21,6 +21,13 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collections;
+import java.util.Random;
+
+import junit.framework.Assert;
 import junit.framework.Test;
 import org.jboss.test.virtual.support.MockTempStore;
 import org.jboss.util.StringPropertyReplacer;
@@ -34,12 +41,6 @@ import org.jboss.virtual.spi.ExceptionHandler;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
-
-import java.io.File;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collections;
-import java.util.Random;
 
 /**
  * Symlink VFSCache Test.
@@ -65,10 +66,10 @@ public class SymlinkTestCase extends AbstractVFSTest
    // enable this to run the test -- no Winz though :-)
    private static boolean supportSymlinks()
    {
-      return false;
-
-//      String os = System.getProperty("os.name");
-//      return os.contains("Win") == false;
+//      return false;
+//
+      String os = System.getProperty("os.name");
+      return os.contains("Win") == false;
    }
 
    @Override
@@ -97,6 +98,29 @@ public class SymlinkTestCase extends AbstractVFSTest
       testName = null;
 
       super.tearDown();
+   }
+
+   public void testAppAsLink() throws Exception
+   {
+      if (supportSymlinks() == false)
+         return;
+
+      URL dir = getResource("/vfs/symlink");
+
+      CombinedVFSCache cache = new CombinedVFSCache();
+      VFSCacheFactory.setInstance(cache);
+      cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(dir, null));
+
+      VirtualFile root = VFS.getRoot(dir);
+      VirtualFile app = root.getChild("app.jar");
+      VirtualFile clazz = app.getChild("org/jboss/test/vfs/support/CommonClass.class");
+      Assert.assertNotNull(clazz);
+      URL url = clazz.toURL();
+
+      VirtualFile vf1 = VFS.getRoot(url);
+      Assert.assertNotNull(vf1);
+      VirtualFile vf2 = VFS.getRoot(url);
+      Assert.assertNotNull(vf2);
    }
 
    public void testCacheUsage() throws Exception
