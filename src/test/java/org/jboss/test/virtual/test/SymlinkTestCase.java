@@ -105,7 +105,11 @@ public class SymlinkTestCase extends AbstractVFSTest
       if (supportSymlinks() == false)
          return;
 
-      URL dir = getResource("/vfs/symlink");
+      URLEditor editor = new URLEditor();
+      // this is now a symlink, pointing to where app.jar is
+      // where app.jar is again a symlink
+      editor.setAsText("/Users/alesj/temp/otherln");
+      URL dir = (URL) editor.getValue();
 
       CombinedVFSCache cache = new CombinedVFSCache();
       VFSCacheFactory.setInstance(cache);
