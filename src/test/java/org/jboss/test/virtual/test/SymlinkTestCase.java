@@ -55,7 +55,8 @@ public class SymlinkTestCase extends AbstractVFSTest
 
    public SymlinkTestCase(String name)
    {
-      super(name);
+      //turn on force copy with second parameter
+      super(name, true);
    }
 
    public static Test suite()
@@ -113,18 +114,26 @@ public class SymlinkTestCase extends AbstractVFSTest
 
       CombinedVFSCache cache = new CombinedVFSCache();
       VFSCacheFactory.setInstance(cache);
-      cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(dir, null));
+      try
+      {
+        cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(dir, null));
 
-      VirtualFile root = VFS.getRoot(dir);
-      VirtualFile app = root.getChild("app.jar");
-      VirtualFile clazz = app.getChild("org/jboss/test/vfs/support/CommonClass.class");
-      Assert.assertNotNull(clazz);
-      URL url = clazz.toURL();
+        VirtualFile root = VFS.getRoot(dir);
+        VirtualFile app = root.getChild("app.jar");
+        VirtualFile clazz = app.getChild("org/jboss/test/vfs/support/CommonClass.class");
+        Assert.assertNotNull(clazz);
+        URL url = clazz.toURL();
 
-      VirtualFile vf1 = VFS.getRoot(url);
-      Assert.assertNotNull(vf1);
-      VirtualFile vf2 = VFS.getRoot(url);
-      Assert.assertNotNull(vf2);
+        VirtualFile vf1 = VFS.getRoot(url);
+        Assert.assertNotNull(vf1);
+        VirtualFile vf2 = VFS.getRoot(url);
+        Assert.assertNotNull(vf2);
+      }
+      finally
+      {
+         VFSCacheFactory.setInstance(null);
+         cache.stop();
+      }
    }
 
    public void testCacheUsage() throws Exception
