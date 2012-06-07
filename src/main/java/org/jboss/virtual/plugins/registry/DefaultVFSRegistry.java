@@ -104,36 +104,16 @@ public class DefaultVFSRegistry extends VFSRegistry
    }
 
    /**
-    * Canonicalize uri.
-    *
-    * @param uri the uri
-    * @return canonical uri
-    * @throws IOException for any IO error
-    */
-   protected static URI canonicalize(URI uri) throws IOException
-   {
-      if (forceCanonical)
-      {
-         String path = new File(uri.getPath()).getCanonicalPath();
-         try
-         {
-            return new URI(uri.getScheme(), uri.getHost(), path, uri.getQuery(), uri.getFragment());
-         }
-         catch (URISyntaxException e)
-         {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            throw ioe;
-         }
-      }
-      return uri;
-   }
-
-   /*
     * Walk backward up the path canonicalizing until we find something
     * that is in permanentRoots.  This is essentially a way to figure out
     * what the original path was for the permanentRoot before it got mangled
     * by the URLEditor.
+    *
+    * @param uri the uri
+    * @return a uri with the first part of it replaced with a permanent root if that
+    * can be done from canonicalizing the URI working backward from the entire thing up to
+    * the root of the URI.  If that can't be done, the original URI is returned.
+    * @throws IOException for any IO or URI error.
     */
    protected URI fixURI(URI uri) throws IOException
    {
