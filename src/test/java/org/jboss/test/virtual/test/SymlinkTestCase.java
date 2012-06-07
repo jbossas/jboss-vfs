@@ -21,7 +21,12 @@
 */
 package org.jboss.test.virtual.test;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -38,6 +43,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.cache.CombinedVFSCache;
 import org.jboss.virtual.plugins.copy.TrackingTempStore;
 import org.jboss.virtual.spi.ExceptionHandler;
+import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
@@ -55,7 +61,6 @@ public class SymlinkTestCase extends AbstractVFSTest
 
    public SymlinkTestCase(String name)
    {
-      //turn on force copy with second parameter
       super(name, true);
    }
 
@@ -84,7 +89,8 @@ public class SymlinkTestCase extends AbstractVFSTest
       // setup symlink dir and test path!
 
 //      System.setProperty("test.dir", "/Users/alesj/projects/jboss6/trunk"); // plain path
-      System.setProperty("test.dir", "/Users/alesj/jboss"); // -- this is symlink
+//      System.setProperty("test.dir", "/Users/alesj/jboss"); // -- this is symlink
+      System.setProperty("test.dir", "/home/csams/tmp/sym_deploy"); // -- this is symlink
 
       testPath = "/testsuite/output/lib/jboss-seam-booking.ear/jboss-seam.jar/org/jboss/seam/Seam.class";
       testName = "jboss-seam.jar";
@@ -101,42 +107,58 @@ public class SymlinkTestCase extends AbstractVFSTest
       super.tearDown();
    }
 
+   /*
+    * /home/csams/tmp/sym_deploy -> /home/csams/tmp/deploy
+    * /home/csams/tmp/deploy/deploy -> /home/csams/tmp/another_dir
+    */
    public void testAppAsLink() throws Exception
    {
       if (supportSymlinks() == false)
          return;
 
+      String resourceName="vfszip:///home/csams/tmp/sym_deploy/deploy/data.jar/empty.txt";
+
       URLEditor editor = new URLEditor();
-      // this is now a symlink, pointing to where app.jar is
-      // where app.jar is again a symlink
-      editor.setAsText("/Users/alesj/temp/otherln");
+      editor.setAsText("/home/csams/tmp/sym_deploy");
       URL dir = (URL) editor.getValue();
 
       CombinedVFSCache cache = new CombinedVFSCache();
       VFSCacheFactory.setInstance(cache);
+      VFSCache realCache = new NoopVFSCache();
+      realCache.start();
+      cache.setRealCache(realCache);
+
       try
       {
         cache.setPermanentRoots(Collections.<URL, ExceptionHandler>singletonMap(dir, null));
+        cache.start();
+        
+        URL sub = new URL(resourceName);
 
-        VirtualFile root = VFS.getRoot(dir);
-        VirtualFile app = root.getChild("app.jar");
-        VirtualFile clazz = app.getChild("org/jboss/test/vfs/support/CommonClass.class");
-        Assert.assertNotNull(clazz);
-        URL url = clazz.toURL();
+        VirtualFile rootFile = VFS.getRoot(dir);
+        VirtualFile subFile1 = VFS.getRoot(sub);
+        VirtualFile subFile2 = VFS.getRoot(sub);
 
-        VirtualFile vf1 = VFS.getRoot(url);
-        Assert.assertNotNull(vf1);
-        VirtualFile vf2 = VFS.getRoot(url);
-        Assert.assertNotNull(vf2);
+        //they should have parents, and those parents' VFSContexts should be the one stored as permanentRoot
+        assertNotNull(subFile1.getParent());
+        assertNotNull(subFile2.getParent());
+
+        //the parent VFSContext of the ZipEntryContext should be the VFSContext of the permanentRoot
+        assertEquals(rootFile.getVFS(), subFile1.getParent().getVFS());
+        assertEquals(rootFile.getVFS(), subFile2.getParent().getVFS());
+
+        //the VFSContexts should be the same
+        assertEquals(subFile1.getVFS(), subFile2.getVFS());
       }
       finally
       {
          VFSCacheFactory.setInstance(null);
-         cache.stop();
+         if(cache != null)
+           cache.stop();
       }
    }
 
-   public void testCacheUsage() throws Exception
+   public void xtestCacheUsage() throws Exception
    {
       if (supportSymlinks() == false)
          return;
@@ -201,6 +223,17 @@ public class SymlinkTestCase extends AbstractVFSTest
          VFSCacheFactory.setInstance(null);
          cache.stop();
       }
+   }
+
+   protected void assertCopies(TrackingTempStore store, String name)
+   {
+      int counter = 0;
+      for (File file : store.getFiles())
+      {
+         if (file.getName().contains(name))
+            counter++;
+      }
+      assertEquals("Test files == 1", 1, counter);
    }
 
    protected void assertCopies(TrackingTempStore store)
