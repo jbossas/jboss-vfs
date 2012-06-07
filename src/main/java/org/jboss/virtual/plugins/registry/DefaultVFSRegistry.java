@@ -39,6 +39,8 @@ import java.net.URISyntaxException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -50,13 +52,17 @@ public class DefaultVFSRegistry extends VFSRegistry
 {
    /** Do we force canonical lookup */
    private static boolean forceCanonical;
+   private static Logger log = Logger.getLogger(DefaultVFSRegistry.class);
+   private static boolean trace = log.isTraceEnabled();
+
+   private Map<String,String> pathAliases = new HashMap<String,String>();
 
    static
    {
       forceCanonical = AccessController.doPrivileged(new CheckForceCanonical());
 
       if (forceCanonical)
-         Logger.getLogger(DefaultVFSRegistry.class).info("VFS force canonical lookup is enabled.");
+         log.info("VFS force canonical lookup is enabled.");
    }
 
    /**
@@ -123,12 +129,81 @@ public class DefaultVFSRegistry extends VFSRegistry
       return uri;
    }
 
+   /*
+    * Walk backward up the path canonicalizing until we find something
+    * that is in permanentRoots.  This is essentially a way to figure out
+    * what the original path was for the permanentRoot before it got mangled
+    * by the URLEditor.
+    */
+   protected URI fixURI(URI uri) throws IOException
+   {
+      if(forceCanonical)
+      {
+         String path = uri.getPath();
+
+         //first just try to get it and return if we're lucky.
+         VFSContext ctx = getCache().findContext(uri);
+         if(ctx != null)
+         {
+            return uri;
+         }
+
+         //we weren't lucky.. check to see if we've already done the walking routine to figure out
+         //the permanent root.  If we have, build a URI with the permanent root and the relative path
+         //of the original URI minus whatever symlink infested stuff it had as parents.
+         File file = new File(path);
+         try
+         {
+            for(String key: pathAliases.keySet())
+            {
+               if(path.startsWith(key))
+               {
+                  String relative = path.substring(key.length());
+
+                  String alias = pathAliases.get(key);
+                  if(trace)
+                  {
+                     log.trace("Found alias: [" + key + " = " + alias + "] for [" + path + "]");
+                  }
+                  return new URI(uri.getScheme(), uri.getHost(),  alias + relative, uri.getQuery(), uri.getFragment());
+               }
+            }
+
+            //well, it wasn't aliased, so try to figure out if a corresponding permanentRoot exists
+            String relative = file.getName();
+            while(ctx == null && (file = file.getParentFile()) != null)
+            {
+                  ctx = getCache().findContext(new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath(), uri.getQuery(), uri.getFragment()));
+                  if(ctx == null)
+                     relative = file.getName() + File.separator + relative;
+            }
+
+            //we found one, so store it for later
+            if(ctx != null)
+            {
+               pathAliases.put(file.getPath(),file.getCanonicalPath());
+               return new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath() + File.separator + relative, uri.getQuery(), uri.getFragment());
+            }
+         }
+         catch (URISyntaxException e)
+         {
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            throw ioe;
+         }
+
+      }
+      //we did all we could - let it fall through with the original URI and hopefully get stored
+      //as some context in the realCache.
+      return uri;
+   }
+
    public VFSContext getContext(URI uri) throws IOException
    {
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
-      uri = canonicalize(uri);
+      uri = fixURI(uri);
       VFSContext context = getCache().findContext(uri);
       if (context != null)
       {
@@ -144,7 +219,7 @@ public class DefaultVFSRegistry extends VFSRegistry
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
-      uri = canonicalize(uri);
+      uri = fixURI(uri);
       VFSContext context = getCache().findContext(uri);
       if (context != null)
       {
