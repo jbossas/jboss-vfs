@@ -1061,7 +1061,7 @@ public class VFSUtils
     * @param uri the uri
     * @return uri's path
     */
-   protected static String getPath(URI uri)
+   public static String getPath(URI uri)
    {
       String path = uri.getPath();
       if(path == null)
