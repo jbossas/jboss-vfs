@@ -21,18 +21,12 @@
 */
 package org.jboss.test.virtual.test;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Random;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import org.jboss.test.virtual.support.MockTempStore;
 import org.jboss.util.StringPropertyReplacer;
@@ -43,7 +37,6 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.plugins.cache.CombinedVFSCache;
 import org.jboss.virtual.plugins.copy.TrackingTempStore;
 import org.jboss.virtual.spi.ExceptionHandler;
-import org.jboss.virtual.spi.VFSContext;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.cache.helpers.NoopVFSCache;
@@ -225,15 +218,17 @@ public class SymlinkTestCase extends AbstractVFSTest
       }
    }
 
-   protected void assertCopies(TrackingTempStore store, String name)
+   public void testJarFileScheme() throws Exception
    {
-      int counter = 0;
-      for (File file : store.getFiles())
+      URL url = getResource("/vfs/test/level1.zip");
+      try
       {
-         if (file.getName().contains(name))
-            counter++;
+        VFS vfs = VFS.getVFS(new URL("jar:file:" + url.getPath() + "!/" + "level2.zip/level3.zip"));
       }
-      assertEquals("Test files == 1", 1, counter);
+      catch(NullPointerException npe)
+      {
+        failure("NPE thrown because jar:file: not handled by canonicalization code.", npe);
+      }
    }
 
    protected void assertCopies(TrackingTempStore store)
