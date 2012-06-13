@@ -112,7 +112,9 @@ public class SymlinkTestCase extends AbstractVFSTest
       String resourceName="vfszip:///home/csams/tmp/sym_deploy/deploy/data.jar/empty.txt";
 
       URLEditor editor = new URLEditor();
-      editor.setAsText("/home/csams/tmp/sym_deploy");
+      editor.setAsText("file:/home/csams/tmp/sym_deploy");
+
+      //this should resolve as file:/home/csams/tmp/deploy
       URL dir = (URL) editor.getValue();
 
       CombinedVFSCache cache = new CombinedVFSCache();
@@ -127,20 +129,27 @@ public class SymlinkTestCase extends AbstractVFSTest
         cache.start();
         
         URL sub = new URL(resourceName);
+        VFS dirVFS = VFS.getVFS(dir);
 
         VirtualFile rootFile = VFS.getRoot(dir);
+        System.out.println(rootFile);
+
         VirtualFile subFile1 = VFS.getRoot(sub);
+        System.out.println(subFile1);
+
         VirtualFile subFile2 = VFS.getRoot(sub);
+        System.out.println(subFile2);
 
         //they should have parents, and those parents' VFSContexts should be the one stored as permanentRoot
         assertNotNull(subFile1.getParent());
         assertNotNull(subFile2.getParent());
 
         //the parent VFSContext of the ZipEntryContext should be the VFSContext of the permanentRoot
+        assertEquals(rootFile.getVFS(), dirVFS);
         assertEquals(rootFile.getVFS(), subFile1.getParent().getVFS());
         assertEquals(rootFile.getVFS(), subFile2.getParent().getVFS());
 
-        //the VFSContexts should be the same
+        //the VFSContexts also should be the same
         assertEquals(subFile1.getVFS(), subFile2.getVFS());
       }
       finally
