@@ -53,7 +53,6 @@ public class DefaultVFSRegistry extends VFSRegistry
    /** Do we force canonical lookup */
    private static boolean forceCanonical;
    private static Logger log = Logger.getLogger(DefaultVFSRegistry.class);
-   private static boolean trace = log.isTraceEnabled();
 
    private Map<String,String> pathAliases = new HashMap<String,String>();
 
@@ -109,24 +108,24 @@ public class DefaultVFSRegistry extends VFSRegistry
     * what the original path was for the permanentRoot before it got mangled
     * by the URLEditor.
     *
-    * @param uri the uri
+    * @param uri the uri to resolve
     * @return a uri with the first part of it replaced with a permanent root if that
     * can be done from canonicalizing the URI working backward from the entire thing up to
-    * the root of the URI.  If that can't be done, the original URI is returned.
+    * the root of the URI along with its VFSContext.  If that can't be done, the original URI is returned.
     * @throws IOException for any IO or URI error.
     */
-   protected URI fixURI(URI uri) throws IOException
+   protected URIResolutionResult resolveURI(URI uri) throws IOException
    {
+      //first just try to find it
+      VFSContext ctx = getCache().findContext(uri);
+      if(ctx != null)
+      {
+         return new URIResolutionResult(ctx, uri);
+      }
+
       if(forceCanonical)
       {
-         String path = uri.getPath();
-
-         //first just try to get it and return if we're lucky.
-         VFSContext ctx = getCache().findContext(uri);
-         if(ctx != null)
-         {
-            return uri;
-         }
+         String path = VFSUtils.stripProtocol(uri);
 
          //we weren't lucky.. check to see if we've already done the walking routine to figure out
          //the permanent root.  If we have, build a URI with the permanent root and the relative path
@@ -134,6 +133,7 @@ public class DefaultVFSRegistry extends VFSRegistry
          File file = new File(path);
          try
          {
+            URI fixedURI = null;
             for(String key: pathAliases.keySet())
             {
                if(path.startsWith(key))
@@ -141,11 +141,8 @@ public class DefaultVFSRegistry extends VFSRegistry
                   String relative = path.substring(key.length());
 
                   String alias = pathAliases.get(key);
-                  if(trace)
-                  {
-                     log.trace("Found alias: [" + key + " = " + alias + "] for [" + path + "]");
-                  }
-                  return new URI(uri.getScheme(), uri.getHost(),  alias + relative, uri.getQuery(), uri.getFragment());
+                  fixedURI = new URI(uri.getScheme(), uri.getHost(),  alias + relative, uri.getQuery(), uri.getFragment());
+                  return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
                }
             }
 
@@ -153,16 +150,17 @@ public class DefaultVFSRegistry extends VFSRegistry
             String relative = file.getName();
             while(ctx == null && (file = file.getParentFile()) != null)
             {
-                  ctx = getCache().findContext(new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath(), uri.getQuery(), uri.getFragment()));
-                  if(ctx == null)
-                     relative = file.getName() + File.separator + relative;
+               ctx = getCache().findContext(new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath(), uri.getQuery(), uri.getFragment()));
+               if(ctx == null)
+                  relative = file.getName() + "/" + relative;
             }
 
             //we found one, so store it for later
             if(ctx != null)
             {
                pathAliases.put(file.getPath(),file.getCanonicalPath());
-               return new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath() + File.separator + relative, uri.getQuery(), uri.getFragment());
+               fixedURI = new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath() + "/" + relative, uri.getQuery(), uri.getFragment());
+               return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
             }
          }
          catch (URISyntaxException e)
@@ -173,9 +171,8 @@ public class DefaultVFSRegistry extends VFSRegistry
          }
 
       }
-      //we did all we could - let it fall through with the original URI and hopefully get stored
-      //as some context in the realCache.
-      return uri;
+      //we did all we could - let it fall through with the original URI
+      return new URIResolutionResult(null, uri);
    }
 
    public VFSContext getContext(URI uri) throws IOException
@@ -183,11 +180,12 @@ public class DefaultVFSRegistry extends VFSRegistry
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
-      uri = fixURI(uri);
-      VFSContext context = getCache().findContext(uri);
+      URIResolutionResult resolutionResult = resolveURI(uri);
+
+      VFSContext context = resolutionResult.getContext();
       if (context != null)
       {
-         String relativePath = VFSUtils.getRelativePath(context, uri);
+         String relativePath = VFSUtils.getRelativePath(context, resolutionResult.getURI());
          if (relativePath.length() == 0)
             return context;
       }
@@ -199,11 +197,11 @@ public class DefaultVFSRegistry extends VFSRegistry
       if (uri == null)
          throw new IllegalArgumentException("Null uri");
 
-      uri = fixURI(uri);
-      VFSContext context = getCache().findContext(uri);
+      URIResolutionResult resolutionResult = resolveURI(uri);
+      VFSContext context = resolutionResult.getContext();
       if (context != null)
       {
-         String relativePath = VFSUtils.getRelativePath(context, uri);
+         String relativePath = VFSUtils.getRelativePath(context, resolutionResult.getURI());
 
          TempInfo ti = context.getFurthestParentTemp(relativePath);
          if (ti != null)
@@ -253,4 +251,27 @@ public class DefaultVFSRegistry extends VFSRegistry
          return Boolean.valueOf(forceString);
       }
    }
+
+   private static class URIResolutionResult
+   {
+      private VFSContext context;
+      private URI uri;
+
+      public URIResolutionResult(final VFSContext context, final URI uri)
+      {
+         this.context = context;
+         this.uri = uri;
+      }
+
+      public VFSContext getContext()
+      {
+         return this.context;
+      }
+
+      public URI getURI()
+      {
+         return this.uri;
+      }
+   }
+
 }
