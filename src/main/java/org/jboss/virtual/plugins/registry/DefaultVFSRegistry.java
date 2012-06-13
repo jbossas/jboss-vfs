@@ -103,15 +103,17 @@ public class DefaultVFSRegistry extends VFSRegistry
    }
 
    /**
+    * Retrieve a VFSContext and canonicalized URI if jboss.vfs.forceCanonical is enabled.
     * Walk backward up the path canonicalizing until we find something
     * that is in permanentRoots.  This is essentially a way to figure out
     * what the original path was for the permanentRoot before it got mangled
     * by the URLEditor.
     *
     * @param uri the uri to resolve
-    * @return a uri with the first part of it replaced with a permanent root if that
-    * can be done from canonicalizing the URI working backward from the entire thing up to
-    * the root of the URI along with its VFSContext.  If that can't be done, the original URI is returned.
+    * @return If jboss.vfs.forceCanonical is true, a uri with its first part replaced
+    * with a permanent root if possible along with its VFSContext if possible.
+    * If jboss.vfs.forceCanonical=false, just try to find the VFSContext without
+    * canonicalizing the original URI and return both.
     * @throws IOException for any IO or URI error.
     */
    protected URIResolutionResult resolveURI(URI uri) throws IOException
@@ -120,6 +122,9 @@ public class DefaultVFSRegistry extends VFSRegistry
       VFSContext ctx = getCache().findContext(uri);
       if(ctx != null)
       {
+         if(log.isTraceEnabled())
+            log.trace("Context found immediately for: " + uri.toString() + " -> " + ctx.toString());
+
          return new URIResolutionResult(ctx, uri);
       }
 
@@ -142,22 +147,44 @@ public class DefaultVFSRegistry extends VFSRegistry
 
                   String alias = pathAliases.get(key);
                   fixedURI = new URI(uri.getScheme(), uri.getHost(),  alias + relative, uri.getQuery(), uri.getFragment());
+
+                  if(log.isTraceEnabled())
+                     log.trace("Found aliased context: " + key + " -> " + pathAliases.get(key));
+
                   return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
                }
             }
 
-            //well, it wasn't aliased, so try to figure out if a corresponding permanentRoot exists
-            String relative = file.getName();
-            while(ctx == null && (file = file.getParentFile()) != null)
+            //it wasn't aliased, so try to figure out if a corresponding permanentRoot exists
+            String relative = "";
+            while(ctx == null && file != null)
             {
-               ctx = getCache().findContext(new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath(), uri.getQuery(), uri.getFragment()));
+               URI toFind = new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath(), uri.getQuery(), uri.getFragment());
+
+               if(log.isTraceEnabled())
+                  log.trace("Trying to find in permanentRoots: " + toFind.toString());
+
+               ctx = getCache().findContext(toFind);
                if(ctx == null)
-                  relative = file.getName() + "/" + relative;
+               {
+                  if(relative.length() == 0)
+                  {
+                     relative=file.getName();
+                  }
+                  else
+                  {
+                     relative = file.getName() + "/" + relative;
+                  }
+                  file = file.getParentFile();
+               }
             }
 
             //we found one, so store it for later
             if(ctx != null)
             {
+               if(log.isTraceEnabled())
+                  log.trace("Found: " + file.getCanonicalPath());
+
                pathAliases.put(file.getPath(),file.getCanonicalPath());
                fixedURI = new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath() + "/" + relative, uri.getQuery(), uri.getFragment());
                return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
@@ -182,6 +209,9 @@ public class DefaultVFSRegistry extends VFSRegistry
 
       URIResolutionResult resolutionResult = resolveURI(uri);
 
+      if(log.isTraceEnabled())
+         log.trace("Getting context in getContext(): " + resolutionResult.getURI().toString());
+
       VFSContext context = resolutionResult.getContext();
       if (context != null)
       {
@@ -198,6 +228,10 @@ public class DefaultVFSRegistry extends VFSRegistry
          throw new IllegalArgumentException("Null uri");
 
       URIResolutionResult resolutionResult = resolveURI(uri);
+
+      if(log.isTraceEnabled())
+         log.trace("Getting context in getFile(): " + resolutionResult.getURI().toString());
+
       VFSContext context = resolutionResult.getContext();
       if (context != null)
       {
