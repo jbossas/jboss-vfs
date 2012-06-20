@@ -879,6 +879,7 @@ public class VFSUtils {
                     } finally {
                         VFSUtils.safeClose(is);
                     }
+                    current.setLastModified(zipEntry.getTime());
                 }
             }
         } finally {
