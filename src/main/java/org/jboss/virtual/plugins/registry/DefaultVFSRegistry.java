@@ -21,6 +21,17 @@
  */
 package org.jboss.virtual.plugins.registry;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jboss.logging.Logger;
 import org.jboss.virtual.VFSUtils;
 import org.jboss.virtual.VirtualFile;
@@ -31,17 +42,6 @@ import org.jboss.virtual.spi.VirtualFileHandler;
 import org.jboss.virtual.spi.cache.VFSCache;
 import org.jboss.virtual.spi.cache.VFSCacheFactory;
 import org.jboss.virtual.spi.registry.VFSRegistry;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
 
 /**
  * Default vfs registry.
@@ -55,7 +55,7 @@ public class DefaultVFSRegistry extends VFSRegistry
    private static boolean forceCanonical;
    private static Logger log = Logger.getLogger(DefaultVFSRegistry.class);
 
-   private Map<String,String> pathAliases = new HashMap<String,String>();
+   private Map<String,String> pathAliases = new ConcurrentHashMap<String, String>();
 
    static
    {
