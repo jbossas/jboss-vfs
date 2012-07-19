@@ -47,6 +47,7 @@ import java.util.Set;
  * Default vfs registry.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
+ * @author Chris Sams
  */
 public class DefaultVFSRegistry extends VFSRegistry
 {
@@ -138,18 +139,19 @@ public class DefaultVFSRegistry extends VFSRegistry
          File file = new File(path);
          try
          {
-            URI fixedURI = null;
-            for(String key: pathAliases.keySet())
+            URI fixedURI;
+            for(Map.Entry<String, String> entry : pathAliases.entrySet())
             {
+               String key = entry.getKey();
                if(path.startsWith(key))
                {
                   String relative = path.substring(key.length());
 
-                  String alias = pathAliases.get(key);
+                  String alias = entry.getValue();
                   fixedURI = new URI(uri.getScheme(), uri.getHost(),  alias + relative, uri.getQuery(), uri.getFragment());
 
                   if(log.isTraceEnabled())
-                     log.trace("Found aliased context: " + key + " -> " + pathAliases.get(key));
+                     log.trace("Found aliased context: " + key + " -> " + alias);
 
                   return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
                }
@@ -185,7 +187,7 @@ public class DefaultVFSRegistry extends VFSRegistry
                if(log.isTraceEnabled())
                   log.trace("Found: " + file.getCanonicalPath());
 
-               pathAliases.put(file.getPath(),file.getCanonicalPath());
+               pathAliases.put(file.getPath(), file.getCanonicalPath());
                fixedURI = new URI(uri.getScheme(), uri.getHost(), file.getCanonicalPath() + "/" + relative, uri.getQuery(), uri.getFragment());
                return new URIResolutionResult(getCache().findContext(fixedURI), fixedURI);
             }
