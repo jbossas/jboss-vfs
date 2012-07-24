@@ -110,18 +110,18 @@
       <groupId>org.jboss.logging</groupId>
       <artifactId>jboss-logging-spi</artifactId>
       <version>${version.jboss.logging}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.test</groupId>
-      <artifactId>jboss-test</artifactId>
-      <version>${version.jboss.test}</version>
-      <scope>test</scope>
       <exclusions>
          <exclusion>
             <groupId>apache-log4j</groupId>
             <artifactId>log4j</artifactId>
          </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.test</groupId>
+      <artifactId>jboss-test</artifactId>
+      <version>${version.jboss.test}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
