@@ -98,7 +98,7 @@ public class JarContext extends AbstractVFSContext
          return jar;
       
       // todo This is a hack until we can fix http://jira.jboss.com/jira/browse/JBMICROCONT-164
-      AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.getChild(entryPath);
+      AbstractVirtualFileHandler result = (AbstractVirtualFileHandler)jar.getChild(removeQuery(entryPath));
       if (result == null)
          throw new IllegalArgumentException("Null child, entryPath: " + entryPath);
 
@@ -108,8 +108,7 @@ public class JarContext extends AbstractVFSContext
 
    public static String entryPath(String entryName)
    {
-      int index;
-      index = entryName.indexOf("!/");
+      int index = entryName.indexOf("!/");
       if (index != -1)
       {
          entryName = entryName.substring(index + 2);
@@ -122,6 +121,16 @@ public class JarContext extends AbstractVFSContext
          return null;
       
       return entryName;
+   }
+
+   protected static String removeQuery(String entryPath)
+   {
+      int index = entryPath.indexOf("?");
+      if (index != -1)
+      {
+         entryPath = entryPath.substring(0, index);
+      }
+      return entryPath;
    }
 
    /**

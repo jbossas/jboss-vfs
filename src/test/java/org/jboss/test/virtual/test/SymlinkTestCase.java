@@ -62,13 +62,13 @@ public class SymlinkTestCase extends AbstractVFSTest
       return suite(SymlinkTestCase.class);
    }
 
-   // enable this to run the test -- no Winz though :-)
+   // enable this to run the tests -- no Winz though :-)
    private static boolean supportSymlinks()
    {
-//      return false;
-//
-      String os = System.getProperty("os.name");
-      return os.contains("Win") == false;
+      return false;
+
+//      String os = System.getProperty("os.name");
+//      return os.contains("Win") == false;
    }
 
    @Override
@@ -160,7 +160,7 @@ public class SymlinkTestCase extends AbstractVFSTest
       }
    }
 
-   public void xtestCacheUsage() throws Exception
+   public void testCacheUsage() throws Exception
    {
       if (supportSymlinks() == false)
          return;
@@ -232,7 +232,8 @@ public class SymlinkTestCase extends AbstractVFSTest
       URL url = getResource("/vfs/test/level1.zip");
       try
       {
-        VFS vfs = VFS.getVFS(new URL("jar:file:" + url.getPath() + "!/" + "level2.zip/level3.zip"));
+          String path = url.getPath();
+          VFS.getVFS(new URL("jar:file:" + path + "!/" + "level2.zip/level3.zip"));
       }
       catch(NullPointerException npe)
       {
