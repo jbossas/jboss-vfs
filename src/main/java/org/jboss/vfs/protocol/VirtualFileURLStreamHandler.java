@@ -22,9 +22,9 @@
 
 package org.jboss.vfs.protocol;
 
-import java.net.URLConnection;
-import java.net.URL;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * The VFS URL stream handler.
