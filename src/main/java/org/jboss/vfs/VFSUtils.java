@@ -34,6 +34,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLStreamHandler;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -54,7 +55,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jboss.logging.Logger;
-import org.jboss.vfs.spi.FileSystem;
+import org.jboss.vfs.protocol.FileURLStreamHandler;
+import org.jboss.vfs.protocol.VirtualFileURLStreamHandler;
 import org.jboss.vfs.spi.MountHandle;
 import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.vfs.util.automount.Automounter;
@@ -86,6 +88,16 @@ public class VFSUtils {
     public static final String VFS_PROTOCOL = "vfs";
 
 
+    /**
+     * The {@link URLStreamHandler} for the 'vfs' protocol
+     */
+    public static final URLStreamHandler VFS_URL_HANDLER = new VirtualFileURLStreamHandler();
+    
+    /**
+     * The {@link URLStreamHandler} for the 'file' protocol
+     */
+    public static final URLStreamHandler FILE_URL_HANDLER = new FileURLStreamHandler();
+    
     /**
      * The default buffer size to use for copies
      */
@@ -498,9 +510,16 @@ public class VFSUtils {
      * @see VirtualFile#asFileURL()
      */
     public static URL getVirtualURL(VirtualFile file) throws MalformedURLException {
-        // todo: specify the URL handler directly as a minor optimization
         try {
-            return getVirtualURI(file).toURL();
+            URI uri = getVirtualURI(file);
+            String scheme = uri.getScheme();
+            if (VFS_PROTOCOL.equals(scheme)) {
+                return new URL(null, uri.toString(), VFS_URL_HANDLER);
+            } else if ("file".equals(scheme)) {
+                return new URL(null, uri.toString(), FILE_URL_HANDLER);
+            } else {
+                return uri.toURL();
+            }
         } catch (URISyntaxException e) {
             throw new MalformedURLException(e.getMessage());
         }

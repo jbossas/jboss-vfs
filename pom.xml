@@ -34,7 +34,7 @@
     <groupId>org.jboss</groupId>
     <artifactId>jboss-vfs</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.0.Final</version>
+    <version>3.1.1-SNAPSHOT</version>
     <name>JBoss VFS</name>
     <url>http://www.jboss.org</url>
     <description>A VFS library</description>
@@ -51,6 +51,17 @@
         <url>http://www.jboss.org</url>
     </organization>
 
+	<issueManagement>
+	  <system>JIRA</system>
+	  <url>https://issues.jboss.org/browse/JBVFS</url>
+	</issueManagement>
+	
+	<scm>
+	  <connection>scm:git:git://github.com/jbossas/jboss-vfs.git</connection>
+	  <developerConnection>scm:git:git@github.com:jbossas/jboss-vfs.git</developerConnection>
+	  <url>https://github.com/jbossas/jboss-vfs</url>
+	</scm>
+	
     <properties>
         <version.jboss.logging>3.0.0.CR1</version.jboss.logging>
         <version.jboss.test>1.1.5.GA</version.jboss.test>
