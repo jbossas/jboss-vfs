@@ -51,10 +51,10 @@ public final class RootFileSystem implements FileSystem {
     
     public static final RootFileSystem ROOT_INSTANCE = new RootFileSystem();
     
-    private boolean forceCaseSensitive  = false;
+    private boolean forceCaseSensitive = false;
     
     private RootFileSystem() {
-    	forceCaseSensitive  = "true".equals(System.getProperty("jboss.vfs.forceCaseSensitive "));
+    	forceCaseSensitive = "true".equals(System.getProperty("jboss.vfs.forceCaseSensitive"));
     }
 
     /**
@@ -71,10 +71,10 @@ public final class RootFileSystem implements FileSystem {
         return false;
     }
 
-    private class ForceCaseSensitive FileFilter implements FilenameFilter {
+    private class ForceCaseSensitiveFileFilter implements FilenameFilter {
     	private String virtualFileName = "";
     	
-    	public ForceCaseSensitive FileFilter(String virtualFileName) {
+    	public ForceCaseSensitiveFileFilter(String virtualFileName) {
     		this.virtualFileName = virtualFileName;
     		if (virtualFileName == null) {
     			virtualFileName = "";
@@ -92,10 +92,10 @@ public final class RootFileSystem implements FileSystem {
      */
     public File getFile(VirtualFile mountPoint, VirtualFile target) {
     	File retFile = new File(target.getPathName()); 
-        if (forceCaseSensitive  && retFile != null && retFile.isFile()) {
+        if (forceCaseSensitive && retFile != null && retFile.isFile()) {
         	File parentFile = retFile.getParentFile();
         	if (parentFile != null) {
-        		ForceCaseSensitive FileFilter wc = new ForceCaseSensitive FileFilter(target.getName());
+        		ForceCaseSensitiveFileFilter wc = new ForceCaseSensitiveFileFilter(target.getName());
         		if (parentFile.list(wc).length == 0) {
         			// Randomize the Filename so that it will map to a file that does not exist.
         			retFile = new File(target.getPathName() + UUID.randomUUID().toString());	
