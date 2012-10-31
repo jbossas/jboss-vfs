@@ -28,6 +28,8 @@ import org.jboss.vfs.VirtualFile;
 import org.jboss.logging.Logger;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -35,6 +37,7 @@ import java.security.CodeSigner;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * A special FileSystem which supports multiple roots.
@@ -48,7 +51,11 @@ public final class RootFileSystem implements FileSystem {
     
     public static final RootFileSystem ROOT_INSTANCE = new RootFileSystem();
     
-    private RootFileSystem(){}
+    private boolean forceCaseSensative = false;
+    
+    private RootFileSystem() {
+    	forceCaseSensative = "true".equals(System.getProperty("jboss.vfs.forceCaseSensative"));
+    }
 
     /**
      * {@inheritDoc}
@@ -64,11 +71,38 @@ public final class RootFileSystem implements FileSystem {
         return false;
     }
 
+    private class ForceCaseSensativeFileFilter implements FilenameFilter {
+    	private String virtualFileName = "";
+    	
+    	public ForceCaseSensativeFileFilter(String virtualFileName) {
+    		this.virtualFileName = virtualFileName;
+    		if (virtualFileName == null) {
+    			virtualFileName = "";
+    		}
+    	}
+    	
+		@Override
+		public boolean accept(File dir, String name) {
+			return virtualFileName.equals(name);
+		}    	
+    }
+    
     /**
      * {@inheritDoc}
      */
     public File getFile(VirtualFile mountPoint, VirtualFile target) {
-        return new File(target.getPathName());
+    	File retFile = new File(target.getPathName()); 
+        if (forceCaseSensative && retFile != null && retFile.isFile()) {
+        	File parentFile = retFile.getParentFile();
+        	if (parentFile != null) {
+        		ForceCaseSensativeFileFilter wc = new ForceCaseSensativeFileFilter(target.getName());
+        		if (parentFile.list(wc).length == 0) {
+        			// Randomize the Filename so that it will map to a file that does not exist.
+        			retFile = new File(target.getPathName() + UUID.randomUUID().toString());	
+        		}        		
+        	}        	
+        }
+        return retFile;
     }
 
     /**
