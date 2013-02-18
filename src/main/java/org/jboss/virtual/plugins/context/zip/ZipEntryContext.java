@@ -393,6 +393,8 @@ public class ZipEntryContext extends AbstractVFSContext
       ZipInputStream zis = new ZipInputStream(bais);
       ZipEntry entry;
       String longestNameMatch = null;
+      String youngestNameMatch = null;
+      long youngestMatchTime = 0;
       while((entry = zis.getNextEntry()) != null)
       {
          String entryName = entry.getName();
@@ -424,10 +426,27 @@ public class ZipEntryContext extends AbstractVFSContext
                longestNameMatch = entryName; // keep entry name
             }
          }
+
+         final int lastIndex = entryName.lastIndexOf('/');
+         if (lastIndex != -1)
+         {
+            String entryPath = entryName.substring(0, lastIndex);
+            if (entryPath.equals(relative))
+            {
+               // found a ghost directory
+               if (entry.getTime() > youngestMatchTime)
+               {
+                  youngestNameMatch = entryName;
+               }
+            }
+         }
       }
-      if (longestNameMatch == null)
+      if (longestNameMatch == null && youngestNameMatch == null)
          throw new IllegalArgumentException("Cannot find entry: " + is + ", " + relative);
 
+      assert longestNameMatch != null ^ youngestNameMatch != null;
+
+      final String alternateName = longestNameMatch != null ? longestNameMatch : youngestNameMatch;
       // do recursion on relative
       bais.reset();
       zis = new ZipInputStream(bais);
@@ -441,6 +460,14 @@ public class ZipEntryContext extends AbstractVFSContext
 
             relative = relative.substring(longestNameMatch.length() + 1);
             return findEntry(zis, relative, null);
+         }
+         if (entryName.equals(youngestNameMatch))
+         {
+            if (urlInfo != null)
+               urlInfo.relativePath = relative;
+
+            this.rootEntryPath = relative;
+            return new ZipDirWrapper(zis, relative, System.currentTimeMillis(), bais);
          }
       }
       throw new IllegalArgumentException("No such entry: " + is + ", " + relative);
