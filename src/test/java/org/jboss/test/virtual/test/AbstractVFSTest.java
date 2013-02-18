@@ -82,6 +82,12 @@ public abstract class AbstractVFSTest extends BaseTestCase
       }
    }
 
+   static void registerFactories()
+   {
+      VFSContextFactoryLocator.registerFactory(fileFactory);
+      VFSContextFactoryLocator.registerFactory(jarFactory);
+   }
+
    protected void setUp() throws Exception
    {
       super.setUp();
@@ -98,8 +104,7 @@ public abstract class AbstractVFSTest extends BaseTestCase
       System.setProperty(VFSUtils.VFS_CACHE_KEY + ".TimedPolicyCaching.lifetime", "60");
 */
 
-      VFSContextFactoryLocator.registerFactory(fileFactory);
-      VFSContextFactoryLocator.registerFactory(jarFactory);
+      registerFactories();
 
       getLog().info("Force copy: " + forceCopy);
       if (forceCopy)
@@ -111,8 +116,7 @@ public abstract class AbstractVFSTest extends BaseTestCase
 
    protected void tearDown() throws Exception
    {
-      VFSContextFactoryLocator.unregisterFactory(jarFactory);
-      VFSContextFactoryLocator.unregisterFactory(fileFactory);
+      unregisterFactories();
 
       if (forceCopy)
          OptionsAwareURI.clear(OptionsAwareURI.Copy);
@@ -121,6 +125,12 @@ public abstract class AbstractVFSTest extends BaseTestCase
          OptionsAwareURI.clear(OptionsAwareURI.NoReaper);
 
       super.tearDown();
+   }
+
+   static void unregisterFactories()
+   {
+      VFSContextFactoryLocator.unregisterFactory(jarFactory);
+      VFSContextFactoryLocator.unregisterFactory(fileFactory);
    }
 
    // TODO move to AbstractTestCase
