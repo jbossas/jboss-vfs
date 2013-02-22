@@ -97,7 +97,7 @@ public final class TempFileProvider implements Closeable {
         final String name = createTempName(originalName + "-", "");
         final File f = new File(providerRoot, name);
         for (int i = 0; i < RETRIES; i++) {
-            if (f.mkdir())
+            if (f.mkdirs())
                 return new TempDir(this, f);
         }
         throw new IOException(
@@ -109,7 +109,7 @@ public final class TempFileProvider implements Closeable {
     private static File createTempDir(String prefix, String suffix, File root) throws IOException {
         for (int i = 0; i < RETRIES; i++) {
             final File f = new File(root, createTempName(prefix, suffix));
-            if (f.mkdir())
+            if (f.mkdirs())
                 return f;
         }
         throw new IOException(
