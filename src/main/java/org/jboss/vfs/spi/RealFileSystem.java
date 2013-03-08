@@ -22,8 +22,13 @@
 
 package org.jboss.vfs.spi;
 
+import java.io.FilePermission;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.logging.Logger;
 
@@ -36,6 +41,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static java.security.AccessController.doPrivileged;
+
 /**
  * A real filesystem.
  *
@@ -45,14 +52,10 @@ public final class RealFileSystem implements FileSystem {
 
     private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
 
-    /**
-     * The root real filesystem (singleton instance).
-     */
-   
-
     private static final boolean NEEDS_CONVERSION = File.separatorChar != '/';
 
     private final File realRoot;
+    private final boolean privileged;
 
     /**
      * Construct a real filesystem with the given real root.
@@ -60,15 +63,50 @@ public final class RealFileSystem implements FileSystem {
      * @param realRoot the real root
      */
     public RealFileSystem(File realRoot) {
+        this(realRoot, true);
+    }
+
+    /**
+     * Construct a real filesystem with the given real root.
+     *
+     * @param realRoot the real root
+     * @param privileged {@code true} to check permissions once up front, {@code false} to check at access time
+     */
+    public RealFileSystem(File realRoot, boolean privileged) {
+        if (privileged) {
+            final SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                sm.checkPermission(new FilePermission(new File(realRoot, "-").getPath(), "read,delete"));
+            }
+        }
         this.realRoot = realRoot;
-        log.tracef("Constructed real filesystem at root %s", realRoot);
+        this.privileged = privileged;
+        log.tracef("Constructed real %s filesystem at root %s", privileged ? "privileged" : "unprivileged", realRoot);
+    }
+
+    private static <T> T doIoPrivileged(PrivilegedExceptionAction<T> action) throws IOException {
+        try {
+            return doPrivileged(action);
+        } catch (PrivilegedActionException pe) {
+            try {
+                throw pe.getException();
+            } catch (IOException | RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
-        return new FileInputStream(getFile(mountPoint, target));
+    public InputStream openInputStream(final VirtualFile mountPoint, final VirtualFile target) throws IOException {
+        return privileged ? doIoPrivileged(new PrivilegedExceptionAction<InputStream>() {
+            public InputStream run() throws Exception {
+                return new FileInputStream(getFile(mountPoint, target));
+            }
+        }) : new FileInputStream(getFile(mountPoint, target));
     }
 
     /**
@@ -95,47 +133,82 @@ public final class RealFileSystem implements FileSystem {
      * {@inheritDoc}
      */
     public boolean delete(VirtualFile mountPoint, VirtualFile target) {
-        return getFile(mountPoint, target).delete();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.valueOf(file.delete());
+            }
+        }).booleanValue() : file.delete();
     }
 
     /**
      * {@inheritDoc}
      */
     public long getSize(VirtualFile mountPoint, VirtualFile target) {
-        return getFile(mountPoint, target).length();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Long>() {
+            public Long run() {
+                return Long.valueOf(file.length());
+            }
+        }).longValue() : file.length();
     }
 
     /**
      * {@inheritDoc}
      */
     public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
-        return getFile(mountPoint, target).lastModified();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Long>() {
+            public Long run() {
+                return Long.valueOf(file.lastModified());
+            }
+        }).longValue() : file.lastModified();
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean exists(VirtualFile mountPoint, VirtualFile target) {
-        return getFile(mountPoint, target).exists();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.valueOf(file.exists());
+            }
+        }).booleanValue() : file.exists();
     }
 
     /** {@inheritDoc} */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
-        return getFile(mountPoint, target).isFile();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.valueOf(file.isFile());
+            }
+        }).booleanValue() : file.isFile();
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
-        return getFile(mountPoint, target).isDirectory();
+        final File file = getFile(mountPoint, target);
+        return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return Boolean.valueOf(file.isDirectory());
+            }
+        }).booleanValue() : file.isDirectory();
     }
 
     /**
      * {@inheritDoc}
      */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
-        final String[] names = getFile(mountPoint, target).list();
+        final File file = getFile(mountPoint, target);
+        final String[] names = privileged ? doPrivileged(new PrivilegedAction<String[]>() {
+            public String[] run() {
+                return file.list();
+            }
+        }) : file.list();
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
     
