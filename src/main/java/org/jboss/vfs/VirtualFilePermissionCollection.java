@@ -22,42 +22,61 @@
 
 package org.jboss.vfs;
 
-import java.io.FilePermission;
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamField;
+import java.lang.reflect.Field;
+import java.security.AccessController;
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.util.ArrayList;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 
 final class VirtualFilePermissionCollection extends PermissionCollection {
-    private final PermissionCollection collection;
-    private final ArrayList<Permission> list;
+    private static final ObjectStreamField[] serialPersistentFields = {
+        new ObjectStreamField("list", VirtualFilePermission[].class)
+    };
 
-    VirtualFilePermissionCollection(final PermissionCollection collection) {
-        this.collection = collection;
-        list = new ArrayList<Permission>();
+    private static final VirtualFilePermission[] NO_PERMISSIONS = new VirtualFilePermission[0];
+
+    private volatile VirtualFilePermission[] permissions = NO_PERMISSIONS;
+
+    private static final Field listField;
+
+    static {
+        listField = AccessController.doPrivileged(new PrivilegedAction<Field>() {
+            public Field run() {
+                final Field field;
+                try {
+                    field = VirtualFilePermissionCollection.class.getDeclaredField("permissions");
+                } catch (NoSuchFieldException e) {
+                    throw new NoSuchFieldError(e.getMessage());
+                }
+                field.setAccessible(true);
+                return field;
+            }
+        });
     }
 
-    VirtualFilePermissionCollection(final PermissionCollection collection, final ArrayList<Permission> list) {
-        this.collection = collection;
-        this.list = list;
+    VirtualFilePermissionCollection() {
     }
 
     public void add(final Permission permission) {
         if (permission instanceof VirtualFilePermission) {
-            final VirtualFilePermission virtualFilePermission = (VirtualFilePermission) permission;
-            add(virtualFilePermission);
+            add((VirtualFilePermission) permission);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
-    public void add(final VirtualFilePermission permission) {
+    public synchronized void add(final VirtualFilePermission permission) {
         if (permission != null) {
-            collection.add(permission.getFilePermission());
-            list.add(permission);
+            final VirtualFilePermission[] permissions = this.permissions;
+            final int length = permissions.length;
+            final VirtualFilePermission[] newPermissions = Arrays.copyOf(permissions, length + 1);
+            newPermissions[length] = permission;
+            this.permissions = newPermissions;
         } else {
             throw new IllegalArgumentException();
         }
@@ -67,29 +86,44 @@ final class VirtualFilePermissionCollection extends PermissionCollection {
         return permission instanceof VirtualFilePermission && implies((VirtualFilePermission) permission);
     }
 
-    public boolean implies(final VirtualFilePermission permission) {
-        return permission != null && collection.implies(permission.getFilePermission());
-    }
-
-    public Enumeration<Permission> elements() {
-        return Collections.enumeration(list);
-    }
-
-    Object writeReplace() {
-        return new Serialized(list.toArray(new VirtualFilePermission[list.size()]));
-    }
-
-    static final class Serialized implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        final VirtualFilePermission[] permissions;
-
-        Serialized(final VirtualFilePermission[] permissions) {
-            this.permissions = permissions;
+    private boolean implies(final VirtualFilePermission permission) {
+        assert permission != null; // else the above check would have failed
+        int remainingFlags = permission.getActionFlags();
+        if (remainingFlags == 0) return true;
+        // snapshot
+        final VirtualFilePermission[] permissions = this.permissions;
+        final String theirName = permission.getName();
+        for (VirtualFilePermission ourPermission : permissions) {
+            if (VirtualFilePermission.impliesPath(ourPermission.getName(), theirName)) {
+                remainingFlags &= ~ourPermission.getActionFlags();
+                if (remainingFlags == 0) {
+                    return true;
+                }
+            }
         }
+        return false;
+    }
 
-        Object readResolve() {
-            return new VirtualFilePermissionCollection(new FilePermission("/", "*").newPermissionCollection(), new ArrayList<Permission>(Arrays.asList(permissions)));
+    @SuppressWarnings("unchecked")
+    public Enumeration<Permission> elements() {
+        final VirtualFilePermission[] permissions = this.permissions;
+        return new Enumeration<Permission>() {
+            private int idx = 0;
+            public boolean hasMoreElements() {
+                return idx < permissions.length;
+            }
+
+            public Permission nextElement() {
+                return permissions[idx++];
+            }
+        };
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        try {
+            listField.set(this, ois.readFields().get("list", null));
+        } catch (IllegalAccessException e) {
+            throw new IllegalAccessError(e.getMessage());
         }
     }
 }
