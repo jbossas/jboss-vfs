@@ -334,7 +334,7 @@ public abstract class AbstractVirtualFileHandler implements VirtualFileHandler
                      {
                         vfsUrlCached = oldRootURL;
                      }
-                     log.warn("No such existing handler, falling back to old root + path: " + vfsUrlCached);
+                     log.debug("No such existing handler, falling back to old root + path: " + vfsUrlCached);
                   }
                   else
                   {
