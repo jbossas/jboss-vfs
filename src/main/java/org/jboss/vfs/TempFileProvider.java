@@ -147,8 +147,12 @@ public final class TempFileProvider implements Closeable {
 
         public void run() {
             if (VFSUtils.recursiveDelete(root) == false) {
-                log.tracef("Failed to delete root (%s), retrying in 30sec.", root);
-                executor.schedule(this, 30L, TimeUnit.SECONDS);
+                if (executor != null) {
+                    log.tracef("Failed to delete root (%s), retrying in 30sec.", root);
+                    executor.schedule(this, 30L, TimeUnit.SECONDS);
+                } else {
+                    log.tracef("Failed to delete root (%s).", root);
+                }
             }
         }
     }
