@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Created-By: ${java.runtime.version} (${java.vendor})
+Specification-Title: filesonly-war
+Specification-Version: 1.0.0.GA
+Specification-Vendor: JBoss Inc.
+Implementation-Title: filesonly-war
+Implementation-URL: http://www.jboss.org
+Implementation-Version: 1.0.0.GA-jboss
+Implementation-Vendor: JBoss Inc.
+
