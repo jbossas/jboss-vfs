@@ -54,8 +54,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jboss.logging.Logger;
-import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.MountHandle;
+import org.jboss.vfs.util.PaddedManifestStream;
 import org.jboss.vfs.util.PathTokenizer;
 import org.jboss.vfs.util.automount.Automounter;
 
@@ -211,7 +211,7 @@ public class VFSUtils {
     public static Manifest readManifest(VirtualFile manifest) throws IOException {
         if (manifest == null)
             throw new IllegalArgumentException("Null manifest file");
-        InputStream stream = manifest.openStream();
+        InputStream stream = new PaddedManifestStream(manifest.openStream());
         try {
             return new Manifest(stream);
         }
