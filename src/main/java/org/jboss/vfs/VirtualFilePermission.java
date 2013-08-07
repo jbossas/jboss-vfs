@@ -162,8 +162,8 @@ public final class VirtualFilePermission extends Permission implements Serializa
     private static boolean impliesPath(String ourName, String theirName, int idx) {
         final int ourLen = ourName.length();
         final int theirLen = theirName.length();
-        final int ei1 = ourIndexOf(ourName, File.separatorChar, idx);
-        final int ei2 = ourIndexOf(theirName, File.separatorChar, idx);
+        final int ei1 = ourIndexOf(ourName, '/', idx);
+        final int ei2 = ourIndexOf(theirName, '/', idx);
         if (ei1 == idx + 1) {
             final char ch = ourName.charAt(idx);
             if (ch == '-') {
