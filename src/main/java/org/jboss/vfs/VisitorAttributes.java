@@ -95,7 +95,6 @@ public class VisitorAttributes {
      * Set the leaves only.
      *
      * @param leavesOnly the leaves only
-     *
      * @throws IllegalStateException if you attempt to modify one of the preconfigured static values of this class
      */
     public void setLeavesOnly(boolean leavesOnly) {
@@ -109,13 +108,11 @@ public class VisitorAttributes {
      * Default: false
      *
      * @param file the file
-     *
      * @return the recurse flag.
      */
     public boolean isRecurse(VirtualFile file) {
         boolean recurse = false;
-        if (recurseFilter != null)
-            recurse = recurseFilter.accepts(file);
+        if (recurseFilter != null) { recurse = recurseFilter.accepts(file); }
         return recurse;
     }
 
@@ -132,7 +129,6 @@ public class VisitorAttributes {
      * Set the recurse filter.
      *
      * @param filter - the recurse filter.
-     *
      * @throws IllegalStateException if you attempt to modify one of the preconfigured static values of this class
      */
     public void setRecurseFilter(VirtualFileFilter filter) {
@@ -154,7 +150,6 @@ public class VisitorAttributes {
      * Set the includeRoot.
      *
      * @param includeRoot the includeRoot.
-     *
      * @throws IllegalStateException if you attempt to modify one of the preconfigured static values of this class
      */
     public void setIncludeRoot(boolean includeRoot) {
@@ -176,7 +171,6 @@ public class VisitorAttributes {
      * Set the ignoreErrors.
      *
      * @param ignoreErrors the ignoreErrors.
-     *
      * @throws IllegalStateException if you attempt to modify one of the preconfigured static values of this class
      */
     public void setIgnoreErrors(boolean ignoreErrors) {
@@ -198,7 +192,6 @@ public class VisitorAttributes {
      * Set the includeHidden.
      *
      * @param includeHidden the includeHidden.
-     *
      * @throws IllegalStateException if you attempt to modify one of the preconfigured static values of this class
      */
     public void setIncludeHidden(boolean includeHidden) {
@@ -226,7 +219,7 @@ public class VisitorAttributes {
         /**
          * Create a new ImmutableVirtualFileVisitorAttributes.
          *
-         * @param leavesOnly whether to visit leaves only
+         * @param leavesOnly    whether to visit leaves only
          * @param recurseFilter - filter which controls whether to recurse
          */
         public ImmutableVisitorAttributes(boolean leavesOnly, VirtualFileFilter recurseFilter) {

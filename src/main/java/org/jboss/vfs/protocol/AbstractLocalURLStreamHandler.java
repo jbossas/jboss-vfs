@@ -49,6 +49,10 @@ public abstract class AbstractLocalURLStreamHandler extends URLStreamHandler {
         locals = set;
     }
 
+    private static String toLower(String str) {
+        return str == null ? null : str.toLowerCase();
+    }
+
     @Override
     protected URLConnection openConnection(URL u, Proxy p) throws IOException {
         return openConnection(u);
@@ -59,13 +63,10 @@ public abstract class AbstractLocalURLStreamHandler extends URLStreamHandler {
         return locals.contains(toLower(url1.getHost())) && locals.contains(toLower(url2.getHost())) || super.hostsEqual(url1, url2);
     }
 
-    private static String toLower(String str) {
-        return str == null ? null : str.toLowerCase();
-    }
-
     protected void ensureLocal(URL url) throws IOException {
-       if (!locals.contains(toLower(url.getHost())))   
-          throw new IOException("Remote host access not supported for URLs of type \"" + url.getProtocol() + "\"");
+        if (!locals.contains(toLower(url.getHost()))) {
+            throw new IOException("Remote host access not supported for URLs of type \"" + url.getProtocol() + "\"");
+        }
     }
 
 }

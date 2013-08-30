@@ -25,17 +25,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URL;
-import java.net.URISyntaxException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.CodeSigner;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.Arrays;
 
 import org.jboss.vfs.util.FilterVirtualFileVisitor;
 import org.jboss.vfs.util.MatchAllVirtualFileFilter;
@@ -115,8 +115,8 @@ public final class VirtualFile implements Serializable {
         if (this.parent == null) {
             throw new IllegalArgumentException("Given parent is not an ancestor of this virtual file");
         }
-        if(this.equals(parent)) {
-           return;
+        if (this.equals(parent)) {
+            return;
         }
         if (!this.parent.equals(parent)) {
             this.parent.getPathNameRelativeTo(parent, builder);
@@ -129,7 +129,6 @@ public final class VirtualFile implements Serializable {
      * Get the absolute VFS full path name. If this is a URL then directory entries will have a trailing slash.
      *
      * @param url whether or not this path is being used for a URL
-     *
      * @return the VFS full path name
      */
     String getPathName(boolean url) {
@@ -145,8 +144,7 @@ public final class VirtualFile implements Serializable {
             builder.append(name);
         }
         // Perhaps this should be cached to avoid the fs stat call?
-        if (url && isDirectory())
-            builder.append('/');
+        if (url && isDirectory()) { builder.append('/'); }
         return builder.toString();
     }
 
@@ -191,14 +189,14 @@ public final class VirtualFile implements Serializable {
         final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().exists(mount.getMountPoint(), this);
     }
-    
+
     /**
      * Determines whether this virtual file represents a true root of a file system.
      * On UNIX, there is only one root "/". Howevever, on Windows there are an infinite
      * number of roots that correspond to drives, or UNC paths.
-     * 
+     *
      * @return {@code true} if this represents a root.
-     */ 
+     */
     public boolean isRoot() {
         return parent == null;
     }
@@ -207,7 +205,6 @@ public final class VirtualFile implements Serializable {
      * Whether it is a simple leaf of the VFS, i.e. whether it can contain other files
      *
      * @return {@code true} if a simple file
-     *
      * @deprecated use {@link #isDirectory()} or {@link #isFile()} instead
      */
     @Deprecated
@@ -247,7 +244,6 @@ public final class VirtualFile implements Serializable {
      * Access the file contents.
      *
      * @return an InputStream for the file contents.
-     *
      * @throws IOException for any error accessing the file system
      */
     public InputStream openStream() throws IOException {
@@ -255,8 +251,8 @@ public final class VirtualFile implements Serializable {
         if (sm != null) {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
-        if(isDirectory()) {
-           return new VirtualJarInputStream(this);
+        if (isDirectory()) {
+            return new VirtualJarInputStream(this);
         }
         final VFS.Mount mount = VFS.getMount(this);
         return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
@@ -283,7 +279,6 @@ public final class VirtualFile implements Serializable {
      * virtual directory.
      *
      * @return the physical file
-     *
      * @throws IOException if an I/O error occurs while producing the physical file
      */
     public File getPhysicalFile() throws IOException {
@@ -343,8 +338,7 @@ public final class VirtualFile implements Serializable {
      */
     public List<VirtualFile> getChildren() {
         // isDirectory does the read security check
-        if (!isDirectory())
-            return Collections.emptyList();
+        if (!isDirectory()) { return Collections.emptyList(); }
         final VFS.Mount mount = VFS.getMount(this);
         final Set<String> submounts = VFS.getSubmounts(this);
         final List<String> names = mount.getFileSystem().getDirectoryEntries(mount.getMountPoint(), this);
@@ -355,8 +349,8 @@ public final class VirtualFile implements Serializable {
             submounts.remove(name);
         }
         for (String name : submounts) {
-           final VirtualFile child = new VirtualFile(name, this);
-           virtualFiles.add(child);
+            final VirtualFile child = new VirtualFile(name, this);
+            virtualFiles.add(child);
         }
         return virtualFiles;
     }
@@ -365,18 +359,14 @@ public final class VirtualFile implements Serializable {
      * Get the children
      *
      * @param filter to filter the children
-     *
      * @return the children
-     *
-     * @throws IOException for any problem accessing the virtual file system
+     * @throws IOException           for any problem accessing the virtual file system
      * @throws IllegalStateException if the file is closed or it is a leaf node
      */
     public List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException {
         // isDirectory does the read security check
-        if (!isDirectory())
-            return Collections.emptyList();
-        if (filter == null)
-            filter = MatchAllVirtualFileFilter.INSTANCE;
+        if (!isDirectory()) { return Collections.emptyList(); }
+        if (filter == null) { filter = MatchAllVirtualFileFilter.INSTANCE; }
         FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, null);
         visit(visitor);
         return visitor.getMatched();
@@ -388,8 +378,7 @@ public final class VirtualFile implements Serializable {
      * This always uses {@link VisitorAttributes#RECURSE}
      *
      * @return the children
-     *
-     * @throws IOException for any problem accessing the virtual file system
+     * @throws IOException           for any problem accessing the virtual file system
      * @throws IllegalStateException if the file is closed
      */
     public List<VirtualFile> getChildrenRecursively() throws IOException {
@@ -402,18 +391,14 @@ public final class VirtualFile implements Serializable {
      * This always uses {@link VisitorAttributes#RECURSE}
      *
      * @param filter to filter the children
-     *
      * @return the children
-     *
-     * @throws IOException for any problem accessing the virtual file system
+     * @throws IOException           for any problem accessing the virtual file system
      * @throws IllegalStateException if the file is closed or it is a leaf node
      */
     public List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException {
         // isDirectory does the read security check
-        if (!isDirectory())
-            return Collections.emptyList();
-        if (filter == null)
-            filter = MatchAllVirtualFileFilter.INSTANCE;
+        if (!isDirectory()) { return Collections.emptyList(); }
+        if (filter == null) { filter = MatchAllVirtualFileFilter.INSTANCE; }
         FilterVirtualFileVisitor visitor = new FilterVirtualFileVisitor(filter, VisitorAttributes.RECURSE);
         visit(visitor);
         return visitor.getMatched();
@@ -423,10 +408,9 @@ public final class VirtualFile implements Serializable {
      * Visit the virtual file system
      *
      * @param visitor the visitor
-     *
-     * @throws IOException for any problem accessing the virtual file system
+     * @throws IOException              for any problem accessing the virtual file system
      * @throws IllegalArgumentException if the visitor is null
-     * @throws IllegalStateException if the file is closed
+     * @throws IllegalStateException    if the file is closed
      */
     public void visit(VirtualFileVisitor visitor) throws IOException {
         visit(visitor, true);
@@ -434,17 +418,13 @@ public final class VirtualFile implements Serializable {
 
     private void visit(VirtualFileVisitor visitor, boolean root) throws IOException {
         final VisitorAttributes visitorAttributes = visitor.getAttributes();
-        if (root && visitorAttributes.isIncludeRoot())
-            visitor.visit(this);
+        if (root && visitorAttributes.isIncludeRoot()) { visitor.visit(this); }
         // isDirectory does the read security check
-        if (!isDirectory())
-            return;
+        if (!isDirectory()) { return; }
         for (VirtualFile child : getChildren()) {
             // Always visit a leaf, and visit directories when leaves only is false
-            if (!child.isDirectory() || !visitorAttributes.isLeavesOnly())
-                visitor.visit(child);
-            if (child.isDirectory() && visitorAttributes.isRecurse(child))
-                child.visit(visitor, false);
+            if (!child.isDirectory() || !visitorAttributes.isLeavesOnly()) { visitor.visit(child); }
+            if (child.isDirectory() && visitorAttributes.isRecurse(child)) { child.visit(visitor, false); }
         }
     }
 
@@ -452,14 +432,11 @@ public final class VirtualFile implements Serializable {
      * Get a child virtual file.  The child may or may not exist in the virtual filesystem.
      *
      * @param path the path
-     *
      * @return the child
-     *
      * @throws IllegalArgumentException if the path is null
      */
     public VirtualFile getChild(String path) {
-        if (path == null)
-            throw new IllegalArgumentException("Null path");
+        if (path == null) { throw new IllegalArgumentException("Null path"); }
         final List<String> pathParts = PathTokenizer.getTokens(path);
         VirtualFile current = this;
         for (String part : pathParts) {
@@ -480,7 +457,6 @@ public final class VirtualFile implements Serializable {
      * over time.
      *
      * @return the current url
-     *
      * @throws MalformedURLException if the URL is somehow malformed
      * @see VirtualFile#asDirectoryURL()
      * @see VirtualFile#asFileURL()
@@ -496,7 +472,6 @@ public final class VirtualFile implements Serializable {
      * over time.
      *
      * @return the current uri
-     *
      * @throws URISyntaxException if the URI is somehow malformed
      * @see VirtualFile#asDirectoryURI()
      * @see VirtualFile#asFileURI()
@@ -504,53 +479,49 @@ public final class VirtualFile implements Serializable {
     public URI toURI() throws URISyntaxException {
         return VFSUtils.getVirtualURI(this);
     }
-    
-   /**
-    * Get file's URL as a directory.  There will always be a trailing {@code "/"} character.
-    *
-    * @return the url
-    *
-    * @throws MalformedURLException if the URL is somehow malformed
-    */
+
+    /**
+     * Get file's URL as a directory.  There will always be a trailing {@code "/"} character.
+     *
+     * @return the url
+     * @throws MalformedURLException if the URL is somehow malformed
+     */
     public URL asDirectoryURL() throws MalformedURLException {
-       final String pathName = getPathName(false);
-       return new URL(VFSUtils.VFS_PROTOCOL, "", -1, parent == null ? pathName : pathName + "/", VFSUtils.VFS_URL_HANDLER);
+        final String pathName = getPathName(false);
+        return new URL(VFSUtils.VFS_PROTOCOL, "", -1, parent == null ? pathName : pathName + "/", VFSUtils.VFS_URL_HANDLER);
     }
 
-   /**
-    * Get file's URI as a directory.  There will always be a trailing {@code "/"} character.
-    *
-    * @return the uri
-    *
-    * @throws URISyntaxException if the URI is somehow malformed
-    */
+    /**
+     * Get file's URI as a directory.  There will always be a trailing {@code "/"} character.
+     *
+     * @return the uri
+     * @throws URISyntaxException if the URI is somehow malformed
+     */
     public URI asDirectoryURI() throws URISyntaxException {
-       final String pathName = getPathName(false);
-       return new URI(VFSUtils.VFS_PROTOCOL, "", parent == null ? pathName : pathName + "/", null);
+        final String pathName = getPathName(false);
+        return new URI(VFSUtils.VFS_PROTOCOL, "", parent == null ? pathName : pathName + "/", null);
     }
 
-   /**
-    * Get file's URL as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
-    * represents a root.
-    *
-    * @return the url
-    *
-    * @throws MalformedURLException if the URL is somehow malformed
-    */
+    /**
+     * Get file's URL as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
+     * represents a root.
+     *
+     * @return the url
+     * @throws MalformedURLException if the URL is somehow malformed
+     */
     public URL asFileURL() throws MalformedURLException {
-       return new URL(VFSUtils.VFS_PROTOCOL, "", -1, getPathName(false), VFSUtils.VFS_URL_HANDLER);
+        return new URL(VFSUtils.VFS_PROTOCOL, "", -1, getPathName(false), VFSUtils.VFS_URL_HANDLER);
     }
 
-   /**
-    * Get file's URI as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
-    * represents a root.
-    *
-    * @return the url
-    *
-    * @throws URISyntaxException if the URI is somehow malformed
-    */
+    /**
+     * Get file's URI as a file.  There will be no trailing {@code "/"} character unless this {@code VirtualFile}
+     * represents a root.
+     *
+     * @return the url
+     * @throws URISyntaxException if the URI is somehow malformed
+     */
     public URI asFileURI() throws URISyntaxException {
-       return new URI(VFSUtils.VFS_PROTOCOL, "", getPathName(false), null);
+        return new URI(VFSUtils.VFS_PROTOCOL, "", getPathName(false), null);
     }
 
     /**
@@ -577,7 +548,7 @@ public final class VirtualFile implements Serializable {
         // getCodeSigners() does the sec check
         final CodeSigner[] codeSigners = getCodeSigners();
         if (codeSigners == null) {
-           return null;
+            return null;
         }
         final List<Certificate> certList = new ArrayList<Certificate>(codeSigners.length * 3);
         for (CodeSigner signer : codeSigners) {
@@ -600,7 +571,6 @@ public final class VirtualFile implements Serializable {
      * from the same {@code VFS} instance with the same name.
      *
      * @param o the other object
-     *
      * @return {@code true} if they are equal
      */
     public boolean equals(Object o) {
@@ -612,14 +582,13 @@ public final class VirtualFile implements Serializable {
      * from the same {@code VFS} instance with the same name.
      *
      * @param o the other virtual file
-     *
      * @return {@code true} if they are equal
      */
     public boolean equals(VirtualFile o) {
         if (o == this) {
             return true;
         }
-        if (o == null || hashCode != o.hashCode || ! name.equals(o.name)) {
+        if (o == null || hashCode != o.hashCode || !name.equals(o.name)) {
             return false;
         }
         final VirtualFile parent = this.parent;

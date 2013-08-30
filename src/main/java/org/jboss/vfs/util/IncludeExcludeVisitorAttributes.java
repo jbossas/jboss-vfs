@@ -21,69 +21,56 @@
  */
 package org.jboss.vfs.util;
 
-import java.util.Set;
-import java.util.Collections;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Set;
 
-import org.jboss.vfs.VisitorAttributes;
-import org.jboss.vfs.VirtualFileFilter;
-import org.jboss.vfs.VirtualFile;
 import org.jboss.logging.Logger;
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.VirtualFileFilter;
+import org.jboss.vfs.VisitorAttributes;
 
 /**
  * Include/exclude visitor attributes.
  *
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
-public class IncludeExcludeVisitorAttributes extends VisitorAttributes implements VirtualFileFilter
-{
-   private Logger log = Logger.getLogger(getClass());
+public class IncludeExcludeVisitorAttributes extends VisitorAttributes implements VirtualFileFilter {
+    private Logger log = Logger.getLogger(getClass());
 
-   private Set<String> includes;
-   private Set<String> excludes;
+    private Set<String> includes;
+    private Set<String> excludes;
 
-   public IncludeExcludeVisitorAttributes(Set<String> includes, Set<String> excludes)
-   {
-      if (includes == null)
-         includes = Collections.emptySet();
-      if (excludes == null)
-         excludes = Collections.emptySet();
+    public IncludeExcludeVisitorAttributes(Set<String> includes, Set<String> excludes) {
+        if (includes == null) { includes = Collections.emptySet(); }
+        if (excludes == null) { excludes = Collections.emptySet(); }
 
-      this.includes = includes;
-      this.excludes = excludes;
+        this.includes = includes;
+        this.excludes = excludes;
 
-      setIncludeRoot(false);
-      setLeavesOnly(true);
-      setRecurseFilter(this);
-   }
+        setIncludeRoot(false);
+        setLeavesOnly(true);
+        setRecurseFilter(this);
+    }
 
-   public boolean accepts(VirtualFile file)
-   {
-      try
-      {
-         URL url = file.toURL();
-         String urlString = url.toExternalForm();
+    public boolean accepts(VirtualFile file) {
+        try {
+            URL url = file.toURL();
+            String urlString = url.toExternalForm();
 
-         for (String include : includes)
-         {
-            if (urlString.contains(include) == false)
-               return false;
-         }
+            for (String include : includes) {
+                if (urlString.contains(include) == false) { return false; }
+            }
 
-         for (String exclude : excludes)
-         {
-            if (urlString.contains(exclude))
-               return false;
-         }
+            for (String exclude : excludes) {
+                if (urlString.contains(exclude)) { return false; }
+            }
 
-         return true;
-      }
-      catch (Exception e)
-      {
-         if (log.isTraceEnabled())
-            log.trace("Exception while filtering file: " + file, e);
+            return true;
+        } catch (Exception e) {
+            if (log.isTraceEnabled()) { log.trace("Exception while filtering file: " + file, e); }
 
-         return false;
-      }
-   }
+            return false;
+        }
+    }
 }

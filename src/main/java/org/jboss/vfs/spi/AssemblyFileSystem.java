@@ -22,9 +22,9 @@
 package org.jboss.vfs.spi;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSigner;
@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileAssembly;
-import org.jboss.logging.Logger;
 
 /**
  * FileSystem used to mount an Assembly into the VFS.
@@ -52,41 +52,50 @@ public class AssemblyFileSystem implements FileSystem {
         log.tracef("Constructed a new assembly filesystem for %s", assembly);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException {
         return getExistingFile(mountPoint, target).getPhysicalFile();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean delete(VirtualFile mountPoint, VirtualFile target) {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile != null && assemblyFile.delete();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean exists(VirtualFile mountPoint, VirtualFile target) {
-        if(mountPoint.equals(target)) 
-        {
-           return true;
+        if (mountPoint.equals(target)) {
+            return true;
         }
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        if(assemblyFile != null) {
-           return assemblyFile.exists();
+        if (assemblyFile != null) {
+            return assemblyFile.exists();
         }
         return assembly.contains(mountPoint, target);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile != null && assemblyFile.isFile();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         if (assemblyFile == null) {
-           return new ArrayList<String>(assembly.getChildNames(mountPoint, target));
+            return new ArrayList<String>(assembly.getChildNames(mountPoint, target));
         }
         final List<String> directoryEntries = new LinkedList<String>();
         for (VirtualFile child : assemblyFile.getChildren()) {
@@ -95,59 +104,75 @@ public class AssemblyFileSystem implements FileSystem {
         return directoryEntries;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile == null ? 0L : assemblyFile.getLastModified();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public long getSize(VirtualFile mountPoint, VirtualFile target) {
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
         return assemblyFile == null ? 0L : assemblyFile.getSize();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
-        if(mountPoint.equals(target))
-           return true;
+        if (mountPoint.equals(target)) { return true; }
         final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-        if(assemblyFile != null)
-           return assemblyFile.isDirectory();
+        if (assemblyFile != null) { return assemblyFile.isDirectory(); }
         return assembly.contains(mountPoint, target);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isReadOnly() {
         return false;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
         return getExistingFile(mountPoint, target).openStream();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() throws IOException {
         log.tracef("Closing assembly filesystem %s", this);
         assembly.close();
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
-       final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
-       if (assemblyFile == null) {
-          return null;
-       }
-       return assemblyFile.getCodeSigners();
+        final VirtualFile assemblyFile = assembly.getFile(mountPoint, target);
+        if (assemblyFile == null) {
+            return null;
+        }
+        return assemblyFile.getCodeSigners();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public File getMountSource() {
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public URI getRootURI() throws URISyntaxException {
         return null;
     }

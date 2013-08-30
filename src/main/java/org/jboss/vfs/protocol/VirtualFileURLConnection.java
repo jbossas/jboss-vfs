@@ -21,15 +21,15 @@
 */
 package org.jboss.vfs.protocol;
 
-import org.jboss.vfs.VFS;
-import org.jboss.vfs.VirtualFile;
-
 import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
+
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * Implements basic URLConnection for a VirtualFile
@@ -38,52 +38,43 @@ import java.security.Permission;
  * @author <a href="ales.justin@jboss.com">Ales Justin</a>
  * @version $Revision: 1.1 $
  */
-class VirtualFileURLConnection extends AbstractURLConnection
-{
-   private final VirtualFile file;
+class VirtualFileURLConnection extends AbstractURLConnection {
+    private final VirtualFile file;
 
-   public VirtualFileURLConnection(URL url) throws IOException
-   {
-      super(url);
-      file = VFS.getChild(toURI(url));
-   }
+    public VirtualFileURLConnection(URL url) throws IOException {
+        super(url);
+        file = VFS.getChild(toURI(url));
+    }
 
-   public void connect() throws IOException
-   {
-   }
+    public void connect() throws IOException {
+    }
 
-   public VirtualFile getContent() throws IOException
-   {
-      return file;
-   }
+    public VirtualFile getContent() throws IOException {
+        return file;
+    }
 
-   public int getContentLength()
-   {
-      final long size = file.getSize();
-      return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
-   }
+    public int getContentLength() {
+        final long size = file.getSize();
+        return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
+    }
 
-   public long getLastModified()
-   {
-      return file.getLastModified();
-   }
+    public long getLastModified() {
+        return file.getLastModified();
+    }
 
-   public InputStream getInputStream() throws IOException
-   {
-      return file.openStream();
-   }
+    public InputStream getInputStream() throws IOException {
+        return file.openStream();
+    }
 
-   public Permission getPermission() throws IOException
-   {
-      String decodedPath = toURI(url).getPath();
-      if (File.separatorChar != '/')
-         decodedPath = decodedPath.replace('/', File.separatorChar);
+    public Permission getPermission() throws IOException {
+        String decodedPath = toURI(url).getPath();
+        if (File.separatorChar != '/') { decodedPath = decodedPath.replace('/', File.separatorChar); }
 
-      return new FilePermission(decodedPath, "read");
-   }
+        return new FilePermission(decodedPath, "read");
+    }
 
-   @Override
-   protected String getName() {
-      return file.getName();
-   }
+    @Override
+    protected String getName() {
+        return file.getName();
+    }
 }

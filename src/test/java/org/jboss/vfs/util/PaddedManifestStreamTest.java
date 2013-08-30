@@ -21,14 +21,15 @@
 */
 package org.jboss.vfs.util;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
 import org.jboss.vfs.VFSUtils;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
- *
  * @author ehsavoie
  */
 public class PaddedManifestStreamTest {

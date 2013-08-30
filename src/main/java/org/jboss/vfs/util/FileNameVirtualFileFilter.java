@@ -21,80 +21,68 @@
  */
 package org.jboss.vfs.util;
 
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
-import org.jboss.vfs.VirtualFileFilter;
-import org.jboss.vfs.VirtualFile;
 import org.jboss.logging.Logger;
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.VirtualFileFilter;
 
 /**
  * Exclude virtual file by file name and path.
  *
  * @author ales.justin@jboss.org
  */
-public class FileNameVirtualFileFilter implements VirtualFileFilter
-{
-   protected Logger log = Logger.getLogger(getClass());
-   private Map<String, Set<String>> excludes;
+public class FileNameVirtualFileFilter implements VirtualFileFilter {
+    protected Logger log = Logger.getLogger(getClass());
+    private Map<String, Set<String>> excludes;
 
-   public FileNameVirtualFileFilter(Map<String, Set<String>> excludes)
-   {
-      if (excludes == null || excludes.isEmpty())
-         throw new IllegalArgumentException("Null or empty excludes.");
+    public FileNameVirtualFileFilter(Map<String, Set<String>> excludes) {
+        if (excludes == null || excludes.isEmpty()) { throw new IllegalArgumentException("Null or empty excludes."); }
 
-      this.excludes = excludes;
-   }
+        this.excludes = excludes;
+    }
 
-   /**
-    * Do we accept file.
-    *
-    * If pathName contains any of the keys,
-    *   * if the value is null - then do exclude
-    *   * if value is not null - only exclude if it value contains simple name
-    *
-    * @param file the virtual file
-    * @return false if file is excluded by excludes map, true other wise
-    */
-   public boolean accepts(VirtualFile file)
-   {
-      String pathName = getPathName(file);
-      for (Map.Entry<String, Set<String>> entry : excludes.entrySet())
-      {
-         String key = entry.getKey();
-         if (pathName.contains(key))
-         {
-            String simpleName = file.getName();
-            Set<String> value = entry.getValue();
-            if (value == null || value.contains(simpleName))
-            {
-               if (log.isTraceEnabled())
-                  log.trace("Excluding " + pathName);
+    /**
+     * Do we accept file.
+     * <p/>
+     * If pathName contains any of the keys,
+     * * if the value is null - then do exclude
+     * * if value is not null - only exclude if it value contains simple name
+     *
+     * @param file the virtual file
+     * @return false if file is excluded by excludes map, true other wise
+     */
+    public boolean accepts(VirtualFile file) {
+        String pathName = getPathName(file);
+        for (Map.Entry<String, Set<String>> entry : excludes.entrySet()) {
+            String key = entry.getKey();
+            if (pathName.contains(key)) {
+                String simpleName = file.getName();
+                Set<String> value = entry.getValue();
+                if (value == null || value.contains(simpleName)) {
+                    if (log.isTraceEnabled()) { log.trace("Excluding " + pathName); }
 
-               return false;
+                    return false;
+                }
             }
-         }
-      }
-      return true;
-   }
+        }
+        return true;
+    }
 
-   /**
-    * Get the path name for the VirtualFile.
-    *
-    * @param file the virtual file
-    * @return the path name
-    */
-   protected String getPathName(VirtualFile file)
-   {
-      try
-      {
-         // prefer the URI, as the pathName might
-         // return an empty string for temp virtual files
-         return file.toURI().toString();
-      }
-      catch(Exception e)
-      {
-         return file.getPathName();
-      }
-   }
+    /**
+     * Get the path name for the VirtualFile.
+     *
+     * @param file the virtual file
+     * @return the path name
+     */
+    protected String getPathName(VirtualFile file) {
+        try {
+            // prefer the URI, as the pathName might
+            // return an empty string for temp virtual files
+            return file.toURI().toString();
+        } catch (Exception e) {
+            return file.getPathName();
+        }
+    }
 }

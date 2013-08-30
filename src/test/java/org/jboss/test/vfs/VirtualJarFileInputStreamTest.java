@@ -21,8 +21,7 @@
  */
 package org.jboss.test.vfs;
 
-import org.jboss.vfs.*;
-import org.jboss.vfs.VirtualJarFileInputStream;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,7 +30,9 @@ import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static org.junit.Assert.assertArrayEquals;
+import org.jboss.vfs.TempDir;
+import org.jboss.vfs.VFSUtils;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * @author <a href="mailto:jbailey@redhat.com">John Bailey</a>

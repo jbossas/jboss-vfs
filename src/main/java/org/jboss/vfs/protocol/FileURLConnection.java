@@ -21,16 +21,16 @@
  */
 package org.jboss.vfs.protocol;
 
-import org.jboss.vfs.VFS;
-import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.spi.RootFileSystem;
-
 import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
+
+import org.jboss.vfs.VFS;
+import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.spi.RootFileSystem;
 
 /**
  * Implementation URLConnection that will delegate to the VFS RootFileSystem.
@@ -40,49 +40,44 @@ import java.security.Permission;
  */
 public class FileURLConnection extends AbstractURLConnection {
 
-   private final RootFileSystem rootFileSystem = RootFileSystem.ROOT_INSTANCE;
+    private final RootFileSystem rootFileSystem = RootFileSystem.ROOT_INSTANCE;
 
-   private final VirtualFile mountPoint = VFS.getRootVirtualFile();
-    
-   private final VirtualFile file;
+    private final VirtualFile mountPoint = VFS.getRootVirtualFile();
 
-   public FileURLConnection(URL url) throws IOException
-   {
-      super(url);
-      file = VFS.getChild(toURI(url));
-   }
+    private final VirtualFile file;
 
-   public File getContent() throws IOException
-   {
-      return rootFileSystem.getFile(mountPoint, file);
-   }
+    public FileURLConnection(URL url) throws IOException {
+        super(url);
+        file = VFS.getChild(toURI(url));
+    }
 
-   public int getContentLength()
-   {
-      final long size = rootFileSystem.getSize(mountPoint, file);
-      return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
-   }
+    public File getContent() throws IOException {
+        return rootFileSystem.getFile(mountPoint, file);
+    }
 
-   public long getLastModified()
-   {
-      return rootFileSystem.getLastModified(mountPoint, file);
-   }
+    public int getContentLength() {
+        final long size = rootFileSystem.getSize(mountPoint, file);
+        return size > (long) Integer.MAX_VALUE ? -1 : (int) size;
+    }
 
-   public InputStream getInputStream() throws IOException
-   {
-      return rootFileSystem.openInputStream(mountPoint, file);
-   }
+    public long getLastModified() {
+        return rootFileSystem.getLastModified(mountPoint, file);
+    }
 
-   @Override
-   public Permission getPermission() throws IOException {
-      return new FilePermission(file.getPathName(), "read");
-   }
+    public InputStream getInputStream() throws IOException {
+        return rootFileSystem.openInputStream(mountPoint, file);
+    }
 
-   public void connect() throws IOException {
-   }
+    @Override
+    public Permission getPermission() throws IOException {
+        return new FilePermission(file.getPathName(), "read");
+    }
 
-   @Override
-   protected String getName() {
-      return file.getName();
-   }
+    public void connect() throws IOException {
+    }
+
+    @Override
+    protected String getName() {
+        return file.getName();
+    }
 }

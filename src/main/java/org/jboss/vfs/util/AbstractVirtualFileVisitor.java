@@ -50,8 +50,7 @@ public abstract class AbstractVirtualFileVisitor implements VirtualFileVisitor {
      * @param attributes the attributes, uses the default if null
      */
     protected AbstractVirtualFileVisitor(VisitorAttributes attributes) {
-        if (attributes == null)
-            attributes = VisitorAttributes.DEFAULT;
+        if (attributes == null) { attributes = VisitorAttributes.DEFAULT; }
         this.attributes = attributes;
     }
 

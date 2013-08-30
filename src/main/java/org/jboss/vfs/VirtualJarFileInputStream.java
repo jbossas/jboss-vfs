@@ -69,9 +69,8 @@ public class VirtualJarFileInputStream extends InputStream {
      * @param bufferLength          The length of put to use
      */
     public VirtualJarFileInputStream(final VirtualJarInputStream virtualJarInputStream, int bufferLength) {
-        if (virtualJarInputStream == null) throw new IllegalArgumentException("virtualJarInputStream is required");
-        if (bufferLength < MINIMUM_BUFFER_LENGTH)
-            throw new IllegalArgumentException("The totalBufferLength must be larger than " + MINIMUM_BUFFER_LENGTH);
+        if (virtualJarInputStream == null) { throw new IllegalArgumentException("virtualJarInputStream is required"); }
+        if (bufferLength < MINIMUM_BUFFER_LENGTH) { throw new IllegalArgumentException("The totalBufferLength must be larger than " + MINIMUM_BUFFER_LENGTH); }
 
         this.virtualJarInputStream = virtualJarInputStream;
 
@@ -122,8 +121,7 @@ public class VirtualJarFileInputStream extends InputStream {
         buffer.reset();
         JarEntry jarEntry = virtualJarInputStream.getNextJarEntry();
 
-        if (jarEntry == null)
-            return false;
+        if (jarEntry == null) { return false; }
 
         currentEntry = new ProcessedEntry(jarEntry, totalRead);
         processedEntries.add(currentEntry);
@@ -153,8 +151,7 @@ public class VirtualJarFileInputStream extends InputStream {
     private boolean bufferNextCentralFileHeader() throws IOException {
         buffer.reset();
 
-        if (currentCentralEntryIdx == processedEntries.size())
-            return false;
+        if (currentCentralEntryIdx == processedEntries.size()) { return false; }
 
         ProcessedEntry entry = processedEntries.get(currentCentralEntryIdx++);
 
@@ -180,7 +177,7 @@ public class VirtualJarFileInputStream extends InputStream {
         return true;
     }
 
-        /**
+    /**
      * Write the central file header records.  This is repeated
      * until all entries have been added to the central file header.
      *
@@ -229,10 +226,7 @@ public class VirtualJarFileInputStream extends InputStream {
      * @param b The byte
      */
     private void buffer(byte b) {
-        if(buffer.hasCapacity())
-            buffer.put(b);
-        else
-            throw new IllegalStateException("Buffer does not have enough capacity");
+        if (buffer.hasCapacity()) { buffer.put(b); } else { throw new IllegalStateException("Buffer does not have enough capacity"); }
     }
 
     /**
@@ -241,8 +235,7 @@ public class VirtualJarFileInputStream extends InputStream {
      * @param bytes The bytes
      */
     private void buffer(byte[] bytes) {
-        for (byte b : bytes)
-            buffer(b);
+        for (byte b : bytes) { buffer(b); }
     }
 
 
@@ -259,7 +252,7 @@ public class VirtualJarFileInputStream extends InputStream {
 
     /**
      * Basic state machine that will allow the process to transition between the different process states.
-     *
+     * <p/>
      * The following describes the process flow:
      * [NOT_STARTED] - Initial state
      * - Does not provide content
@@ -291,6 +284,7 @@ public class VirtualJarFileInputStream extends InputStream {
         },
         LOCAL_ENTRY_HEADER {
             boolean buffered;
+
             @Override
             void init(final VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 buffered = jarFileInputStream.bufferLocalFileHeader();
@@ -299,25 +293,23 @@ public class VirtualJarFileInputStream extends InputStream {
             @Override
             int read(VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 final ByteBuffer buffer = jarFileInputStream.buffer;
-                if (buffered && buffer.hasRemaining())
-                    return buffer.get();
+                if (buffered && buffer.hasRemaining()) { return buffer.get(); }
                 return -1;
             }
 
             @Override
             State transition(final VirtualJarFileInputStream virtualJarFileInputStream) throws IOException {
-                if (buffered)
-                    return ENTRY_CONTENT;
+                if (buffered) { return ENTRY_CONTENT; }
                 return START_CENTRAL_DIRECTORY;
             }
         },
         ENTRY_CONTENT {
-
             @Override
             int read(final VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 final VirtualJarInputStream virtualJarInputStream = jarFileInputStream.virtualJarInputStream;
                 return virtualJarInputStream.read();
             }
+
             @Override
             State transition(final VirtualJarFileInputStream virtualJarFileInputStream) throws IOException {
                 virtualJarFileInputStream.closeCurrent();
@@ -337,6 +329,7 @@ public class VirtualJarFileInputStream extends InputStream {
         },
         CENTRAL_ENTRY_HEADER {
             boolean buffered;
+
             @Override
             void init(final VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 buffered = jarFileInputStream.bufferNextCentralFileHeader();
@@ -345,14 +338,13 @@ public class VirtualJarFileInputStream extends InputStream {
             @Override
             int read(final VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 final ByteBuffer buffer = jarFileInputStream.buffer;
-                if (buffered && buffer.hasRemaining())
-                    return buffer.get();
+                if (buffered && buffer.hasRemaining()) { return buffer.get(); }
                 return -1;
             }
+
             @Override
             State transition(final VirtualJarFileInputStream virtualJarFileInputStream) throws IOException {
-                if (buffered)
-                    return CENTRAL_ENTRY_HEADER;
+                if (buffered) { return CENTRAL_ENTRY_HEADER; }
                 return CENTRAL_END;
             }
         },
@@ -365,8 +357,7 @@ public class VirtualJarFileInputStream extends InputStream {
             @Override
             int read(final VirtualJarFileInputStream jarFileInputStream) throws IOException {
                 final ByteBuffer buffer = jarFileInputStream.buffer;
-                if (buffer.hasRemaining())
-                    return buffer.get();
+                if (buffer.hasRemaining()) { return buffer.get(); }
                 return -1;
             }
 
@@ -388,8 +379,7 @@ public class VirtualJarFileInputStream extends InputStream {
 
         State getNextState(VirtualJarFileInputStream jarFileInputStream) throws IOException {
             State nextState = transition(jarFileInputStream);
-            if (nextState != null)
-                nextState.init(jarFileInputStream);
+            if (nextState != null) { nextState.init(jarFileInputStream); }
             return nextState;
         }
     }

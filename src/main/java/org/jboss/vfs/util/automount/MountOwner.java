@@ -22,16 +22,14 @@
 package org.jboss.vfs.util.automount;
 
 /**
- * An owner of a reference to an automounted resource.  
- * 
- * @author <a href="jbailey@redhat.com">John Bailey</a>
+ * An owner of a reference to an automounted resource.
  *
+ * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-public interface MountOwner
-{
-   /**
-    * A callback method allowing the mount owner to perform any addition cleanup 
-    * specific to the owner type. 
-    */
-   void onCleanup(); 
+public interface MountOwner {
+    /**
+     * A callback method allowing the mount owner to perform any addition cleanup
+     * specific to the owner type.
+     */
+    void onCleanup();
 }

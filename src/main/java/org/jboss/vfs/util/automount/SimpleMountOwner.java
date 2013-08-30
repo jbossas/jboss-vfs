@@ -23,34 +23,30 @@ package org.jboss.vfs.util.automount;
 
 /**
  * Simple mount owner wrapper relying on any object type as the owner.
- * 
- * @author <a href="jbailey@redhat.com">John Bailey</a>
  *
+ * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-public class SimpleMountOwner extends AbstractMountOwner<Object>
-{
-   /**
-    * Construct with a new object as the owner
-    */
-   public SimpleMountOwner() {
-      this(new Object());
-   }
-   
-   /**
-    * Construct with the provided object as the owner
-    * 
-    * @param object the actual owner
-    */
-   public SimpleMountOwner(Object owner)
-   {
-      super(owner);
-   }
+public class SimpleMountOwner extends AbstractMountOwner<Object> {
+    /**
+     * Construct with a new object as the owner
+     */
+    public SimpleMountOwner() {
+        this(new Object());
+    }
 
-   /**
-    * No-op cleanup method
-    */
-   @Override
-   public void onCleanup()
-   {
-   }
+    /**
+     * Construct with the provided object as the owner
+     *
+     * @param object the actual owner
+     */
+    public SimpleMountOwner(Object owner) {
+        super(owner);
+    }
+
+    /**
+     * No-op cleanup method
+     */
+    @Override
+    public void onCleanup() {
+    }
 }

@@ -43,15 +43,12 @@ public class SuffixesExcludeFilter implements VirtualFileFilter {
      * Create a new SuffixMatchFilter,
      *
      * @param suffixes the suffixes
-     *
      * @throws IllegalArgumentException for null suffixes
      */
     public SuffixesExcludeFilter(Collection<String> suffixes) {
-        if (suffixes == null)
-            throw new IllegalArgumentException("Null suffixes");
+        if (suffixes == null) { throw new IllegalArgumentException("Null suffixes"); }
         for (String suffix : suffixes) {
-            if (suffix == null)
-                throw new IllegalArgumentException("Null suffix in " + suffixes);
+            if (suffix == null) { throw new IllegalArgumentException("Null suffix in " + suffixes); }
         }
         this.suffixes = suffixes;
     }
@@ -59,8 +56,7 @@ public class SuffixesExcludeFilter implements VirtualFileFilter {
     public boolean accepts(VirtualFile file) {
         String name = file.getName();
         for (String suffix : suffixes) {
-            if (name.endsWith(suffix))
-                return false;
+            if (name.endsWith(suffix)) { return false; }
         }
         return true;
     }

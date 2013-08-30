@@ -44,234 +44,182 @@ import org.jboss.vfs.VirtualFileFilter;
  * @author Scott.Stark@jboss.org
  * @version $Revision:$
  */
-public class ClassPathIterator
-{
-   ZipInputStream zis;
-   FileIterator fileIter;
-   File file;
-   VirtualFileIterator vfIter;
-   VirtualFile vf;
-   int rootLength;
+public class ClassPathIterator {
+    ZipInputStream zis;
+    FileIterator fileIter;
+    File file;
+    VirtualFileIterator vfIter;
+    VirtualFile vf;
+    int rootLength;
 
-   public ClassPathIterator(URL url) throws IOException
-   {
-      String protocol = url != null ? url.getProtocol() : null;
-      if( protocol == null )
-      {
-      }
-      else if( protocol.equals(VFSUtils.VFS_PROTOCOL))
-      {
-         URLConnection conn = url.openConnection();
-         vf = (VirtualFile) conn.getContent();
-         rootLength = vf.getPathName().length() + 1;
-         vfIter = new VirtualFileIterator(vf);
-      }
-      else
-      {
-         // Assume this points to a jar
-         InputStream is = url.openStream();
-         zis = new ZipInputStream(is);
-      }
-   }
+    public ClassPathIterator(URL url) throws IOException {
+        String protocol = url != null ? url.getProtocol() : null;
+        if (protocol == null) {
+        } else if (protocol.equals(VFSUtils.VFS_PROTOCOL)) {
+            URLConnection conn = url.openConnection();
+            vf = (VirtualFile) conn.getContent();
+            rootLength = vf.getPathName().length() + 1;
+            vfIter = new VirtualFileIterator(vf);
+        } else {
+            // Assume this points to a jar
+            InputStream is = url.openStream();
+            zis = new ZipInputStream(is);
+        }
+    }
 
-   public ClassPathEntry getNextEntry() throws IOException
-   {
-      ClassPathEntry entry = null;
-      if( zis != null )
-      {
-         ZipEntry zentry = zis.getNextEntry();
-         if( zentry != null )
-            entry = new ClassPathEntry(zentry);
-      }
-      else if( fileIter != null )
-      {
-         File fentry = fileIter.getNextEntry();
-         if( fentry != null )
-            entry = new ClassPathEntry(fentry, rootLength);
-         file = fentry;
-      }
-      else if( vfIter != null )
-      {
-         VirtualFile fentry = vfIter.getNextEntry();
-         if( fentry != null )
-            entry = new ClassPathEntry(fentry, rootLength);
-         vf = fentry;
-      }
+    public ClassPathEntry getNextEntry() throws IOException {
+        ClassPathEntry entry = null;
+        if (zis != null) {
+            ZipEntry zentry = zis.getNextEntry();
+            if (zentry != null) { entry = new ClassPathEntry(zentry); }
+        } else if (fileIter != null) {
+            File fentry = fileIter.getNextEntry();
+            if (fentry != null) { entry = new ClassPathEntry(fentry, rootLength); }
+            file = fentry;
+        } else if (vfIter != null) {
+            VirtualFile fentry = vfIter.getNextEntry();
+            if (fentry != null) { entry = new ClassPathEntry(fentry, rootLength); }
+            vf = fentry;
+        }
 
-      return entry;
-   }
+        return entry;
+    }
 
-   InputStream getInputStream() throws IOException
-   {
-      InputStream is = zis;
-      if( zis == null )
-      {
-         is = new FileInputStream(file);
-      }
-      return is;
-   }
+    InputStream getInputStream() throws IOException {
+        InputStream is = zis;
+        if (zis == null) {
+            is = new FileInputStream(file);
+        }
+        return is;
+    }
 
-   public void close() throws IOException
-   {
-      if( zis != null )
-         zis.close();
-   }
+    public void close() throws IOException {
+        if (zis != null) { zis.close(); }
+    }
 
-   static class FileIterator
-   {
-      LinkedList subDirectories = new LinkedList();
-      FileFilter filter;
-      File[] currentListing;
-      int index = 0;
+    static class FileIterator {
+        LinkedList subDirectories = new LinkedList();
+        FileFilter filter;
+        File[] currentListing;
+        int index = 0;
 
-      FileIterator(File start)
-      {
-         String name = start.getName();
-         // Don't recurse into wars
-         boolean isWar = name.endsWith(".war");
-         if( isWar )
-            currentListing = new File[0];
-         else
-            currentListing = start.listFiles();
-      }
-      FileIterator(File start, FileFilter filter)
-      {
-         String name = start.getName();
-         // Don't recurse into wars
-         boolean isWar = name.endsWith(".war");
-         if( isWar )
-            currentListing = new File[0];
-         else
-            currentListing = start.listFiles(filter);
-         this.filter = filter;
-      }
+        FileIterator(File start) {
+            String name = start.getName();
+            // Don't recurse into wars
+            boolean isWar = name.endsWith(".war");
+            if (isWar) { currentListing = new File[0]; } else { currentListing = start.listFiles(); }
+        }
 
-      File getNextEntry()
-      {
-         File next = null;
-         if( index >= currentListing.length && subDirectories.size() > 0 )
-         {
-            do
-            {
-               File nextDir = (File) subDirectories.removeFirst();
-               currentListing = nextDir.listFiles(filter);
-            } while( currentListing.length == 0 && subDirectories.size() > 0 );
-            index = 0;
-         }
-         if( index < currentListing.length )
-         {
-            next = currentListing[index ++];
-            if( next.isDirectory() )
-               subDirectories.addLast(next);
-         }
-         return next;
-      }
-   }
+        FileIterator(File start, FileFilter filter) {
+            String name = start.getName();
+            // Don't recurse into wars
+            boolean isWar = name.endsWith(".war");
+            if (isWar) { currentListing = new File[0]; } else { currentListing = start.listFiles(filter); }
+            this.filter = filter;
+        }
 
-   static class VirtualFileIterator
-   {
-      LinkedList<VirtualFile> subDirectories = new LinkedList<VirtualFile>();
-      VirtualFileFilter filter;
-      List<VirtualFile> currentListing;
-      int index = 0;
+        File getNextEntry() {
+            File next = null;
+            if (index >= currentListing.length && subDirectories.size() > 0) {
+                do {
+                    File nextDir = (File) subDirectories.removeFirst();
+                    currentListing = nextDir.listFiles(filter);
+                } while (currentListing.length == 0 && subDirectories.size() > 0);
+                index = 0;
+            }
+            if (index < currentListing.length) {
+                next = currentListing[index++];
+                if (next.isDirectory()) { subDirectories.addLast(next); }
+            }
+            return next;
+        }
+    }
 
-      VirtualFileIterator(VirtualFile start) throws IOException
-      {
-         this(start, null);
-      }
-      VirtualFileIterator(VirtualFile start, VirtualFileFilter filter)  throws IOException
-      {
-         String name = start.getName();
-         // Don't recurse into wars
-         boolean isWar = name.endsWith(".war");
-         if( isWar )
-            currentListing = new ArrayList<VirtualFile>();
-         else
-            currentListing = start.getChildren();
-         this.filter = filter;
-      }
+    static class VirtualFileIterator {
+        LinkedList<VirtualFile> subDirectories = new LinkedList<VirtualFile>();
+        VirtualFileFilter filter;
+        List<VirtualFile> currentListing;
+        int index = 0;
 
-      VirtualFile getNextEntry()
-         throws IOException
-      {
-         VirtualFile next = null;
-         if( index >= currentListing.size() && subDirectories.size() > 0 )
-         {
-            do
-            {
-               VirtualFile nextDir = subDirectories.removeFirst();
-               currentListing = nextDir.getChildren(filter);
-            } while( currentListing.size() == 0 && subDirectories.size() > 0 );
-            index = 0;
-         }
-         if( index < currentListing.size() )
-         {
-            next = currentListing.get(index);
-            index ++;
-             if( next.isFile() == false )
-               subDirectories.addLast(next);
-         }
-         return next;
-      }
-   }
+        VirtualFileIterator(VirtualFile start) throws IOException {
+            this(start, null);
+        }
 
-   public static class ClassPathEntry
-   {
-      public String name;
-      public ZipEntry zipEntry;
-      public File fileEntry;
-      public VirtualFile vfEntry;
+        VirtualFileIterator(VirtualFile start, VirtualFileFilter filter) throws IOException {
+            String name = start.getName();
+            // Don't recurse into wars
+            boolean isWar = name.endsWith(".war");
+            if (isWar) { currentListing = new ArrayList<VirtualFile>(); } else { currentListing = start.getChildren(); }
+            this.filter = filter;
+        }
 
-      ClassPathEntry(ZipEntry zipEntry)
-      {
-         this.zipEntry = zipEntry;
-         this.name = zipEntry.getName();
-      }
-      ClassPathEntry(File fileEntry, int rootLength)
-      {
-         this.fileEntry = fileEntry;
-         this.name = fileEntry.getPath().substring(rootLength);
-      }
-      ClassPathEntry(VirtualFile vfEntry, int rootLength)
-      {
-         this.vfEntry = vfEntry;
-         this.name = vfEntry.getPathName().substring(rootLength);
-      }
+        VirtualFile getNextEntry()
+                throws IOException {
+            VirtualFile next = null;
+            if (index >= currentListing.size() && subDirectories.size() > 0) {
+                do {
+                    VirtualFile nextDir = subDirectories.removeFirst();
+                    currentListing = nextDir.getChildren(filter);
+                } while (currentListing.size() == 0 && subDirectories.size() > 0);
+                index = 0;
+            }
+            if (index < currentListing.size()) {
+                next = currentListing.get(index);
+                index++;
+                if (next.isFile() == false) { subDirectories.addLast(next); }
+            }
+            return next;
+        }
+    }
 
-      String getName()
-      {
-         return name;
-      }
-      /** Convert the entry path to a package name
-       */
-      String toPackageName()
-      {
-         String pkgName = name;
-         char separatorChar = zipEntry != null ? '/' : File.separatorChar;
-         int index = name.lastIndexOf(separatorChar);
-         if( index > 0 )
-         {
-            pkgName = name.substring(0, index);
-            pkgName = pkgName.replace(separatorChar, '.');
-         }
-         else
-         {
-            // This must be an entry in the default package (e.g., X.class)
-            pkgName = "";
-         }
-         return pkgName;
-      }
+    public static class ClassPathEntry {
+        public String name;
+        public ZipEntry zipEntry;
+        public File fileEntry;
+        public VirtualFile vfEntry;
 
-      boolean isDirectory()
-      {
-         boolean isDirectory = false;
-         if( zipEntry != null )
-            isDirectory = zipEntry.isDirectory();
-         else
-            isDirectory = fileEntry.isDirectory();
-         return isDirectory;
-      }
-   }
+        ClassPathEntry(ZipEntry zipEntry) {
+            this.zipEntry = zipEntry;
+            this.name = zipEntry.getName();
+        }
+
+        ClassPathEntry(File fileEntry, int rootLength) {
+            this.fileEntry = fileEntry;
+            this.name = fileEntry.getPath().substring(rootLength);
+        }
+
+        ClassPathEntry(VirtualFile vfEntry, int rootLength) {
+            this.vfEntry = vfEntry;
+            this.name = vfEntry.getPathName().substring(rootLength);
+        }
+
+        String getName() {
+            return name;
+        }
+
+        /**
+         * Convert the entry path to a package name
+         */
+        String toPackageName() {
+            String pkgName = name;
+            char separatorChar = zipEntry != null ? '/' : File.separatorChar;
+            int index = name.lastIndexOf(separatorChar);
+            if (index > 0) {
+                pkgName = name.substring(0, index);
+                pkgName = pkgName.replace(separatorChar, '.');
+            } else {
+                // This must be an entry in the default package (e.g., X.class)
+                pkgName = "";
+            }
+            return pkgName;
+        }
+
+        boolean isDirectory() {
+            boolean isDirectory = false;
+            if (zipEntry != null) { isDirectory = zipEntry.isDirectory(); } else { isDirectory = fileEntry.isDirectory(); }
+            return isDirectory;
+        }
+    }
 
 }
 

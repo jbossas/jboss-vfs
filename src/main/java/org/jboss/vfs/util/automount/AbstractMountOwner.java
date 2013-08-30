@@ -22,47 +22,41 @@
 package org.jboss.vfs.util.automount;
 
 /**
- * Abstract MountOwner used to wrap a real object as an owner. 
- * 
- * @author <a href="jbailey@redhat.com">John Bailey</a>
+ * Abstract MountOwner used to wrap a real object as an owner.
  *
  * @param <T> the type of the actual owner
+ * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-public abstract class AbstractMountOwner<T> implements MountOwner
-{
-   private final T owner;
-   
-   /**
-    * Construct with an object.
-    * 
-    * @param owner the actual owner
-    */
-   protected AbstractMountOwner(T owner)
-   {
-      this.owner = owner;
-   }
-   
-   /**
-    * Get the owner object
-    * 
-    * @return the actual owner
-    */
-   protected T getOwner() {
-      return owner;
-   }
-   
-   @SuppressWarnings("unchecked")
-   @Override
-   public boolean equals(Object other)
-   {
-      if(!(other instanceof AbstractMountOwner))
-         return false;
-      return getOwner().equals(AbstractMountOwner.class.cast(other).getOwner());
-   }
+public abstract class AbstractMountOwner<T> implements MountOwner {
+    private final T owner;
 
-   @Override
-   public int hashCode()
-   {
-      return getOwner().hashCode();
-   }
+    /**
+     * Construct with an object.
+     *
+     * @param owner the actual owner
+     */
+    protected AbstractMountOwner(T owner) {
+        this.owner = owner;
+    }
+
+    /**
+     * Get the owner object
+     *
+     * @return the actual owner
+     */
+    protected T getOwner() {
+        return owner;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof AbstractMountOwner)) { return false; }
+        return getOwner().equals(AbstractMountOwner.class.cast(other).getOwner());
+    }
+
+    @Override
+    public int hashCode() {
+        return getOwner().hashCode();
+    }
 }

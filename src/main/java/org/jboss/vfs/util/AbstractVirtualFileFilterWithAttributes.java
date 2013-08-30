@@ -50,8 +50,7 @@ public abstract class AbstractVirtualFileFilterWithAttributes implements Virtual
      * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
      */
     protected AbstractVirtualFileFilterWithAttributes(VisitorAttributes attributes) {
-        if (attributes == null)
-            attributes = VisitorAttributes.DEFAULT;
+        if (attributes == null) { attributes = VisitorAttributes.DEFAULT; }
         this.attributes = attributes;
     }
 

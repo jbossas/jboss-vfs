@@ -67,9 +67,9 @@ public class VFS {
     private static final VirtualFile rootVirtualFile = createDefaultRoot();
 
     private static VirtualFile createDefaultRoot() {
-       return isWindows() ? getChild("/") : new VirtualFile("/", null);
+        return isWindows() ? getChild("/") : new VirtualFile("/", null);
     }
-            
+
     // Note that rootVirtualFile is ignored by RootFS
     private static final Mount rootMount = new Mount(RootFileSystem.ROOT_INSTANCE, rootVirtualFile);
 
@@ -78,11 +78,11 @@ public class VFS {
     }
 
     /**
-     * Do not allow construction 
+     * Do not allow construction
      */
     private VFS() {
     }
-    
+
     /**
      * Initialize VFS protocol handlers package property.
      */
@@ -92,8 +92,7 @@ public class VFS {
             pkgs = "org.jboss.net.protocol|org.jboss.vfs.protocol";
             System.setProperty("java.protocol.handler.pkgs", pkgs);
         } else if (pkgs.contains("org.jboss.vfs.protocol") == false) {
-            if(pkgs.contains("org.jboss.net.protocol") == false)
-                pkgs += "|org.jboss.net.protocol";
+            if (pkgs.contains("org.jboss.net.protocol") == false) { pkgs += "|org.jboss.net.protocol"; }
             pkgs += "|org.jboss.vfs.protocol";
             System.setProperty("java.protocol.handler.pkgs", pkgs);
         }
@@ -105,9 +104,7 @@ public class VFS {
      *
      * @param mountPoint the mount point
      * @param fileSystem the file system to mount
-     *
      * @return a handle which can be used to unmount the filesystem
-     *
      * @throws IOException if an I/O error occurs, such as a filesystem already being mounted at the given mount point
      */
     public static Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
@@ -118,7 +115,7 @@ public class VFS {
         final String name = mountPoint.getName();
         final Mount mount = new Mount(fileSystem, mountPoint);
         final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
-        for (; ;) {
+        for (; ; ) {
             Map<String, Mount> childMountMap = mounts.get(parent);
             Map<String, Mount> newMap;
             if (childMountMap == null) {
@@ -142,10 +139,8 @@ public class VFS {
      * Find a virtual file.
      *
      * @param url the URL whose path component is the child path
-     *
      * @return the child
-     *
-     * @throws IllegalArgumentException if the path is null
+     * @throws IllegalArgumentException    if the path is null
      * @throws java.net.URISyntaxException for any uri error
      * @deprecated use getChild(URI) instead
      */
@@ -153,9 +148,8 @@ public class VFS {
     public static VirtualFile getChild(URL url) throws URISyntaxException {
         return getChild(url.toURI());
     }
-    
-    private static boolean isWindows()
-    {
+
+    private static boolean isWindows() {
         // Not completely accurate, but good enough
         return File.separatorChar == '\\';
     }
@@ -164,9 +158,7 @@ public class VFS {
      * Find a virtual file.
      *
      * @param uri the URI whose path component is the child path
-     *
      * @return the child
-     *
      * @throws IllegalArgumentException if the path is null
      */
     public static VirtualFile getChild(URI uri) {
@@ -177,17 +169,14 @@ public class VFS {
      * Find a virtual file.
      *
      * @param path the child path
-     *
      * @return the child
-     *
      * @throws IllegalArgumentException if the path is null
      */
     public static VirtualFile getChild(String path) {
-        if (path == null)
-            throw new IllegalArgumentException("Null path");
-        
+        if (path == null) { throw new IllegalArgumentException("Null path"); }
+
         VirtualFile root = null;
-        
+
         if (isWindows()) {
             // Normalize the path using java.io.File
             //   TODO Consider creating our own normalization routine, which would
@@ -199,27 +188,26 @@ public class VFS {
                     root = new VirtualFile("/" + absolute.charAt(0) + ":/", null);
                     path = absolute.substring(2).replace('\\', '/');
                 } else if (absolute.charAt(0) == '\\' && absolute.charAt(1) == '\\') {
-                    // UNC form 
+                    // UNC form
                     for (int i = 2; i < absolute.length(); i++) {
                         if (absolute.charAt(i) == '\\') {
                             // Switch \\ to // just like java file URLs.
                             // Note, it turns out that File.toURL puts this portion
                             // in the path portion of the URL, which is actually not
                             // correct, since // is supposed to signify the authority.
-                            root = new VirtualFile("//" + absolute.substring(0,i) + "/", null);
+                            root = new VirtualFile("//" + absolute.substring(0, i) + "/", null);
                             path = absolute.substring(i).replace('\\', '/');
                             break;
                         }
-                    }               
+                    }
                 }
             }
-            
-            if (root == null)
-                throw new IllegalArgumentException("Invalid Win32 path: " + path);       
+
+            if (root == null) { throw new IllegalArgumentException("Invalid Win32 path: " + path); }
         } else {
             root = rootVirtualFile;
         }
-        
+
         return root.getChild(path);
     }
 
@@ -236,7 +224,6 @@ public class VFS {
      * Get the children
      *
      * @return the children
-     *
      * @throws IOException for any problem accessing the virtual file system
      */
     public static List<VirtualFile> getChildren() throws IOException {
@@ -247,9 +234,7 @@ public class VFS {
      * Get the children
      *
      * @param filter to filter the children
-     *
      * @return the children
-     *
      * @throws IOException for any problem accessing the virtual file system
      */
     public static List<VirtualFile> getChildren(VirtualFileFilter filter) throws IOException {
@@ -262,7 +247,6 @@ public class VFS {
      * This always uses {@link VisitorAttributes#RECURSE}
      *
      * @return the children
-     *
      * @throws IOException for any problem accessing the virtual file system
      */
     public static List<VirtualFile> getChildrenRecursively() throws IOException {
@@ -275,9 +259,7 @@ public class VFS {
      * This always uses {@link VisitorAttributes#RECURSE}
      *
      * @param filter to filter the children
-     *
      * @return the children
-     *
      * @throws IOException for any problem accessing the virtual file system
      */
     public static List<VirtualFile> getChildrenRecursively(VirtualFileFilter filter) throws IOException {
@@ -288,8 +270,7 @@ public class VFS {
      * Visit the virtual file system from the root
      *
      * @param visitor the visitor
-     *
-     * @throws IOException for any problem accessing the VFS
+     * @throws IOException              for any problem accessing the VFS
      * @throws IllegalArgumentException if the visitor is null
      */
     public static void visit(VirtualFileVisitor visitor) throws IOException {
@@ -299,21 +280,19 @@ public class VFS {
     /**
      * Visit the virtual file system
      *
-     * @param file the file
+     * @param file    the file
      * @param visitor the visitor
-     *
-     * @throws IOException for any problem accessing the VFS
+     * @throws IOException              for any problem accessing the VFS
      * @throws IllegalArgumentException if the file or visitor is null
      */
     protected static void visit(VirtualFile file, VirtualFileVisitor visitor) throws IOException {
-        if (file == null)
-            throw new IllegalArgumentException("Null file");
+        if (file == null) { throw new IllegalArgumentException("Null file"); }
         visitor.visit(file);
     }
 
     static Mount getMount(VirtualFile virtualFile) {
         final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
-        for (; ;) {
+        for (; ; ) {
             final VirtualFile parent = virtualFile.getParent();
             if (parent == null) {
                 return rootMount;
@@ -336,7 +315,6 @@ public class VFS {
      * Get all immediate submounts for a path.
      *
      * @param virtualFile the path
-     *
      * @return the collection of present mount (simple) names
      */
     static Set<String> getSubmounts(VirtualFile virtualFile) {
@@ -365,12 +343,10 @@ public class VFS {
      * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
      * system when closed.
      *
-     * @param zipFile the zip file to mount
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipFile          the zip file to mount
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZip(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -391,13 +367,11 @@ public class VFS {
      * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
      * system when closed.
      *
-     * @param zipData an input stream containing the zip data
-     * @param zipName the name of the archive
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipData          an input stream containing the zip data
+     * @param zipName          the name of the archive
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZip(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -422,12 +396,10 @@ public class VFS {
      * Create and mount a zip file into the filesystem, returning a single handle which will unmount and close the file
      * system when closed.
      *
-     * @param zipFile a zip file in the VFS
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipFile          a zip file in the VFS
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZip(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -438,11 +410,9 @@ public class VFS {
      * Create and mount a real file system, returning a single handle which will unmount and close the filesystem when
      * closed.
      *
-     * @param realRoot the real filesystem root
+     * @param realRoot   the real filesystem root
      * @param mountPoint the point at which the filesystem should be mounted
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountReal(File realRoot, VirtualFile mountPoint) throws IOException {
@@ -453,11 +423,9 @@ public class VFS {
      * Create and mount a temporary file system, returning a single handle which will unmount and close the filesystem
      * when closed.
      *
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountTemp(VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -478,12 +446,10 @@ public class VFS {
      * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
      * close the filesystem when closed.
      *
-     * @param zipFile the zip file to mount
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipFile          the zip file to mount
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZipExpanded(File zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -506,13 +472,11 @@ public class VFS {
      * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
      * close the filesystem when closed.  The given zip data stream is closed.
      *
-     * @param zipData an input stream containing the zip data
-     * @param zipName the name of the archive
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipData          an input stream containing the zip data
+     * @param zipName          the name of the archive
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZipExpanded(InputStream zipData, String zipName, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
@@ -538,8 +502,8 @@ public class VFS {
                     ok = true;
                     return handle;
                 } finally {
-                   //noinspection ResultOfMethodCallIgnored
-                   zipFile.delete();
+                    //noinspection ResultOfMethodCallIgnored
+                    zipFile.delete();
                 }
             } finally {
                 if (!ok) {
@@ -555,39 +519,36 @@ public class VFS {
      * Create and mount an expanded zip file in a temporary file system, returning a single handle which will unmount and
      * close the filesystem when closed.  The given zip data stream is closed.
      *
-     * @param zipFile a zip file in the VFS
-     * @param mountPoint the point at which the filesystem should be mounted
+     * @param zipFile          a zip file in the VFS
+     * @param mountPoint       the point at which the filesystem should be mounted
      * @param tempFileProvider the temporary file provider
-     *
      * @return a handle
-     *
      * @throws IOException if an error occurs
      */
     public static Closeable mountZipExpanded(VirtualFile zipFile, VirtualFile mountPoint, TempFileProvider tempFileProvider) throws IOException {
         return mountZipExpanded(zipFile.openStream(), zipFile.getName(), mountPoint, tempFileProvider);
     }
-    
+
     /**
      * Create and mount an assembly file system, returning a single handle which will unmount and
-     * close the filesystem when closed. 
-     * 
-     * @param assembly an {@link VirtualFileAssembly} to mount in the VFS
+     * close the filesystem when closed.
+     *
+     * @param assembly   an {@link VirtualFileAssembly} to mount in the VFS
      * @param mountPoint the point at which the filesystem should be mounted
      * @return a handle
-     * 
      * @throws IOException if an error occurs
      */
     public static Closeable mountAssembly(VirtualFileAssembly assembly, VirtualFile mountPoint) throws IOException {
-       return doMount(new AssemblyFileSystem(assembly), mountPoint);
+        return doMount(new AssemblyFileSystem(assembly), mountPoint);
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     private static <E> Set<E> emptyRemovableSet() {
         return EMPTY_REMOVABLE_SET;
     }
 
     @SuppressWarnings("unchecked")
-   private static final Set EMPTY_REMOVABLE_SET = new EmptyRemovableSet();
+    private static final Set EMPTY_REMOVABLE_SET = new EmptyRemovableSet();
 
     private static final class EmptyRemovableSet<E> extends AbstractSet<E> {
 
@@ -636,7 +597,7 @@ public class VFS {
             final String name = mountPoint.getName();
             final VirtualFile parent = mountPoint.getParent();
             final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = VFS.mounts;
-            for (; ;) {
+            for (; ; ) {
                 final Map<String, Mount> parentMounts = mounts.get(parent);
                 if (parentMounts == null) {
                     return;

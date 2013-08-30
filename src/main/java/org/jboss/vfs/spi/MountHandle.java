@@ -32,10 +32,10 @@ import java.io.File;
  * @author <a href=mailto:jbailey@redhat.com">John Bailey</a>
  */
 public interface MountHandle extends Closeable {
-   /**
-    * Get the source file used for the mount.
-    *
-    * @return the source file
-    */
-   File getMountSource();
+    /**
+     * Get the source file used for the mount.
+     *
+     * @return the source file
+     */
+    File getMountSource();
 }

@@ -24,7 +24,6 @@ package org.jboss.vfs;
 import java.io.InputStream;
 
 import org.jboss.vfs.util.LazyInputStream;
-
 import org.xml.sax.InputSource;
 
 /**
@@ -37,8 +36,7 @@ public class VFSInputSource extends InputSource {
     private VirtualFile file;
 
     public VFSInputSource(VirtualFile file) {
-        if (file == null)
-            throw new IllegalArgumentException("Null file");
+        if (file == null) { throw new IllegalArgumentException("Null file"); }
         this.file = file;
     }
 
@@ -53,7 +51,7 @@ public class VFSInputSource extends InputSource {
 
     @Override
     public InputStream getByteStream() {
-        return new LazyInputStream(file); 
+        return new LazyInputStream(file);
     }
 
     @Override

@@ -23,8 +23,6 @@ package org.jboss.test.vfs;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -64,11 +62,11 @@ public class VFSUtilsTestCase extends AbstractVFSTest {
 
     @Test
     public void testReadManifest() throws Exception {
-        VirtualFile correctManifest = getVirtualFile("/vfs/test/manifest/correct.mf");        
-        Manifest manifest = VFSUtils.readManifest(correctManifest);               
+        VirtualFile correctManifest = getVirtualFile("/vfs/test/manifest/correct.mf");
+        Manifest manifest = VFSUtils.readManifest(correctManifest);
         assertManifest(manifest);
         VirtualFile incorrectManifest = getVirtualFile("/vfs/test/manifest/incorrect.mf");
-        manifest = VFSUtils.readManifest(incorrectManifest);               
+        manifest = VFSUtils.readManifest(incorrectManifest);
         assertManifest(manifest);
     }
 

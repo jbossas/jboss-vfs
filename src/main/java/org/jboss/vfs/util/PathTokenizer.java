@@ -32,7 +32,7 @@ import java.util.List;
  * @author <a href="david.lloyd@jboss.com">David M. Lloyd</a>
  * @version $Revision: 1.1 $
  */
-@SuppressWarnings({ "StringEquality" })
+@SuppressWarnings({"StringEquality"})
 public class PathTokenizer {
 
     /**
@@ -63,20 +63,15 @@ public class PathTokenizer {
      * Get the remaining path from some tokens
      *
      * @param tokens the tokens
-     * @param i the current location
-     * @param end the end index
-     *
+     * @param i      the current location
+     * @param end    the end index
      * @return the remaining path
-     *
      * @throws IllegalArgumentException for null tokens or i is out of range
      */
     protected static String getRemainingPath(List<String> tokens, int i, int end) {
-        if (tokens == null)
-            throw new IllegalArgumentException("Null tokens");
-        if (i < 0 || i >= end)
-            throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (end - 1));
-        if (i == end - 1)
-            return tokens.get(end - 1);
+        if (tokens == null) { throw new IllegalArgumentException("Null tokens"); }
+        if (i < 0 || i >= end) { throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (end - 1)); }
+        if (i == end - 1) { return tokens.get(end - 1); }
         StringBuilder buffer = new StringBuilder();
         for (; i < end - 1; ++i) {
             buffer.append(tokens.get(i));
@@ -90,14 +85,11 @@ public class PathTokenizer {
      * Get the tokens that comprise this path.
      *
      * @param path the path
-     *
      * @return the tokens or null if the path is empty
-     *
      * @throws IllegalArgumentException if the path is null
      */
     public static List<String> getTokens(String path) {
-        if (path == null)
-            throw new IllegalArgumentException("Null path");
+        if (path == null) { throw new IllegalArgumentException("Null path"); }
         List<String> list = new ArrayList<String>();
         getTokens(list, path);
         return list;
@@ -107,9 +99,7 @@ public class PathTokenizer {
      * Get the tokens that comprise this path and append them to the list.
      *
      * @param path the path
-     *
      * @return the tokens or null if the path is empty
-     *
      * @throws IllegalArgumentException if the path is null
      */
     public static void getTokens(List<String> list, String path) {
@@ -207,15 +197,12 @@ public class PathTokenizer {
      * Get the remaining path from some tokens
      *
      * @param tokens the tokens
-     * @param i the current location
-     *
+     * @param i      the current location
      * @return the remaining path
-     *
      * @throws IllegalArgumentException for null tokens or i is out of range
      */
     public static String getRemainingPath(List<String> tokens, int i) {
-        if (tokens == null)
-            throw new IllegalArgumentException("Null tokens");
+        if (tokens == null) { throw new IllegalArgumentException("Null tokens"); }
         return getRemainingPath(tokens, i, tokens.size());
     }
 
@@ -223,24 +210,16 @@ public class PathTokenizer {
      * Apply any . or .. paths in the path param.
      *
      * @param path the path
-     *
      * @return simple path, containing no . or .. paths
      */
     public static String applySpecialPaths(String path) throws IllegalArgumentException {
         List<String> tokens = getTokens(path);
-        if (tokens == null)
-            return null;
+        if (tokens == null) { return null; }
         int i = 0;
         for (int j = 0; j < tokens.size(); j++) {
             String token = tokens.get(j);
-            if (isCurrentToken(token))
-                continue;
-            else if (isReverseToken(token))
-                i--;
-            else
-                tokens.set(i++, token);
-            if (i < 0)
-                throw new IllegalArgumentException(".. on root path");
+            if (isCurrentToken(token)) { continue; } else if (isReverseToken(token)) { i--; } else { tokens.set(i++, token); }
+            if (i < 0) { throw new IllegalArgumentException(".. on root path"); }
         }
         return getRemainingPath(tokens, 0, i);
     }
@@ -249,24 +228,19 @@ public class PathTokenizer {
      * Apply any . or .. paths in the pathTokens parameter, returning the minimal token list.
      *
      * @param pathTokens the path tokens
-     *
      * @return the simple path tokens
-     *
      * @throws IllegalArgumentException if reverse path goes over the top path
      */
     public static List<String> applySpecialPaths(List<String> pathTokens) throws IllegalArgumentException {
         final ArrayList<String> newTokens = new ArrayList<String>();
         for (String pathToken : pathTokens) {
-            if (isCurrentToken(pathToken))
-                continue;
-            else if (isReverseToken(pathToken)) {
+            if (isCurrentToken(pathToken)) { continue; } else if (isReverseToken(pathToken)) {
                 final int size = newTokens.size();
                 if (size == 0) {
                     throw new IllegalArgumentException(".. on root path");
                 }
                 newTokens.remove(size - 1);
-            } else
-                newTokens.add(pathToken);
+            } else { newTokens.add(pathToken); }
         }
         return newTokens;
     }
@@ -275,7 +249,6 @@ public class PathTokenizer {
      * Is current token.
      *
      * @param token the token to check
-     *
      * @return true if token matches current path token
      */
     public static boolean isCurrentToken(String token) {
@@ -286,7 +259,6 @@ public class PathTokenizer {
      * Is reverse token.
      *
      * @param token the token to check
-     *
      * @return true if token matches reverse path token
      */
     public static boolean isReverseToken(String token) {

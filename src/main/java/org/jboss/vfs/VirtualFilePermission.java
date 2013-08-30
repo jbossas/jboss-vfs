@@ -22,8 +22,6 @@
 
 package org.jboss.vfs;
 
-import java.io.File;
-import java.io.FilePermission;
 import java.io.Serializable;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -31,9 +29,8 @@ import java.security.PermissionCollection;
 /**
  * A permission to a file on the virtual file system.
  *
- * @see FilePermission
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @see java.io.FilePermission
  */
 public final class VirtualFilePermission extends Permission implements Serializable {
 
@@ -47,20 +44,20 @@ public final class VirtualFilePermission extends Permission implements Serializa
     /**
      * The flag value for the "read" action.
      */
-    public static final int FLAG_READ       = 0b0000_0000_0000_0001;
+    public static final int FLAG_READ = 0b0000_0000_0000_0001;
     /**
      * The flag value for the "delete" action.
      */
-    public static final int FLAG_DELETE     = 0b0000_0000_0000_0010;
+    public static final int FLAG_DELETE = 0b0000_0000_0000_0010;
     /**
      * The flag value for the "getfile" action.
      */
-    public static final int FLAG_GET_FILE   = 0b0000_0000_0000_0100;
+    public static final int FLAG_GET_FILE = 0b0000_0000_0000_0100;
 
     /**
      * The set of valid action flags for this permission.
      */
-    public static final int VALID_FLAGS     = 0b0000_0000_0000_0111;
+    public static final int VALID_FLAGS = 0b0000_0000_0000_0111;
 
     VirtualFilePermission(final String path, final int actionFlags, final boolean canonicalize) {
         super(canonicalize ? VFSUtils.canonicalize(path) : path);
@@ -70,7 +67,7 @@ public final class VirtualFilePermission extends Permission implements Serializa
     /**
      * Construct a new instance.
      *
-     * @param path the path
+     * @param path    the path
      * @param actions the actions to grant
      */
     public VirtualFilePermission(final String path, final String actions) {
@@ -80,7 +77,7 @@ public final class VirtualFilePermission extends Permission implements Serializa
     /**
      * Construct a new instance.  Any flags outside of {@link #VALID_FLAGS} are ignored.
      *
-     * @param path the path
+     * @param path        the path
      * @param actionFlags the action flags to set
      */
     public VirtualFilePermission(final String path, final int actionFlags) {
@@ -98,16 +95,16 @@ public final class VirtualFilePermission extends Permission implements Serializa
     static int parseActions(String actions) {
         final int len = actions.length();
         int res = 0;
-        for (int i = 0; i < len; i ++) {
+        for (int i = 0; i < len; i++) {
             if (lenIs(actions, i, len, 4)
-                    && in(actions.charAt(i    ), 'r', 'R')
+                    && in(actions.charAt(i), 'r', 'R')
                     && in(actions.charAt(i + 1), 'e', 'E')
                     && in(actions.charAt(i + 2), 'a', 'A')
                     && in(actions.charAt(i + 3), 'd', 'D')) {
                 res |= FLAG_READ;
                 i += 4;
             } else if (lenIs(actions, i, len, 6)
-                    && in(actions.charAt(i    ), 'd', 'D')
+                    && in(actions.charAt(i), 'd', 'D')
                     && in(actions.charAt(i + 1), 'e', 'E')
                     && in(actions.charAt(i + 2), 'l', 'L')
                     && in(actions.charAt(i + 3), 'e', 'E')
@@ -116,7 +113,7 @@ public final class VirtualFilePermission extends Permission implements Serializa
                 res |= FLAG_DELETE;
                 i += 6;
             } else if (lenIs(actions, i, len, 7)
-                    && in(actions.charAt(i    ), 'g', 'G')
+                    && in(actions.charAt(i), 'g', 'G')
                     && in(actions.charAt(i + 1), 'e', 'E')
                     && in(actions.charAt(i + 2), 't', 'T')
                     && in(actions.charAt(i + 3), 'f', 'F')
@@ -125,7 +122,7 @@ public final class VirtualFilePermission extends Permission implements Serializa
                     && in(actions.charAt(i + 6), 'e', 'E')) {
                 res |= FLAG_GET_FILE;
                 i += 7;
-            } else if (lenIs(actions, i, len, 1) && actions.charAt(i) == '*'){
+            } else if (lenIs(actions, i, len, 1) && actions.charAt(i) == '*') {
                 res |= FLAG_READ | FLAG_DELETE | FLAG_GET_FILE;
             } else {
                 throw new IllegalArgumentException("Invalid actions string");
@@ -195,11 +192,11 @@ public final class VirtualFilePermission extends Permission implements Serializa
             builder.append("read");
         }
         if ((actionFlags & FLAG_DELETE) != 0) {
-            if (builder.length() > 0) builder.append(',');
+            if (builder.length() > 0) { builder.append(','); }
             builder.append("delete");
         }
         if ((actionFlags & FLAG_GET_FILE) != 0) {
-            if (builder.length() > 0) builder.append(',');
+            if (builder.length() > 0) { builder.append(','); }
             builder.append("getfile");
         }
         return builder.toString();

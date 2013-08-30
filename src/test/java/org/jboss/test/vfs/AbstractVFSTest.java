@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import junit.framework.AssertionFailedError;
 import org.jboss.test.BaseTestCase;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
@@ -46,87 +45,57 @@ import org.junit.internal.ArrayComparisonFailure;
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @version $Revision: 1.1 $
  */
-public abstract class AbstractVFSTest extends BaseTestCase
-{
-   protected TempFileProvider provider;
+public abstract class AbstractVFSTest extends BaseTestCase {
+    protected TempFileProvider provider;
 
-   public AbstractVFSTest(String name)
-   {
-      super(name);
-   }
+    public AbstractVFSTest(String name) {
+        super(name);
+    }
 
-   protected void setUp() throws Exception
-   {
-      super.setUp();
+    protected void setUp() throws Exception {
+        super.setUp();
 
-      provider = TempFileProvider.create("test", new ScheduledThreadPoolExecutor(2));
-   }
+        provider = TempFileProvider.create("test", new ScheduledThreadPoolExecutor(2));
+    }
 
-   protected void tearDown() throws Exception
-   {
-      provider.close();
-   }
+    protected void tearDown() throws Exception {
+        provider.close();
+    }
 
-   public URL getResource(String name)
-   {
-      URL url = super.getResource(name);
-      assertNotNull("Resource not found: " + name, url);
-      return url;
-   }
-   
-   public VirtualFile getVirtualFile(String name)
-   {
-      VirtualFile virtualFile = VFS.getChild(getResource(name).getPath()); 
-      assertTrue("VirtualFile does not exist: " + name, virtualFile.exists());
-      return virtualFile;
-   }
+    public URL getResource(String name) {
+        URL url = super.getResource(name);
+        assertNotNull("Resource not found: " + name, url);
+        return url;
+    }
 
-   public List<Closeable> recursiveMount(VirtualFile file) throws IOException
-   {
-      ArrayList<Closeable> mounts = new ArrayList<Closeable>();
+    public VirtualFile getVirtualFile(String name) {
+        VirtualFile virtualFile = VFS.getChild(getResource(name).getPath());
+        assertTrue("VirtualFile does not exist: " + name, virtualFile.exists());
+        return virtualFile;
+    }
 
-      if (!file.isDirectory() && file.getName().matches("^.*\\.([EeWwJj][Aa][Rr]|[Zz][Ii][Pp])$"))
-         mounts.add(VFS.mountZip(file, file, provider));
+    public List<Closeable> recursiveMount(VirtualFile file) throws IOException {
+        ArrayList<Closeable> mounts = new ArrayList<Closeable>();
 
-      if (file.isDirectory())
-         for (VirtualFile child : file.getChildren())
-            mounts.addAll(recursiveMount(child));
+        if (!file.isDirectory() && file.getName().matches("^.*\\.([EeWwJj][Aa][Rr]|[Zz][Ii][Pp])$")) { mounts.add(VFS.mountZip(file, file, provider)); }
 
-      return mounts;
-   }
+        if (file.isDirectory()) { for (VirtualFile child : file.getChildren()) { mounts.addAll(recursiveMount(child)); } }
 
-   protected <T> void checkThrowableTemp(Class<T> expected, Throwable throwable)
-   {
-      if (expected == null)
-         fail("Must provide an expected class");
-      if (throwable == null)
-         fail("Must provide a throwable for comparison");
-      if (throwable instanceof AssertionFailedError || throwable instanceof AssertionError)
-         throw (Error) throwable;
-      // TODO move to AbstractTestCase if (expected.equals(throwable.getClass()) == false)
-      if (expected.isAssignableFrom(throwable.getClass()) == false)
-      {
-         getLog().error("Unexpected throwable", throwable);
-         fail("Unexpected throwable: " + throwable);
-      }
-      else
-      {
-         getLog().debug("Got expected " + expected.getName() + "(" + throwable + ")");
-      }
-   }
-   
-   protected void assertContentEqual(VirtualFile expected, VirtualFile actual) throws ArrayComparisonFailure, IOException {
-      assertArrayEquals("Expected content must mach actual conent", getContent(expected), getContent(actual));
-   }
+        return mounts;
+    }
 
-   protected byte[] getContent(VirtualFile virtualFile) throws IOException {
-      InputStream is = virtualFile.openStream();
-      return getContent(is);
-   }
+    protected void assertContentEqual(VirtualFile expected, VirtualFile actual) throws ArrayComparisonFailure, IOException {
+        assertArrayEquals("Expected content must mach actual content", getContent(expected), getContent(actual));
+    }
 
-   protected byte[] getContent(InputStream is) throws IOException {
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      VFSUtils.copyStreamAndClose(is, bos);
-      return bos.toByteArray();
-   }
+    protected byte[] getContent(VirtualFile virtualFile) throws IOException {
+        InputStream is = virtualFile.openStream();
+        return getContent(is);
+    }
+
+    protected byte[] getContent(InputStream is) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        VFSUtils.copyStreamAndClose(is, bos);
+        return bos.toByteArray();
+    }
 }

@@ -35,7 +35,7 @@ import java.util.Enumeration;
 
 final class VirtualFilePermissionCollection extends PermissionCollection {
     private static final ObjectStreamField[] serialPersistentFields = {
-        new ObjectStreamField("list", VirtualFilePermission[].class)
+            new ObjectStreamField("list", VirtualFilePermission[].class)
     };
 
     private static final VirtualFilePermission[] NO_PERMISSIONS = new VirtualFilePermission[0];
@@ -89,7 +89,7 @@ final class VirtualFilePermissionCollection extends PermissionCollection {
     private boolean implies(final VirtualFilePermission permission) {
         assert permission != null; // else the above check would have failed
         int remainingFlags = permission.getActionFlags();
-        if (remainingFlags == 0) return true;
+        if (remainingFlags == 0) { return true; }
         // snapshot
         final VirtualFilePermission[] permissions = this.permissions;
         final String theirName = permission.getName();
@@ -109,6 +109,7 @@ final class VirtualFilePermissionCollection extends PermissionCollection {
         final VirtualFilePermission[] permissions = this.permissions;
         return new Enumeration<Permission>() {
             private int idx = 0;
+
             public boolean hasMoreElements() {
                 return idx < permissions.length;
             }

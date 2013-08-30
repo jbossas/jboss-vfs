@@ -23,10 +23,10 @@
 package org.jboss.vfs;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -50,7 +50,6 @@ public final class TempDir implements Closeable {
      * long as the tempdir exists.
      *
      * @return the root file
-     *
      * @throws IOException if the directory was closed at the time of this invocation
      */
     public File getRoot() throws IOException {
@@ -64,9 +63,7 @@ public final class TempDir implements Closeable {
      * Get the {@code File} for a relative path.  The returned file is only valid as long as the tempdir exists.
      *
      * @param relativePath the relative path
-     *
      * @return the corresponding file
-     *
      * @throws IOException if the directory was closed at the time of this invocation
      */
     public File getFile(String relativePath) throws IOException {
@@ -80,10 +77,8 @@ public final class TempDir implements Closeable {
      * Create a file within this temporary directory, prepopulating the file from the given input stream.
      *
      * @param relativePath the relative path name
-     * @param sourceData the source input stream to use
-     *
+     * @param sourceData   the source input stream to use
      * @return the file
-     *
      * @throws IOException if the directory was closed at the time of this invocation or an error occurs
      */
     public File createFile(String relativePath, InputStream sourceData) throws IOException {

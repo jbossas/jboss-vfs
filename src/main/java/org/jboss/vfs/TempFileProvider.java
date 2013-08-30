@@ -49,13 +49,11 @@ public final class TempFileProvider implements Closeable {
 
     static {
         String configTmpDir = System.getProperty(JBOSS_TMP_DIR_PROPERTY);
-        if (configTmpDir == null)
-            configTmpDir = System.getProperty(JVM_TMP_DIR_PROPERTY);
+        if (configTmpDir == null) { configTmpDir = System.getProperty(JVM_TMP_DIR_PROPERTY); }
         try {
             TMP_ROOT = new File(configTmpDir, "vfs");
             TMP_ROOT.mkdirs();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Can't set up temp file provider", e);
         }
     }
@@ -64,9 +62,8 @@ public final class TempFileProvider implements Closeable {
      * Create a temporary file provider for a given type.
      *
      * @param providerType the provider type string (used as a prefix in the temp file dir name)
-     * @param executor the executor
+     * @param executor     the executor
      * @return the new provider
-     *
      * @throws IOException if an I/O error occurs
      */
     public static TempFileProvider create(String providerType, ScheduledExecutorService executor) throws IOException {
@@ -85,9 +82,7 @@ public final class TempFileProvider implements Closeable {
      * Create a temp directory, into which temporary files may be placed.
      *
      * @param originalName the original file name
-     *
      * @return the temp directory
-     *
      * @throws IOException for any error
      */
     public TempDir createTempDir(String originalName) throws IOException {
@@ -97,8 +92,7 @@ public final class TempFileProvider implements Closeable {
         final String name = createTempName(originalName + "-", "");
         final File f = new File(providerRoot, name);
         for (int i = 0; i < RETRIES; i++) {
-            if (f.mkdirs())
-                return new TempDir(this, f);
+            if (f.mkdirs()) { return new TempDir(this, f); }
         }
         throw new IOException(
                 String.format("Could not create directory for original name '%s' after %d attempts", originalName, RETRIES));
@@ -109,8 +103,7 @@ public final class TempFileProvider implements Closeable {
     private static File createTempDir(String prefix, String suffix, File root) throws IOException {
         for (int i = 0; i < RETRIES; i++) {
             final File f = new File(root, createTempName(prefix, suffix));
-            if (f.mkdirs())
-                return f;
+            if (f.mkdirs()) { return f; }
         }
         throw new IOException(
                 String.format("Could not create directory for root '%s' (prefix '%s', suffix '%s') after %d attempts",

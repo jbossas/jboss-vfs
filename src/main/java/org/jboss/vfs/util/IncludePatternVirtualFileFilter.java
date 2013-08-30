@@ -26,15 +26,12 @@ package org.jboss.vfs.util;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public abstract class IncludePatternVirtualFileFilter extends AbstractPatternVirtualFileFilter
-{
-   public IncludePatternVirtualFileFilter(String regexp)
-   {
-      super(regexp);
-   }
+public abstract class IncludePatternVirtualFileFilter extends AbstractPatternVirtualFileFilter {
+    public IncludePatternVirtualFileFilter(String regexp) {
+        super(regexp);
+    }
 
-   protected boolean doMatch()
-   {
-      return true;
-   }
+    protected boolean doMatch() {
+        return true;
+    }
 }

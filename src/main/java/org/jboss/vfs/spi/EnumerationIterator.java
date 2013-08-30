@@ -22,8 +22,8 @@
 
 package org.jboss.vfs.spi;
 
-import java.util.Iterator;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * An enumeration iterator.

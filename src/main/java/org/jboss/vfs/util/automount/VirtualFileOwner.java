@@ -24,31 +24,27 @@ package org.jboss.vfs.util.automount;
 import org.jboss.vfs.VirtualFile;
 
 /**
- * Mount owner using a {@link VirtualFile} as the actual owner. 
- * 
- * @author <a href="jbailey@redhat.com">John Bailey</a>
+ * Mount owner using a {@link VirtualFile} as the actual owner.
  *
+ * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-public class VirtualFileOwner extends AbstractMountOwner<VirtualFile>
-{
-   /**
-    * Constructed with a {@link VirtualFile} owner 
-    * 
-    * @param file the {@link VirtualFile} owning mount references
-    */
-   public VirtualFileOwner(VirtualFile file)
-   {
-      super(file);
-   }
+public class VirtualFileOwner extends AbstractMountOwner<VirtualFile> {
+    /**
+     * Constructed with a {@link VirtualFile} owner
+     *
+     * @param file the {@link VirtualFile} owning mount references
+     */
+    public VirtualFileOwner(VirtualFile file) {
+        super(file);
+    }
 
-   /**
-    * {@inheritDoc}
-    * 
-    * Execute a forced recursive deep clean on the {@link VirtualFile} owner.  
-    */
-   @Override
-   public void onCleanup()
-   {
-      Automounter.getEntry(getOwner()).cleanup();
-   }
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Execute a forced recursive deep clean on the {@link VirtualFile} owner.
+     */
+    @Override
+    public void onCleanup() {
+        Automounter.getEntry(getOwner()).cleanup();
+    }
 }

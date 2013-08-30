@@ -21,10 +21,10 @@
  */
 package org.jboss.vfs.util;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.jboss.vfs.VirtualFile;
@@ -51,8 +51,7 @@ public class ExtensibleFilter implements VirtualFileFilter {
             int idx1 = o1.length();
             int idx2 = o2.length();
             int comp = 0;
-            while (comp == 0 && idx1 > 0 && idx2 > 0)
-                comp = o1.charAt(--idx1) - o2.charAt(--idx2);
+            while (comp == 0 && idx1 > 0 && idx2 > 0) { comp = o1.charAt(--idx1) - o2.charAt(--idx2); }
             return (comp == 0) ? (idx1 - idx2) : comp;
         }
     };
@@ -61,20 +60,20 @@ public class ExtensibleFilter implements VirtualFileFilter {
      * the default prefix list
      */
     private static final String[] DEFAULT_PREFIXES =
-            { "#", "%", ",", ".", "_$" };
+            {"#", "%", ",", ".", "_$"};
 
     /**
      * the default suffix list
      */
     private static final String[] DEFAULT_SUFFIXES =
-            { "#", "$", "%", "~", ",v", ".BAK", ".bak", ".old", ".orig", ".tmp", ".rej", ".sh" };
+            {"#", "$", "%", "~", ",v", ".BAK", ".bak", ".old", ".orig", ".tmp", ".rej", ".sh"};
 
     /**
      * the default matches list
      */
     private static final String[] DEFAULT_MATCHES =
-            { ".make.state", ".nse_depinfo", "CVS", "CVS.admin", "RCS", "RCSLOG",
-                    "SCCS", "TAGS", "core", "tags" };
+            {".make.state", ".nse_depinfo", "CVS", "CVS.admin", "RCS", "RCSLOG",
+                    "SCCS", "TAGS", "core", "tags"};
 
     /**
      * The list of disallowed suffixes, sorted using reverse values
@@ -102,21 +101,18 @@ public class ExtensibleFilter implements VirtualFileFilter {
      * Create using a custom set of matches, prefixes, and suffixes.  If any of these arrays are null, then the
      * corresponding default will be substituted.
      *
-     * @param matches the matches
+     * @param matches  the matches
      * @param prefixes the prefixes
      * @param suffixes the suffixes
      */
     public ExtensibleFilter(String[] matches, String[] prefixes, String[] suffixes) {
-        if (matches == null)
-            matches = DEFAULT_MATCHES;
+        if (matches == null) { matches = DEFAULT_MATCHES; }
         Arrays.sort(matches);
         this.matches = new ArrayList<String>(Arrays.asList(matches));
-        if (prefixes == null)
-            prefixes = DEFAULT_PREFIXES;
+        if (prefixes == null) { prefixes = DEFAULT_PREFIXES; }
         Arrays.sort(prefixes);
         this.prefixes = new ArrayList<String>(Arrays.asList(prefixes));
-        if (suffixes == null)
-            suffixes = DEFAULT_SUFFIXES;
+        if (suffixes == null) { suffixes = DEFAULT_SUFFIXES; }
         Arrays.sort(suffixes, reverseComparator);
         this.suffixes = new ArrayList<String>(Arrays.asList(suffixes));
     }
@@ -200,38 +196,32 @@ public class ExtensibleFilter implements VirtualFileFilter {
      * overkill, but this method operates in log(n) time, where n is the size of the arrays.
      *
      * @param file The file to be tested
-     *
      * @return <code>false</code> if the filename matches any of the prefixes, suffixes, or matches.
      */
     public boolean accepts(VirtualFile file) {
         String name = file.getName();
         // check exact match
         int index = Collections.binarySearch(matches, name);
-        if (index >= 0)
-            return false;
+        if (index >= 0) { return false; }
         // check prefix
         index = Collections.binarySearch(prefixes, name);
-        if (index >= 0)
-            return false;
+        if (index >= 0) { return false; }
         if (index < -1) {
             // The < 0 index gives the first index greater than name
             int firstLessIndex = -2 - index;
             String prefix = prefixes.get(firstLessIndex);
             // If name starts with an ingored prefix ignore name
-            if (name.startsWith(prefix))
-                return false;
+            if (name.startsWith(prefix)) { return false; }
         }
         // check suffix
         index = Collections.binarySearch(suffixes, name, reverseComparator);
-        if (index >= 0)
-            return false;
+        if (index >= 0) { return false; }
         if (index < -1) {
             // The < 0 index gives the first index greater than name
             int firstLessIndex = -2 - index;
             String suffix = suffixes.get(firstLessIndex);
             // If name ends with an ingored suffix ignore name
-            if (name.endsWith(suffix))
-                return false;
+            if (name.endsWith(suffix)) { return false; }
         }
         // everything checks out.
         return true;

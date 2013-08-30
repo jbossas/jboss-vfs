@@ -35,17 +35,16 @@ import java.util.Map;
 public class VfsUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
 
-   private static Map<String, URLStreamHandler> handlerMap = new HashMap<String, URLStreamHandler>(2);
+    private static Map<String, URLStreamHandler> handlerMap = new HashMap<String, URLStreamHandler>(2);
 
-   static {
-      handlerMap.put("file", new FileURLStreamHandler());
-      handlerMap.put("vfs", new VirtualFileURLStreamHandler());
-   }
+    static {
+        handlerMap.put("file", new FileURLStreamHandler());
+        handlerMap.put("vfs", new VirtualFileURLStreamHandler());
+    }
 
 
-   @Override
-   public URLStreamHandler createURLStreamHandler(final String protocol)
-   {
-      return handlerMap.get(protocol);
-   }
+    @Override
+    public URLStreamHandler createURLStreamHandler(final String protocol) {
+        return handlerMap.get(protocol);
+    }
 }

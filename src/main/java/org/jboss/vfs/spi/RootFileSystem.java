@@ -22,33 +22,34 @@
 
 package org.jboss.vfs.spi;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import org.jboss.vfs.VirtualFile;
-import org.jboss.logging.Logger;
-
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.CodeSigner;
-import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+
+import org.jboss.logging.Logger;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * A special FileSystem which supports multiple roots.
- * 
+ * <p/>
  * This is currently accomplished by requiring that VirtualFile.getPathName()
  * produce output that is consumable by java.io.File as a path.
  */
 public final class RootFileSystem implements FileSystem {
 
     private static final Logger log = Logger.getLogger("org.jboss.vfs.root");
-    
+
     public static final RootFileSystem ROOT_INSTANCE = new RootFileSystem();
-    
-    private RootFileSystem(){}
+
+    private RootFileSystem() {
+    }
 
     /**
      * {@inheritDoc}
@@ -99,7 +100,9 @@ public final class RootFileSystem implements FileSystem {
         return getFile(mountPoint, target).exists();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         return getFile(mountPoint, target).isFile();
     }
@@ -118,7 +121,7 @@ public final class RootFileSystem implements FileSystem {
         final String[] names = getFile(mountPoint, target).list();
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
-    
+
     /**
      * {@inheritDoc}
      */

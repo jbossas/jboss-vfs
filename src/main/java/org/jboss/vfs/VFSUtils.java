@@ -93,12 +93,12 @@ public class VFSUtils {
      * The {@link URLStreamHandler} for the 'vfs' protocol
      */
     public static final URLStreamHandler VFS_URL_HANDLER = new VirtualFileURLStreamHandler();
-    
+
     /**
      * The {@link URLStreamHandler} for the 'file' protocol
      */
     public static final URLStreamHandler FILE_URL_HANDLER = new FileURLStreamHandler();
-    
+
     /**
      * The default buffer size to use for copies
      */
@@ -111,54 +111,41 @@ public class VFSUtils {
      * Get the paths string for a collection of virtual files
      *
      * @param paths the paths
-     *
      * @return the string
-     *
      * @throws IllegalArgumentException for null paths
      */
     public static String getPathsString(Collection<VirtualFile> paths) {
-        if (paths == null)
-            throw new IllegalArgumentException("Null paths");
+        if (paths == null) { throw new IllegalArgumentException("Null paths"); }
         StringBuilder buffer = new StringBuilder();
         boolean first = true;
         for (VirtualFile path : paths) {
-            if (path == null)
-                throw new IllegalArgumentException("Null path in " + paths);
-            if (first == false)
-                buffer.append(':');
-            else
-                first = false;
+            if (path == null) { throw new IllegalArgumentException("Null path in " + paths); }
+            if (first == false) { buffer.append(':'); } else { first = false; }
             buffer.append(path.getPathName());
         }
-        if (first == true)
-            buffer.append("<empty>");
+        if (first == true) { buffer.append("<empty>"); }
         return buffer.toString();
     }
 
     /**
      * Add manifest paths
      *
-     * @param file the file
+     * @param file  the file
      * @param paths the paths to add to
-     *
-     * @throws IOException if there is an error reading the manifest or the virtual file is closed
-     * @throws IllegalStateException if the file has no parent
+     * @throws IOException              if there is an error reading the manifest or the virtual file is closed
+     * @throws IllegalStateException    if the file has no parent
      * @throws IllegalArgumentException for a null file or paths
      */
     public static void addManifestLocations(VirtualFile file, List<VirtualFile> paths) throws IOException {
-        if (file == null)
-            throw new IllegalArgumentException("Null file");
-        if (paths == null)
-            throw new IllegalArgumentException("Null paths");
+        if (file == null) { throw new IllegalArgumentException("Null file"); }
+        if (paths == null) { throw new IllegalArgumentException("Null paths"); }
         boolean trace = log.isTraceEnabled();
         Manifest manifest = getManifest(file);
-        if (manifest == null)
-            return;
+        if (manifest == null) { return; }
         Attributes mainAttributes = manifest.getMainAttributes();
         String classPath = mainAttributes.getValue(Attributes.Name.CLASS_PATH);
         if (classPath == null) {
-            if (trace)
-                log.trace("Manifest has no Class-Path for " + file.getPathName());
+            if (trace) { log.trace("Manifest has no Class-Path for " + file.getPathName()); }
             return;
         }
         VirtualFile parent = file.getParent();
@@ -166,8 +153,7 @@ public class VFSUtils {
             log.debug(file + " has no parent.");
             return;
         }
-        if (trace)
-            log.trace("Parsing Class-Path: " + classPath + " for " + file.getName() + " parent=" + parent.getName());
+        if (trace) { log.trace("Parsing Class-Path: " + classPath + " for " + file.getName() + " parent=" + parent.getName()); }
         StringTokenizer tokenizer = new StringTokenizer(classPath);
         while (tokenizer.hasMoreTokens()) {
             String path = tokenizer.nextToken();
@@ -179,12 +165,9 @@ public class VFSUtils {
                         // Recursively process the jar
                         Automounter.mount(file, vf);
                         addManifestLocations(vf, paths);
-                    } else if (trace)
-                        log.trace(vf.getName() + " from manifest is already in the classpath " + paths);
-                } else if (trace)
-                    log.trace("Unable to find " + path + " from " + parent.getName());
-            }
-            catch (IOException e) {
+                    } else if (trace) { log.trace(vf.getName() + " from manifest is already in the classpath " + paths); }
+                } else if (trace) { log.trace("Unable to find " + path + " from " + parent.getName()); }
+            } catch (IOException e) {
                 log.debug("Manifest Class-Path entry " + path + " ignored for " + file.getPathName() + " reason=" + e);
             }
         }
@@ -194,19 +177,15 @@ public class VFSUtils {
      * Get a manifest from a virtual file, assuming the virtual file is the root of an archive
      *
      * @param archive the root the archive
-     *
      * @return the manifest or null if not found
-     *
-     * @throws IOException if there is an error reading the manifest or the virtual file is closed
+     * @throws IOException              if there is an error reading the manifest or the virtual file is closed
      * @throws IllegalArgumentException for a null archive
      */
     public static Manifest getManifest(VirtualFile archive) throws IOException {
-        if (archive == null)
-            throw new IllegalArgumentException("Null archive");
+        if (archive == null) { throw new IllegalArgumentException("Null archive"); }
         VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
         if (manifest == null || !manifest.exists()) {
-            if (log.isTraceEnabled())
-                log.trace("Can't find manifest for " + archive.getPathName());
+            if (log.isTraceEnabled()) { log.trace("Can't find manifest for " + archive.getPathName()); }
             return null;
         }
         return readManifest(manifest);
@@ -216,19 +195,15 @@ public class VFSUtils {
      * Read the manifest from given manifest VirtualFile.
      *
      * @param manifest the VF to read from
-     *
      * @return JAR's manifest
-     *
      * @throws IOException if problems while opening VF stream occur
      */
     public static Manifest readManifest(VirtualFile manifest) throws IOException {
-        if (manifest == null)
-            throw new IllegalArgumentException("Null manifest file");
+        if (manifest == null) { throw new IllegalArgumentException("Null manifest file"); }
         InputStream stream = new PaddedManifestStream(manifest.openStream());
         try {
             return new Manifest(stream);
-        }
-        finally {
+        } finally {
             safeClose(stream);
         }
     }
@@ -237,19 +212,14 @@ public class VFSUtils {
      * Fix a name (removes any trailing slash)
      *
      * @param name the name to fix
-     *
      * @return the fixed name
-     *
      * @throws IllegalArgumentException for a null name
      */
     public static String fixName(String name) {
-        if (name == null)
-            throw new IllegalArgumentException("Null name");
+        if (name == null) { throw new IllegalArgumentException("Null name"); }
         int length = name.length();
-        if (length <= 1)
-            return name;
-        if (name.charAt(length - 1) == '/')
-            return name.substring(0, length - 1);
+        if (length <= 1) { return name; }
+        if (name.charAt(length - 1) == '/') { return name.substring(0, length - 1); }
         return name;
     }
 
@@ -257,7 +227,6 @@ public class VFSUtils {
      * Decode the path with UTF-8 encoding..
      *
      * @param path the path to decode
-     *
      * @return decoded path
      */
     public static String decode(String path) {
@@ -267,16 +236,14 @@ public class VFSUtils {
     /**
      * Decode the path.
      *
-     * @param path the path to decode
+     * @param path     the path to decode
      * @param encoding the encoding
-     *
      * @return decoded path
      */
     public static String decode(String path, String encoding) {
         try {
             return URLDecoder.decode(path, encoding);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot decode: " + path + " [" + encoding + "]", e);
         }
     }
@@ -285,18 +252,15 @@ public class VFSUtils {
      * Get the name.
      *
      * @param uri the uri
-     *
      * @return name from uri's path
      */
     public static String getName(URI uri) {
-        if (uri == null)
-            throw new IllegalArgumentException("Null uri");
+        if (uri == null) { throw new IllegalArgumentException("Null uri"); }
         String name = uri.getPath();
         if (name != null) {
             // TODO: Not correct for certain uris like jar:...!/
             int lastSlash = name.lastIndexOf('/');
-            if (lastSlash > 0)
-                name = name.substring(lastSlash + 1);
+            if (lastSlash > 0) { name = name.substring(lastSlash + 1); }
         }
         return name;
     }
@@ -305,7 +269,6 @@ public class VFSUtils {
      * Take a URL.getQuery string and parse it into name=value pairs
      *
      * @param query Possibly empty/null url query string
-     *
      * @return String[] for the name/value pairs in the query. May be empty but never null.
      */
     public static Map<String, String> parseURLQuery(String query) {
@@ -325,18 +288,14 @@ public class VFSUtils {
      * Deal with urls that may include spaces.
      *
      * @param url the url
-     *
      * @return uri the uri
-     *
      * @throws URISyntaxException for any error
      */
     public static URI toURI(URL url) throws URISyntaxException {
-        if (url == null)
-            throw new IllegalArgumentException("Null url");
+        if (url == null) { throw new IllegalArgumentException("Null url"); }
         try {
             return url.toURI();
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             String urispec = url.toExternalForm();
             // Escape percent sign and spaces
             urispec = urispec.replaceAll("%", "%25");
@@ -349,50 +308,47 @@ public class VFSUtils {
      * Ensure the url is convertible to URI by encoding spaces and percent characters if necessary
      *
      * @param url to be sanitized
-     *
      * @return sanitized URL
-     *
-     * @throws URISyntaxException if URI conversion can't be fixed
+     * @throws URISyntaxException    if URI conversion can't be fixed
      * @throws MalformedURLException if an error occurs
      */
     public static URL sanitizeURL(URL url) throws URISyntaxException, MalformedURLException {
         return toURI(url).toURL();
     }
-    
+
     /**
      * Copy all the children from the original {@link VirtualFile} the target recursively.
-     *  
+     *
      * @param original the file to copy children from
-     * @param target the file to copy the children to
+     * @param target   the file to copy the children to
      * @throws IOException if any problems occur copying the files
      */
     public static void copyChildrenRecursive(VirtualFile original, VirtualFile target) throws IOException {
-       if(original == null) throw new IllegalArgumentException("Original VirtualFile must not be null");
-       if(target == null) throw new IllegalArgumentException("Target VirtualFile must not be null");
+        if (original == null) { throw new IllegalArgumentException("Original VirtualFile must not be null"); }
+        if (target == null) { throw new IllegalArgumentException("Target VirtualFile must not be null"); }
 
-       List<VirtualFile> children = original.getChildren();
-       for(VirtualFile child : children) {
-          VirtualFile targetChild = target.getChild(child.getName());
-          File childFile = child.getPhysicalFile();
-          if(childFile.isDirectory()) {
-             if(!targetChild.getPhysicalFile().mkdir()) {
-                throw new IllegalArgumentException("Problems creating new directory: " + targetChild);
-             }
-             copyChildrenRecursive(child, targetChild);
-          } else {
-             FileInputStream is = new FileInputStream(childFile);
-             writeFile(targetChild, is);
-          }
-       }
+        List<VirtualFile> children = original.getChildren();
+        for (VirtualFile child : children) {
+            VirtualFile targetChild = target.getChild(child.getName());
+            File childFile = child.getPhysicalFile();
+            if (childFile.isDirectory()) {
+                if (!targetChild.getPhysicalFile().mkdir()) {
+                    throw new IllegalArgumentException("Problems creating new directory: " + targetChild);
+                }
+                copyChildrenRecursive(child, targetChild);
+            } else {
+                FileInputStream is = new FileInputStream(childFile);
+                writeFile(targetChild, is);
+            }
+        }
     }
-    
+
 
     /**
      * Copy input stream to output stream and close them both
      *
      * @param is input stream
      * @param os output stream
-     *
      * @throws IOException for any error
      */
     public static void copyStreamAndClose(InputStream is, OutputStream os) throws IOException {
@@ -402,10 +358,9 @@ public class VFSUtils {
     /**
      * Copy input stream to output stream and close them both
      *
-     * @param is input stream
-     * @param os output stream
+     * @param is         input stream
+     * @param os         output stream
      * @param bufferSize the buffer size to use
-     *
      * @throws IOException for any error
      */
     public static void copyStreamAndClose(InputStream is, OutputStream os, int bufferSize)
@@ -415,8 +370,7 @@ public class VFSUtils {
             // throw an exception if the close fails since some data might be lost
             is.close();
             os.close();
-        }
-        finally {
+        } finally {
             // ...but still guarantee that they're both closed
             safeClose(is);
             safeClose(os);
@@ -428,7 +382,6 @@ public class VFSUtils {
      *
      * @param is input stream
      * @param os output stream
-     *
      * @throws IOException for any error
      */
     public static void copyStream(InputStream is, OutputStream os) throws IOException {
@@ -438,21 +391,18 @@ public class VFSUtils {
     /**
      * Copy input stream to output stream without closing streams. Flushes output stream when done.
      *
-     * @param is input stream
-     * @param os output stream
+     * @param is         input stream
+     * @param os         output stream
      * @param bufferSize the buffer size to use
-     *
      * @throws IOException for any error
      */
     public static void copyStream(InputStream is, OutputStream os, int bufferSize)
             throws IOException {
-        if (is == null)
-            throw new IllegalArgumentException("input stream is null");
-        if (os == null)
-            throw new IllegalArgumentException("output stream is null");
+        if (is == null) { throw new IllegalArgumentException("input stream is null"); }
+        if (os == null) { throw new IllegalArgumentException("output stream is null"); }
         byte[] buff = new byte[bufferSize];
         int rc;
-        while ((rc = is.read(buff)) != -1) os.write(buff, 0, rc);
+        while ((rc = is.read(buff)) != -1) { os.write(buff, 0, rc); }
         os.flush();
     }
 
@@ -461,8 +411,7 @@ public class VFSUtils {
      * one does not exist.
      *
      * @param virtualFile the virtual file to write
-     * @param bytes the bytes
-     *
+     * @param bytes       the bytes
      * @throws IOException if an error occurs
      */
     public static void writeFile(VirtualFile virtualFile, byte[] bytes) throws IOException {
@@ -476,21 +425,20 @@ public class VFSUtils {
             safeClose(fos);
         }
     }
-    
+
     /**
      * Write the content from the given {@link InputStream} to the given virtual file, replacing its current contents (if any) or creating a new file if
      * one does not exist.
      *
      * @param virtualFile the virtual file to write
-     * @param is the input stream
-     *
+     * @param is          the input stream
      * @throws IOException if an error occurs
      */
     public static void writeFile(VirtualFile virtualFile, InputStream is) throws IOException {
-       final File file = virtualFile.getPhysicalFile();
-       file.getParentFile().mkdirs();
-       final FileOutputStream fos = new FileOutputStream(file);
-       copyStreamAndClose(is, fos);
+        final File file = virtualFile.getPhysicalFile();
+        file.getParentFile().mkdirs();
+        final FileOutputStream fos = new FileOutputStream(file);
+        copyStreamAndClose(is, fos);
     }
 
     /**
@@ -503,9 +451,7 @@ public class VFSUtils {
      * over time.
      *
      * @param file the virtual file
-     *
      * @return the URL
-     *
      * @throws MalformedURLException if the file cannot be coerced into a URL for some reason
      * @see VirtualFile#asDirectoryURL()
      * @see VirtualFile#asFileURL()
@@ -534,9 +480,7 @@ public class VFSUtils {
      * over time.
      *
      * @param file the virtual file
-     *
      * @return the URI
-     *
      * @throws URISyntaxException if the file cannot be coerced into a URI for some reason
      * @see VirtualFile#asDirectoryURI()
      * @see VirtualFile#asFileURI()
@@ -550,9 +494,7 @@ public class VFSUtils {
      * before using this method.
      *
      * @param file the virtual file
-     *
      * @return the physical file URL
-     *
      * @throws IOException if an I/O error occurs getting the physical file
      */
     public static URL getPhysicalURL(VirtualFile file) throws IOException {
@@ -564,9 +506,7 @@ public class VFSUtils {
      * before using this method.
      *
      * @param file the virtual file
-     *
      * @return the physical file URL
-     *
      * @throws IOException if an I/O error occurs getting the physical file
      */
     public static URI getPhysicalURI(VirtualFile file) throws IOException {
@@ -609,21 +549,22 @@ public class VFSUtils {
      * @param c the resource
      */
     public static void safeClose(final Closeable c) {
-        if (c != null) try {
-            c.close();
-        }
-        catch (Exception e) {
-            log.trace("Failed to close resource", e);
+        if (c != null) {
+            try {
+                c.close();
+            } catch (Exception e) {
+                log.trace("Failed to close resource", e);
+            }
         }
     }
-    
+
     /**
      * Safely close some resource without throwing an exception.  Any exception will be logged at TRACE level.
      *
      * @param closeables the resources
      */
     public static void safeClose(final Closeable... closeables) {
-       safeClose(Arrays.asList(closeables));
+        safeClose(Arrays.asList(closeables));
     }
 
     /**
@@ -632,8 +573,10 @@ public class VFSUtils {
      * @param ci the resources
      */
     public static void safeClose(final Iterable<? extends Closeable> ci) {
-        if (ci != null) for (Closeable closeable : ci) {
-            safeClose(closeable);
+        if (ci != null) {
+            for (Closeable closeable : ci) {
+                safeClose(closeable);
+            }
         }
     }
 
@@ -643,11 +586,12 @@ public class VFSUtils {
      * @param zipFile the resource
      */
     public static void safeClose(final ZipFile zipFile) {
-        if (zipFile != null) try {
-            zipFile.close();
-        }
-        catch (Exception e) {
-            log.trace("Failed to close resource", e);
+        if (zipFile != null) {
+            try {
+                zipFile.close();
+            } catch (Exception e) {
+                log.trace("Failed to close resource", e);
+            }
         }
     }
 
@@ -655,7 +599,6 @@ public class VFSUtils {
      * Attempt to recursively delete a real file.
      *
      * @param root the real file to delete
-     *
      * @return {@code true} if the file was deleted
      */
     public static boolean recursiveDelete(File root) {
@@ -676,7 +619,6 @@ public class VFSUtils {
      * Attempt to recursively delete a virtual file.
      *
      * @param root the virtual file to delete
-     *
      * @return {@code true} if the file was deleted
      */
     public static boolean recursiveDelete(VirtualFile root) {
@@ -697,7 +639,7 @@ public class VFSUtils {
      * Recursively copy a file or directory from one location to another.
      *
      * @param original the original file or directory
-     * @param destDir the destination directory
+     * @param destDir  the destination directory
      * @throws IOException if an I/O error occurs before the copy is complete
      */
     public static void recursiveCopy(File original, File destDir) throws IOException {
@@ -724,7 +666,7 @@ public class VFSUtils {
      * Recursively copy a file or directory from one location to another.
      *
      * @param original the original file or directory
-     * @param destDir the destination directory
+     * @param destDir  the destination directory
      * @throws IOException if an I/O error occurs before the copy is complete
      */
     public static void recursiveCopy(File original, VirtualFile destDir) throws IOException {
@@ -751,7 +693,7 @@ public class VFSUtils {
      * Recursively copy a file or directory from one location to another.
      *
      * @param original the original virtual file or directory
-     * @param destDir the destination directory
+     * @param destDir  the destination directory
      * @throws IOException if an I/O error occurs before the copy is complete
      */
     public static void recursiveCopy(VirtualFile original, File destDir) throws IOException {
@@ -778,7 +720,7 @@ public class VFSUtils {
      * Recursively copy a file or directory from one location to another.
      *
      * @param original the original virtual file or directory
-     * @param destDir the destination virtual directory
+     * @param destDir  the destination virtual directory
      * @throws IOException if an I/O error occurs before the copy is complete
      */
     public static void recursiveCopy(VirtualFile original, VirtualFile destDir) throws IOException {
@@ -827,7 +769,7 @@ public class VFSUtils {
      * @throws IOException if any problems occur
      */
     public static InputStream createJarFileInputStream(final VirtualFile virtualFile) throws IOException {
-        if(virtualFile.isDirectory()) {
+        if (virtualFile.isDirectory()) {
             final VirtualJarInputStream jarInputStream = new VirtualJarInputStream(virtualFile);
             return new VirtualJarFileInputStream(jarInputStream);
         }
@@ -843,8 +785,8 @@ public class VFSUtils {
             inputStream = virtualFile.openStream();
             final byte[] bytes = new byte[4];
             final int read = inputStream.read(bytes, 0, 4);
-            if(read < 4 || !Arrays.equals(expectedHeader, bytes)) {
-                throw new IOException("Invalid jar signature " + Arrays.toString(bytes) +" should be " + Arrays.toString(expectedHeader));
+            if (read < 4 || !Arrays.equals(expectedHeader, bytes)) {
+                throw new IOException("Invalid jar signature " + Arrays.toString(bytes) + " should be " + Arrays.toString(expectedHeader));
             }
         } finally {
             safeClose(inputStream);
@@ -858,7 +800,6 @@ public class VFSUtils {
      *
      * @param zipFile the zip file
      * @param destDir the destination directory
-     *
      * @throws IOException if an error occurs
      */
     public static void unzip(File zipFile, File destDir) throws IOException {
@@ -907,15 +848,15 @@ public class VFSUtils {
         }
     }
 
-   /**
-    * Return the mount source File for a given mount handle.
-    * @param handle The handle to get the source for
-    * @return The mount source file or null if the handle does not have a source, or is not a MountHandle
-    */
+    /**
+     * Return the mount source File for a given mount handle.
+     *
+     * @param handle The handle to get the source for
+     * @return The mount source file or null if the handle does not have a source, or is not a MountHandle
+     */
     public static File getMountSource(Closeable handle) {
-       if(handle instanceof MountHandle)
-         return MountHandle.class.cast(handle).getMountSource();
-       return null;
+        if (handle instanceof MountHandle) { return MountHandle.class.cast(handle).getMountSource(); }
+        return null;
     }
 
     private static final Pattern GLOB_PATTERN = Pattern.compile("(\\*\\*?)|(\\?)|(\\\\.)|(/+)|([^*?]+)");
@@ -935,7 +876,6 @@ public class VFSUtils {
      * <b>See also:</b> <a href="http://ant.apache.org/manual/dirtasks.html#patterns">"Patterns" in the Ant Manual</a>
      *
      * @param glob the glob to match
-     *
      * @return the pattern
      */
     public static Pattern getGlobPattern(final String glob) {
@@ -1004,26 +944,51 @@ public class VFSUtils {
         int a = length - 1;
         // number of segments to skip
         int skip = 0;
-        loop: while (--i >= 0) {
+        loop:
+        while (--i >= 0) {
             char c = path.charAt(i);
-            outer: switch (c) {
+            outer:
+            switch (c) {
                 case '/': {
-                    inner: switch (state) {
-                        case 0: state = 3; e = i; break outer;
-                        case 1: state = 3; e = i; break outer;
-                        case 2: state = 3; e = i; skip ++; break outer;
-                        case 3: e = i; break outer;
-                        default: throw new IllegalStateException();
+                    inner:
+                    switch (state) {
+                        case 0:
+                            state = 3;
+                            e = i;
+                            break outer;
+                        case 1:
+                            state = 3;
+                            e = i;
+                            break outer;
+                        case 2:
+                            state = 3;
+                            e = i;
+                            skip++;
+                            break outer;
+                        case 3:
+                            e = i;
+                            break outer;
+                        default:
+                            throw new IllegalStateException();
                     }
                     // not reached!
                 }
                 case '.': {
-                    inner: switch (state) {
-                        case 0: state = 1; break outer;
-                        case 1: state = 2; break outer;
-                        case 2: break inner; // emit!
-                        case 3: state = 1; break outer;
-                        default: throw new IllegalStateException();
+                    inner:
+                    switch (state) {
+                        case 0:
+                            state = 1;
+                            break outer;
+                        case 1:
+                            state = 2;
+                            break outer;
+                        case 2:
+                            break inner; // emit!
+                        case 3:
+                            state = 1;
+                            break outer;
+                        default:
+                            throw new IllegalStateException();
                     }
                     // fall thru
                 }

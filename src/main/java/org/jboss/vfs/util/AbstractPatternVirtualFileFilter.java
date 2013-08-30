@@ -23,44 +23,40 @@ package org.jboss.vfs.util;
 
 import java.util.regex.Pattern;
 
-import org.jboss.vfs.VirtualFileFilter;
 import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.VirtualFileFilter;
 
 /**
  * Regexp patter filter.
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public abstract class AbstractPatternVirtualFileFilter implements VirtualFileFilter
-{
-   private Pattern pattern;
+public abstract class AbstractPatternVirtualFileFilter implements VirtualFileFilter {
+    private Pattern pattern;
 
-   public AbstractPatternVirtualFileFilter(String regexp)
-   {
-      if (regexp == null)
-         throw new IllegalArgumentException("Null regexp");
+    public AbstractPatternVirtualFileFilter(String regexp) {
+        if (regexp == null) { throw new IllegalArgumentException("Null regexp"); }
 
-      pattern = Pattern.compile(regexp);
-   }
+        pattern = Pattern.compile(regexp);
+    }
 
-   /**
-    * Extract match string from file.
-    *
-    * @param file the file
-    * @return extracted match string
-    */
-   protected abstract String getMatchString(VirtualFile file);
+    /**
+     * Extract match string from file.
+     *
+     * @param file the file
+     * @return extracted match string
+     */
+    protected abstract String getMatchString(VirtualFile file);
 
-   /**
-    * Should we match the pattern.
-    *
-    * @return the match flag
-    */
-   protected abstract boolean doMatch();
+    /**
+     * Should we match the pattern.
+     *
+     * @return the match flag
+     */
+    protected abstract boolean doMatch();
 
-   public boolean accepts(VirtualFile file)
-   {
-      String string = getMatchString(file);
-      return pattern.matcher(string).matches() == doMatch();
-   }
+    public boolean accepts(VirtualFile file) {
+        String string = getMatchString(file);
+        return pattern.matcher(string).matches() == doMatch();
+    }
 }

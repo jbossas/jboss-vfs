@@ -51,22 +51,17 @@ public class FilterVirtualFileVisitor extends AbstractVirtualFileVisitor {
     /**
      * Check the attributes
      *
-     * @param filter the filter
+     * @param filter     the filter
      * @param attributes the attributes
-     *
      * @return the attributes
-     *
      * @throws IllegalArgumentException for a null filter
      */
     private static VisitorAttributes checkAttributes(VirtualFileFilter filter, VisitorAttributes attributes) {
-        if (filter == null)
-            throw new IllegalArgumentException("Null filter");
+        if (filter == null) { throw new IllegalArgumentException("Null filter"); }
         // Specified
-        if (attributes != null)
-            return attributes;
+        if (attributes != null) { return attributes; }
         // From the filter
-        if (filter instanceof VirtualFileFilterWithAttributes)
-            return ((VirtualFileFilterWithAttributes) filter).getAttributes();
+        if (filter instanceof VirtualFileFilterWithAttributes) { return ((VirtualFileFilterWithAttributes) filter).getAttributes(); }
         // It will use the default
         return null;
     }
@@ -75,7 +70,6 @@ public class FilterVirtualFileVisitor extends AbstractVirtualFileVisitor {
      * Create a new FilterVirtualFileVisitor with default attributes
      *
      * @param filter the filter
-     *
      * @throws IllegalArgumentException if the filter is null
      */
     public FilterVirtualFileVisitor(VirtualFileFilter filter) {
@@ -85,9 +79,8 @@ public class FilterVirtualFileVisitor extends AbstractVirtualFileVisitor {
     /**
      * Create a new FilterVirtualFileVisitor.
      *
-     * @param filter the filter
+     * @param filter     the filter
      * @param attributes the attributes, uses the default if null
-     *
      * @throws IllegalArgumentException if the filter is null
      */
     public FilterVirtualFileVisitor(VirtualFileFilter filter, VisitorAttributes attributes) {
@@ -101,16 +94,12 @@ public class FilterVirtualFileVisitor extends AbstractVirtualFileVisitor {
      * @return the matched files
      */
     public List<VirtualFile> getMatched() {
-        if (matched == null)
-            return Collections.emptyList();
-        else
-            return matched;
+        if (matched == null) { return Collections.emptyList(); } else { return matched; }
     }
 
     public void visit(VirtualFile virtualFile) {
         if (filter.accepts(virtualFile)) {
-            if (matched == null)
-                matched = new ArrayList<VirtualFile>();
+            if (matched == null) { matched = new ArrayList<VirtualFile>(); }
             matched.add(virtualFile);
         }
     }

@@ -35,44 +35,36 @@ import org.junit.Assert;
  *
  * @author ales.justin@jboss.org
  */
-public class JarVFSUnitTestCase extends AbstractVFSTest
-{
-   public JarVFSUnitTestCase(String name)
-   {
-      super(name);
-   }
+public class JarVFSUnitTestCase extends AbstractVFSTest {
+    public JarVFSUnitTestCase(String name) {
+        super(name);
+    }
 
-   public static Test suite()
-   {
-      return new TestSuite(JarVFSUnitTestCase.class);
-   }
+    public static Test suite() {
+        return new TestSuite(JarVFSUnitTestCase.class);
+    }
 
-   public void testDuplicateName() throws Throwable
-   {
-      VirtualFile jar = getVirtualFile("/vfs/test/dup.jar");
-      recursiveMount(jar);
+    public void testDuplicateName() throws Throwable {
+        VirtualFile jar = getVirtualFile("/vfs/test/dup.jar");
+        recursiveMount(jar);
 
-      VirtualFile lower = jar.getChild("org/jboss/acme/Dummy.class");
-      Assert.assertNotNull(lower);
-      Assert.assertTrue(lower.exists());
-      VirtualFile upper = jar.getChild("org/jboss/acme/DuMMy.class");
-      Assert.assertNotNull(upper);
-      Assert.assertTrue(upper.exists());
-      String ll = readLine(lower);
-      String ul = readLine(upper);
-      Assert.assertFalse("Lines match", ll.equals(ul));
-   }
+        VirtualFile lower = jar.getChild("org/jboss/acme/Dummy.class");
+        Assert.assertNotNull(lower);
+        Assert.assertTrue(lower.exists());
+        VirtualFile upper = jar.getChild("org/jboss/acme/DuMMy.class");
+        Assert.assertNotNull(upper);
+        Assert.assertTrue(upper.exists());
+        String ll = readLine(lower);
+        String ul = readLine(upper);
+        Assert.assertFalse("Lines match", ll.equals(ul));
+    }
 
-   static String readLine(VirtualFile file) throws Throwable
-   {
-      InputStream is = file.openStream();
-      try
-      {
-         return new BufferedReader(new InputStreamReader(is)).readLine();
-      }
-      finally
-      {
-         is.close();
-      }
-   }
+    static String readLine(VirtualFile file) throws Throwable {
+        InputStream is = file.openStream();
+        try {
+            return new BufferedReader(new InputStreamReader(is)).readLine();
+        } finally {
+            is.close();
+        }
+    }
 }

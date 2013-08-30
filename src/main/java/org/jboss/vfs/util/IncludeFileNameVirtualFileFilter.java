@@ -28,15 +28,12 @@ import org.jboss.vfs.VirtualFile;
  *
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class IncludeFileNameVirtualFileFilter extends IncludePatternVirtualFileFilter
-{
-   public IncludeFileNameVirtualFileFilter(String regexp)
-   {
-      super(regexp);
-   }
+public class IncludeFileNameVirtualFileFilter extends IncludePatternVirtualFileFilter {
+    public IncludeFileNameVirtualFileFilter(String regexp) {
+        super(regexp);
+    }
 
-   protected String getMatchString(VirtualFile file)
-   {
-      return file.getName();
-   }
+    protected String getMatchString(VirtualFile file) {
+        return file.getName();
+    }
 }

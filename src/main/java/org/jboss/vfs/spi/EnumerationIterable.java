@@ -28,8 +28,8 @@ import java.util.Iterator;
 /**
  * An iterable enumeration wrapper.
  *
- * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @param <T> the element type
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 class EnumerationIterable<T> implements Iterable<T> {
 

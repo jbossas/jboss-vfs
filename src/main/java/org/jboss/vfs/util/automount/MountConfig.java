@@ -23,61 +23,55 @@ package org.jboss.vfs.util.automount;
 
 /**
  * Configuration used to control the auto-mount behavior.
- * 
+ *
  * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
-class MountConfig
-{
-   private boolean mountExpanded;
+class MountConfig {
+    private boolean mountExpanded;
 
-   private boolean copyTarget;
+    private boolean copyTarget;
 
-   /**
-    * Should the archive be mounted as an expanded zip filesystem.  Defaults to false.
-    * 
-    * @return true if it should be expanded
-    */
-   boolean mountExpanded()
-   {
-      return mountExpanded;
-   }
-   
-   /**
-    * Set whether the mount should be an expanded zip filesystem.
-    * 
-    * @param mountExpanded the boolean value to set it to
-    */
-   void setMountExpanded(boolean mountExpanded)
-   {
-      this.mountExpanded = mountExpanded;
-   }
+    /**
+     * Should the archive be mounted as an expanded zip filesystem.  Defaults to false.
+     *
+     * @return true if it should be expanded
+     */
+    boolean mountExpanded() {
+        return mountExpanded;
+    }
 
-   /**
-    * Should the archive be copied to a temporary location before being mounted.
-    * Defaults to false.
-    * 
-    * @return true if the archive should be copied before being mounted
-    */
-   boolean copyTarget()
-   {
-      return copyTarget;
-   }
+    /**
+     * Set whether the mount should be an expanded zip filesystem.
+     *
+     * @param mountExpanded the boolean value to set it to
+     */
+    void setMountExpanded(boolean mountExpanded) {
+        this.mountExpanded = mountExpanded;
+    }
 
-   /**
-    * Set whether the archive should be copied before being mounted.
-    * 
-    * @param copyTarget the boolean value to set it to
-    */
-   void setCopyTarget(boolean copyTarget)
-   {
-      this.copyTarget = copyTarget;
-   }
+    /**
+     * Should the archive be copied to a temporary location before being mounted.
+     * Defaults to false.
+     *
+     * @return true if the archive should be copied before being mounted
+     */
+    boolean copyTarget() {
+        return copyTarget;
+    }
 
-   @Override
-   public String toString()
-   {
-      return new StringBuilder().append("MountConfig[Expanded: ").append(mountExpanded).append(", Copy: ").append(
-            copyTarget).append("]").toString();
-   }
+    /**
+     * Set whether the archive should be copied before being mounted.
+     *
+     * @param copyTarget the boolean value to set it to
+     */
+    void setCopyTarget(boolean copyTarget) {
+        this.copyTarget = copyTarget;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("MountConfig[Expanded: ").append(mountExpanded).append(", Copy: ").append(
+                copyTarget).append("]").toString();
+    }
 
 }

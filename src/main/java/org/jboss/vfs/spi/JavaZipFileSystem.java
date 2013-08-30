@@ -44,11 +44,11 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.jboss.logging.Logger;
 import org.jboss.vfs.TempDir;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.util.PathTokenizer;
-import org.jboss.logging.Logger;
 
 /**
  * {@inheritDoc}
@@ -73,10 +73,9 @@ public final class JavaZipFileSystem implements FileSystem {
     /**
      * Create a new instance.
      *
-     * @param name the name of the source archive
+     * @param name        the name of the source archive
      * @param inputStream an input stream from the source archive
-     * @param tempDir the temp dir into which zip information is stored
-     *
+     * @param tempDir     the temp dir into which zip information is stored
      * @throws java.io.IOException if an I/O error occurs
      */
     public JavaZipFileSystem(String name, InputStream inputStream, TempDir tempDir) throws IOException {
@@ -87,8 +86,7 @@ public final class JavaZipFileSystem implements FileSystem {
      * Create a new instance.
      *
      * @param archiveFile the original archive file
-     * @param tempDir the temp dir into which zip information is stored
-     *
+     * @param tempDir     the temp dir into which zip information is stored
      * @throws java.io.IOException if an I/O error occurs
      */
     public JavaZipFileSystem(File archiveFile, TempDir tempDir) throws IOException {
@@ -131,12 +129,16 @@ public final class JavaZipFileSystem implements FileSystem {
         log.tracef("Created zip filesystem for file %s in temp dir %s", archiveFile, tempDir);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     private static <T> Iterable<T> iter(final Enumeration<T> entries) {
         return new EnumerationIterable<T>(entries);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public File getFile(VirtualFile mountPoint, VirtualFile target) throws IOException {
         final ZipNode zipNode = getExistingZipNode(mountPoint, target);
         // check if we have cached one already
@@ -150,24 +152,26 @@ public final class JavaZipFileSystem implements FileSystem {
             if (cachedFile != null) {
                 return cachedFile;
             }
-            
+
             // nope, create a cached temp
             final JarEntry zipEntry = zipNode.entry;
             String name = target.getPathNameRelativeTo(mountPoint);
             cachedFile = buildFile(contentsDir, name);
-            if(zipEntry == null)  {
-               cachedFile.mkdir();
+            if (zipEntry == null) {
+                cachedFile.mkdir();
             } else {
-               VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
+                VFSUtils.copyStreamAndClose(zipFile.getInputStream(zipEntry), new BufferedOutputStream(new FileOutputStream(cachedFile)));
             }
-            
+
             zipNode.cachedFile = cachedFile;
             return cachedFile;
         }
     }
 
-    /** {@inheritDoc} */
-   public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
+    /**
+     * {@inheritDoc}
+     */
+    public InputStream openInputStream(VirtualFile mountPoint, VirtualFile target) throws IOException {
         final ZipNode zipNode = getExistingZipNode(mountPoint, target);
         final File cachedFile = zipNode.cachedFile;
         if (cachedFile != null) {
@@ -183,7 +187,9 @@ public final class JavaZipFileSystem implements FileSystem {
         return zipFile.getInputStream(entry);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean delete(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -193,7 +199,9 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null && cachedFile.delete();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public long getSize(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -207,7 +215,9 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.length() : entry == null ? 0L : entry.getSize();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public long getLastModified(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -218,7 +228,9 @@ public final class JavaZipFileSystem implements FileSystem {
         return cachedFile != null ? cachedFile.lastModified() : entry == null ? zipTime : entry.getTime();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean exists(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         if (zipNode == null) {
@@ -229,19 +241,25 @@ public final class JavaZipFileSystem implements FileSystem {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         return zipNode != null && zipNode.entry != null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isDirectory(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = rootNode.find(mountPoint, target);
         return zipNode != null && zipNode.entry == null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getDirectoryEntries(VirtualFile mountPoint, VirtualFile target) {
         final ZipNode zipNode = getZipNode(mountPoint, target);
         if (zipNode == null) {
@@ -258,17 +276,17 @@ public final class JavaZipFileSystem implements FileSystem {
         }
         return names;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public CodeSigner[] getCodeSigners(VirtualFile mountPoint, VirtualFile target) {
-       final ZipNode zipNode = getZipNode(mountPoint, target);
-       if (zipNode == null) {
-           return null;
-       }
-       JarEntry jarEntry = zipNode.entry;
-       return jarEntry.getCodeSigners();
+        final ZipNode zipNode = getZipNode(mountPoint, target);
+        if (zipNode == null) {
+            return null;
+        }
+        JarEntry jarEntry = zipNode.entry;
+        return jarEntry.getCodeSigners();
     }
 
     private ZipNode getZipNode(VirtualFile mountPoint, VirtualFile target) {
@@ -284,12 +302,16 @@ public final class JavaZipFileSystem implements FileSystem {
         return zipNode;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isReadOnly() {
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public File getMountSource() {
         return archiveFile;
     }
@@ -298,7 +320,9 @@ public final class JavaZipFileSystem implements FileSystem {
         return new URI("jar", archiveFile.toURI().toString() + "!/", null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() throws IOException {
         log.tracef("Closing zip filesystem %s", this);
         VFSUtils.safeClose(new Closeable() {
@@ -308,15 +332,15 @@ public final class JavaZipFileSystem implements FileSystem {
         });
         tempDir.close();
     }
-    
+
     private File buildFile(File contentsDir, String name) {
-       List<String> tokens = PathTokenizer.getTokens(name);
-       File currentFile = contentsDir;
-       for(String token : tokens) {
-          currentFile = new File(currentFile, token);
-       }
-       currentFile.getParentFile().mkdirs();
-       return currentFile;
+        List<String> tokens = PathTokenizer.getTokens(name);
+        File currentFile = contentsDir;
+        for (String token : tokens) {
+            currentFile = new File(currentFile, token);
+        }
+        currentFile.getParentFile().mkdirs();
+        return currentFile;
     }
 
     private static final class ZipNode {
@@ -332,7 +356,7 @@ public final class JavaZipFileSystem implements FileSystem {
             this.name = name;
             this.entry = entry;
         }
-        
+
         private ZipNode find(VirtualFile mountPoint, VirtualFile target) {
             if (mountPoint.equals(target)) {
                 return this;

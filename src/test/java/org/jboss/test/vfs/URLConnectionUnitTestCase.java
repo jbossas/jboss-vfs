@@ -30,6 +30,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
+
 import junit.framework.Test;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
@@ -43,224 +44,199 @@ import org.jboss.vfs.protocol.VfsUrlStreamHandlerFactory;
  *
  * @author ales.jutin@jboss.org
  */
-public class URLConnectionUnitTestCase extends AbstractVFSTest
-{
-   static {
-      URL.setURLStreamHandlerFactory(new VfsUrlStreamHandlerFactory());
-   }
+public class URLConnectionUnitTestCase extends AbstractVFSTest {
+    static {
+        URL.setURLStreamHandlerFactory(new VfsUrlStreamHandlerFactory());
+    }
 
-   public URLConnectionUnitTestCase(String name)
-   {
-      super(name);
-   }
+    public URLConnectionUnitTestCase(String name) {
+        super(name);
+    }
 
-   public static Test suite()
-   {
-      return suite(URLConnectionUnitTestCase.class);
-   }
+    public static Test suite() {
+        return suite(URLConnectionUnitTestCase.class);
+    }
 
-   protected String getFileName()
-   {
-      return "outer.jar";
-   }
+    protected String getFileName() {
+        return "outer.jar";
+    }
 
-   protected VirtualFile getFile() throws Exception
-   {
-      VirtualFile root = getVirtualFile("/vfs/test/");
-      VirtualFile file = root.getChild(getFileName());
-      assertNotNull(file);
-      return file;
-   }
+    protected VirtualFile getFile() throws Exception {
+        VirtualFile root = getVirtualFile("/vfs/test/");
+        VirtualFile file = root.getChild(getFileName());
+        assertNotNull(file);
+        return file;
+    }
 
-   protected URL getURLAndAssertProtocol(VirtualFile file) throws Exception
-   {
-      URL url = file.toURL();
-      assertEquals(VFSUtils.VFS_PROTOCOL, url.getProtocol());
-      return url;
-   }
+    protected URL getURLAndAssertProtocol(VirtualFile file) throws Exception {
+        URL url = file.toURL();
+        assertEquals(VFSUtils.VFS_PROTOCOL, url.getProtocol());
+        return url;
+    }
 
-   /**
-    * Test url connection content.
-    *
-    * @throws Exception for any error
-    */
-   public void testContent() throws Exception
-   {
-      VirtualFile file = getFile();
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertEquals(file, conn.getContent());
-   }
+    /**
+     * Test url connection content.
+     *
+     * @throws Exception for any error
+     */
+    public void testContent() throws Exception {
+        VirtualFile file = getFile();
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertEquals(file, conn.getContent());
+    }
 
-   /**
-    * Test url connection content lenght.
-    *
-    * @throws Exception for any error
-    */
-   public void testContentLenght() throws Exception
-   {
-      VirtualFile file = getFile();
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertEquals(file.getSize(), conn.getContentLength());
-   }
+    /**
+     * Test url connection content lenght.
+     *
+     * @throws Exception for any error
+     */
+    public void testContentLenght() throws Exception {
+        VirtualFile file = getFile();
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertEquals(file.getSize(), conn.getContentLength());
+    }
 
-   /**
-    * Test url connection last modified.
-    *
-    * @throws Exception for any error
-    */
-   public void testLastModified() throws Exception
-   {
-      VirtualFile file = getFile();
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertEquals(file.getLastModified(), conn.getLastModified());
-   }
+    /**
+     * Test url connection last modified.
+     *
+     * @throws Exception for any error
+     */
+    public void testLastModified() throws Exception {
+        VirtualFile file = getFile();
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertEquals(file.getLastModified(), conn.getLastModified());
+    }
 
-   /**
-    * Test url connection input stream.
-    *
-    * @throws Exception for any error
-    */
-   public void testInputStream() throws Exception
-   {
-      VirtualFile file = getFile();
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertTrue(Arrays.equals(readBytes(file.openStream()), readBytes(conn.getInputStream())));
-   }
+    /**
+     * Test url connection input stream.
+     *
+     * @throws Exception for any error
+     */
+    public void testInputStream() throws Exception {
+        VirtualFile file = getFile();
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertTrue(Arrays.equals(readBytes(file.openStream()), readBytes(conn.getInputStream())));
+    }
 
-   public void testPathWithSpaces() throws Exception
-   {
-      VirtualFile root = getVirtualFile("/vfs/test/");
-      VirtualFile file = root.getChild("path with spaces/spaces.ear");
-      File real = file.getPhysicalFile();
-      assertTrue(real.exists());
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertTrue(Arrays.equals(readBytes(conn.getInputStream()), readBytes(file.openStream())));
-   }
+    public void testPathWithSpaces() throws Exception {
+        VirtualFile root = getVirtualFile("/vfs/test/");
+        VirtualFile file = root.getChild("path with spaces/spaces.ear");
+        File real = file.getPhysicalFile();
+        assertTrue(real.exists());
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertTrue(Arrays.equals(readBytes(conn.getInputStream()), readBytes(file.openStream())));
+    }
 
-   public void testTempPath() throws Exception
-   {
-      File temp = File.createTempFile("123", ".tmp");
-      temp.deleteOnExit();
-      VirtualFile file = VFS.getChild(temp.toURI());
-      assertTrue(file.exists());
-      URL url = getURLAndAssertProtocol(file);
-      URLConnection conn = url.openConnection();
-      assertEquals(file.getLastModified(), conn.getLastModified());
-   }
+    public void testTempPath() throws Exception {
+        File temp = File.createTempFile("123", ".tmp");
+        temp.deleteOnExit();
+        VirtualFile file = VFS.getChild(temp.toURI());
+        assertTrue(file.exists());
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+        assertEquals(file.getLastModified(), conn.getLastModified());
+    }
 
-   public void testVfsUrlContentType() throws Exception
-   {
-      URL url = getResource("/vfs/test/test-web.xml");
-      VirtualFile xml = VFS.getChild(url);
-      URLConnection conn = xml.toURL().openConnection();
-      String contentType = conn.getContentType();
-      assertNotNull(contentType);
-      assertEquals("application/xml", contentType);
-   }
+    public void testVfsUrlContentType() throws Exception {
+        URL url = getResource("/vfs/test/test-web.xml");
+        VirtualFile xml = VFS.getChild(url);
+        URLConnection conn = xml.toURL().openConnection();
+        String contentType = conn.getContentType();
+        assertNotNull(contentType);
+        assertEquals("application/xml", contentType);
+    }
 
-   public void testOutsideUrl() throws Exception
-   {
-      URL url = getResource("/vfs/test/outer.jar");
-      File file = new File(url.toURI());
-       
-      url = new URL(VFSUtils.VFS_PROTOCOL, url.getHost(), url.getPort(), url.getFile());
+    public void testOutsideUrl() throws Exception {
+        URL url = getResource("/vfs/test/outer.jar");
+        File file = new File(url.toURI());
 
-      URLConnection conn = url.openConnection();
-      assertEquals(file.lastModified(), conn.getLastModified());
-   }
+        url = new URL(VFSUtils.VFS_PROTOCOL, url.getHost(), url.getPort(), url.getFile());
 
-   public void testFileUrl() throws Exception
-   {
-      // Hack to ensure VFS.init has been called and has taken over the file: protocol
-      VFS.getChild("");
-      URL resourceUrl = getResource("/vfs/test/outer.jar");
-      // Hack to ensure the URL handler is not passed down by the parent URL context
-      URL url = new URL("file", resourceUrl.getHost(), resourceUrl.getFile());
+        URLConnection conn = url.openConnection();
+        assertEquals(file.lastModified(), conn.getLastModified());
+    }
 
-      // Make sure we are using our handler
-      URLConnection urlConn = url.openConnection();
-      assertTrue(urlConn instanceof FileURLConnection); 
+    public void testFileUrl() throws Exception {
+        // Hack to ensure VFS.init has been called and has taken over the file: protocol
+        VFS.getChild("");
+        URL resourceUrl = getResource("/vfs/test/outer.jar");
+        // Hack to ensure the URL handler is not passed down by the parent URL context
+        URL url = new URL("file", resourceUrl.getHost(), resourceUrl.getFile());
 
-      File file = new File(url.toURI());
-      assertNotNull(file);
+        // Make sure we are using our handler
+        URLConnection urlConn = url.openConnection();
+        assertTrue(urlConn instanceof FileURLConnection);
 
-      VirtualFile vf = VFS.getChild(url);
-      assertTrue(vf.isFile());
-       // Mount a temp dir over the jar location in VFS
-      TempFileProvider provider = null;
-      Closeable handle = null;
-      try {
-         provider = TempFileProvider.create("temp", Executors.newSingleThreadScheduledExecutor());
-         handle = VFS.mountTemp(vf, provider);
-         assertTrue(vf.isDirectory());
+        File file = new File(url.toURI());
+        assertNotNull(file);
 
-         File vfsDerivedFile = vf.getPhysicalFile();
-         File urlDerivedFile = (File)url.getContent();
-         // Make sure the file returned by the file: URL is not the VFS File (In other words, make sure it does not use the mounts)
-         assertTrue(urlDerivedFile.isFile());
-         assertFalse(vfsDerivedFile.equals(urlDerivedFile));
-      } finally {
-         VFSUtils.safeClose(handle, provider);
-      }
-   }
+        VirtualFile vf = VFS.getChild(url);
+        assertTrue(vf.isFile());
+        // Mount a temp dir over the jar location in VFS
+        TempFileProvider provider = null;
+        Closeable handle = null;
+        try {
+            provider = TempFileProvider.create("temp", Executors.newSingleThreadScheduledExecutor());
+            handle = VFS.mountTemp(vf, provider);
+            assertTrue(vf.isDirectory());
 
-   public void testFileUrlContentType() throws Exception
-   {
-      VFS.getChild("");
-      URL url = getResource("/vfs/test/test-web.xml");
-      url = new URL("file", url.getHost(), url.getFile());
-      
-      URLConnection conn = url.openConnection();
-      String contentType = conn.getContentType();
-      assertNotNull(contentType);
-      assertEquals("application/xml", contentType);
-   }
+            File vfsDerivedFile = vf.getPhysicalFile();
+            File urlDerivedFile = (File) url.getContent();
+            // Make sure the file returned by the file: URL is not the VFS File (In other words, make sure it does not use the mounts)
+            assertTrue(urlDerivedFile.isFile());
+            assertFalse(vfsDerivedFile.equals(urlDerivedFile));
+        } finally {
+            VFSUtils.safeClose(handle, provider);
+        }
+    }
 
-   public void testHeaderFields() throws Exception
-   {
-      VFS.getChild("");
-      URL url = getResource("/vfs/test/test-web.xml");
-      url = new URL("file", url.getHost(), url.getFile());
+    public void testFileUrlContentType() throws Exception {
+        VFS.getChild("");
+        URL url = getResource("/vfs/test/test-web.xml");
+        url = new URL("file", url.getHost(), url.getFile());
 
-      URLConnection conn = url.openConnection();
-      int contentLength = conn.getContentLength();
-      assertTrue(contentLength > 0);
-      String contentLengthHeader = conn.getHeaderField("content-length");
-      assertEquals(String.valueOf(contentLength), contentLengthHeader);
+        URLConnection conn = url.openConnection();
+        String contentType = conn.getContentType();
+        assertNotNull(contentType);
+        assertEquals("application/xml", contentType);
+    }
 
-      assertTrue(conn.getLastModified() > 0);
-      String lastModifiedHeader = conn.getHeaderField("last-modified");
-      assertNotNull(lastModifiedHeader);
-   }
+    public void testHeaderFields() throws Exception {
+        VFS.getChild("");
+        URL url = getResource("/vfs/test/test-web.xml");
+        url = new URL("file", url.getHost(), url.getFile());
 
-   protected static byte[] readBytes(InputStream inputStream) throws Exception
-   {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      int read = 0;
-      byte[] bytes = new byte[1024];
-      try
-      {
-         while (read >=0)
-         {
-            read = inputStream.read(bytes);
-            baos.write(bytes);
-         }
-      }
-      finally
-      {
-         try
-         {
-            inputStream.close();
-         }
-         catch (IOException ignored)
-         {
-         }
-      }
-      return baos.toByteArray();
-   }
+        URLConnection conn = url.openConnection();
+        int contentLength = conn.getContentLength();
+        assertTrue(contentLength > 0);
+        String contentLengthHeader = conn.getHeaderField("content-length");
+        assertEquals(String.valueOf(contentLength), contentLengthHeader);
+
+        assertTrue(conn.getLastModified() > 0);
+        String lastModifiedHeader = conn.getHeaderField("last-modified");
+        assertNotNull(lastModifiedHeader);
+    }
+
+    protected static byte[] readBytes(InputStream inputStream) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int read = 0;
+        byte[] bytes = new byte[1024];
+        try {
+            while (read >= 0) {
+                read = inputStream.read(bytes);
+                baos.write(bytes);
+            }
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException ignored) {
+            }
+        }
+        return baos.toByteArray();
+    }
 }

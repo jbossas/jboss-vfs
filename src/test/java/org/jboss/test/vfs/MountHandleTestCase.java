@@ -21,12 +21,12 @@
  */
 package org.jboss.test.vfs;
 
+import java.io.Closeable;
+import java.io.File;
+
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
-
-import java.io.Closeable;
-import java.io.File;
 
 /**
  * Tests functionality of the MountHandle retrieving mount source.
@@ -35,33 +35,32 @@ import java.io.File;
  */
 public class MountHandleTestCase extends AbstractVFSTest {
 
-   public MountHandleTestCase(final String name) {
-      super(name);
-   }
+    public MountHandleTestCase(final String name) {
+        super(name);
+    }
 
-   public void testZipGetMountSource() throws Exception {
-      VirtualFile jar  = getVirtualFile("/vfs/test/jar1.jar");
-      File origin = jar.getPhysicalFile();
-      Closeable mountHandle = VFS.mountZip(jar, jar, provider);
-      try
-      {
-         File mounted = jar.getPhysicalFile();
-         File source = VFSUtils.getMountSource(mountHandle);
+    public void testZipGetMountSource() throws Exception {
+        VirtualFile jar = getVirtualFile("/vfs/test/jar1.jar");
+        File origin = jar.getPhysicalFile();
+        Closeable mountHandle = VFS.mountZip(jar, jar, provider);
+        try {
+            File mounted = jar.getPhysicalFile();
+            File source = VFSUtils.getMountSource(mountHandle);
 
-         assertNotNull(origin);
-         assertNotNull(mounted);
-         assertNotNull(source);
-         assertFalse(origin.equals(mounted));
-         assertFalse(origin.equals(source));
-         assertFalse(mounted.equals(source));
+            assertNotNull(origin);
+            assertNotNull(mounted);
+            assertNotNull(source);
+            assertFalse(origin.equals(mounted));
+            assertFalse(origin.equals(source));
+            assertFalse(mounted.equals(source));
 
-         assertTrue(origin.isFile());
-         assertTrue(source.isFile());
-         assertTrue(mounted.isDirectory());
+            assertTrue(origin.isFile());
+            assertTrue(source.isFile());
+            assertTrue(mounted.isDirectory());
 
-         assertEquals(origin.length(), source.length());
-      } finally {
-         VFSUtils.safeClose(mountHandle);
-      }
-   }
+            assertEquals(origin.length(), source.length());
+        } finally {
+            VFSUtils.safeClose(mountHandle);
+        }
+    }
 }

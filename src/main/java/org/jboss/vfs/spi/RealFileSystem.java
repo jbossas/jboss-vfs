@@ -22,26 +22,26 @@
 
 package org.jboss.vfs.spi;
 
+import static java.security.AccessController.doPrivileged;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilePermission;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.CodeSigner;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import org.jboss.vfs.VirtualFile;
-import org.jboss.logging.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.security.CodeSigner;
-import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import static java.security.AccessController.doPrivileged;
+import org.jboss.logging.Logger;
+import org.jboss.vfs.VirtualFile;
 
 /**
  * A real filesystem.
@@ -69,7 +69,7 @@ public final class RealFileSystem implements FileSystem {
     /**
      * Construct a real filesystem with the given real root.
      *
-     * @param realRoot the real root
+     * @param realRoot   the real root
      * @param privileged {@code true} to check permissions once up front, {@code false} to check at access time
      */
     public RealFileSystem(File realRoot, boolean privileged) {
@@ -177,7 +177,9 @@ public final class RealFileSystem implements FileSystem {
         }).booleanValue() : file.exists();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isFile(final VirtualFile mountPoint, final VirtualFile target) {
         final File file = getFile(mountPoint, target);
         return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
@@ -211,7 +213,7 @@ public final class RealFileSystem implements FileSystem {
         }) : file.list();
         return names == null ? Collections.<String>emptyList() : Arrays.asList(names);
     }
-    
+
     /**
      * {@inheritDoc}
      */

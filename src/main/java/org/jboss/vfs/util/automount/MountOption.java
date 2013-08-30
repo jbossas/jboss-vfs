@@ -23,28 +23,26 @@ package org.jboss.vfs.util.automount;
 
 /**
  * Custom configurations to use when mounting archives through the {@link Automounter}.
- *   
+ *
  * @author <a href="jbailey@redhat.com">John Bailey</a>
  */
 public enum MountOption {
-   
-   EXPANDED {
-      void applyTo(MountConfig config)
-      {
-         config.setMountExpanded(true);
-      }
-   },
-   COPY {
-      void applyTo(MountConfig config)
-      {
-         config.setCopyTarget(true);
-      }
-   };
 
-   /**
-    * Each option must apply its custom settings to teh {@link MountConfig}.
-    * 
-    * @param config MountConfig to apply settings to
-    */
-   abstract void applyTo(MountConfig config);
+    EXPANDED {
+        void applyTo(MountConfig config) {
+            config.setMountExpanded(true);
+        }
+    },
+    COPY {
+        void applyTo(MountConfig config) {
+            config.setCopyTarget(true);
+        }
+    };
+
+    /**
+     * Each option must apply its custom settings to teh {@link MountConfig}.
+     *
+     * @param config MountConfig to apply settings to
+     */
+    abstract void applyTo(MountConfig config);
 }

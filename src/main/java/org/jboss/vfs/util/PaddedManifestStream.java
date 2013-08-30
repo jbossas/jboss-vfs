@@ -26,6 +26,7 @@ import java.io.InputStream;
 
 /**
  * Appends a new line char to the stream if it doesn't have one as his last byte.
+ *
  * @author ehsavoie
  */
 public class PaddedManifestStream extends InputStream {
@@ -48,6 +49,5 @@ public class PaddedManifestStream extends InputStream {
         return value;
     }
 
-    
 
 }

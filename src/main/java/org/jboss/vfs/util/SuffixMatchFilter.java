@@ -49,7 +49,6 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
      * Create a new SuffixMatchFilter, using {@link VisitorAttributes#DEFAULT}
      *
      * @param suffix the suffix
-     *
      * @throws IllegalArgumentException for a null suffix
      */
     public SuffixMatchFilter(String suffix) {
@@ -59,9 +58,8 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
     /**
      * Create a new SuffixMatchFilter.
      *
-     * @param suffix the suffix
+     * @param suffix     the suffix
      * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
-     *
      * @throws IllegalArgumentException for a null suffix
      */
     @SuppressWarnings("unchecked")
@@ -73,7 +71,6 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
      * Create a new SuffixMatchFilter.
      *
      * @param suffixes - the list of file suffixes to accept.
-     *
      * @throws IllegalArgumentException for a null suffixes
      */
     public SuffixMatchFilter(Collection<String> suffixes) {
@@ -83,15 +80,13 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
     /**
      * Create a new SuffixMatchFilter.
      *
-     * @param suffixes - the list of file suffixes to accept.
+     * @param suffixes   - the list of file suffixes to accept.
      * @param attributes the attributes, pass null to use {@link VisitorAttributes#DEFAULT}
-     *
      * @throws IllegalArgumentException for a null suffixes
      */
     public SuffixMatchFilter(Collection<String> suffixes, VisitorAttributes attributes) {
         super(attributes == null ? VisitorAttributes.DEFAULT : attributes);
-        if (suffixes == null)
-            throw new IllegalArgumentException("Null suffixes");
+        if (suffixes == null) { throw new IllegalArgumentException("Null suffixes"); }
         this.suffixes = new LinkedHashSet<String>();
         this.suffixes.addAll(suffixes);
         trace = log.isTraceEnabled();
@@ -111,8 +106,7 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
                 break;
             }
         }
-        if (trace)
-            log.trace(file + " accepted: " + accepts);
+        if (trace) { log.trace(file + " accepted: " + accepts); }
         return accepts;
     }
 }
