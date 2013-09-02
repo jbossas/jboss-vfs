@@ -21,6 +21,8 @@
  */
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.util.regex.Pattern;
 
 import org.jboss.vfs.VirtualFile;
@@ -35,7 +37,9 @@ public abstract class AbstractPatternVirtualFileFilter implements VirtualFileFil
     private Pattern pattern;
 
     public AbstractPatternVirtualFileFilter(String regexp) {
-        if (regexp == null) { throw new IllegalArgumentException("Null regexp"); }
+        if (regexp == null) {
+            throw MESSAGES.nullArgument("regexp");
+        }
 
         pattern = Pattern.compile(regexp);
     }

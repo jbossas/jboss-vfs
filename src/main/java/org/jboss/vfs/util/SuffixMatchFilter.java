@@ -21,11 +21,13 @@
  */
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
-import org.jboss.logging.Logger;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VisitorAttributes;
 
@@ -38,7 +40,6 @@ import org.jboss.vfs.VisitorAttributes;
  */
 public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
 
-    private static Logger log = Logger.getLogger(SuffixMatchFilter.class);
     /**
      * The suffixes
      */
@@ -86,10 +87,11 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
      */
     public SuffixMatchFilter(Collection<String> suffixes, VisitorAttributes attributes) {
         super(attributes == null ? VisitorAttributes.DEFAULT : attributes);
-        if (suffixes == null) { throw new IllegalArgumentException("Null suffixes"); }
+        if (suffixes == null) {
+            throw MESSAGES.nullArgument("suffixes");
+        }
         this.suffixes = new LinkedHashSet<String>();
         this.suffixes.addAll(suffixes);
-        trace = log.isTraceEnabled();
     }
 
     /**
@@ -106,7 +108,7 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
                 break;
             }
         }
-        if (trace) { log.trace(file + " accepted: " + accepts); }
+        VFSLogger.ROOT_LOGGER.tracef(file + "%s accepted: %s", file, accepts);
         return accepts;
     }
 }

@@ -21,6 +21,8 @@
 */
 package org.jboss.vfs;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 /**
  * Attributes used when visiting a virtual file system
  *
@@ -229,27 +231,27 @@ public class VisitorAttributes {
 
         @Override
         public void setLeavesOnly(boolean leavesOnly) {
-            throw new IllegalStateException("The preconfigured attributes are immutable");
+            throw MESSAGES.preconfiguredAttributesAreImmutable();
         }
 
         @Override
         public void setIncludeRoot(boolean includeRoot) {
-            throw new IllegalStateException("The preconfigured attributes are immutable");
+            throw MESSAGES.preconfiguredAttributesAreImmutable();
         }
 
         @Override
         public void setRecurseFilter(VirtualFileFilter filter) {
-            throw new IllegalStateException("The preconfigured attributes are immutable");
+            throw MESSAGES.preconfiguredAttributesAreImmutable();
         }
 
         @Override
         public void setIgnoreErrors(boolean ignoreErrors) {
-            throw new IllegalStateException("The preconfigured attributes are immutable");
+            throw MESSAGES.preconfiguredAttributesAreImmutable();
         }
 
         @Override
         public void setIncludeHidden(boolean includeHidden) {
-            throw new IllegalStateException("The preconfigured attributes are immutable");
+            throw MESSAGES.preconfiguredAttributesAreImmutable();
         }
     }
 }

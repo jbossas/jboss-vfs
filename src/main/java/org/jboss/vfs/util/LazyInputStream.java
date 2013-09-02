@@ -22,6 +22,8 @@
 
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,7 +45,9 @@ public class LazyInputStream extends InputStream {
     private InputStream stream;
 
     public LazyInputStream(VirtualFile file) {
-        if (file == null) { throw new IllegalArgumentException("Null file"); }
+        if (file == null) {
+            throw MESSAGES.nullArgument("file");
+        }
         this.file = file;
     }
 

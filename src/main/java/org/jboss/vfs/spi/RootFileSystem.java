@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jboss.logging.Logger;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -43,8 +42,6 @@ import org.jboss.vfs.VirtualFile;
  * produce output that is consumable by java.io.File as a path.
  */
 public final class RootFileSystem implements FileSystem {
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.root");
 
     public static final RootFileSystem ROOT_INSTANCE = new RootFileSystem();
 

@@ -125,7 +125,7 @@ public final class VirtualFilePermission extends Permission implements Serializa
             } else if (lenIs(actions, i, len, 1) && actions.charAt(i) == '*') {
                 res |= FLAG_READ | FLAG_DELETE | FLAG_GET_FILE;
             } else {
-                throw new IllegalArgumentException("Invalid actions string");
+                throw VFSMessages.MESSAGES.invalidActionsString(actions);
             }
         }
         return res;

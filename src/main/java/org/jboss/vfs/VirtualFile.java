@@ -113,7 +113,7 @@ public final class VirtualFile implements Serializable {
 
     private void getPathNameRelativeTo(VirtualFile parent, StringBuilder builder) {
         if (this.parent == null) {
-            throw new IllegalArgumentException("Given parent is not an ancestor of this virtual file");
+            throw VFSMessages.MESSAGES.parentIsNotAncestor(parent);
         }
         if (this.equals(parent)) {
             return;
@@ -436,7 +436,9 @@ public final class VirtualFile implements Serializable {
      * @throws IllegalArgumentException if the path is null
      */
     public VirtualFile getChild(String path) {
-        if (path == null) { throw new IllegalArgumentException("Null path"); }
+        if (path == null) {
+            throw VFSMessages.MESSAGES.nullArgument("path");
+        }
         final List<String> pathParts = PathTokenizer.getTokens(path);
         VirtualFile current = this;
         for (String part : pathParts) {

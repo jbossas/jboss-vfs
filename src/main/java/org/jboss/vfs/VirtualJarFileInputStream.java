@@ -69,8 +69,12 @@ public class VirtualJarFileInputStream extends InputStream {
      * @param bufferLength          The length of put to use
      */
     public VirtualJarFileInputStream(final VirtualJarInputStream virtualJarInputStream, int bufferLength) {
-        if (virtualJarInputStream == null) { throw new IllegalArgumentException("virtualJarInputStream is required"); }
-        if (bufferLength < MINIMUM_BUFFER_LENGTH) { throw new IllegalArgumentException("The totalBufferLength must be larger than " + MINIMUM_BUFFER_LENGTH); }
+        if (virtualJarInputStream == null) {
+            throw VFSMessages.MESSAGES.nullArgument("virtualJarInputStream");
+        }
+        if (bufferLength < MINIMUM_BUFFER_LENGTH) {
+            throw VFSMessages.MESSAGES.bufferMustBeLargerThan(MINIMUM_BUFFER_LENGTH);
+        }
 
         this.virtualJarInputStream = virtualJarInputStream;
 
@@ -226,7 +230,11 @@ public class VirtualJarFileInputStream extends InputStream {
      * @param b The byte
      */
     private void buffer(byte b) {
-        if (buffer.hasCapacity()) { buffer.put(b); } else { throw new IllegalStateException("Buffer does not have enough capacity"); }
+        if (buffer.hasCapacity()) {
+            buffer.put(b);
+        } else {
+            throw VFSMessages.MESSAGES.bufferDoesntHaveEnoughCapacity();
+        }
     }
 
     /**

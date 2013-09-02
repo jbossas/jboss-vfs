@@ -21,6 +21,8 @@
 */
 package org.jboss.vfs;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,7 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.logging.Logger;
 import org.jboss.vfs.spi.AssemblyFileSystem;
 import org.jboss.vfs.spi.FileSystem;
 import org.jboss.vfs.spi.JavaZipFileSystem;
@@ -60,9 +61,6 @@ import org.jboss.vfs.spi.RootFileSystem;
  * @version $Revision: 1.1 $
  */
 public class VFS {
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs");
-
     private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
     private static final VirtualFile rootVirtualFile = createDefaultRoot();
 
@@ -110,7 +108,7 @@ public class VFS {
     public static Closeable mount(VirtualFile mountPoint, FileSystem fileSystem) throws IOException {
         final VirtualFile parent = mountPoint.getParent();
         if (parent == null) {
-            throw new IOException("Root filesystem already mounted");
+            throw VFSMessages.MESSAGES.rootFileSystemAlreadyMounted();
         }
         final String name = mountPoint.getName();
         final Mount mount = new Mount(fileSystem, mountPoint);
@@ -126,10 +124,10 @@ public class VFS {
             }
             newMap = new HashMap<String, Mount>(childMountMap);
             if (newMap.put(name, mount) != null) {
-                throw new IOException("Filesystem already mounted at mount point \"" + mountPoint + "\"");
+                throw VFSMessages.MESSAGES.fileSystemAlreadyMountedAtMountPoint(mountPoint);
             }
             if (mounts.replace(parent, childMountMap, newMap)) {
-                log.tracef("Mounted filesystem %s on mount point %s", fileSystem, mountPoint);
+                VFSLogger.ROOT_LOGGER.tracef("Mounted filesystem %s on mount point %s", fileSystem, mountPoint);
                 return mount;
             }
         }
@@ -173,7 +171,9 @@ public class VFS {
      * @throws IllegalArgumentException if the path is null
      */
     public static VirtualFile getChild(String path) {
-        if (path == null) { throw new IllegalArgumentException("Null path"); }
+        if (path == null) {
+            throw VFSMessages.MESSAGES.nullArgument("path");
+        }
 
         VirtualFile root = null;
 
@@ -203,7 +203,9 @@ public class VFS {
                 }
             }
 
-            if (root == null) { throw new IllegalArgumentException("Invalid Win32 path: " + path); }
+            if (root == null) {
+                throw MESSAGES.invalidWin32Path(path);
+            }
         } else {
             root = rootVirtualFile;
         }
@@ -286,7 +288,9 @@ public class VFS {
      * @throws IllegalArgumentException if the file or visitor is null
      */
     protected static void visit(VirtualFile file, VirtualFileVisitor visitor) throws IOException {
-        if (file == null) { throw new IllegalArgumentException("Null file"); }
+        if (file == null) {
+            throw VFSMessages.MESSAGES.nullArgument("file");
+        }
         visitor.visit(file);
     }
 
@@ -617,19 +621,19 @@ public class VFS {
                         newParentMounts = Collections.singletonMap(e1.getKey(), e1.getValue());
                     }
                     if (mounts.replace(parent, parentMounts, newParentMounts)) {
-                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
+                        VFSLogger.ROOT_LOGGER.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 } else if (parentMounts.size() == 1) {
                     if (mounts.remove(parent, parentMounts)) {
-                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
+                        VFSLogger.ROOT_LOGGER.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 } else {
                     newParentMounts = new HashMap<String, Mount>(parentMounts);
                     newParentMounts.remove(name);
                     if (mounts.replace(parent, parentMounts, newParentMounts)) {
-                        log.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
+                        VFSLogger.ROOT_LOGGER.tracef("Unmounted filesystem %s on mount point %s", fileSystem, mountPoint);
                         return;
                     }
                 }
@@ -651,9 +655,9 @@ public class VFS {
                 if (allocationPoint != null) {
                     final LeakDescriptor t = new LeakDescriptor();
                     t.setStackTrace(allocationPoint);
-                    log.warnf(t, "A VFS mount (%s) was leaked!", mountPoint);
+                    VFSLogger.ROOT_LOGGER.vfsMountLeaked(mountPoint, t);
                 } else {
-                    log.warnf("A VFS mount (%s) was leaked!", mountPoint);
+                    VFSLogger.ROOT_LOGGER.vfsMountLeaked(mountPoint, null);
                 }
                 close();
             }

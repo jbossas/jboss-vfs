@@ -21,6 +21,8 @@
 */
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +59,9 @@ public class FilterVirtualFileVisitor extends AbstractVirtualFileVisitor {
      * @throws IllegalArgumentException for a null filter
      */
     private static VisitorAttributes checkAttributes(VirtualFileFilter filter, VisitorAttributes attributes) {
-        if (filter == null) { throw new IllegalArgumentException("Null filter"); }
+        if (filter == null) {
+            throw MESSAGES.nullArgument("filter");
+        }
         // Specified
         if (attributes != null) { return attributes; }
         // From the filter

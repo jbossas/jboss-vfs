@@ -29,6 +29,8 @@ import java.net.URLStreamHandler;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.vfs.VFSMessages;
+
 /**
  * Abstract URLStreamHandler that can be used as a base for other URLStreamHandlers that
  * require the URL to be local.
@@ -65,7 +67,7 @@ public abstract class AbstractLocalURLStreamHandler extends URLStreamHandler {
 
     protected void ensureLocal(URL url) throws IOException {
         if (!locals.contains(toLower(url.getHost()))) {
-            throw new IOException("Remote host access not supported for URLs of type \"" + url.getProtocol() + "\"");
+            throw VFSMessages.MESSAGES.remoteHostAccessNotSupportedForUrls(url.getProtocol());
         }
     }
 

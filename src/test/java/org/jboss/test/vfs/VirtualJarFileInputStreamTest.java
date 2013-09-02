@@ -98,7 +98,7 @@ public class VirtualJarFileInputStreamTest extends AbstractVFSTest {
             VFSUtils.createJarFileInputStream(testJar);
             fail("Should have thrown IOException");
         } catch (IOException expected) {
-            assertTrue(expected.getMessage().startsWith("Invalid jar signature"));
+            assertTrue(expected.getMessage().contains("Invalid jar signature"));
         }
 
     }

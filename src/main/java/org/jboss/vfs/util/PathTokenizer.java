@@ -21,8 +21,12 @@
 */
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.vfs.VFSMessages;
 
 /**
  * PathTokenizer.
@@ -69,7 +73,9 @@ public class PathTokenizer {
      * @throws IllegalArgumentException for null tokens or i is out of range
      */
     protected static String getRemainingPath(List<String> tokens, int i, int end) {
-        if (tokens == null) { throw new IllegalArgumentException("Null tokens"); }
+        if (tokens == null) {
+            throw MESSAGES.nullArgument("tokens");
+        }
         if (i < 0 || i >= end) { throw new IllegalArgumentException("i is not in the range of tokens: 0-" + (end - 1)); }
         if (i == end - 1) { return tokens.get(end - 1); }
         StringBuilder buffer = new StringBuilder();
@@ -89,7 +95,9 @@ public class PathTokenizer {
      * @throws IllegalArgumentException if the path is null
      */
     public static List<String> getTokens(String path) {
-        if (path == null) { throw new IllegalArgumentException("Null path"); }
+        if (path == null) {
+            throw MESSAGES.nullArgument("path");
+        }
         List<String> list = new ArrayList<String>();
         getTokens(list, path);
         return list;
@@ -202,7 +210,9 @@ public class PathTokenizer {
      * @throws IllegalArgumentException for null tokens or i is out of range
      */
     public static String getRemainingPath(List<String> tokens, int i) {
-        if (tokens == null) { throw new IllegalArgumentException("Null tokens"); }
+        if (tokens == null) {
+            throw MESSAGES.nullArgument("tokens");
+        }
         return getRemainingPath(tokens, i, tokens.size());
     }
 
@@ -219,7 +229,9 @@ public class PathTokenizer {
         for (int j = 0; j < tokens.size(); j++) {
             String token = tokens.get(j);
             if (isCurrentToken(token)) { continue; } else if (isReverseToken(token)) { i--; } else { tokens.set(i++, token); }
-            if (i < 0) { throw new IllegalArgumentException(".. on root path"); }
+            if (i < 0) {
+                throw VFSMessages.MESSAGES.onRootPath();
+            }
         }
         return getRemainingPath(tokens, 0, i);
     }
@@ -237,7 +249,7 @@ public class PathTokenizer {
             if (isCurrentToken(pathToken)) { continue; } else if (isReverseToken(pathToken)) {
                 final int size = newTokens.size();
                 if (size == 0) {
-                    throw new IllegalArgumentException(".. on root path");
+                    throw VFSMessages.MESSAGES.onRootPath();
                 }
                 newTokens.remove(size - 1);
             } else { newTokens.add(pathToken); }

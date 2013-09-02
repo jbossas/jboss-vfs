@@ -21,6 +21,8 @@
  */
 package org.jboss.vfs.util.automount;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -33,9 +35,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.logging.Logger;
 import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.util.PathTokenizer;
@@ -54,8 +56,6 @@ public class Automounter {
 
     /* Provider of temp files/directories*/
     private static TempFileProvider tempFileProvider;
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.util.automount");
 
     /**
      * Private constructor
@@ -203,7 +203,7 @@ public class Automounter {
      */
     static RegistryEntry getEntry(VirtualFile virtualFile) {
         if (virtualFile == null) {
-            throw new IllegalArgumentException("A valid VirtualFile is required.");
+            throw MESSAGES.nullArgument("VirutalFile");
         }
         return rootEntry.find(virtualFile);
     }
@@ -225,7 +225,7 @@ public class Automounter {
         private void mount(VirtualFile target, MountConfig mountConfig) throws IOException {
             if (mounted.compareAndSet(false, true)) {
                 if (target.isFile()) {
-                    log.debugf("Automounting: %s with options %s", target, mountConfig);
+                    VFSLogger.ROOT_LOGGER.debugf("Automounting: %s with options %s", target, mountConfig);
 
                     final TempFileProvider provider = getTempFileProvider();
                     if (mountConfig.mountExpanded()) {

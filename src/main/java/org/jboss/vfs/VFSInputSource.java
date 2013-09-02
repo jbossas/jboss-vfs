@@ -36,7 +36,9 @@ public class VFSInputSource extends InputSource {
     private VirtualFile file;
 
     public VFSInputSource(VirtualFile file) {
-        if (file == null) { throw new IllegalArgumentException("Null file"); }
+        if (file == null) {
+            throw VFSMessages.MESSAGES.nullArgument("file");
+        }
         this.file = file;
     }
 

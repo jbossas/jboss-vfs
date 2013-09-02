@@ -25,7 +25,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jboss.logging.Logger;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileFilter;
 import org.jboss.vfs.VisitorAttributes;
@@ -36,7 +36,6 @@ import org.jboss.vfs.VisitorAttributes;
  * @author <a href="mailto:ales.justin@jboss.com">Ales Justin</a>
  */
 public class IncludeExcludeVisitorAttributes extends VisitorAttributes implements VirtualFileFilter {
-    private Logger log = Logger.getLogger(getClass());
 
     private Set<String> includes;
     private Set<String> excludes;
@@ -68,8 +67,7 @@ public class IncludeExcludeVisitorAttributes extends VisitorAttributes implement
 
             return true;
         } catch (Exception e) {
-            if (log.isTraceEnabled()) { log.trace("Exception while filtering file: " + file, e); }
-
+            VFSLogger.ROOT_LOGGER.tracef(e,"Exception while filtering file: %s", file);
             return false;
         }
     }

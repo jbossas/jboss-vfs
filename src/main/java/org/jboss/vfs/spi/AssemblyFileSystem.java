@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jboss.logging.Logger;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileAssembly;
 
@@ -43,13 +43,11 @@ import org.jboss.vfs.VirtualFileAssembly;
  */
 public class AssemblyFileSystem implements FileSystem {
 
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.assembly");
-
     private final VirtualFileAssembly assembly;
 
     public AssemblyFileSystem(VirtualFileAssembly assembly) {
         this.assembly = assembly;
-        log.tracef("Constructed a new assembly filesystem for %s", assembly);
+        VFSLogger.ROOT_LOGGER.tracef("Constructed a new assembly filesystem for %s", assembly);
     }
 
     /**
@@ -148,7 +146,7 @@ public class AssemblyFileSystem implements FileSystem {
      * {@inheritDoc}
      */
     public void close() throws IOException {
-        log.tracef("Closing assembly filesystem %s", this);
+        VFSLogger.ROOT_LOGGER.tracef("Closing assembly filesystem %s", this);
         assembly.close();
     }
 

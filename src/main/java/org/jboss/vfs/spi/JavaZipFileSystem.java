@@ -44,8 +44,9 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.jboss.logging.Logger;
 import org.jboss.vfs.TempDir;
+import org.jboss.vfs.VFSLogger;
+import org.jboss.vfs.VFSMessages;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.util.PathTokenizer;
@@ -60,8 +61,6 @@ import org.jboss.vfs.util.PathTokenizer;
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public final class JavaZipFileSystem implements FileSystem {
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.zip");
 
     private final JarFile zipFile;
     private final File archiveFile;
@@ -126,7 +125,7 @@ public final class JavaZipFileSystem implements FileSystem {
         this.rootNode = rootNode;
         contentsDir = tempDir.getFile("contents");
         contentsDir.mkdir();
-        log.tracef("Created zip filesystem for file %s in temp dir %s", archiveFile, tempDir);
+        VFSLogger.ROOT_LOGGER.tracef("Created zip filesystem for file %s in temp dir %s", archiveFile, tempDir);
     }
 
     /**
@@ -182,7 +181,7 @@ public final class JavaZipFileSystem implements FileSystem {
         }
         final JarEntry entry = zipNode.entry;
         if (entry == null) {
-            throw new IOException("Not a file: \"" + target.getPathName() + "\"");
+            throw VFSMessages.MESSAGES.notAFile(target.getPathName());
         }
         return zipFile.getInputStream(entry);
     }
@@ -324,7 +323,7 @@ public final class JavaZipFileSystem implements FileSystem {
      * {@inheritDoc}
      */
     public void close() throws IOException {
-        log.tracef("Closing zip filesystem %s", this);
+        VFSLogger.ROOT_LOGGER.tracef("Closing zip filesystem %s", this);
         VFSUtils.safeClose(new Closeable() {
             public void close() throws IOException {
                 zipFile.close();

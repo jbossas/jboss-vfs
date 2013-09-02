@@ -54,7 +54,7 @@ public final class TempDir implements Closeable {
      */
     public File getRoot() throws IOException {
         if (!open.get()) {
-            throw new IOException("Temp directory closed");
+            throw VFSMessages.MESSAGES.tempDirectoryClosed();
         }
         return root;
     }
@@ -68,7 +68,7 @@ public final class TempDir implements Closeable {
      */
     public File getFile(String relativePath) throws IOException {
         if (!open.get()) {
-            throw new IOException("Temp directory closed");
+            throw VFSMessages.MESSAGES.tempDirectoryClosed();
         }
         return new File(root, relativePath);
     }

@@ -30,8 +30,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jboss.logging.Logger;
-
 /**
  * A provider for temporary physical files and directories.
  *
@@ -40,7 +38,6 @@ import org.jboss.logging.Logger;
  */
 public final class TempFileProvider implements Closeable {
 
-    private static final Logger log = Logger.getLogger(TempFileProvider.class);
     private static final String JBOSS_TMP_DIR_PROPERTY = "jboss.server.temp.dir";
     private static final String JVM_TMP_DIR_PROPERTY = "java.io.tmpdir";
     private static final File TMP_ROOT;
@@ -54,7 +51,7 @@ public final class TempFileProvider implements Closeable {
             TMP_ROOT = new File(configTmpDir, "vfs");
             TMP_ROOT.mkdirs();
         } catch (Exception e) {
-            throw new RuntimeException("Can't set up temp file provider", e);
+            throw VFSMessages.MESSAGES.cantSetupTempFileProvider(e);
         }
     }
 
@@ -97,7 +94,7 @@ public final class TempFileProvider implements Closeable {
                 final File toBeDeletedProviderRoot = createTempDir(providerType + "-to-be-deleted-", "", TMP_ROOT);
                 if (!possiblyExistingProviderRoot.renameTo(toBeDeletedProviderRoot)) {
                     // throw error if rename failed
-                    throw new IOException("Failed to clean existing content for temp file provider of type " + providerType);
+                    throw VFSMessages.MESSAGES.failedToCleanExistingContentForTempFileProvider(providerType);
                 }
                 // delete in the background
                 executor.submit(new DeleteTask(toBeDeletedProviderRoot, executor));
@@ -125,15 +122,16 @@ public final class TempFileProvider implements Closeable {
      */
     public TempDir createTempDir(String originalName) throws IOException {
         if (!open.get()) {
-            throw new IOException("Temp file provider closed");
+            throw VFSMessages.MESSAGES.tempFileProviderClosed();
         }
         final String name = createTempName(originalName + "-", "");
         final File f = new File(providerRoot, name);
         for (int i = 0; i < RETRIES; i++) {
-            if (f.mkdirs()) { return new TempDir(this, f); }
+            if (f.mkdirs()) {
+                return new TempDir(this, f);
+            }
         }
-        throw new IOException(
-                String.format("Could not create directory for original name '%s' after %d attempts", originalName, RETRIES));
+        throw VFSMessages.MESSAGES.couldNotCreateDirectory(originalName,RETRIES);
     }
 
     private static final Random rng = new Random();
@@ -143,12 +141,11 @@ public final class TempFileProvider implements Closeable {
             final File f = new File(root, createTempName(prefix, suffix));
             if (f.mkdirs()) { return f; }
         }
-        throw new IOException(
-                String.format("Could not create directory for root '%s' (prefix '%s', suffix '%s') after %d attempts",
-                        root,
-                        prefix,
-                        suffix,
-                        RETRIES));
+        throw VFSMessages.MESSAGES.couldNotCreateDirectoryForRoot(
+                root,
+                prefix,
+                suffix,
+                RETRIES);
     }
 
     static String createTempName(String prefix, String suffix) {
@@ -190,10 +187,10 @@ public final class TempFileProvider implements Closeable {
         public void run() {
             if (VFSUtils.recursiveDelete(root) == false) {
                 if (retryExecutor != null) {
-                    log.tracef("Failed to delete root (%s), retrying in 30sec.", root);
+                    VFSLogger.ROOT_LOGGER.tracef("Failed to delete root (%s), retrying in 30sec.", root);
                     retryExecutor.schedule(this, 30L, TimeUnit.SECONDS);
                 } else {
-                    log.tracef("Failed to delete root (%s).", root);
+                    VFSLogger.ROOT_LOGGER.tracef("Failed to delete root (%s).", root);
                 }
             }
         }

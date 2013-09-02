@@ -21,10 +21,12 @@
  */
 package org.jboss.vfs.util;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.logging.Logger;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFileFilter;
 
@@ -34,11 +36,12 @@ import org.jboss.vfs.VirtualFileFilter;
  * @author ales.justin@jboss.org
  */
 public class FileNameVirtualFileFilter implements VirtualFileFilter {
-    protected Logger log = Logger.getLogger(getClass());
     private Map<String, Set<String>> excludes;
 
     public FileNameVirtualFileFilter(Map<String, Set<String>> excludes) {
-        if (excludes == null || excludes.isEmpty()) { throw new IllegalArgumentException("Null or empty excludes."); }
+        if (excludes == null || excludes.isEmpty()) {
+            throw MESSAGES.nullOrEmpty("excludes");
+        }
 
         this.excludes = excludes;
     }
@@ -61,8 +64,7 @@ public class FileNameVirtualFileFilter implements VirtualFileFilter {
                 String simpleName = file.getName();
                 Set<String> value = entry.getValue();
                 if (value == null || value.contains(simpleName)) {
-                    if (log.isTraceEnabled()) { log.trace("Excluding " + pathName); }
-
+                    VFSLogger.ROOT_LOGGER.tracef("Excluding %s", pathName);
                     return false;
                 }
             }

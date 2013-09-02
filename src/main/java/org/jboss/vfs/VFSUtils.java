@@ -21,6 +21,8 @@
 */
 package org.jboss.vfs;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,11 +40,9 @@ import java.net.URLStreamHandler;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
@@ -54,7 +54,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jboss.logging.Logger;
 import org.jboss.vfs.protocol.FileURLStreamHandler;
 import org.jboss.vfs.protocol.VirtualFileURLStreamHandler;
 import org.jboss.vfs.spi.MountHandle;
@@ -72,12 +71,6 @@ import org.jboss.vfs.util.automount.Automounter;
  * @version $Revision: 1.1 $
  */
 public class VFSUtils {
-
-    /**
-     * The log
-     */
-    private static final Logger log = Logger.getLogger(VFSUtils.class);
-
     /**
      * The default encoding
      */
@@ -115,15 +108,23 @@ public class VFSUtils {
      * @throws IllegalArgumentException for null paths
      */
     public static String getPathsString(Collection<VirtualFile> paths) {
-        if (paths == null) { throw new IllegalArgumentException("Null paths"); }
+        if (paths == null) {
+            throw MESSAGES.nullArgument("paths");
+        }
         StringBuilder buffer = new StringBuilder();
         boolean first = true;
         for (VirtualFile path : paths) {
             if (path == null) { throw new IllegalArgumentException("Null path in " + paths); }
-            if (first == false) { buffer.append(':'); } else { first = false; }
+            if (first == false) {
+                buffer.append(':');
+            } else {
+                first = false;
+            }
             buffer.append(path.getPathName());
         }
-        if (first == true) { buffer.append("<empty>"); }
+        if (first == true) {
+            buffer.append("<empty>");
+        }
         return buffer.toString();
     }
 
@@ -137,23 +138,31 @@ public class VFSUtils {
      * @throws IllegalArgumentException for a null file or paths
      */
     public static void addManifestLocations(VirtualFile file, List<VirtualFile> paths) throws IOException {
-        if (file == null) { throw new IllegalArgumentException("Null file"); }
-        if (paths == null) { throw new IllegalArgumentException("Null paths"); }
-        boolean trace = log.isTraceEnabled();
+        if (file == null) {
+            throw MESSAGES.nullArgument("file");
+        }
+        if (paths == null) {
+            throw MESSAGES.nullArgument("paths");
+        }
+        boolean trace = VFSLogger.ROOT_LOGGER.isTraceEnabled();
         Manifest manifest = getManifest(file);
         if (manifest == null) { return; }
         Attributes mainAttributes = manifest.getMainAttributes();
         String classPath = mainAttributes.getValue(Attributes.Name.CLASS_PATH);
         if (classPath == null) {
-            if (trace) { log.trace("Manifest has no Class-Path for " + file.getPathName()); }
+            if (trace) {
+                VFSLogger.ROOT_LOGGER.tracef("Manifest has no Class-Path for %s", file.getPathName());
+            }
             return;
         }
         VirtualFile parent = file.getParent();
         if (parent == null) {
-            log.debug(file + " has no parent.");
+            VFSLogger.ROOT_LOGGER.debugf("%s has no parent.", file);
             return;
         }
-        if (trace) { log.trace("Parsing Class-Path: " + classPath + " for " + file.getName() + " parent=" + parent.getName()); }
+        if (trace) {
+            VFSLogger.ROOT_LOGGER.tracef("Parsing Class-Path: %s for %s parent=%s", classPath, file.getName(), parent.getName());
+        }
         StringTokenizer tokenizer = new StringTokenizer(classPath);
         while (tokenizer.hasMoreTokens()) {
             String path = tokenizer.nextToken();
@@ -165,10 +174,14 @@ public class VFSUtils {
                         // Recursively process the jar
                         Automounter.mount(file, vf);
                         addManifestLocations(vf, paths);
-                    } else if (trace) { log.trace(vf.getName() + " from manifest is already in the classpath " + paths); }
-                } else if (trace) { log.trace("Unable to find " + path + " from " + parent.getName()); }
+                    } else if (trace) {
+                        VFSLogger.ROOT_LOGGER.tracef("%s from manifest is already in the classpath %s", vf.getName(), paths);
+                    }
+                } else if (trace) {
+                    VFSLogger.ROOT_LOGGER.trace("Unable to find " + path + " from " + parent.getName());
+                }
             } catch (IOException e) {
-                log.debug("Manifest Class-Path entry " + path + " ignored for " + file.getPathName() + " reason=" + e);
+                VFSLogger.ROOT_LOGGER.debugf("Manifest Class-Path entry %s ignored for %s reason= %s", path, file.getPathName(), e);
             }
         }
     }
@@ -182,10 +195,14 @@ public class VFSUtils {
      * @throws IllegalArgumentException for a null archive
      */
     public static Manifest getManifest(VirtualFile archive) throws IOException {
-        if (archive == null) { throw new IllegalArgumentException("Null archive"); }
+        if (archive == null) {
+            throw MESSAGES.nullArgument("archive");
+        }
         VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
         if (manifest == null || !manifest.exists()) {
-            if (log.isTraceEnabled()) { log.trace("Can't find manifest for " + archive.getPathName()); }
+            if (VFSLogger.ROOT_LOGGER.isTraceEnabled()) {
+                VFSLogger.ROOT_LOGGER.tracef("Can't find manifest for %s", archive.getPathName());
+            }
             return null;
         }
         return readManifest(manifest);
@@ -199,7 +216,9 @@ public class VFSUtils {
      * @throws IOException if problems while opening VF stream occur
      */
     public static Manifest readManifest(VirtualFile manifest) throws IOException {
-        if (manifest == null) { throw new IllegalArgumentException("Null manifest file"); }
+        if (manifest == null) {
+            throw MESSAGES.nullArgument("manifest file");
+        }
         InputStream stream = new PaddedManifestStream(manifest.openStream());
         try {
             return new Manifest(stream);
@@ -216,7 +235,9 @@ public class VFSUtils {
      * @throws IllegalArgumentException for a null name
      */
     public static String fixName(String name) {
-        if (name == null) { throw new IllegalArgumentException("Null name"); }
+        if (name == null) {
+            throw MESSAGES.nullArgument("name");
+        }
         int length = name.length();
         if (length <= 1) { return name; }
         if (name.charAt(length - 1) == '/') { return name.substring(0, length - 1); }
@@ -244,7 +265,7 @@ public class VFSUtils {
         try {
             return URLDecoder.decode(path, encoding);
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot decode: " + path + " [" + encoding + "]", e);
+            throw MESSAGES.cannotDecode(path,encoding,e);
         }
     }
 
@@ -255,7 +276,9 @@ public class VFSUtils {
      * @return name from uri's path
      */
     public static String getName(URI uri) {
-        if (uri == null) { throw new IllegalArgumentException("Null uri"); }
+        if (uri == null) {
+            throw MESSAGES.nullArgument("uri");
+        }
         String name = uri.getPath();
         if (name != null) {
             // TODO: Not correct for certain uris like jar:...!/
@@ -265,24 +288,6 @@ public class VFSUtils {
         return name;
     }
 
-    /**
-     * Take a URL.getQuery string and parse it into name=value pairs
-     *
-     * @param query Possibly empty/null url query string
-     * @return String[] for the name/value pairs in the query. May be empty but never null.
-     */
-    public static Map<String, String> parseURLQuery(String query) {
-        Map<String, String> pairsMap = new HashMap<String, String>();
-        if (query != null) {
-            StringTokenizer tokenizer = new StringTokenizer(query, "=&");
-            while (tokenizer.hasMoreTokens()) {
-                String name = tokenizer.nextToken();
-                String value = tokenizer.nextToken();
-                pairsMap.put(name, value);
-            }
-        }
-        return pairsMap;
-    }
 
     /**
      * Deal with urls that may include spaces.
@@ -292,7 +297,9 @@ public class VFSUtils {
      * @throws URISyntaxException for any error
      */
     public static URI toURI(URL url) throws URISyntaxException {
-        if (url == null) { throw new IllegalArgumentException("Null url"); }
+        if (url == null) {
+            throw MESSAGES.nullArgument("url");
+        }
         try {
             return url.toURI();
         } catch (URISyntaxException e) {
@@ -324,8 +331,12 @@ public class VFSUtils {
      * @throws IOException if any problems occur copying the files
      */
     public static void copyChildrenRecursive(VirtualFile original, VirtualFile target) throws IOException {
-        if (original == null) { throw new IllegalArgumentException("Original VirtualFile must not be null"); }
-        if (target == null) { throw new IllegalArgumentException("Target VirtualFile must not be null"); }
+        if (original == null) {
+            throw MESSAGES.nullArgument("Original VirtualFile");
+        }
+        if (target == null) {
+            throw MESSAGES.nullArgument("Target VirtualFile");
+        }
 
         List<VirtualFile> children = original.getChildren();
         for (VirtualFile child : children) {
@@ -333,7 +344,7 @@ public class VFSUtils {
             File childFile = child.getPhysicalFile();
             if (childFile.isDirectory()) {
                 if (!targetChild.getPhysicalFile().mkdir()) {
-                    throw new IllegalArgumentException("Problems creating new directory: " + targetChild);
+                    throw MESSAGES.problemCreatingNewDirectory(targetChild);
                 }
                 copyChildrenRecursive(child, targetChild);
             } else {
@@ -398,8 +409,12 @@ public class VFSUtils {
      */
     public static void copyStream(InputStream is, OutputStream os, int bufferSize)
             throws IOException {
-        if (is == null) { throw new IllegalArgumentException("input stream is null"); }
-        if (os == null) { throw new IllegalArgumentException("output stream is null"); }
+        if (is == null) {
+            throw MESSAGES.nullArgument("input stream");
+        }
+        if (os == null) {
+            throw MESSAGES.nullArgument("output stream");
+        }
         byte[] buff = new byte[bufferSize];
         int rc;
         while ((rc = is.read(buff)) != -1) { os.write(buff, 0, rc); }
@@ -553,7 +568,7 @@ public class VFSUtils {
             try {
                 c.close();
             } catch (Exception e) {
-                log.trace("Failed to close resource", e);
+                VFSLogger.ROOT_LOGGER.trace("Failed to close resource", e);
             }
         }
     }
@@ -590,7 +605,7 @@ public class VFSUtils {
             try {
                 zipFile.close();
             } catch (Exception e) {
-                log.trace("Failed to close resource", e);
+                VFSLogger.ROOT_LOGGER.trace("Failed to close resource", e);
             }
         }
     }
@@ -786,7 +801,7 @@ public class VFSUtils {
             final byte[] bytes = new byte[4];
             final int read = inputStream.read(bytes, 0, 4);
             if (read < 4 || !Arrays.equals(expectedHeader, bytes)) {
-                throw new IOException("Invalid jar signature " + Arrays.toString(bytes) + " should be " + Arrays.toString(expectedHeader));
+                throw MESSAGES.invalidJarSignature(Arrays.toString(bytes), Arrays.toString(expectedHeader));
             }
         } finally {
             safeClose(inputStream);

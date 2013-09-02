@@ -195,7 +195,7 @@ public class VirtualJarInputStream extends JarInputStream {
      */
     private void ensureOpen() throws IOException {
         if (closed) {
-            throw new IOException("Stream is closed");
+            throw VFSMessages.MESSAGES.streamIsClosed();
         }
     }
 

@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jboss.logging.Logger;
+import org.jboss.vfs.VFSLogger;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -49,8 +49,6 @@ import org.jboss.vfs.VirtualFile;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class RealFileSystem implements FileSystem {
-
-    private static final Logger log = Logger.getLogger("org.jboss.vfs.real");
 
     private static final boolean NEEDS_CONVERSION = File.separatorChar != '/';
 
@@ -81,7 +79,7 @@ public final class RealFileSystem implements FileSystem {
         }
         this.realRoot = realRoot;
         this.privileged = privileged;
-        log.tracef("Constructed real %s filesystem at root %s", privileged ? "privileged" : "unprivileged", realRoot);
+        VFSLogger.ROOT_LOGGER.tracef("Constructed real %s filesystem at root %s", privileged ? "privileged" : "unprivileged", realRoot);
     }
 
     private static <T> T doIoPrivileged(PrivilegedExceptionAction<T> action) throws IOException {
