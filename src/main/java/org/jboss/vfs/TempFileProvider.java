@@ -60,6 +60,8 @@ public final class TempFileProvider implements Closeable {
 
     /**
      * Create a temporary file provider for a given type.
+     * <p/>
+     * This is the same as calling {@link #create(String, java.util.concurrent.ScheduledExecutorService, boolean) create(final String providerType, final ScheduledExecutorService executor, false)}
      *
      * @param providerType the provider type string (used as a prefix in the temp file dir name)
      * @param executor     the executor
@@ -67,7 +69,43 @@ public final class TempFileProvider implements Closeable {
      * @throws IOException if an I/O error occurs
      */
     public static TempFileProvider create(String providerType, ScheduledExecutorService executor) throws IOException {
-        return new TempFileProvider(createTempDir(providerType, "", TMP_ROOT), executor);
+        return create(providerType, executor, false);
+    }
+
+    /**
+     * Create a temporary file provider for a given type.
+     *
+     * @param providerType The provider type string (used as a prefix in the temp file dir name)
+     * @param executor Executor which will be used to manage temp file provider tasks (like cleaning up/deleting the temp files when needed)
+     * @param cleanExisting If this is true, then existing temp content (if any) for the <code>providerType</code> will be deleted and the implementation ensures that when this method returns, the
+     *                      returned {@link TempFileProvider} can be used and the previously existing content (if any) for this <code>providerType</code> will <i>not<i/> be present under the root directory
+     *                      represented by the returned {@link TempFileProvider}
+     * @return The new provider
+     * @throws IOException if an I/O error occurs
+     */
+    public static TempFileProvider create(final String providerType, final ScheduledExecutorService executor, final boolean cleanExisting) throws IOException {
+        if (cleanExisting) {
+            // The "clean existing" logic is as follows:
+            // 1) Rename the root directory "foo" corresponding to the provider type to "bar"
+            // 2) Submit a task to delete "bar" and its contents, in a background thread, to the the passed executor.
+            // 3) Create a "foo" root directory for the provider type and return that TempFileProvider (while at the same time the background task is in progress)
+            // This ensures that the "foo" root directory for the providerType is empty and the older content is being cleaned up in the background (without affecting the current processing),
+            // thus simulating a "cleanup existing content"
+            final File possiblyExistingProviderRoot = new File(TMP_ROOT, providerType);
+            if (possiblyExistingProviderRoot.exists()) {
+                // rename it so that it can be deleted as a separate (background) task
+                final File toBeDeletedProviderRoot = createTempDir(providerType + "-to-be-deleted-", "", TMP_ROOT);
+                if (!possiblyExistingProviderRoot.renameTo(toBeDeletedProviderRoot)) {
+                    // throw error if rename failed
+                    throw new IOException("Failed to clean existing content for temp file provider of type " + providerType);
+                }
+                // delete in the background
+                executor.submit(new DeleteTask(toBeDeletedProviderRoot, executor));
+            }
+        }
+        // now create and return the TempFileProvider for the providerType
+        final File providerRoot = new File(TMP_ROOT, providerType);
+        return new TempFileProvider(createTempDir(providerType, "", providerRoot), executor);
     }
 
     private final File providerRoot;
@@ -122,7 +160,7 @@ public final class TempFileProvider implements Closeable {
      */
     public void close() throws IOException {
         if (open.getAndSet(false)) {
-            new DeleteTask(providerRoot).run();
+            delete();
         }
     }
 
@@ -130,19 +168,30 @@ public final class TempFileProvider implements Closeable {
         VFSUtils.safeClose(this);
     }
 
-    class DeleteTask implements Runnable {
+    /**
+     * Deletes any temp files associated with this provider
+     *
+     * @throws IOException
+     */
+    void delete() throws IOException {
+        new DeleteTask(providerRoot, executor).run();
+    }
+
+    static final class DeleteTask implements Runnable {
 
         private final File root;
+        private ScheduledExecutorService retryExecutor;
 
-        public DeleteTask(File root) {
+        public DeleteTask(final File root, final ScheduledExecutorService retryExecutor) {
             this.root = root;
+            this.retryExecutor = retryExecutor;
         }
 
         public void run() {
             if (VFSUtils.recursiveDelete(root) == false) {
-                if (executor != null) {
+                if (retryExecutor != null) {
                     log.tracef("Failed to delete root (%s), retrying in 30sec.", root);
-                    executor.schedule(this, 30L, TimeUnit.SECONDS);
+                    retryExecutor.schedule(this, 30L, TimeUnit.SECONDS);
                 } else {
                     log.tracef("Failed to delete root (%s).", root);
                 }
