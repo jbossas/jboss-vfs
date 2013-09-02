@@ -44,20 +44,20 @@ public final class VirtualFilePermission extends Permission implements Serializa
     /**
      * The flag value for the "read" action.
      */
-    public static final int FLAG_READ = 0b0000_0000_0000_0001;
+    public static final int FLAG_READ = Integer.parseInt("0000000000000001",2); //0b0000_0000_0000_0001
     /**
      * The flag value for the "delete" action.
      */
-    public static final int FLAG_DELETE = 0b0000_0000_0000_0010;
+    public static final int FLAG_DELETE = Integer.parseInt("0000000000000010",2); //0b0000_0000_0000_0010;
     /**
      * The flag value for the "getfile" action.
      */
-    public static final int FLAG_GET_FILE = 0b0000_0000_0000_0100;
+    public static final int FLAG_GET_FILE = Integer.parseInt("0000000000000100",2); //0b0000_0000_0000_0100;
 
     /**
      * The set of valid action flags for this permission.
      */
-    public static final int VALID_FLAGS = 0b0000_0000_0000_0111;
+    public static final int VALID_FLAGS = Integer.parseInt("0000000000000111",2); //0b0000_0000_0000_0111;
 
     VirtualFilePermission(final String path, final int actionFlags, final boolean canonicalize) {
         super(canonicalize ? VFSUtils.canonicalize(path) : path);

@@ -64,24 +64,17 @@
     </scm>
 
     <properties>
-        <version.jboss.logging>3.1.3.GA</version.jboss.logging>
+        <version.org.jboss.logging.jboss-logging>3.1.3.GA</version.org.jboss.logging.jboss-logging>
+        <version.org.jboss.logging.jboss-logging-tools>1.2.0.Beta1</version.org.jboss.logging.jboss-logging-tools>
         <version.jboss.test>1.1.5.GA</version.jboss.test>
         <version.junit>4.11</version.junit>
-        <skip.enforcer>false</skip.enforcer>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <version.surefire.plugin>2.16</version.surefire.plugin>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <reuseForks>false</reuseForks>
-                    <!-- required to correctly run the PojoServer tests -->
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <testFailureIgnore>true</testFailureIgnore>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -89,6 +82,16 @@
         </plugins>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.surefire.plugin}</version>
+                    <configuration>
+                        <reuseForks>false</reuseForks>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <testFailureIgnore>true</testFailureIgnore>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
@@ -120,8 +123,22 @@
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
-            <version>${version.jboss.logging}</version>
+            <version>${version.org.jboss.logging.jboss-logging}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+            <version>${version.org.jboss.logging.jboss-logging-tools}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-processor</artifactId>
+            <version>${version.org.jboss.logging.jboss-logging-tools}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.test</groupId>

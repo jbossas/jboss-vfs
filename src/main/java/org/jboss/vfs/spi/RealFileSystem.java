@@ -90,7 +90,9 @@ public final class RealFileSystem implements FileSystem {
         } catch (PrivilegedActionException pe) {
             try {
                 throw pe.getException();
-            } catch (IOException | RuntimeException e) {
+            } catch (IOException e) {
+                throw e;
+            } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
                 throw new UndeclaredThrowableException(e);
