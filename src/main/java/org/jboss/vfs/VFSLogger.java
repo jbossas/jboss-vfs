@@ -13,7 +13,7 @@ import org.jboss.logging.annotations.MessageLogger;
  * @author Tomaz Cerar (c) 2013 Red Hat Inc.
  */
 
-@MessageLogger(projectCode = "JBAS")
+@MessageLogger(projectCode = "VFS")
 public interface VFSLogger extends BasicLogger {
 
     /**
