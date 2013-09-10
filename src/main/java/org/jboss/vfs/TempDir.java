@@ -110,7 +110,7 @@ public final class TempDir implements Closeable {
      */
     public void close() throws IOException {
         if (open.getAndSet(false)) {
-            provider.delete();
+            provider.delete(root);
         }
     }
 

@@ -157,7 +157,7 @@ public final class TempFileProvider implements Closeable {
      */
     public void close() throws IOException {
         if (open.getAndSet(false)) {
-            delete();
+            delete(this.providerRoot);
         }
     }
 
@@ -170,8 +170,8 @@ public final class TempFileProvider implements Closeable {
      *
      * @throws IOException
      */
-    void delete() throws IOException {
-        new DeleteTask(providerRoot, executor).run();
+    void delete(final File root) throws IOException {
+        new DeleteTask(root, executor).run();
     }
 
     static final class DeleteTask implements Runnable {
