@@ -74,30 +74,38 @@ public final class TempFileProvider implements Closeable {
      *
      * @param providerType The provider type string (used as a prefix in the temp file dir name)
      * @param executor Executor which will be used to manage temp file provider tasks (like cleaning up/deleting the temp files when needed)
-     * @param cleanExisting If this is true, then existing temp content (if any) for the <code>providerType</code> will be deleted and the implementation ensures that when this method returns, the
-     *                      returned {@link TempFileProvider} can be used and the previously existing content (if any) for this <code>providerType</code> will <i>not<i/> be present under the root directory
-     *                      represented by the returned {@link TempFileProvider}
+     * @param cleanExisting If this is true, then this method will *try* to delete the existing temp content (if any) for the <code>providerType</code>. The attempt to delete the existing content (if any)
+     *                      will be done in the background and this method will not wait for the deletion to complete. The method will immediately return back with a usable {@link TempFileProvider}. Note that the
+     *                      <code>cleanExisting</code> will just act as a hint for this method to trigger the deletion of existing content. The method may not always be able to delete the existing contents.
      * @return The new provider
      * @throws IOException if an I/O error occurs
      */
     public static TempFileProvider create(final String providerType, final ScheduledExecutorService executor, final boolean cleanExisting) throws IOException {
         if (cleanExisting) {
-            // The "clean existing" logic is as follows:
-            // 1) Rename the root directory "foo" corresponding to the provider type to "bar"
-            // 2) Submit a task to delete "bar" and its contents, in a background thread, to the the passed executor.
-            // 3) Create a "foo" root directory for the provider type and return that TempFileProvider (while at the same time the background task is in progress)
-            // This ensures that the "foo" root directory for the providerType is empty and the older content is being cleaned up in the background (without affecting the current processing),
-            // thus simulating a "cleanup existing content"
-            final File possiblyExistingProviderRoot = new File(TMP_ROOT, providerType);
-            if (possiblyExistingProviderRoot.exists()) {
-                // rename it so that it can be deleted as a separate (background) task
-                final File toBeDeletedProviderRoot = createTempDir(providerType + "-to-be-deleted-", "", TMP_ROOT);
-                if (!possiblyExistingProviderRoot.renameTo(toBeDeletedProviderRoot)) {
-                    // throw error if rename failed
-                    throw VFSMessages.MESSAGES.failedToCleanExistingContentForTempFileProvider(providerType);
+            try {
+                // The "clean existing" logic is as follows:
+                // 1) Rename the root directory "foo" corresponding to the provider type to "bar"
+                // 2) Submit a task to delete "bar" and its contents, in a background thread, to the the passed executor.
+                // 3) Create a "foo" root directory for the provider type and return that TempFileProvider (while at the same time the background task is in progress)
+                // This ensures that the "foo" root directory for the providerType is empty and the older content is being cleaned up in the background (without affecting the current processing),
+                // thus simulating a "cleanup existing content"
+                final File possiblyExistingProviderRoot = new File(TMP_ROOT, providerType);
+                if (possiblyExistingProviderRoot.exists()) {
+                    // rename it so that it can be deleted as a separate (background) task
+                    final File toBeDeletedProviderRoot = createTempDir(providerType + "-to-be-deleted-", "", TMP_ROOT);
+                    final boolean renamed = possiblyExistingProviderRoot.renameTo(toBeDeletedProviderRoot);
+                    if (!renamed) {
+                        throw new IOException("Failed to rename " + possiblyExistingProviderRoot.getAbsolutePath() + " to " + toBeDeletedProviderRoot.getAbsolutePath());
+                    } else {
+                        // delete in the background
+                        executor.submit(new DeleteTask(toBeDeletedProviderRoot, executor));
+                    }
                 }
-                // delete in the background
-                executor.submit(new DeleteTask(toBeDeletedProviderRoot, executor));
+            } catch (Throwable t) {
+                // just log a message if existing contents couldn't be deleted
+                VFSLogger.ROOT_LOGGER.failedToCleanExistingContentForTempFileProvider(providerType);
+                // log the cause of the failure
+                VFSLogger.ROOT_LOGGER.debug("Failed to clean existing content for temp file provider of type " + providerType, t);
             }
         }
         // now create and return the TempFileProvider for the providerType
