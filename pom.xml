@@ -35,7 +35,7 @@
     <groupId>org.jboss</groupId>
     <artifactId>jboss-vfs</artifactId>
     <packaging>jar</packaging>
-    <version>3.2.2.Beta1-SNAPSHOST</version>
+    <version>3.2.2.Beta1-SNAPSHOT</version>
     <name>JBoss VFS</name>
     <url>http://www.jboss.org</url>
     <description>A VFS library</description>
