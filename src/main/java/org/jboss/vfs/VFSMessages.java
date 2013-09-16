@@ -28,8 +28,9 @@ public interface VFSMessages {
     @Message(id = 12, value = "Temp file provider closed")
     IOException tempFileProviderClosed();
 
-    @Message(id = 13, value = "Failed to clean existing content for temp file provider of type %s")
-    IOException failedToCleanExistingContentForTempFileProvider(String providerType);
+    //  Retired
+    //    @Message(id = 13, value = "Failed to clean existing content for temp file provider of type %s")
+    //    IOException failedToCleanExistingContentForTempFileProvider(String providerType);
 
     @Message(id = 14, value = "Could not create directory for root '%s' (prefix '%s', suffix '%s') after %d attempts")
     IOException couldNotCreateDirectoryForRoot(File root, String prefix, String suffix, int retries);
