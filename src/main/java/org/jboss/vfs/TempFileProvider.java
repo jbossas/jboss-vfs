@@ -92,7 +92,7 @@ public final class TempFileProvider implements Closeable {
                 final File possiblyExistingProviderRoot = new File(TMP_ROOT, providerType);
                 if (possiblyExistingProviderRoot.exists()) {
                     // rename it so that it can be deleted as a separate (background) task
-                    final File toBeDeletedProviderRoot = createTempDir(providerType + "-to-be-deleted-", "", TMP_ROOT);
+                    final File toBeDeletedProviderRoot = new File(TMP_ROOT, createTempName(providerType + "-to-be-deleted-", ""));
                     final boolean renamed = possiblyExistingProviderRoot.renameTo(toBeDeletedProviderRoot);
                     if (!renamed) {
                         throw new IOException("Failed to rename " + possiblyExistingProviderRoot.getAbsolutePath() + " to " + toBeDeletedProviderRoot.getAbsolutePath());
@@ -115,6 +115,10 @@ public final class TempFileProvider implements Closeable {
 
     private final File providerRoot;
     private final ScheduledExecutorService executor;
+
+    File getProviderRoot() {
+        return providerRoot;
+    }
 
     private TempFileProvider(File providerRoot, ScheduledExecutorService executor) {
         this.providerRoot = providerRoot;
@@ -147,7 +151,12 @@ public final class TempFileProvider implements Closeable {
     private static File createTempDir(String prefix, String suffix, File root) throws IOException {
         for (int i = 0; i < RETRIES; i++) {
             final File f = new File(root, createTempName(prefix, suffix));
-            if (f.mkdirs()) { return f; }
+            if (f.mkdirs()) {
+                if (f.isDirectory()&&f.getParent()!=null){
+                    f.delete();
+                }
+                return f;
+            }
         }
         throw VFSMessages.MESSAGES.couldNotCreateDirectoryForRoot(
                 root,

@@ -620,8 +620,10 @@ public class VFSUtils {
         boolean ok = true;
         if (root.isDirectory()) {
             final File[] files = root.listFiles();
-            for (File file : files) {
-                ok &= recursiveDelete(file);
+            if (files != null) {
+                for (File file : files) {
+                    ok &= recursiveDelete(file);
+                }
             }
             return ok && (root.delete() || !root.exists());
         } else {
