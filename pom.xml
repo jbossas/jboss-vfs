@@ -66,7 +66,7 @@
     <properties>
         <version.org.jboss.logging.jboss-logging>3.1.3.GA</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>1.2.0.Beta1</version.org.jboss.logging.jboss-logging-tools>
-        <version.jboss.test>1.1.5.GA</version.jboss.test>
+        <version.jboss.test>1.1.9.GA</version.jboss.test>
         <version.junit>4.11</version.junit>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
@@ -145,6 +145,36 @@
             <artifactId>jboss-test</artifactId>
             <version>${version.jboss.test}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.ant</groupId>
+                    <artifactId>ant</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.ant</groupId>
+                    <artifactId>ant-junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.jbossas</groupId>
+                    <artifactId>jboss-server-manager</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jboss.profiler.jvmti</groupId>
+                    <artifactId>jboss-profiler-jvmti</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging-spi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging-log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
