@@ -49,5 +49,9 @@ public class PaddedManifestStream extends InputStream {
         return value;
     }
 
-
+    @Override
+    public void close() throws IOException {
+        super.close();
+        realStream.close();
+    }
 }

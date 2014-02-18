@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Specification-Title: closing-manifest
+Specification-Version: 1.0.0.GA
+Specification-Vendor: JBoss Inc.
+Implementation-Title: jar1
+Implementation-URL: http://www.jboss.org
+Implementation-Version: 1.0.0.GA-jboss
+Implementation-Vendor: JBoss Inc.
+

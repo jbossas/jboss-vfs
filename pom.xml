@@ -70,6 +70,7 @@
         <version.junit>4.11</version.junit>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
+        <jdk.min.version>1.7</jdk.min.version>
     </properties>
 
     <build>

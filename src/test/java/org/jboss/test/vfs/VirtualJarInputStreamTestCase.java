@@ -25,6 +25,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -201,6 +204,22 @@ public class VirtualJarInputStreamTestCase extends AbstractVFSTest {
             assertEquals(expected, actual);
         } finally {
             mount.close();
+        }
+    }
+
+    @Test
+    public void testManifestClosed() throws Exception {
+        VirtualFile jar = testdir.getChild("closingManifest");
+        VirtualFile manifestFile = jar.getChild(JarFile.MANIFEST_NAME);
+        Path originalPath = manifestFile.getPhysicalFile().toPath();
+        Path copy = originalPath.resolveSibling("manifest.bak");
+        try {
+            Manifest manifest = VFSUtils.getManifest(jar);
+            assertNotNull(manifest);
+        } finally {
+            Files.copy(originalPath, copy, StandardCopyOption.REPLACE_EXISTING); //backup the original manifest
+            Files.delete(originalPath); //delete original one to make sure there are no more open file handles to it
+            Files.copy(copy, originalPath, StandardCopyOption.REPLACE_EXISTING); //copy the backup back, to make other tests that need it pass.
         }
     }
 
