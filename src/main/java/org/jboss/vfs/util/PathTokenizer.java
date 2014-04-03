@@ -116,7 +116,8 @@ public class PathTokenizer {
         for (int index = 0; index < length; index++) {
             ch = path.charAt(index);
             switch (ch) {
-                case '/': {
+                case '/':
+                case '\\': {
                     switch (state) {
                         case STATE_INITIAL: {
                             // skip extra leading /

@@ -138,7 +138,7 @@ public final class VirtualFile implements Serializable {
             return name;
         } else {
             builder.append(parent.getPathName());
-            if (parent.parent != null) {
+            if (parent.parent != null && (builder.charAt(builder.length() - 1) != '/')) {
                 builder.append('/');
             }
             builder.append(name);
