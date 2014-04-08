@@ -41,6 +41,8 @@ import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.jboss.test.vfs.support.ClassPathIterator;
 import org.jboss.test.vfs.support.ClassPathIterator.ClassPathEntry;
 import org.jboss.vfs.VFS;
@@ -48,8 +50,6 @@ import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VisitorAttributes;
 import org.jboss.vfs.util.SuffixMatchFilter;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 /**
  * Tests of the VFS implementation
@@ -63,14 +63,17 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         super(name);
     }
 
-    @BeforeClass
     public void setUp() throws Exception {
         super.setUp();
     }
 
-    @AfterClass
+
     public void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    public static Test suite() {
+        return new TestSuite(FileVFSUnitTestCase.class);
     }
 
     /**
@@ -1144,6 +1147,46 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         assertEquals(expectedURI, uri);
     }
 
+    //   /**
+    //    * Tests that we can find the META-INF/some-data.xml in an unpacked deployment
+    //    *
+    //    * @throws Exception for any error
+    //    */
+    //   public void testGetMetaDataUnpackedJar() throws Exception
+    //   {
+    //      testGetMetaDataFromJar("unpacked-with-metadata.jar");
+    //   }
+    //
+    //   /**
+    //    * Tests that we can find the META-INF/some-data.xml in a packed deployment
+    //    *
+    //    * @throws Exception for any error
+    //    */
+    //   public void testGetMetaDataPackedJar() throws Exception
+    //   {
+    //      testGetMetaDataFromJar("with-metadata.jar");
+    //   }
+
+    //   private void testGetMetaDataFromJar(String name) throws Exception
+    //   {
+    //      URL rootURL = getResource("/vfs/test");
+    //     VirtualFile testdir = VFS.getChild(rootURL.getPath());
+    //
+    //      VirtualFile jar = testdir.getChild(name);
+    //      assertNotNull(jar);
+    //      VirtualFile metadataLocation = jar.getChild("META-INF");
+    //      assertNotNull(metadataLocation);
+    //
+    //      VirtualFile metadataByName = metadataLocation.getChild("some-data.xml");
+    //      assertNotNull(metadataByName);
+    //
+    //      //This is the same code as is called by AbstractDeploymentContext.getMetaDataFiles(String name, String suffix).
+    //      //The MetaDataMatchFilter is a copy of the one used there
+    //      List<VirtualFile> metaDataList = metadataLocation.getChildren(new MetaDataMatchFilter(null, "-data.xml"));
+    //      assertNotNull(metaDataList);
+    //      assertEquals("Wrong size", 1, metaDataList.size());
+    //   }
+
     /**
      * Validate that a URLClassLoader.findReource/getResourceAsStream calls for non-existing absolute
      * resources that should fail as expected with null results. Related to JBMICROCONT-139.
@@ -1314,8 +1357,49 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         return new URI(VFSUtils.VFS_PROTOCOL, fileUri.getHost(), fileUri.getPath(), fileUri.getFragment());
     }
 
-    public URL getResource(String name) {
-          return getClass().getResource(name);
-      }
-
+    /**
+     * Test for <em>caseSensitive=true</em>
+     *
+     * If this test passes on unixes, it doesn't mean much, because there it should pass without
+     * case sensitivity turned on as well.
+     *
+     * If it passes on windows, it means the functionality works as expected.
+     *
+     * @throws Exception for any error
+     */
+    //   public void testCaseSensitive() throws Exception
+    //   {
+    //      URL rootURL = getResource("/vfs");
+    //
+    //      FileSystemContext ctx = new FileSystemContext(new URL(rootURL.toString() + "?caseSensitive=true"));
+    //      VirtualFileHandler root = ctx.getRoot();
+    //
+    //      String path = "context/file/simple/child";
+    //      VirtualFileHandler child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child != null);
+    //
+    //      path = "context/file/simple/CHILD";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child == null);
+    //
+    //      path = "context/jar/archive.jar";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child != null);
+    //
+    //      path = "context/JAR/archive.jar";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child == null);
+    //
+    //      path = "context/jar/archive.JAR";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child == null);
+    //
+    //      path = "context/jar/archive.jar/child";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child != null);
+    //
+    //      path = "context/jar/archive.jar/CHILD";
+    //      child = root.getChild(path);
+    //      assertTrue("getChild('" + path + "')", child == null);
+    //   }
 }

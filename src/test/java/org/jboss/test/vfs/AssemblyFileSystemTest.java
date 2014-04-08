@@ -110,8 +110,7 @@ public class AssemblyFileSystemTest extends AbstractVFSTest {
     }
 
     private String winFriendlyAbsolutePath(String path) {
-        return path;
-        //return (File.separatorChar == '\\') ? "/" + new File("\\").getAbsolutePath().replace('\\', '/') + path.substring(1) : path;
+        return (File.separatorChar == '\\') ? "/" + new File("\\").getAbsolutePath().replace('\\', '/') + path.substring(1) : path;
     }
 
     @Test

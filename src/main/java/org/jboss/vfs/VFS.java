@@ -21,6 +21,8 @@
 */
 package org.jboss.vfs;
 
+import static org.jboss.vfs.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,7 +62,11 @@ import org.jboss.vfs.spi.RootFileSystem;
  */
 public class VFS {
     private static final ConcurrentMap<VirtualFile, Map<String, Mount>> mounts = new ConcurrentHashMap<VirtualFile, Map<String, Mount>>();
-    private static final VirtualFile rootVirtualFile = new VirtualFile("/", null);
+    private static final VirtualFile rootVirtualFile = createDefaultRoot();
+
+    private static VirtualFile createDefaultRoot() {
+        return isWindows() ? getChild("/") : new VirtualFile("/", null);
+    }
 
     // Note that rootVirtualFile is ignored by RootFS
     private static final Mount rootMount = new Mount(RootFileSystem.ROOT_INSTANCE, rootVirtualFile);
@@ -141,7 +147,7 @@ public class VFS {
         return getChild(url.toURI());
     }
 
-    static boolean isWindows() {
+    private static boolean isWindows() {
         // Not completely accurate, but good enough
         return File.separatorChar == '\\';
     }
@@ -168,7 +174,43 @@ public class VFS {
         if (path == null) {
             throw VFSMessages.MESSAGES.nullArgument("path");
         }
-        return rootVirtualFile.getChild(path);
+
+        VirtualFile root = null;
+
+        if (isWindows()) {
+            // Normalize the path using java.io.File
+            //   TODO Consider creating our own normalization routine, which would
+            //   allow for testing on non-Windows
+            String absolute = new File(path).getAbsolutePath();
+            if (absolute.length() > 2) {
+                if (absolute.charAt(1) == ':') {
+                    // Drive form
+                    root = new VirtualFile("/" + absolute.charAt(0) + ":/", null);
+                    path = absolute.substring(2).replace('\\', '/');
+                } else if (absolute.charAt(0) == '\\' && absolute.charAt(1) == '\\') {
+                    // UNC form
+                    for (int i = 2; i < absolute.length(); i++) {
+                        if (absolute.charAt(i) == '\\') {
+                            // Switch \\ to // just like java file URLs.
+                            // Note, it turns out that File.toURL puts this portion
+                            // in the path portion of the URL, which is actually not
+                            // correct, since // is supposed to signify the authority.
+                            root = new VirtualFile("//" + absolute.substring(0, i) + "/", null);
+                            path = absolute.substring(i).replace('\\', '/');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (root == null) {
+                throw MESSAGES.invalidWin32Path(path);
+            }
+        } else {
+            root = rootVirtualFile;
+        }
+
+        return root.getChild(path);
     }
 
     /**
