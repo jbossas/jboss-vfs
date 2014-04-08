@@ -25,11 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.AccessController;
 import java.security.CodeSigner;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -459,11 +461,11 @@ public final class VirtualFile implements Serializable {
      * over time.
      *
      * @return the current url
-     * @throws MalformedURLException if the URL is somehow malformed
+     * @throws Exception if the URL is somehow malformed
      * @see VirtualFile#asDirectoryURL()
      * @see VirtualFile#asFileURL()
      */
-    public URL toURL() throws MalformedURLException {
+    public URL toURL() throws Exception {
         return VFSUtils.getVirtualURL(this);
     }
 
@@ -474,11 +476,11 @@ public final class VirtualFile implements Serializable {
      * over time.
      *
      * @return the current uri
-     * @throws URISyntaxException if the URI is somehow malformed
+     * @throws Exception if the URI is somehow malformed
      * @see VirtualFile#asDirectoryURI()
      * @see VirtualFile#asFileURI()
      */
-    public URI toURI() throws URISyntaxException {
+    public URI toURI() throws Exception {
         return VFSUtils.getVirtualURI(this);
     }
 
@@ -486,11 +488,21 @@ public final class VirtualFile implements Serializable {
      * Get file's URL as a directory.  There will always be a trailing {@code "/"} character.
      *
      * @return the url
-     * @throws MalformedURLException if the URL is somehow malformed
+     * @throws Exception if the URL is somehow malformed
      */
-    public URL asDirectoryURL() throws MalformedURLException {
+    public URL asDirectoryURL() throws Exception {
         final String pathName = getPathName(false);
-        return new URL(VFSUtils.VFS_PROTOCOL, "", -1, parent == null ? pathName : pathName + "/", VFSUtils.VFS_URL_HANDLER);
+        try {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
+                public URL run() throws Exception {
+                    return new URL(VFSUtils.VFS_PROTOCOL, "", -1, parent == null ? pathName : pathName + "/",
+                            VFSUtils.VFS_URL_HANDLER);
+                }
+
+            });
+        } catch (PrivilegedActionException pe) {
+            throw pe.getException();
+        }
     }
 
     /**
@@ -509,10 +521,19 @@ public final class VirtualFile implements Serializable {
      * represents a root.
      *
      * @return the url
-     * @throws MalformedURLException if the URL is somehow malformed
+     * @throws Exception if the URL is somehow malformed
      */
-    public URL asFileURL() throws MalformedURLException {
-        return new URL(VFSUtils.VFS_PROTOCOL, "", -1, getPathName(false), VFSUtils.VFS_URL_HANDLER);
+    public URL asFileURL() throws Exception {
+        try {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
+                public URL run() throws Exception {
+                    return new URL(VFSUtils.VFS_PROTOCOL, "", -1, getPathName(false), VFSUtils.VFS_URL_HANDLER);
+                }
+
+            });
+        } catch (PrivilegedActionException pe) {
+            throw pe.getException();
+        }
     }
 
     /**
