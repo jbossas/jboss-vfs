@@ -25,8 +25,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import org.jboss.vfs.VFS;
 
 import org.jboss.vfs.VFSUtils;
+import org.jboss.vfs.VirtualFile;
 import org.junit.Test;
 
 /**
@@ -143,6 +145,14 @@ public class PaddedManifestStreamTest {
             VFSUtils.safeClose(output);
         }
         assertEquals("HelloWorld !\n", new String(result, "UTF-8"));
+    }
+
+    @Test
+    public void testAntlr() throws Exception {
+        VirtualFile antlr = VFS.getChild(Thread.currentThread().getContextClassLoader().getResource("vfs/test/antlr/META-INF/MANIFEST.MF").toURI());
+        VFSUtils.readManifest(antlr);
+        VirtualFile antlrArchive = VFS.getChild(Thread.currentThread().getContextClassLoader().getResource("vfs/test/antlr-2.7.5H3.jar").toURI());
+        VFSUtils.getManifest(antlrArchive);
     }
 
 }
