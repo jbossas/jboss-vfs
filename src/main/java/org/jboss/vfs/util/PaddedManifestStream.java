@@ -41,6 +41,9 @@ public class PaddedManifestStream extends InputStream {
     @Override
     public int read() throws IOException {
         int value = this.realStream.read();
+        while(value == '\0') {
+            value = this.realStream.read();
+        }
         if (value == -1 && previousChar != '\n' && previousChar != -1) {
             previousChar = '\n';
             return '\n';
