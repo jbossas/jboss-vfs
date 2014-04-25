@@ -22,8 +22,7 @@
   ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.jboss</groupId>
@@ -35,7 +34,7 @@
     <groupId>org.jboss</groupId>
     <artifactId>jboss-vfs</artifactId>
     <packaging>jar</packaging>
-    <version>3.2.5-SNAPSHOT</version>
+    <version>3.2.5.Final</version>
     <name>JBoss VFS</name>
     <url>http://www.jboss.org</url>
     <description>A VFS library</description>
@@ -61,7 +60,8 @@
         <connection>scm:git:git://github.com/jbossas/jboss-vfs.git</connection>
         <developerConnection>scm:git:git@github.com:jbossas/jboss-vfs.git</developerConnection>
         <url>https://github.com/jbossas/jboss-vfs</url>
-    </scm>
+      <tag>jboss-vfs-3.2.5.Final</tag>
+  </scm>
 
     <properties>
         <version.org.jboss.logging.jboss-logging>3.1.4.GA</version.org.jboss.logging.jboss-logging>
@@ -101,7 +101,7 @@
                         <consoleOutput>true</consoleOutput>
                         <failsOnError>true</failsOnError>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <useFile/>
+                        <useFile />
                     </configuration>
                     <executions>
                         <execution>
