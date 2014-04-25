@@ -34,7 +34,7 @@
     <groupId>org.jboss</groupId>
     <artifactId>jboss-vfs</artifactId>
     <packaging>jar</packaging>
-    <version>3.2.5.Final</version>
+    <version>3.2.6.Final-SNAPSHOT</version>
     <name>JBoss VFS</name>
     <url>http://www.jboss.org</url>
     <description>A VFS library</description>
@@ -60,7 +60,7 @@
         <connection>scm:git:git://github.com/jbossas/jboss-vfs.git</connection>
         <developerConnection>scm:git:git@github.com:jbossas/jboss-vfs.git</developerConnection>
         <url>https://github.com/jbossas/jboss-vfs</url>
-      <tag>jboss-vfs-3.2.5.Final</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <properties>
