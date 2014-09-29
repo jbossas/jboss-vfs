@@ -33,6 +33,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLStreamHandler;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -469,17 +472,24 @@ public class VFSUtils {
      */
     public static URL getVirtualURL(VirtualFile file) throws MalformedURLException {
         try {
-            URI uri = getVirtualURI(file);
-            String scheme = uri.getScheme();
-            if (VFS_PROTOCOL.equals(scheme)) {
-                return new URL(null, uri.toString(), VFS_URL_HANDLER);
-            } else if ("file".equals(scheme)) {
-                return new URL(null, uri.toString(), FILE_URL_HANDLER);
-            } else {
-                return uri.toURL();
-            }
+            final URI uri = getVirtualURI(file);
+            final String scheme = uri.getScheme();
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
+                @Override
+                public URL run() throws MalformedURLException{
+                    if (VFS_PROTOCOL.equals(scheme)) {
+                        return new URL(null, uri.toString(), VFS_URL_HANDLER);
+                    } else if ("file".equals(scheme)) {
+                        return new URL(null, uri.toString(), FILE_URL_HANDLER);
+                    } else {
+                        return uri.toURL();
+                    }
+                }
+            });
         } catch (URISyntaxException e) {
             throw new MalformedURLException(e.getMessage());
+        } catch (PrivilegedActionException e) {
+            throw (MalformedURLException) e.getException();
         }
     }
 
