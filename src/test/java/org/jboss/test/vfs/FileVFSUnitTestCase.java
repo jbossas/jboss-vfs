@@ -64,7 +64,6 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
     @BeforeClass
     public void setUp() throws Exception {
         super.setUp();
-
         oldValue = System.getProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY);
         System.setProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, "true");
     }
