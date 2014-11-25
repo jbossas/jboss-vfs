@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLStreamHandler;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
@@ -80,6 +81,10 @@ public class VFSUtils {
      */
     public static final String VFS_PROTOCOL = "vfs";
 
+    /**
+     * Constant representing the system property for forcing case sensitive
+     */
+    public static final String FORCE_CASE_SENSITIVE_KEY = "jboss.vfs.forceCaseSensitive";
 
     /**
      * The {@link URLStreamHandler} for the 'vfs' protocol
@@ -95,6 +100,21 @@ public class VFSUtils {
      * The default buffer size to use for copies
      */
     public static final int DEFAULT_BUFFER_SIZE = 65536;
+
+    /**
+     * This variable indicates if the FileSystem should force case sensitive independently if
+     * the underlying file system is case sensitive or not
+     */
+    private static boolean forceCaseSensitive;
+
+    static {
+        forceCaseSensitive = AccessController.doPrivileged(new PrivilegedAction<Boolean> () {
+            public Boolean run() {
+               String forceString = System.getProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, "false");
+               return Boolean.valueOf(forceString);
+            }
+       });
+    }
 
     private VFSUtils() {
     }
@@ -613,6 +633,31 @@ public class VFSUtils {
             } catch (Exception e) {
                 VFSLogger.ROOT_LOGGER.trace("Failed to close resource", e);
             }
+        }
+    }
+
+    public static boolean isForceCaseSensitive() {
+        return forceCaseSensitive;
+    }
+
+    /**
+     * In case the file system is not case sensitive we compare the canonical path with
+     * the absolute path of the file after normalized.
+     * @param file
+     * @return
+     */
+    public static boolean exists(File file) {
+        try {
+            boolean fileExists = file.exists();
+            if(!forceCaseSensitive || !fileExists) {
+                return fileExists;
+            }
+
+            String absPath = canonicalize(file.getAbsolutePath());
+            String canPath = canonicalize(file.getCanonicalPath());
+            return fileExists && absPath.equals(canPath);
+        } catch(IOException io) {
+            return false;
         }
     }
 

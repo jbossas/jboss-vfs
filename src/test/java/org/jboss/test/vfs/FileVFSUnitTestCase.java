@@ -55,6 +55,8 @@ import org.junit.BeforeClass;
  * @version $Revision$
  */
 public class FileVFSUnitTestCase extends AbstractVFSTest {
+
+    private String oldValue;
     public FileVFSUnitTestCase(String name) {
         super(name);
     }
@@ -62,12 +64,22 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
     @BeforeClass
     public void setUp() throws Exception {
         super.setUp();
+
+        oldValue = System.getProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY);
+        System.setProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, "true");
     }
 
     @AfterClass
     public void tearDown() throws Exception {
         super.tearDown();
+
+        if(oldValue == null)
+            System.clearProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY);
+        else {
+            System.setProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, oldValue);
+        }
     }
+
 
     /**
      * Test that one can go from a file uri to VirtualFile and obtain the
@@ -1177,6 +1189,30 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
         assertTrue(tmpRoot + ".delete()", tmpRoot.delete());
     }
+    
+    /**
+     * Test VirtualFile.exists for vfsfile based urls.
+     *
+     * @throws Exception
+     */
+    public void testMountRealFileExists() throws Exception {
+        File tmpRoot = File.createTempFile("vfs", ".real");
+        tmpRoot.delete();
+        tmpRoot.mkdir();
+        File tmp = File.createTempFile("testFileExists", null, tmpRoot);
+        log.info("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
+
+        VFS.mountReal(tmpRoot, VFS.getChild("real"));
+        VirtualFile testdir = VFS.getChild("/real/");
+        VirtualFile tmpVF = testdir.getChild(tmp.getName());
+        VirtualFile tmpVFNotExist = testdir.getChild(tmpVF.getName().toUpperCase());
+        assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
+        assertFalse("!" + tmpVFNotExist.getPathName() + ".exists()", tmpVFNotExist.exists());
+        assertTrue("tmp.delete()", tmpVF.delete());
+        assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
+        assertTrue(tmpRoot + ".delete()", tmpRoot.delete());
+    }
+
 
     /**
      * Test VirtualFile.exists for vfsfile based urls for a directory.
