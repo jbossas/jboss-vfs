@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.vfs.VFSLogger;
+import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 
 /**
@@ -168,10 +169,11 @@ public final class RealFileSystem implements FileSystem {
         final File file = getFile(mountPoint, target);
         return privileged ? doPrivileged(new PrivilegedAction<Boolean>() {
             public Boolean run() {
-                return Boolean.valueOf(file.exists());
+                return Boolean.valueOf(VFSUtils.exists(file));
             }
-        }).booleanValue() : file.exists();
+        }).booleanValue() : VFSUtils.exists(file);
     }
+
 
     /**
      * {@inheritDoc}
