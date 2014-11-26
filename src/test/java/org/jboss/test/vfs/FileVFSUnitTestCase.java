@@ -1188,29 +1188,6 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
         assertTrue(tmpRoot + ".delete()", tmpRoot.delete());
     }
-    
-    /**
-     * Test VirtualFile.exists for vfsfile based urls.
-     *
-     * @throws Exception
-     */
-    public void testMountRealFileExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".real");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
-        File tmp = File.createTempFile("testFileExists", null, tmpRoot);
-        log.info("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
-
-        VFS.mountReal(tmpRoot, VFS.getChild("real"));
-        VirtualFile testdir = VFS.getChild("/real/");
-        VirtualFile tmpVF = testdir.getChild(tmp.getName());
-        VirtualFile tmpVFNotExist = testdir.getChild(tmpVF.getName().toUpperCase());
-        assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
-        assertFalse("!" + tmpVFNotExist.getPathName() + ".exists()", tmpVFNotExist.exists());
-        assertTrue("tmp.delete()", tmpVF.delete());
-        assertFalse(tmpVF.getPathName() + ".exists()", tmpVF.exists());
-        assertTrue(tmpRoot + ".delete()", tmpRoot.delete());
-    }
 
 
     /**
