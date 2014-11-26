@@ -8,20 +8,23 @@ import java.io.File;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
-import org.junit.Assume;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * @author Tomaz Cerar (c) 2014 Red Hat Inc.
  */
-public class FileVFSTestCase {
+public class FileVFSCaseSensitiveTestCase {
 
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         System.setProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY, "true");
     }
 
 
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         System.clearProperty(VFSUtils.FORCE_CASE_SENSITIVE_KEY);
     }
 
@@ -33,7 +36,6 @@ public class FileVFSTestCase {
      */
     @Test
     public void testMountRealFileExists() throws Exception {
-        Assume.assumeTrue("windows have case insensitive FS", File.separatorChar == '/');
         File tmpRoot = File.createTempFile("vfs", ".real");
         tmpRoot.delete();
         tmpRoot.mkdir();
@@ -41,7 +43,7 @@ public class FileVFSTestCase {
         System.out.println("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
         VFS.mountReal(tmpRoot, VFS.getChild("real"));
-        VirtualFile testdir = VFS.getChild("/real/");
+        VirtualFile testdir = VFS.getChild("real/");
         VirtualFile tmpVF = testdir.getChild(tmp.getName());
         VirtualFile tmpVFNotExist = testdir.getChild(tmpVF.getName().toUpperCase());
         assertTrue(tmpVF.getPathName() + ".exists()", tmpVF.exists());
