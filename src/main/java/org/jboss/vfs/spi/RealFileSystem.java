@@ -74,7 +74,14 @@ public final class RealFileSystem implements FileSystem {
                 sm.checkPermission(new FilePermission(new File(realRoot, "-").getPath(), "read,delete"));
             }
         }
-        this.realRoot = realRoot;
+        // the transformation is for case insensitive file systems. This helps to ensure that the rest of the path matches exactly the canonical form
+        File canonicalRoot = realRoot;
+        try {
+            canonicalRoot = realRoot.getCanonicalFile();
+        } catch(IOException e) {
+            VFSLogger.ROOT_LOGGER.warnf(e, "Cannot get the canonical form of the real root. This could lead to potential problems if the %s flag is set.", VFSUtils.FORCE_CASE_SENSITIVE_KEY);
+        }
+        this.realRoot = canonicalRoot;
         this.privileged = privileged;
         VFSLogger.ROOT_LOGGER.tracef("Constructed real %s filesystem at root %s", privileged ? "privileged" : "unprivileged", realRoot);
     }
