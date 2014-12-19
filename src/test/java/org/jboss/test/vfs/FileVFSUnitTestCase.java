@@ -94,6 +94,14 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
     }
 
     /**
+     * Test relative file URL (JBVFS-200)
+     */
+    public void testRelativeFileURL() throws Exception {
+        VirtualFile child = VFS.getChild(new URI("file:./a/b"));
+        assertNotNull(child);
+    }
+
+    /**
      * Test reading the contents of nested jar entries.
      *
      * @throws Exception
