@@ -156,7 +156,11 @@ public class VFS {
      * @throws IllegalArgumentException if the path is null
      */
     public static VirtualFile getChild(URI uri) {
-        return getChild(uri.getPath());
+        String path = uri.getPath();
+        if(path == null) {
+            path = uri.getSchemeSpecificPart();
+        }
+        return getChild(path);
     }
 
     /**
