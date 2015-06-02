@@ -908,7 +908,9 @@ public class VFSUtils {
                     } finally {
                         VFSUtils.safeClose(is);
                     }
-                    current.setLastModified(zipEntry.getTime());
+                    // exclude jsp files last modified time change. jasper jsp compiler Compiler.java depends on last modified time-stamp to re-compile jsp files
+                    if (!current.getName().endsWith(".jsp"))
+                        current.setLastModified(zipEntry.getTime());
                 }
             }
         } finally {
