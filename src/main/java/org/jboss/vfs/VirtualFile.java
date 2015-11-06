@@ -55,6 +55,7 @@ public final class VirtualFile implements Serializable {
     private final String lcname;
     private final VirtualFile parent;
     private final int hashCode;
+    private String pathName;
 
     VirtualFile(String name, VirtualFile parent) {
         this.name = name;
@@ -128,20 +129,24 @@ public final class VirtualFile implements Serializable {
      * @return the VFS full path name
      */
     String getPathName(boolean url) {
-        final StringBuilder builder = new StringBuilder(160);
-        final VirtualFile parent = this.parent;
-        if (parent == null) {
-            return name;
-        } else {
-            builder.append(parent.getPathName());
-            if (parent.parent != null) {
-                builder.append('/');
+        if (pathName ==null || pathName.isEmpty()) {
+            VirtualFile[] path = getParentFiles();
+            final StringBuilder builder = new StringBuilder(path.length*30+50);
+            for (int i=path.length-1;i>-1;i--) {
+                final VirtualFile parent = path[i].parent;
+                if (parent == null){
+                    builder.append(path[i].name);
+                }else{
+                    if (parent.parent != null) {
+                        builder.append('/');
+                    }
+                    builder.append(path[i].name);
+                }
             }
-            builder.append(name);
+            pathName = builder.toString();
         }
         // Perhaps this should be cached to avoid the fs stat call?
-        if (url && isDirectory()) { builder.append('/'); }
-        return builder.toString();
+        return (url && isDirectory())? pathName.concat("/"): pathName;
     }
 
     /**

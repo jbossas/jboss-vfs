@@ -104,7 +104,7 @@ public class SuffixMatchFilter extends AbstractVirtualFileFilterWithAttributes {
                 break;
             }
         }
-        VFSLogger.ROOT_LOGGER.tracef(file + "%s accepted: %s", file, accepts);
+            VFSLogger.ROOT_LOGGER.tracef("%s accepted: %s", file, accepts);
         return accepts;
     }
 }
