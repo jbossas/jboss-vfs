@@ -37,7 +37,7 @@ import org.jboss.vfs.VirtualFile;
 class VirtualFileURLConnection extends AbstractURLConnection {
     private final VirtualFile file;
 
-    public VirtualFileURLConnection(URL url) throws IOException {
+    VirtualFileURLConnection(URL url) throws IOException {
         super(url);
         file = VFS.getChild(toURI(url));
     }

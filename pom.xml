@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>16</version>
+        <version>20</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -86,7 +86,6 @@
                     <configuration>
                         <reuseForks>false</reuseForks>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <testFailureIgnore>true</testFailureIgnore>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -99,6 +98,7 @@
                         <failsOnError>true</failsOnError>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
                         <useFile />
+                        <excludes>**/*$logger.java,**/*$bundle.java</excludes>
                     </configuration>
                     <executions>
                         <execution>

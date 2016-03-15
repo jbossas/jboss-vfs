@@ -192,7 +192,7 @@ public final class TempFileProvider implements Closeable {
         private final File root;
         private ScheduledExecutorService retryExecutor;
 
-        public DeleteTask(final File root, final ScheduledExecutorService retryExecutor) {
+        DeleteTask(final File root, final ScheduledExecutorService retryExecutor) {
             this.root = root;
             this.retryExecutor = retryExecutor;
         }

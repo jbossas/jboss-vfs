@@ -174,7 +174,7 @@ public class VirtualFileAssembly implements Closeable {
         private final String realName;
         private VirtualFile target;
 
-        public AssemblyNode(String realName) {
+        AssemblyNode(String realName) {
             this.realName = realName;
         }
 
