@@ -211,7 +211,7 @@ public class VisitorAttributes {
         /**
          * Create a new ImmutableVirtualFileVisitorAttributes with default values
          */
-        public ImmutableVisitorAttributes() {
+        ImmutableVisitorAttributes() {
         }
 
         /**
@@ -220,7 +220,7 @@ public class VisitorAttributes {
          * @param leavesOnly    whether to visit leaves only
          * @param recurseFilter - filter which controls whether to recurse
          */
-        public ImmutableVisitorAttributes(boolean leavesOnly, VirtualFileFilter recurseFilter) {
+        ImmutableVisitorAttributes(boolean leavesOnly, VirtualFileFilter recurseFilter) {
             super.setLeavesOnly(leavesOnly);
             super.setRecurseFilter(recurseFilter);
         }

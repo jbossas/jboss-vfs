@@ -31,7 +31,7 @@ class EnumerationIterable<T> implements Iterable<T> {
 
     private final Enumeration<T> entries;
 
-    public EnumerationIterable(Enumeration<T> entries) {
+    EnumerationIterable(Enumeration<T> entries) {
         this.entries = entries;
     }
 

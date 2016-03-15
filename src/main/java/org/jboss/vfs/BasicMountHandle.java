@@ -43,7 +43,7 @@ class BasicMountHandle implements MountHandle {
      * @param mountHandle          the handle to close the actual mount
      * @param additionalCloseables addition Closeable to execute on close
      */
-    public BasicMountHandle(final FileSystem fileSystem, Closeable mountHandle, Closeable... additionalCloseables) {
+    BasicMountHandle(final FileSystem fileSystem, Closeable mountHandle, Closeable... additionalCloseables) {
         this.fileSystem = fileSystem;
         this.mountHandle = mountHandle;
         this.closeables = additionalCloseables;
