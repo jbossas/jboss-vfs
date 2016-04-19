@@ -21,11 +21,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.AccessController;
 import java.security.CodeSigner;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -160,6 +165,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Long>) () -> mount.getFileSystem().getLastModified(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().getLastModified(mount.getMountPoint(), this);
     }
 
@@ -174,6 +184,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Long>) () -> mount.getFileSystem().getSize(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().getSize(mount.getMountPoint(), this);
     }
 
@@ -188,6 +203,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Boolean>) () -> mount.getFileSystem().exists(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().exists(mount.getMountPoint(), this);
     }
 
@@ -224,6 +244,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Boolean>) () -> mount.getFileSystem().isFile(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().isFile(mount.getMountPoint(), this);
     }
 
@@ -238,6 +263,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "read"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Boolean>) () -> mount.getFileSystem().isDirectory(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().isDirectory(mount.getMountPoint(), this);
     }
 
@@ -256,6 +286,9 @@ public final class VirtualFile implements Serializable {
             return new VirtualJarInputStream(this);
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return doIoPrivileged(() -> mount.getFileSystem().openInputStream(mount.getMountPoint(), this));
+        }
         return mount.getFileSystem().openInputStream(mount.getMountPoint(), this);
     }
 
@@ -270,6 +303,11 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "delete"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<Boolean>) () -> mount.getFileSystem().delete(mount.getMountPoint(), this)
+            );
+        }
         return mount.getFileSystem().delete(mount.getMountPoint(), this);
     }
 
@@ -288,7 +326,24 @@ public final class VirtualFile implements Serializable {
             sm.checkPermission(new VirtualFilePermission(getPathName(), "getfile"));
         }
         final VFS.Mount mount = VFS.getMount(this);
+        if (sm != null) {
+            return doIoPrivileged(() -> mount.getFileSystem().getFile(mount.getMountPoint(), this));
+        }
         return mount.getFileSystem().getFile(mount.getMountPoint(), this);
+    }
+
+    private static <T> T doIoPrivileged(PrivilegedExceptionAction<T> action) throws IOException {
+        try {
+            return AccessController.doPrivileged(action);
+        } catch (PrivilegedActionException pe) {
+            try {
+                throw pe.getException();
+            } catch (IOException | RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
     }
 
     /**
