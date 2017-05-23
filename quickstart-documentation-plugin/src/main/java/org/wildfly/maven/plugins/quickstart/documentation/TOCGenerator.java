@@ -1,4 +1,4 @@
-package org.wildfly.quickstart.documentation.plugin;
+package org.wildfly.maven.plugins.quickstart.documentation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,15 +18,24 @@ import java.util.TreeSet;
  * @author Tomaz Cerar (c) 2017 Red Hat Inc.
  */
 public class TOCGenerator {
-    private static final List<String> IGNORED_DIRS = Arrays.asList("target", "dist", "template", "guide");
+    //private static final List<String> IGNORED_DIRS = Arrays.asList("target", "dist", "template", "guide");
+    private final List<String> ignoredDirs;
 
     public static void main(String[] args) throws IOException {
-
         Path root = Paths.get(".").normalize();
+      new TOCGenerator(Arrays.asList("target", "dist", "template", "guide")).generate(root, "[TOC-quickstart]", Paths.get("target/docs/README.md"));
+    }
+
+    public TOCGenerator(List<String> ignoredDirs) {
+        this.ignoredDirs = ignoredDirs;
+    }
+
+    public void generate(Path root, String tocMarker, Path targetDoc) throws IOException {
         Set<MetaData> allMetaData = new TreeSet<>(Comparator.comparing(o -> o.name));
         try (DirectoryStream<Path> dirs = Files.newDirectoryStream(root, entry -> Files.isDirectory(entry)
-                && (!entry.toString().startsWith("."))
-                && (!IGNORED_DIRS.contains(entry.toString())))) {
+            && (!entry.getFileName().toString().startsWith("."))
+            && (!ignoredDirs.contains(entry.getFileName().toString())))
+        ) {
             dirs.forEach(path -> {
                 try {
                     allMetaData.add(parseReadme(path));
@@ -36,9 +45,9 @@ public class TOCGenerator {
             });
         }
         StringBuffer sb = generateTOC(allMetaData);
-        Path tocFile = root.resolve("target/docs/README.md");
+        Path tocFile = root.resolve(targetDoc);
         String tocFileContent = new String(Files.readAllBytes(tocFile), StandardCharsets.UTF_8);
-        tocFileContent = tocFileContent.replace("[TOC-quickstart]", sb.toString());
+        tocFileContent = tocFileContent.replace(tocMarker, sb.toString());
         Files.write(tocFile, tocFileContent.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -51,7 +60,7 @@ public class TOCGenerator {
          */
         StringBuffer sb = new StringBuffer();
         sb.append("| *Quickstart Name* | *Demonstrated Technologies* | *Description* | *Experience Level Required* | *Prerequisites* |\n");
-        sb.append("| --- | --- | --- | --- |\n");
+        sb.append("| --- | --- | --- | --- | --- |\n");
         for (MetaData md : metaDataList) {
             sb.append("| ")
                     .append("[").append(md.name).append("]").append("(").append(md.name).append("/README.md) |")
@@ -69,7 +78,7 @@ public class TOCGenerator {
 
     private static MetaData parseReadme(Path quickstartDir) throws IOException {
         Path path = quickstartDir.resolve("README.md");
-        MetaData metaData = new MetaData(quickstartDir.toString());
+        MetaData metaData = new MetaData(quickstartDir.getFileName().toString());
         try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             List<String> result = new ArrayList<>();
             for (; ; ) {
