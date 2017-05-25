@@ -39,6 +39,12 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:https://github.com/wildfly/maven-plugins/tree/master/plugin-parent</connection>
+        <developerConnection>scm:git:https://github.com/wildfly/maven-plugins/tree/master/plugin-parent</developerConnection>
+        <url>https://github.com/wildfly/maven-plugins/tree/master/plugin-parent</url>
+    </scm>
+
     <properties>
         <version.org.wildfly.checkstyle-config>1.0.5.Final</version.org.wildfly.checkstyle-config>
     </properties>
