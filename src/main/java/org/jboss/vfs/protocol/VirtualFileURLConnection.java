@@ -45,7 +45,10 @@ class VirtualFileURLConnection extends AbstractURLConnection {
     public void connect() throws IOException {
     }
 
-    public VirtualFile getContent() throws IOException {
+    public Object getContent() throws IOException {
+        if (getContentType() != null) {
+            return super.getContent();
+        }
         return file;
     }
 
