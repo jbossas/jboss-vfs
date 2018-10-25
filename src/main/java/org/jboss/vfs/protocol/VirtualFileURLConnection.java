@@ -76,4 +76,18 @@ class VirtualFileURLConnection extends AbstractURLConnection {
     protected String getName() {
         return file.getName();
     }
+
+    @Override
+    public Object getContent(Class[] classes) throws IOException {
+        Object obj = super.getContent(classes);
+
+        for (int i = 0; i < classes.length; i++) {
+            if (classes[i] == VirtualFile.class) {
+                return file;
+            } else if (classes[i].isInstance(obj)) {
+                return obj;
+            }
+        }
+        return obj;
+    }
 }
