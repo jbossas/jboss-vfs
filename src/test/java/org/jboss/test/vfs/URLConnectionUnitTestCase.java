@@ -20,6 +20,7 @@ package org.jboss.test.vfs;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -34,6 +35,7 @@ import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.protocol.FileURLConnection;
 import org.jboss.vfs.protocol.VfsUrlStreamHandlerFactory;
+import org.junit.Assert;
 
 /**
  * Basic tests of URL connection
@@ -80,6 +82,19 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest {
         URL url = getURLAndAssertProtocol(file);
         URLConnection conn = url.openConnection();
         assertEquals(file, conn.getContent());
+    }
+
+    public void testGetContentWithType() throws Exception {
+        VirtualFile file = getVirtualFile("/vfs/test/test-web.xml");
+        URL url = getURLAndAssertProtocol(file);
+        URLConnection conn = url.openConnection();
+
+        Assert.assertTrue(conn.getContent() instanceof FileInputStream); // handled by UnknownContentHandler
+        Assert.assertTrue(conn.getContent(new Class[]{VirtualFile.class}) instanceof VirtualFile);
+        Assert.assertTrue(conn.getContent(new Class[]{FileInputStream.class, VirtualFile.class}) instanceof FileInputStream);
+        Assert.assertTrue(conn.getContent(new Class[]{VirtualFile.class, FileInputStream.class}) instanceof VirtualFile);
+        Assert.assertTrue(conn.getContent(new Class[]{SomeClass.class, VirtualFile.class}) instanceof VirtualFile);
+        Assert.assertNull(conn.getContent(new Class[]{SomeClass.class}));
     }
 
     /**
@@ -235,4 +250,6 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest {
         }
         return baos.toByteArray();
     }
+
+    private static class SomeClass {}
 }
