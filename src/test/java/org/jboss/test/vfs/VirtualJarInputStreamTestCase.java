@@ -108,6 +108,64 @@ public class VirtualJarInputStreamTestCase extends AbstractVFSTest {
     }
 
     @Test
+    public void testIterationRead() throws Exception {
+        VirtualFile jar = testdir.getChild("jar1.jar");
+        Closeable mount = VFS.mountZip(jar, jar, provider);
+        try {
+            JarInputStream jarInput = (JarInputStream) jar.openStream();
+            JarEntry next = null;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while ((next = jarInput.getNextJarEntry()) != null) {
+                if (next.isDirectory()) {
+                    assertEquals("Directory has empty input stream", jarInput.available(), 0);
+                } else {
+                    assertTrue("File has valid input stream", jarInput.available() > 0);
+                    VFSUtils.copyStream(jarInput, baos);
+                    byte[] actualBytes = baos.toByteArray();
+                    baos.reset();
+
+                    VFSUtils.copyStreamAndClose(jar.getChild(next.getName()).openStream(), baos);
+                    byte[] expectedBytes = baos.toByteArray();
+                    baos.reset();
+
+                    assertTrue(Arrays.equals(expectedBytes, actualBytes));
+                }
+            }
+        } finally {
+            mount.close();
+        }
+    }
+
+    @Test
+    public void testIterationReadNonJar() throws Exception {
+        VirtualFile jar = testdir.getChild("jar1");
+        Closeable mount = VFS.mountReal(jar.getPhysicalFile(), jar);
+        try {
+            JarInputStream jarInput = (JarInputStream) jar.openStream();
+            JarEntry next = null;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while ((next = jarInput.getNextJarEntry()) != null) {
+                if (next.isDirectory()) {
+                    assertEquals("Directory has empty input stream", jarInput.available(), 0);
+                } else {
+                    assertTrue("File has valid input stream", jarInput.available() > 0);
+                    VFSUtils.copyStream(jarInput, baos);
+                    byte[] actualBytes = baos.toByteArray();
+                    baos.reset();
+
+                    VFSUtils.copyStreamAndClose(jar.getChild(next.getName()).openStream(), baos);
+                    byte[] expectedBytes = baos.toByteArray();
+                    baos.reset();
+
+                    assertTrue(Arrays.equals(expectedBytes, actualBytes));
+                }
+            }
+        } finally {
+            mount.close();
+        }
+    }
+
+    @Test
     public void testRead() throws Exception {
         VirtualFile jar = testdir.getChild("jar1.jar");
         Closeable mount = VFS.mountZip(jar, jar, provider);
