@@ -50,6 +50,7 @@ public class VirtualJarInputStream extends JarInputStream {
     private final Deque<Iterator<VirtualFile>> entryItr = new ArrayDeque<Iterator<VirtualFile>>();
     private final VirtualFile root;
     private final Manifest manifest;
+    private VirtualFile currentVirtualFile = null;
     private InputStream currentEntryStream = VFSUtils.emptyStream();
     private boolean closed;
 
@@ -172,6 +173,7 @@ public class VirtualJarInputStream extends JarInputStream {
      */
     @Override
     public void closeEntry() throws IOException {
+        currentVirtualFile = null;
         if (currentEntryStream != null) {
             currentEntryStream.close();
         }
@@ -192,6 +194,13 @@ public class VirtualJarInputStream extends JarInputStream {
     private void ensureOpen() throws IOException {
         if (closed) {
             throw VFSMessages.MESSAGES.streamIsClosed();
+        }
+        if (currentEntryStream == null) {
+            if (currentVirtualFile != null) {
+                currentEntryStream = currentVirtualFile.openStream();
+            } else {
+                currentEntryStream = VFSUtils.emptyStream();
+            }
         }
     }
 
@@ -218,9 +227,11 @@ public class VirtualJarInputStream extends JarInputStream {
      */
     private void openCurrent(VirtualFile current) throws IOException {
         if (current.isDirectory()) {
+            currentVirtualFile = null;
             currentEntryStream = VFSUtils.emptyStream();
         } else {
-            currentEntryStream = current.openStream();
+            currentVirtualFile = current;
+            currentEntryStream = null;
         }
     }
 
