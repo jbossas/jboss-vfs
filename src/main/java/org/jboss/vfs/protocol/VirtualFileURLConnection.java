@@ -35,6 +35,8 @@ import org.jboss.vfs.VirtualFile;
  * @version $Revision: 1.1 $
  */
 class VirtualFileURLConnection extends AbstractURLConnection {
+    static final String JAR_CONTENT_TYPE = "application/java-archive";
+
     private final VirtualFile file;
 
     VirtualFileURLConnection(URL url) throws IOException {
@@ -46,10 +48,10 @@ class VirtualFileURLConnection extends AbstractURLConnection {
     }
 
     public Object getContent() throws IOException {
-        if (getContentType() != null) {
-            return super.getContent();
+        if (JAR_CONTENT_TYPE.equals(getContentType()) || getContentType() == null) {
+            return file;
         }
-        return file;
+        return super.getContent();
     }
 
     public int getContentLength() {
