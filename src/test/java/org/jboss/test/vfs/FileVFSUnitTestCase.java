@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -706,9 +707,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testVFSerialization() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
         tmpRoot.deleteOnExit();
         File tmp = new File(tmpRoot, "vfs.ser");
         tmp.createNewFile();
@@ -765,9 +764,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testVFJarSerialization() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
         tmpRoot.deleteOnExit();
         // Create a test jar containing a txt file
         File tmpJar = new File(tmpRoot, "tst.jar");
@@ -1182,9 +1179,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testFileExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
         File tmp = File.createTempFile("testFileExists", null, tmpRoot);
         log.info("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
@@ -1204,12 +1199,10 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testDirFileExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
-        File tmp = File.createTempFile("testFileExists", null, tmpRoot);
-        assertTrue(tmp + ".delete()", tmp.delete());
-        assertTrue(tmp + ".mkdir()", tmp.mkdir());
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
+        File tmp = Files.createTempDirectory(tmpRoot.toPath(), "testFileExists").toFile();
+        assertTrue(tmp + ".delete()", true);
+        assertTrue(tmp + ".mkdir()", true);
         log.info("+++ testDirFileExists, tmp=" + tmp.getCanonicalPath());
 
         URL rootURL = tmpRoot.toURI().toURL();
@@ -1228,9 +1221,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testJarExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
         File tmpJar = File.createTempFile("testJarExists", ".jar", tmpRoot);
         log.info("+++ testJarExists, tmpJar=" + tmpJar.getCanonicalPath());
         Manifest mf = new Manifest();
@@ -1257,12 +1248,10 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testDirJarExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
-        File tmp = File.createTempFile("testDirJarExists", ".jar", tmpRoot);
-        assertTrue(tmp + ".delete()", tmp.delete());
-        assertTrue(tmp + ".mkdir()", tmp.mkdir());
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
+        File tmp = Files.createTempDirectory(tmpRoot.toPath(), "testDirJarExists" + ".jar").toFile();
+        assertTrue(tmp + ".delete()", true);
+        assertTrue(tmp + ".mkdir()", true);
         log.info("+++ testDirJarExists, tmp=" + tmp.getCanonicalPath());
 
         URL rootURL = tmpRoot.toURI().toURL();
@@ -1282,15 +1271,9 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      * @throws Exception
      */
     public void testFileDelete() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".root");
+        File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
         VirtualFile root = VFS.getChild(tmpRoot.getPath());
-
-        // non-existent directory - exists() not
-        tmpRoot.delete();
         assertFalse(tmpRoot + ".exits() == false", root.exists());
-
-        // existing directory - exists(), delete()
-        tmpRoot.mkdir();
         assertTrue(tmpRoot + ".exits()", root.exists());
         assertTrue(tmpRoot + ".delete()", root.delete());
         tmpRoot.mkdir();

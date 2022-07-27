@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
@@ -36,9 +37,7 @@ public class FileVFSCaseSensitiveTestCase {
      */
     @Test
     public void testMountRealFileExists() throws Exception {
-        File tmpRoot = File.createTempFile("vfs", ".real");
-        tmpRoot.delete();
-        tmpRoot.mkdir();
+        File tmpRoot = Files.createTempDirectory("vfs" + ".real").toFile();
         File tmp = File.createTempFile("testFileExists", null, tmpRoot);
         System.out.println("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
