@@ -22,9 +22,7 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.Permission;
-import java.util.Optional;
 
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
@@ -38,7 +36,7 @@ import org.jboss.vfs.VirtualFile;
  */
 class VirtualFileURLConnection extends AbstractURLConnection {
     static final String JAR_CONTENT_TYPE = "application/java-archive";
- 
+
     private final VirtualFile file;
 
     VirtualFileURLConnection(URL url) throws IOException {
