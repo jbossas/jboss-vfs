@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 
@@ -144,7 +145,7 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest {
     }
 
     public void testTempPath() throws Exception {
-        File temp = File.createTempFile("123", ".tmp");
+        File temp = Files.createTempFile("123", ".tmp").toFile();
         temp.deleteOnExit();
         VirtualFile file = VFS.getChild(temp.toURI());
         assertTrue(file.exists());
