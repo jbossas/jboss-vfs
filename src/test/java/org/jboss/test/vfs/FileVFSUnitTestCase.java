@@ -843,7 +843,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         try {
             VirtualFile inner = outer.getChild("jar1.jar");
 
-            File vfsSer = File.createTempFile("testVFNestedJarSerialization", ".ser");
+            File vfsSer = Files.createTempFile("testVFNestedJarSerialization", ".ser").toFile();
             vfsSer.deleteOnExit();
             // Write out the vfs inner jar file
             FileOutputStream fos = new FileOutputStream(vfsSer);
@@ -952,7 +952,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         VirtualFile testdir = getVirtualFile("/vfs/test");
         VirtualFile jar = testdir.getChild("outer.jar");
         assertTrue("outer.jar != null", jar != null);
-        File tmpJar = File.createTempFile("testCopyJar", ".jar");
+        File tmpJar = Files.createTempFile("testCopyJar", ".jar").toFile();
         tmpJar.deleteOnExit();
 
         try {
@@ -991,7 +991,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
             VirtualFile jar = outerjar.getChild("jar1.jar");
             assertTrue("outer.jar/jar1.jar != null", jar != null);
 
-            File tmpJar = File.createTempFile("testCopyInnerJar", ".jar");
+            File tmpJar = Files.createTempFile("testCopyInnerJar", ".jar").toFile();
             tmpJar.deleteOnExit();
 
             try {
@@ -1180,7 +1180,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      */
     public void testFileExists() throws Exception {
         File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
-        File tmp = File.createTempFile("testFileExists", null, tmpRoot);
+        File tmp = Files.createTempFile(tmpRoot.toPath(), "testFileExists", null).toFile();
         log.info("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
         URL rootURL = tmpRoot.toURI().toURL();
@@ -1222,7 +1222,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
      */
     public void testJarExists() throws Exception {
         File tmpRoot = Files.createTempDirectory("vfs" + ".root").toFile();
-        File tmpJar = File.createTempFile("testJarExists", ".jar", tmpRoot);
+        File tmpJar = Files.createTempFile(tmpRoot.toPath(), "testJarExists", ".jar").toFile();
         log.info("+++ testJarExists, tmpJar=" + tmpJar.getCanonicalPath());
         Manifest mf = new Manifest();
         mf.getMainAttributes().putValue("Created-By", "FileVFSUnitTestCase.testJarExists");
@@ -1280,7 +1280,7 @@ public class FileVFSUnitTestCase extends AbstractVFSTest {
         // non-empty directory - delete()
         File tmp = new File(tmpRoot, "testFileDelete.jar");
         assertTrue(tmp.mkdir());
-        File tmp2 = File.createTempFile("testFileDelete2", ".jar", tmp);
+        File tmp2 = Files.createTempFile(tmp.toPath(), "testFileDelete2", ".jar").toFile();
         assertTrue(tmp2.exists());
         VirtualFile tmpDeletable = VFS.getChild(tmp.toURI());
         assertFalse(tmpRoot + ".delete() == false", tmpDeletable.delete());

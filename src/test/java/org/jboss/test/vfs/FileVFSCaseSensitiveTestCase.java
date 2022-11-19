@@ -38,7 +38,7 @@ public class FileVFSCaseSensitiveTestCase {
     @Test
     public void testMountRealFileExists() throws Exception {
         File tmpRoot = Files.createTempDirectory("vfs" + ".real").toFile();
-        File tmp = File.createTempFile("testFileExists", null, tmpRoot);
+        File tmp = Files.createTempFile(tmpRoot.toPath(), "testFileExists", null).toFile();
         System.out.println("+++ testFileExists, tmp=" + tmp.getCanonicalPath());
 
         VFS.mountReal(tmpRoot, VFS.getChild("real"));

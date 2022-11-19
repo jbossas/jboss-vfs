@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -446,7 +447,7 @@ public class VFS {
             boolean ok = false;
             final TempDir tempDir = tempFileProvider.createTempDir(zipName);
             try {
-                final File zipFile = File.createTempFile(zipName + "-", ".tmp", tempDir.getRoot());
+                final File zipFile = Files.createTempFile(tempDir.getRoot().toPath(), zipName + "-", ".tmp").toFile();
                 try {
                     final FileOutputStream os = new FileOutputStream(zipFile);
                     try {
