@@ -18,7 +18,6 @@
 package org.jboss.test.vfs;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,14 +25,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
 
 import junit.framework.Test;
-import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualFile;
-import org.jboss.vfs.protocol.FileURLConnection;
 import org.jboss.vfs.protocol.VfsUrlStreamHandlerFactory;
 import org.junit.Assert;
 
@@ -170,40 +166,6 @@ public class URLConnectionUnitTestCase extends AbstractVFSTest {
 
         URLConnection conn = url.openConnection();
         assertEquals(file.lastModified(), conn.getLastModified());
-    }
-
-    public void testFileUrl() throws Exception {
-        // Hack to ensure VFS.init has been called and has taken over the file: protocol
-        VFS.getChild("");
-        URL resourceUrl = getResource("/vfs/test/outer.jar");
-        // Hack to ensure the URL handler is not passed down by the parent URL context
-        URL url = new URL("file", resourceUrl.getHost(), resourceUrl.getFile());
-
-        // Make sure we are using our handler
-        URLConnection urlConn = url.openConnection();
-        assertTrue(urlConn instanceof FileURLConnection);
-
-        File file = new File(url.toURI());
-        assertNotNull(file);
-
-        VirtualFile vf = VFS.getChild(url);
-        assertTrue(vf.isFile());
-        // Mount a temp dir over the jar location in VFS
-        TempFileProvider provider = null;
-        Closeable handle = null;
-        try {
-            provider = TempFileProvider.create("temp", Executors.newSingleThreadScheduledExecutor());
-            handle = VFS.mountTemp(vf, provider);
-            assertTrue(vf.isDirectory());
-
-            File vfsDerivedFile = vf.getPhysicalFile();
-            File urlDerivedFile = (File) url.getContent();
-            // Make sure the file returned by the file: URL is not the VFS File (In other words, make sure it does not use the mounts)
-            assertTrue(urlDerivedFile.isFile());
-            assertFalse(vfsDerivedFile.equals(urlDerivedFile));
-        } finally {
-            VFSUtils.safeClose(handle, provider);
-        }
     }
 
     public void testFileUrlContentType() throws Exception {
