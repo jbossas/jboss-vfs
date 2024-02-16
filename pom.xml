@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>36</version>
+        <version>43</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -61,10 +61,13 @@
     </scm>
 
     <properties>
-        <version.org.jboss.logging.jboss-logging>3.4.1.Final</version.org.jboss.logging.jboss-logging>
-        <version.org.jboss.logging.jboss-logging-tools>2.2.0.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logging.jboss-logging>3.5.3.Final</version.org.jboss.logging.jboss-logging>
+        <version.org.jboss.logging.jboss-logging-tools>2.2.1.Final</version.org.jboss.logging.jboss-logging-tools>
         <version.jboss.test>1.2.0.Final</version.jboss.test>
-        <version.junit>4.13.1</version.junit>
+        <version.junit>4.13.2</version.junit>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <jdk.min.version>11</jdk.min.version>
     </properties>
 
     <build>
@@ -72,6 +75,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.jboss.vfs</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -115,30 +129,34 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
     </build>
 
-
     <dependencies>
+        <!-- provided dependencies -->
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
             <version>${version.org.jboss.logging.jboss-logging}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging-annotations</artifactId>
             <version>${version.org.jboss.logging.jboss-logging-tools}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging-processor</artifactId>
             <version>${version.org.jboss.logging.jboss-logging-tools}</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${version.junit}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.test</groupId>
@@ -175,12 +193,6 @@
                     <artifactId>jboss-logging-log4j</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${version.junit}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
