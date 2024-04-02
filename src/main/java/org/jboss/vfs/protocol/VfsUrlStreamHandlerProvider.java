@@ -18,18 +18,16 @@
 package org.jboss.vfs.protocol;
 
 import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
+import java.net.spi.URLStreamHandlerProvider;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * URLStreamHandlerFactory providing URLStreamHandlers for VFS based URLS.
+ * URLStreamHandlerProvider providing URLStreamHandlers for VFS based URLs.
  *
- * @author John Bailey
- * @deprecated Use {@link VfsUrlStreamHandlerProvider} instead.
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-@Deprecated(forRemoval = true)
-public class VfsUrlStreamHandlerFactory implements URLStreamHandlerFactory {
+public final class VfsUrlStreamHandlerProvider extends URLStreamHandlerProvider {
 
     private static Map<String, URLStreamHandler> handlerMap = new HashMap<String, URLStreamHandler>(1);
 
