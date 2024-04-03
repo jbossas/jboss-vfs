@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>43</version>
+        <version>44</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
